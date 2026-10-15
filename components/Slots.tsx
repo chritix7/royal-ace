@@ -138,6 +138,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
             shake={s.winBanner ? (s.winBanner.tier === "epic" ? 3 : s.winBanner.tier === "mega" ? 2 : 1) : 0}
             onPull={() => play(1)}
             canPull={canSpin}
+            large={fullscreen}
           />
 
           {s.banner && (
@@ -188,7 +189,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
                 <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
               </div>
 
-              <div className="relative mx-auto mt-3 flex max-w-md items-center justify-between gap-2">
+              <div className="relative mx-auto mt-3 flex max-w-md items-center justify-center gap-4">
                 <div className="relative">
                   {autoOpen && !auto && !s.gamble && (
                     <div className="absolute bottom-full left-0 mb-2 flex gap-1 rounded-xl border border-white/15 bg-black/85 p-1">
@@ -245,7 +246,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
                   </button>
                 </div>
 
-                <div className="flex flex-col items-end gap-1">
+                <div className="flex flex-col items-center gap-1">
                   <button onClick={maxBet} disabled={s.busy} className={`${small} px-2 text-[11px]`}>Max bet</button>
                   <button
                     onClick={buyBonus}
