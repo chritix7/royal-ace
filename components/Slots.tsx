@@ -165,8 +165,8 @@ export default function Slots({ active = true }: { active?: boolean }) {
           {s.vault && <VaultGame vault={s.vault} onPick={vaultPick} onCollect={vaultCollect} />}
 
           {fullscreen ? (
-            <div className="sticky bottom-0 z-30 -mx-2 mt-3 border-t border-white/10 bg-black/85 px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur sm:-mx-8 sm:px-8">
-              <div className="mx-auto flex max-w-md items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/45 px-3 py-2">
+            <div className="sticky bottom-0 z-30 -mx-2 mt-3 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8">
+              <div className="mx-auto flex max-w-md items-center justify-between gap-3 px-1 py-1">
                 <div className="shrink-0">
                   <p className="text-[8px] uppercase tracking-[0.2em] text-white/45">Balance</p>
                   <p className="font-mono text-sm font-black text-white">◈ {money(balance)}</p>
@@ -185,14 +185,14 @@ export default function Slots({ active = true }: { active?: boolean }) {
                 </div>
               </div>
 
-              <div className="mx-auto mt-2 max-w-md">
+              <div className="mx-auto mt-1 max-w-md">
                 <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
               </div>
 
-              <div className="relative mx-auto mt-3 flex max-w-md items-center justify-center gap-4">
-                <div className="relative">
+              <div className="mx-auto mt-2 grid max-w-md grid-cols-3 items-center">
+                <div className="relative flex justify-center">
                   {autoOpen && !auto && !s.gamble && (
-                    <div className="absolute bottom-full left-0 mb-2 flex gap-1 rounded-xl border border-white/15 bg-black/85 p-1">
+                    <div className="absolute bottom-full left-1/2 mb-2 flex -translate-x-1/2 gap-1 rounded-xl border border-white/15 bg-black/85 p-1">
                       {[10, 25, 50].map((n) => (
                         <button
                           key={n}
@@ -238,22 +238,26 @@ export default function Slots({ active = true }: { active?: boolean }) {
                     onClick={() => play(1)}
                     disabled={!canSpin}
                     aria-label="Spin"
-                    className={`relative h-20 w-20 rounded-full text-sm font-black tracking-widest transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn}`}
+                    className={`h-20 w-20 rounded-full text-sm font-black tracking-widest transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn}`}
                   >
-                    <span className="absolute left-1 top-1/2 -translate-y-1/2 text-base opacity-70">⟲</span>
                     {s.busy ? "…" : "SPIN"}
-                    <span className="absolute right-1 top-1/2 -translate-y-1/2 text-base opacity-70">⟳</span>
                   </button>
                 </div>
 
-                <div className="flex flex-col items-center gap-1">
-                  <button onClick={maxBet} disabled={s.busy} className={`${small} px-2 text-[11px]`}>Max bet</button>
+                <div className="flex items-center justify-center gap-2">
+                  <button
+                    onClick={maxBet}
+                    disabled={s.busy}
+                    className="flex h-14 w-14 flex-col items-center justify-center rounded-full border border-white/15 bg-black/50 text-[9px] font-black leading-3 text-white disabled:opacity-40"
+                  >
+                    MAX<br />BET
+                  </button>
                   <button
                     onClick={buyBonus}
                     disabled={s.busy || !!s.fs || balance < bonusPrice}
-                    className={`${small} max-w-28 px-2 text-[10px] leading-3 ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
+                    className={`flex h-14 w-14 flex-col items-center justify-center rounded-full border border-white/15 bg-black/50 text-[9px] font-black leading-3 text-white disabled:opacity-40 ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
                   >
-                    {s.confirmBuy ? "Confirm?" : "Buy bonus"} ◈ {money(bonusPrice)}
+                    BUY<br />◈ {money(bonusPrice)}
                   </button>
                 </div>
               </div>
