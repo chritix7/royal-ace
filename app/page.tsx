@@ -6,10 +6,12 @@ import AudioControls from "../components/AudioControls";
 import Blackjack from "../components/Blackjack";
 import RewardsPanel from "../components/RewardsPanel";
 import Slots from "../components/Slots";
+import StatsPanel from "../components/StatsPanel";
 import { Counter } from "../components/ui";
 import { achievementsStore } from "../lib/achievementsStore";
 import { dailyStore } from "../lib/daily";
 import { missionsStore } from "../lib/missions";
+import { statsStore } from "../lib/statsStore";
 import { useBalance, useLocked, wallet } from "../lib/wallet";
 import AchievementToasts from "../components/AchievementToasts";
 
@@ -23,6 +25,7 @@ export default function Home() {
   const [tab, setTab] = useState<Tab>("blackjack");
   const [rewardsOpen, setRewardsOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
   const balance = useBalance();
   const locked = useLocked();
 
@@ -31,6 +34,7 @@ export default function Home() {
     dailyStore.hydrate();
     missionsStore.hydrate();
     achievementsStore.hydrate();
+    statsStore.hydrate();
   }, []);
 
   return (
@@ -45,6 +49,14 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setStatsOpen(true)}
+              className="rounded-2xl border border-[#c8a65b]/40 bg-[#151b15] px-4 py-2 text-sm font-bold text-[#e5c779] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10"
+              aria-label="Open statistics"
+            >
+              📊 Stats
+            </button>
+
             <button
               onClick={() => setAchievementsOpen(true)}
               className="rounded-2xl border border-[#c8a65b]/40 bg-[#151b15] px-4 py-2 text-sm font-bold text-[#e5c779] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10"
@@ -114,6 +126,7 @@ export default function Home() {
         onClose={() => setAchievementsOpen(false)}
       />
       <AchievementToasts />
+      <StatsPanel open={statsOpen} onClose={() => setStatsOpen(false)} />
     </main>
   );
 }
