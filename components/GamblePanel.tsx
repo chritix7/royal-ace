@@ -6,18 +6,34 @@ import type { GambleState } from "../lib/useSlots";
 
 const money = (n: number) => n.toLocaleString("en-US");
 
-function PlayingCardFace({ card, back }: { card: GambleState["card"]; back?: boolean }) {
+function Card3D({ card, flipped }: { card: GambleState["card"]; flipped: boolean }) {
   return (
-    <div
-      className={`flex h-44 w-32 items-center justify-center rounded-2xl border-4 text-6xl font-black shadow-2xl transition-transform duration-500 sm:h-56 sm:w-40 sm:text-7xl ${
-        back
-          ? "animate-pulse border-[#d7b45b]/70 text-[#d7b45b] bg-[repeating-linear-gradient(45deg,#12261f_0_10px,#1b3d33_10px_20px)]"
-          : "border-black/20 bg-[#f8f5ec]"
-      } ${!back && card?.color === "red" ? "text-red-600" : !back ? "text-slate-900" : ""}`}
-      role="img"
-      aria-label={back ? "Face-down card" : `${card?.color} card`}
-    >
-      {back ? "♠" : card?.suit}
+    <div className="[perspective:1200px]">
+      <div
+        className={`relative h-44 w-32 transition-transform duration-700 ease-out [transform-style:preserve-3d] sm:h-56 sm:w-40 ${
+          flipped ? "[transform:rotateY(180deg)]" : ""
+        }`}
+      >
+        {/* Dos de la carte */}
+        <div
+          className="absolute inset-0 flex items-center justify-center rounded-2xl border-4 border-[#d7b45b]/70 bg-[repeating-linear-gradient(45deg,#12261f_0_10px,#1b3d33_10px_20px)] text-6xl font-black text-[#d7b45b] shadow-2xl [backface-visibility:hidden] sm:h-56 sm:w-40 sm:text-7xl"
+          role="img"
+          aria-label="Face-down card"
+        >
+          ♠
+        </div>
+
+        {/* Face de la carte */}
+        <div
+          className={`absolute inset-0 flex items-center justify-center rounded-2xl border-4 border-black/20 bg-[#f8f5ec] text-6xl font-black shadow-2xl [backface-visibility:hidden] [transform:rotateY(180deg)] sm:h-56 sm:w-40 sm:text-7xl ${
+            card?.color === "red" ? "text-red-600" : "text-slate-900"
+          }`}
+          role="img"
+          aria-label={card ? `${card.color} card` : "Card"}
+        >
+          {card?.suit ?? ""}
+        </div>
+      </div>
     </div>
   );
 }
@@ -39,7 +55,7 @@ export default function GamblePanel({
     const id = window.setTimeout(() => {
       onCollect();
       onClose();
-    }, 1800);
+    }, 2200);
     return () => window.clearTimeout(id);
   }, [g.phase, onCollect, onClose]);
 
@@ -62,7 +78,7 @@ export default function GamblePanel({
         <p className="mt-1 text-xs text-white/55">Double to ◈ {money(g.amount * 2)}</p>
 
         <div className="mt-6 flex justify-center">
-          <PlayingCardFace card={g.phase === "result" ? g.card : g.phase === "flip" ? null : g.card} back={g.phase === "flip"} />
+          <Card3D card={g.card} flipped={g.phase === "result"} />
         </div>
 
         {g.phase === "choose" && (
