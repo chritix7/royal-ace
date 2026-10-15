@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { GAMBLE_MAX_ROUNDS, type CardColor } from "../lib/gamble";
 import type { GambleState } from "../lib/useSlots";
 
@@ -8,7 +9,7 @@ const money = (n: number) => n.toLocaleString("en-US");
 function PlayingCardFace({ card, back }: { card: GambleState["card"]; back?: boolean }) {
   return (
     <div
-      className={`flex h-20 w-14 items-center justify-center rounded-lg border text-3xl font-bold shadow ${
+      className={`flex h-14 w-10 shrink-0 items-center justify-center rounded-md border text-2xl font-bold shadow sm:h-16 sm:w-12 ${
         back ? "animate-pulse border-[#d7b45b]/60 text-[#d7b45b] bg-[repeating-linear-gradient(45deg,#142d27_0_6px,#1b3d33_6px_12px)]" : "border-black/20 bg-[#f8f5ec]"
       } ${!back && card?.color === "red" ? "text-red-600" : !back ? "text-slate-900" : ""}`}
       role="img"
@@ -21,45 +22,61 @@ function PlayingCardFace({ card, back }: { card: GambleState["card"]; back?: boo
 
 /** Gamble : doubler un gain en devinant la couleur d'une carte (50 % de chances). */
 export default function GamblePanel({ g, onChoose, onCollect }: { g: GambleState; onChoose: (c: CardColor) => void; onCollect: () => void }) {
-  const btn = "rounded-full px-4 py-2 text-xs font-black tracking-wider outline-none transition focus-visible:ring-2 focus-visible:ring-white";
+  useEffect(() => {
+    if (g.phase !== "result") return;
+    const id = window.setTimeout(onCollect, 1800);
+    return () => window.clearTimeout(id);
+  }, [g.phase, onCollect]);
+
   return (
-    <div className="mx-auto mt-3 max-w-md rounded-2xl border border-[#ffd166]/60 bg-black/60 p-3 text-center" role="group" aria-label="Gamble">
-      <p className="text-[10px] font-black tracking-[0.3em] text-[#ffd166]">GAMBLE · {g.rounds} / {GAMBLE_MAX_ROUNDS}</p>
+    <div
+      className="mx-auto mb-2 flex w-full max-w-md items-center gap-2 rounded-xl border border-[#ffd166]/50 bg-[linear-gradient(180deg,rgba(0,0,0,.82),rgba(20,12,4,.9))] p-2 shadow-[0_10px_30px_rgba(0,0,0,.45)] sm:gap-3 sm:p-2.5"
+      role="group"
+      aria-label="Gamble"
+    >
+      <PlayingCardFace card={g.phase === "result" ? g.card : g.phase === "flip" ? null : g.card} back={g.phase === "flip"} />
 
-      {g.phase === "choose" && (
-        <>
-          <p className="mt-1 text-xs text-white/70">
-            Double ◈ {money(g.amount)} → ◈ {money(g.amount * 2)} · pick a colour (50 / 50)
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[9px] font-black tracking-[0.22em] text-[#ffd166] sm:text-[10px]">
+            GAMBLE · {g.rounds} / {GAMBLE_MAX_ROUNDS}
           </p>
-          <div className="mt-3 flex items-center justify-center gap-3">
-            {g.card && <PlayingCardFace card={g.card} />}
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <button onClick={onCollect} className={`${btn} bg-[#ffd166] text-[#10130e] hover:bg-[#ffe08f]`}>COLLECT ◈ {money(g.amount)}</button>
-              <button onClick={() => onChoose("red")} className={`${btn} bg-red-600 text-white hover:bg-red-500`}>♥ ♦ RED</button>
-              <button onClick={() => onChoose("black")} className={`${btn} bg-slate-800 text-white hover:bg-slate-700`}>♠ ♣ BLACK</button>
+          <p className="font-mono text-xs font-black text-white sm:text-sm">◈ {money(g.amount)}</p>
+        </div>
+
+        {g.phase === "choose" && (
+          <>
+            <p className="mt-0.5 truncate text-[10px] text-white/60 sm:text-xs">Double to ◈ {money(g.amount * 2)} · pick a colour</p>
+            <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+              <button
+                onClick={() => onChoose("red")}
+                className="flex h-9 items-center justify-center gap-1 rounded-lg border border-red-400/40 bg-[linear-gradient(180deg,#dc2626,#991b1b)] text-[11px] font-black tracking-wide text-white shadow-inner transition hover:brightness-110 active:scale-[.98] sm:h-10 sm:text-xs"
+              >
+                ♥♦ RED
+              </button>
+              <button
+                onClick={() => onChoose("black")}
+                className="flex h-9 items-center justify-center gap-1 rounded-lg border border-white/15 bg-[linear-gradient(180deg,#334155,#0f172a)] text-[11px] font-black tracking-wide text-white shadow-inner transition hover:brightness-110 active:scale-[.98] sm:h-10 sm:text-xs"
+              >
+                ♠♣ BLACK
+              </button>
             </div>
-          </div>
-        </>
-      )}
+          </>
+        )}
 
-      {g.phase === "flip" && (
-        <div className="mt-2 flex flex-col items-center gap-2" aria-live="polite">
-          <PlayingCardFace card={null} back />
-          <p className="text-xs text-white/70">You picked {g.guess}. Drawing…</p>
-        </div>
-      )}
-
-      {g.phase === "result" && (
-        <div className="mt-2 flex flex-col items-center gap-2" aria-live="polite">
-          <PlayingCardFace card={g.card} />
-          <p className={`text-sm font-bold ${g.won ? "text-emerald-300" : "text-red-300"}`}>
-            {g.won ? `Doubled to ◈ ${money(g.amount)}. That is the maximum.` : "Wrong colour. The win is lost."}
+        {g.phase === "flip" && (
+          <p className="mt-1 text-[11px] text-white/70" aria-live="polite">
+            You picked {g.guess}. Drawing…
           </p>
-          <button onClick={onCollect} className={`${btn} bg-[#ffd166] text-[#10130e] hover:bg-[#ffe08f]`}>
-            {g.won ? `COLLECT ◈ ${money(g.amount)}` : "OK"}
-          </button>
-        </div>
-      )}
+        )}
+
+        {g.phase === "result" && (
+          <p className={`mt-1 text-[11px] font-bold sm:text-xs ${g.won ? "text-emerald-300" : "text-red-300"}`} aria-live="polite">
+            {g.won ? `Doubled to ◈ ${money(g.amount)}.` : "Wrong colour. The win is lost."}
+            <span className="ml-1 font-normal text-white/45">Collecting…</span>
+          </p>
+        )}
+      </div>
     </div>
   );
 }
