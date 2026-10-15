@@ -6,7 +6,6 @@ import { wallet } from "./wallet";
 /**
  * Moteur des succès : écoute les événements des jeux et le solde,
  * puis sauvegarde les succès débloqués dans le navigateur.
- * L'interface 🏆 est disponible via AchievementsPanel.
  */
 
 export type AchievementState = Record<string, number>;
@@ -15,6 +14,7 @@ const EMPTY: AchievementState = {};
 const KEY = "royalace:achievements";
 const HIGH_ROLLER_BALANCE = 10_000;
 const SHARP_MIND_STREAK = 10;
+const HOT_STREAK = 5;
 
 let state: AchievementState = EMPTY;
 let hydrated = false;
@@ -37,7 +37,7 @@ function unlock(id: string) {
   emit();
 }
 
-function handleEvent(event: Parameters<Parameters<typeof onEvent>[0]>[0]) {
+function handleEvent(event: Parameters<Parameters<typeof onEvent>[0]>[0], amount = 1) {
   if (event === "bjBlackjack") {
     unlock("bj");
     return;
@@ -61,6 +61,22 @@ function handleEvent(event: Parameters<Parameters<typeof onEvent>[0]>[0]) {
 
   if (event === "bjHand") {
     correctStreak = 0;
+    return;
+  }
+
+  if (event === "pairWin") {
+    unlock("pair");
+    return;
+  }
+
+  if (event === "suitedWin") {
+    unlock("suited");
+    return;
+  }
+
+  if (event === "bjStreak") {
+    if (amount >= HOT_STREAK) unlock("streak5");
+    return;
   }
 }
 

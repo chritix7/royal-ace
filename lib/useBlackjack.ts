@@ -187,6 +187,7 @@ export function useBlackjack(active = true) {
         payout += c.ppBet * (w.odds + 1);
         notes.push(`${w.label} +${c.ppBet * w.odds}`);
         unlock("pair");
+        track("pairWin");
         if (w.odds >= 25) big = true;
       }
     }
@@ -196,6 +197,7 @@ export function useBlackjack(active = true) {
         payout += c.t3Bet * (w.odds + 1);
         notes.push(`${w.label} +${c.t3Bet * w.odds}`);
         unlock("suited");
+        track("suitedWin");
         if (w.odds >= 40) big = true;
       }
     }
@@ -517,12 +519,13 @@ export function useBlackjack(active = true) {
       },
     });
 
-    // On annonce ce qui s'est passé (les missions écoutent)
+    // On annonce ce qui s'est passé (les missions et succès écoutent)
     track("bjHand", hands.length);
     track("bjWin", won);
     if (gotBJ) track("bjBlackjack");
     track("bjDouble", doubledWins);
     track("bjSplit", splitWins);
+    if (streak > 0) track("bjStreak", streak);
 
     if (gotBJ) unlock("bj");
     if (streak >= 5) unlock("streak5");
@@ -540,7 +543,7 @@ export function useBlackjack(active = true) {
 
   function resetAll() {
     const c = ref.current;
-    if (c.phase !== "betting" && c.phase !== "settled") return;
+    if ((c.phase !== "betting" && c.phase !== "settled") || c.balance >= MIN_BET) return;
     set({
       ...INITIAL,
       settings: c.settings,
@@ -581,7 +584,7 @@ export function useBlackjack(active = true) {
   const hand = s.hands[s.active];
   const playing = s.phase === "player" && !s.busy;
   const canDouble = playing && !!hand && hand.cards.length === 2 && s.balance >= hand.bet;
-  const canSplit = playing && !!hand && canSplitCards(hand.cards) && s.hands.length < 4 && s.balance >= hand.bet;
+  const canSplit = playing && !!hand && canSplitCards(h.cards) && s.hands.length < 4 && s.balance >= h.bet;
   const canSurrender = playing && s.hands.length === 1 && !!hand && hand.cards.length === 2 && !hand.split;
   const advice =
     showHint && playing && hand && s.dealer[0] ? advise(hand.cards, s.dealer[0], canDouble, canSplit) : null;

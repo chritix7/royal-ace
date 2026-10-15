@@ -1,6 +1,6 @@
 /**
  * Petit bus d'événements : les jeux annoncent ce qui se passe (un spin, une main gagnée...)
- * et les missions écoutent. Ainsi les jeux ne connaissent pas les missions.
+ * et les missions/succès écoutent. Ainsi les jeux ne connaissent pas les récompenses.
  */
 export type GameEvent =
   | "spin" // un tour payant à la machine
@@ -17,7 +17,10 @@ export type GameEvent =
   | "bjBlackjack" // un blackjack naturel
   | "bjDouble" // un double gagné
   | "bjSplit" // une main splittée gagnée
-  | "bjCorrect"; // une décision conforme à la stratégie de base
+  | "bjCorrect" // une décision conforme à la stratégie de base
+  | "pairWin" // un Perfect Pairs gagné
+  | "suitedWin" // un 21+3 gagné
+  | "bjStreak"; // série actuelle de manches gagnées
 
 type Listener = (event: GameEvent, amount: number) => void;
 const listeners = new Set<Listener>();
