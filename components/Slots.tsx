@@ -165,8 +165,8 @@ export default function Slots({ active = true }: { active?: boolean }) {
           {s.vault && <VaultGame vault={s.vault} onPick={vaultPick} onCollect={vaultCollect} />}
 
           {fullscreen ? (
-            <div className="sticky bottom-0 z-30 -mx-2 mt-3 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8">
-              <div className="mx-auto flex max-w-md items-center justify-between gap-3 px-1 py-1">
+            <div className="sticky bottom-0 z-30 -mx-2 mt-4 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8">
+              <div className="mx-auto flex max-w-md items-center justify-between gap-3 px-2">
                 <div className="shrink-0">
                   <p className="text-[8px] uppercase tracking-[0.2em] text-white/45">Balance</p>
                   <p className="font-mono text-sm font-black text-white">◈ {money(balance)}</p>
@@ -189,8 +189,8 @@ export default function Slots({ active = true }: { active?: boolean }) {
                 <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
               </div>
 
-              <div className="mx-auto mt-2 grid max-w-md grid-cols-3 items-center">
-                <div className="relative flex justify-center">
+              <div className="mx-auto mt-2 flex items-center justify-center gap-3">
+                <div className="relative">
                   {autoOpen && !auto && !s.gamble && (
                     <div className="absolute bottom-full left-1/2 mb-2 flex -translate-x-1/2 gap-1 rounded-xl border border-white/15 bg-black/85 p-1">
                       {[10, 25, 50].map((n) => (
@@ -244,7 +244,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
                   </button>
                 </div>
 
-                <div className="flex items-center justify-center gap-2">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={maxBet}
                     disabled={s.busy}
