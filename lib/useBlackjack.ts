@@ -584,7 +584,7 @@ export function useBlackjack(active = true) {
   const hand = s.hands[s.active];
   const playing = s.phase === "player" && !s.busy;
   const canDouble = playing && !!hand && hand.cards.length === 2 && s.balance >= hand.bet;
-  const canSplit = playing && !!hand && canSplitCards(h.cards) && s.hands.length < 4 && s.balance >= h.bet;
+  const canSplit = playing && !!hand && canSplitCards(hand.cards) && s.hands.length < 4 && s.balance >= hand.bet;
   const canSurrender = playing && s.hands.length === 1 && !!hand && hand.cards.length === 2 && !hand.split;
   const advice =
     showHint && playing && hand && s.dealer[0] ? advise(hand.cards, s.dealer[0], canDouble, canSplit) : null;
