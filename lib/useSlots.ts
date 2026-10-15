@@ -23,6 +23,7 @@ import { music } from "./music";
 import type { SlotLabels } from "./skins";
 import { sfx } from "./sound";
 import { useBalance, wallet } from "./wallet";
+import { winHistory } from "./winHistory";
 
 export type SlotStats = { spins: number; wagered: number; won: number; biggest: number; freeSpinRounds: number; vaults: number; jackpotWins: number };
 export type FreeSpins = { left: number; played: number; total: number; win: number };
@@ -330,11 +331,12 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
     let jackpots: { tier: JackpotTier; amount: number }[] = [];
 
     if (debugVault() || Math.random() < VAULT_TRIGGER) {
-      vaultHit = true;
-      const v = await runVault(b);
-      total += v.total;
-      jackpots = v.wins;
-    }
+  vaultHit = true;
+  const v = await runVault(b);
+  total += v.total;
+  jackpots = v.wins;
+  winHistory.record({ game: "slots", kind: "vault", amount: v.total });
+}
     if (triggered) total += await runFreeSpins(base.freeSpins);
 
     const ratio = total / b;
@@ -358,10 +360,16 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
     // On annonce ce qui s'est passé (les missions écoutent)
     track("spin");
     if (total > 0) track("slotWin");
-    if (ratio >= 20) track("bigWin");
+    if (ratio >= 20) {
+  track("bigWin");
+  winHistory.record({ game: "slots", kind: "bigWin", amount: total });
+}
     if (triggered) track("bonus");
     if (vaultHit) track("vault");
     track("jackpot", jackpots.length);
+    for (const jackpot of jackpots) {
+  winHistory.record({ game: "slots", kind: "jackpot", amount: jackpot.amount });
+}
 
     if (jackpots.length > 0) {
       for (const j of jackpots) {

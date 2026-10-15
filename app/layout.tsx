@@ -17,7 +17,9 @@ export const metadata: Metadata = {
   description: "A private virtual game room",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: LayoutProps<"/">) {
   return (
     <html
       lang="en"

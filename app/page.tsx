@@ -66,12 +66,12 @@ export default function Home() {
             </button>
 
             <button
-              onClick={() => setRewardsOpen(true)}
-              className="rounded-2xl border border-[#c8a65b]/40 bg-[#151b15] px-4 py-2 text-sm font-bold text-[#e5c779] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10"
-              aria-label="Open rewards"
-            >
-              🎁 Rewards
-            </button>
+  onClick={() => setRewardsOpen(true)}
+  className="rounded-2xl border border-[#c8a65b]/40 bg-[#151b15] px-4 py-2 text-sm font-bold text-[#e5c779] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10"
+  aria-label="Open rewards"
+>
+  🎁 Rewards
+</button>
 
             <div className="rounded-2xl border border-[#c8a65b]/30 bg-[#151b15] px-4 py-2 text-right">
               <p className="text-[10px] text-white/50">Your chips</p>

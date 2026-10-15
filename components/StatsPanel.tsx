@@ -2,6 +2,7 @@
 
 import { useStats } from "../lib/statsStore";
 import { statsStore } from "../lib/statsStore";
+import { useWinHistory, winHistory } from "../lib/winHistory";
 
 type Props = {
   open: boolean;
@@ -10,6 +11,7 @@ type Props = {
 
 export default function StatsPanel({ open, onClose }: Props) {
   const stats = useStats();
+  const history = useWinHistory();
 
   if (!open) return null;
 
@@ -36,6 +38,18 @@ export default function StatsPanel({ open, onClose }: Props) {
     { label: "Correct decisions", value: stats.correctDecisions },
     { label: "Decision rate", value: `${decisionRate}%` },
   ];
+
+const formatKind = (kind: string) =>
+  kind === "bigWin"
+    ? "Big win"
+    : kind === "vault"
+      ? "Vault"
+      : kind === "jackpot"
+        ? "Jackpot"
+        : "Blackjack";
+
+const formatGame = (game: string) =>
+  game === "slots" ? "Slots" : "Blackjack";
 
   return (
     <div
@@ -80,6 +94,51 @@ export default function StatsPanel({ open, onClose }: Props) {
             </div>
           ))}
         </div>
+
+        <section className="mt-6">
+  <div className="mb-3 flex items-center justify-between gap-4">
+    <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white/70">
+      Recent big wins
+    </h3>
+    {history.length > 0 && (
+      <button
+        onClick={() => {
+          if (window.confirm("Clear the win history?")) winHistory.clear();
+        }}
+        className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/60 transition hover:text-white"
+      >
+        Clear
+      </button>
+    )}
+  </div>
+
+  {history.length === 0 ? (
+    <p className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-white/45">
+      No big win recorded yet.
+    </p>
+  ) : (
+    <div className="space-y-2">
+      {history.map((entry) => (
+        <div
+          key={entry.id}
+          className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+        >
+          <div>
+            <p className="text-sm font-semibold text-white">
+              {formatKind(entry.kind)} · {formatGame(entry.game)}
+            </p>
+            <p className="mt-1 text-xs text-white/45">
+              {new Date(entry.at).toLocaleString()}
+            </p>
+          </div>
+          <p className="text-lg font-black text-[#e5c779]">
+            ◈ {entry.amount.toLocaleString("en-US")}
+          </p>
+        </div>
+      ))}
+    </div>
+  )}
+</section>
 
         <button
           onClick={() => {

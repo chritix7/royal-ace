@@ -8,6 +8,7 @@ import { music } from "./music";
 import { wallet } from "./wallet";
 import { CHIPS, MIN_BET, REFILL, EMPTY_STATS, EMPTY_RECORDS, DEFAULT_SETTINGS, INITIAL, BACKS, sleep, floor10 } from "./game";
 import type { S, Settings, Records } from "./game";
+import { winHistory } from "./winHistory";
 
 export function useBlackjack(active = true) {
   const activeRef = useRef(active);
@@ -524,6 +525,14 @@ export function useBlackjack(active = true) {
     track("bjDouble", doubledWins);
     track("bjSplit", splitWins);
     if (streak > 0) track("bjStreak", streak);
+
+    if (gotBJ) {
+  winHistory.record({
+    game: "blackjack",
+    kind: "blackjack",
+    amount: Math.max(0, net),
+  });
+}
 
     if (gotBJ) unlock("bj");
     if (streak >= 5) unlock("streak5");
