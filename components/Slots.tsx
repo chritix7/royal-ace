@@ -44,6 +44,7 @@ function Led({ label, children, className, on }: { label: string; children: Reac
 export default function Slots({ active = true }: { active?: boolean }) {
   const [skinId, setSkinId] = useState<SkinId>("miami");
   const [fullscreen, setFullscreen] = useState(false);
+  const [gambleScreen, setGambleScreen] = useState(false);
   const skin = SKINS[skinId];
   const {
     s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, refill,
@@ -95,9 +96,10 @@ export default function Slots({ active = true }: { active?: boolean }) {
   const net = s.stats.won - s.stats.wagered;
   const outOfChips = !s.busy && balance < BET_LEVELS[0];
 
-  const gamblePanel = s.gamble ? (
-    <GamblePanel g={s.gamble} onChoose={gambleChoose} onCollect={gambleCollect} />
-  ) : null;
+  // Ferme l'écran Gamble si le gamble disparaît (nouveau spin, achat bonus, etc.)
+  useEffect(() => {
+    if (!s.gamble) setGambleScreen(false);
+  }, [s.gamble]);
 
   return (
     <div className={`grid gap-6 lg:grid-cols-[1fr_320px] ${fullscreen ? "fixed inset-0 z-50 overflow-y-auto bg-black" : ""}`}>
@@ -183,9 +185,6 @@ export default function Slots({ active = true }: { active?: boolean }) {
             )}
           </div>
 
-          {/* Gamble : en plein écran, il reste au-dessus des commandes */}
-          {gamblePanel && !fullscreen && gamblePanel}
-
           {/* Compteurs lumineux */}
           <div className="mx-auto mt-2 grid max-w-2xl grid-cols-3 gap-1.5 sm:mt-3 sm:gap-3">
             <Led label="CREDIT" className={`${skin.ledBox} ${skin.led}`}>
@@ -249,6 +248,14 @@ export default function Slots({ active = true }: { active?: boolean }) {
                 )}
 
                 <div className="flex flex-col items-end gap-1">
+                  {s.gamble && (
+                    <button
+                      onClick={() => setGambleScreen(true)}
+                      className="h-9 min-w-14 rounded-full border border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] px-3 text-xs font-black tracking-widest text-[#10130e] shadow-[0_0_18px_rgba(255,209,102,.35)] transition hover:brightness-110 active:scale-95"
+                    >
+                      X2
+                    </button>
+                  )}
                   <button onClick={maxBet} disabled={s.busy} className={`${small} px-2 text-[11px] sm:px-4 sm:text-xs`}>Max bet</button>
                   <button
                     onClick={buyBonus}
@@ -268,13 +275,6 @@ export default function Slots({ active = true }: { active?: boolean }) {
           </div>
         </div>
       </section>
-
-      {/* Gamble plein écran : surimpression au-dessus des commandes */}
-      {gamblePanel && fullscreen && (
-        <div className="fixed inset-x-0 bottom-20 z-30 px-2">
-          {gamblePanel}
-        </div>
-      )}
 
       {/* ================= PANNEAU DE DROITE ================= */}
       <aside className={`flex flex-col gap-5 ${fullscreen ? "hidden" : ""}`}>
@@ -413,6 +413,16 @@ export default function Slots({ active = true }: { active?: boolean }) {
           Virtual chips only. No real money, deposits or cash-outs.
         </p>
       </aside>
+
+      {/* Écran Gamble plein écran */}
+      {s.gamble && gambleScreen && (
+        <GamblePanel
+          g={s.gamble}
+          onChoose={gambleChoose}
+          onCollect={gambleCollect}
+          onClose={() => setGambleScreen(false)}
+        />
+      )}
     </div>
   );
 }
