@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import {
   BET_LEVELS,
@@ -39,19 +41,19 @@ export type GambleState = {
 };
 
 type S = {
-  grid: Sym[][]; // ce qui est affiché quand les rouleaux sont arrêtés
-  target: Sym[][]; // résultat du tour en cours
-  spinId: number; // change à chaque tour : relance l'animation des rouleaux
-  stopAt: number[]; // moment d'arrêt de chaque rouleau (ms depuis le début du tour)
-  landMs: number; // durée du ralentissement final
-  anticipate: boolean[]; // rouleaux qui ralentissent pour faire monter le suspense
-  held: boolean[]; // rouleaux gardés pendant un re-spin (wild étendu)
-  expanding: number[]; // rouleaux dont le wild est en train de s'étendre
-  winBanner: { label: string; amount: number; tier: Tier } | null; // gros gain
-  pools: Pools; // cagnottes jackpot (multiples de la mise)
-  vault: VaultState | null; // bonus coffre en cours
-  gamble: GambleState | null; // gamble proposé après un gain
-  confirmBuy: boolean; // « achat de bonus » en attente de confirmation
+  grid: Sym[][];
+  target: Sym[][];
+  spinId: number;
+  stopAt: number[];
+  landMs: number;
+  anticipate: boolean[];
+  held: boolean[];
+  expanding: number[];
+  winBanner: { label: string; amount: number; tier: Tier } | null;
+  pools: Pools;
+  vault: VaultState | null;
+  gamble: GambleState | null;
+  confirmBuy: boolean;
   spinning: boolean[];
   cells: boolean[][];
   lineWins: LineWin[];
@@ -65,7 +67,7 @@ type S = {
   banner: string | null;
   celebrate: number;
   stats: SlotStats;
-  history: number[]; // multiple de la mise gagné à chaque manche
+  history: number[];
 };
 
 const KEY = "royalace:slots";
@@ -104,17 +106,11 @@ const INITIAL: S = {
 };
 
 const DEFAULT_LABELS: SlotLabels = { big: "BIG WIN", mega: "MEGA WIN", epic: "EPIC WIN", freeSpins: "FREE SPINS" };
-/**
- * Pour tester le coffre sans attendre 250 tours : dans la console du navigateur, tape
- *   localStorage.setItem("royalace:debug", "vault")
- * puis lance un spin. Pour revenir au normal :  localStorage.removeItem("royalace:debug")
- */
 function debugVault() {
   try {
     return localStorage.getItem("royalace:debug") === "vault";
-  } catch {
-    return false;
-  }
+  } catch {}
+  return false;
 }
 
 const tierOf = (ratio: number): Tier => (ratio >= 100 ? "epic" : ratio >= 50 ? "mega" : ratio >= 20 ? "big" : "");
@@ -161,10 +157,6 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
 
   const bet = BET_LEVELS[s.betIdx];
 
-  /**
-   * Un tour : mise, rotation, arrêt des rouleaux un par un (avec sons), puis l'éventuel wild qui
-   * s'étend et les re-spins qu'il déclenche (les rouleaux étendus restent en place), et les gains.
-   */
   async function runSpin(free: boolean, mult: number) {
     const b = BET_LEVELS[ref.current.betIdx];
     if (!free) {
@@ -203,7 +195,7 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
       const t0 = performance.now();
       let scatters = 0;
       for (let k = 0; k < REELS; k++) {
-        if (st.held[k]) continue; // rouleau gardé : il ne tourne pas
+        if (st.held[k]) continue;
         if (anticipate[k] && !anticipate[k - 1]) sfx.tension();
         await sleep(Math.max(0, stopAt[k] - (performance.now() - t0)));
         set({
@@ -243,7 +235,6 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
     return { total: spinTotal, scatters: steps[0].scatters, freeSpins: steps[0].freeSpins };
   }
 
-  /** Le bonus de free spins (avec re-spins et retrigger). Renvoie le gain du bonus. */
   async function runFreeSpins(initial: number) {
     sfx.freeSpins();
     set({
@@ -265,7 +256,6 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
       const r = await runSpin(true, FS_MULT);
       fsWin += r.total;
 
-      // Retrigger : des scatters PENDANT les free spins en redonnent
       const add = retriggerSpins(r.scatters, used, left);
       if (add > 0) {
         left += add;
@@ -282,7 +272,6 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
     return fsWin;
   }
 
-  /** Le coffre : on attend que le joueur ouvre ses 3 mallettes, puis on paie (jackpots compris). */
   const vaultDone = useRef<(() => void) | null>(null);
   async function runVault(b: number) {
     sfx.vault();
@@ -321,7 +310,6 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
 
   const JP_TIER: Record<JackpotTier, Tier> = { mini: "big", minor: "mega", major: "epic", kingpin: "epic" };
 
-  /** Une manche complète : tour de base, coffre éventuel, free spins éventuels. */
   async function oneRound() {
     const b = BET_LEVELS[ref.current.betIdx];
     const base = await runSpin(false, 1);
@@ -331,12 +319,12 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
     let jackpots: { tier: JackpotTier; amount: number }[] = [];
 
     if (debugVault() || Math.random() < VAULT_TRIGGER) {
-  vaultHit = true;
-  const v = await runVault(b);
-  total += v.total;
-  jackpots = v.wins;
-  winHistory.record({ game: "slots", kind: "vault", amount: v.total });
-}
+      vaultHit = true;
+      const v = await runVault(b);
+      total += v.total;
+      jackpots = v.wins;
+      winHistory.record({ game: "slots", kind: "vault", amount: v.total });
+    }
     if (triggered) total += await runFreeSpins(base.freeSpins);
 
     const ratio = total / b;
@@ -357,19 +345,18 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
       message: total > 0 ? `You won ◈ ${fmt(total)}` : "No win this time. Spin again!",
     });
 
-    // On annonce ce qui s'est passé (les missions écoutent)
     track("spin");
     if (total > 0) track("slotWin");
     if (ratio >= 20) {
-  track("bigWin");
-  winHistory.record({ game: "slots", kind: "bigWin", amount: total });
-}
+      track("bigWin");
+      winHistory.record({ game: "slots", kind: "bigWin", amount: total });
+    }
     if (triggered) track("bonus");
     if (vaultHit) track("vault");
     track("jackpot", jackpots.length);
     for (const jackpot of jackpots) {
-  winHistory.record({ game: "slots", kind: "jackpot", amount: jackpot.amount });
-}
+      winHistory.record({ game: "slots", kind: "jackpot", amount: jackpot.amount });
+    }
 
     if (jackpots.length > 0) {
       for (const j of jackpots) {
@@ -385,7 +372,7 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
       sfx.bigWin();
       sfx.coin(tier === "epic" ? 14 : 8);
       music.duck(3400);
-      haptic(tier === "epic" ? HAPTIC.epic : HAPTIC.big);
+      haptic(HAPTIC.epic);
       set({ winBanner: { label: labelsRef.current[tier], amount: total, tier }, celebrate: Date.now() });
       await sleep((tier === "epic" ? 4600 : 3400) * speed());
       set({ winBanner: null });
@@ -393,11 +380,9 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
     return { total, triggered, vault: vaultHit, ratio, jackpots };
   }
 
-  /** `count` > 1 = tours automatiques (s'arrêtent sur un gros gain, un coffre ou des free spins). */
   async function play(count = 1) {
     if (ref.current.busy) return;
     stopRef.current = false;
-    // Lancer un spin encaisse le gamble en cours
     set({ busy: true, autoLeft: count > 1 ? count : 0, celebrate: 0, banner: null, gamble: null, confirmBuy: false });
     wallet.setLocked(true);
     sfx.lever();
@@ -423,7 +408,6 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
     set({ busy: false, autoLeft: 0 });
   }
 
-  /** Gamble : doubler le gain en devinant la couleur d'une carte (50 % de chances). */
   async function gambleChoose(guess: CardColor) {
     const g = ref.current.gamble;
     if (!g || g.phase !== "choose" || ref.current.busy) return;
@@ -437,14 +421,19 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
       track("gambleWin");
       wallet.add(g.amount);
       const rounds = g.rounds + 1;
+      const amount = g.amount * 2;
       sfx.win();
       haptic(HAPTIC.win);
       set({
-        gamble: { amount: g.amount * 2, rounds, phase: rounds >= GAMBLE_MAX_ROUNDS ? "result" : "choose", card, won: true, guess },
-        lastWin: g.amount * 2,
-        message: `Doubled! ◈ ${fmt(g.amount * 2)}`,
-        stats: { ...st, won: st.won + g.amount, biggest: Math.max(st.biggest, g.amount * 2) },
+        gamble: { amount, rounds, phase: "result", card, won: true, guess },
+        lastWin: amount,
+        message: `Doubled! ◈ ${fmt(amount)}`,
+        stats: { ...st, won: st.won + g.amount, biggest: Math.max(st.biggest, amount) },
       });
+      await sleep(1600 * speed());
+      if (rounds < GAMBLE_MAX_ROUNDS) {
+        set({ gamble: { amount, rounds, phase: "choose", card, won: true, guess } });
+      }
     } else {
       const lost = Math.min(g.amount, wallet.getBalance());
       wallet.add(-lost);
@@ -459,14 +448,12 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
   }
   const gambleCollect = () => set({ gamble: null });
 
-  // Pendant un gamble ouvert, on ne peut pas dépenser ces chips dans l'autre jeu
   const gambleOpen = s.gamble !== null;
   useEffect(() => {
     if (gambleOpen) wallet.setLocked(true);
     else if (!ref.current.busy) wallet.setLocked(false);
   }, [gambleOpen]);
 
-  /** Achat de bonus : 10 free spins directs. Un premier clic demande confirmation. */
   const bonusPrice = BONUS_PRICE_MULT * bet;
   async function runBuy(price: number) {
     const b = BET_LEVELS[ref.current.betIdx];
@@ -496,7 +483,7 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
       sfx.bigWin();
       sfx.coin(tier === "epic" ? 14 : 8);
       music.duck(3400);
-      haptic(tier === "epic" ? HAPTIC.epic : HAPTIC.big);
+      haptic(HAPTIC.epic);
       set({ winBanner: { label: labelsRef.current[tier], amount: win, tier }, celebrate: Date.now() });
       await sleep((tier === "epic" ? 4600 : 3400) * speed());
       set({ winBanner: null });
@@ -544,7 +531,6 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
     set({ message: "Refill: ◈ 500 added. Good luck!" });
   }
 
-  // Raccourcis : Espace = tourner (ou arrêter l'auto), flèches = mise
   const actions = useRef({ play, stopAuto, changeBet });
   actions.current = { play, stopAuto, changeBet };
   useEffect(() => {
@@ -570,7 +556,6 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
 
   useEffect(() => () => wallet.setLocked(false), []);
 
-  // La musique devient plus intense pendant les free spins
   const bonus = s.fs !== null;
   useEffect(() => {
     if (active) music.setMode(bonus ? "bonus" : "normal");
