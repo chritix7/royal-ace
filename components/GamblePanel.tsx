@@ -14,7 +14,6 @@ function Card3D({ card, flipped }: { card: GambleState["card"]; flipped: boolean
           flipped ? "[transform:rotateY(180deg)]" : ""
         }`}
       >
-        {/* Dos de la carte */}
         <div
           className="absolute inset-0 flex items-center justify-center rounded-2xl border-4 border-[#d7b45b]/70 bg-[repeating-linear-gradient(45deg,#12261f_0_10px,#1b3d33_10px_20px)] text-6xl font-black text-[#d7b45b] shadow-2xl [backface-visibility:hidden] sm:h-56 sm:w-40 sm:text-7xl"
           role="img"
@@ -23,7 +22,6 @@ function Card3D({ card, flipped }: { card: GambleState["card"]; flipped: boolean
           ♠
         </div>
 
-        {/* Face de la carte */}
         <div
           className={`absolute inset-0 flex items-center justify-center rounded-2xl border-4 border-black/20 bg-[#f8f5ec] text-6xl font-black shadow-2xl [backface-visibility:hidden] [transform:rotateY(180deg)] sm:h-56 sm:w-40 sm:text-7xl ${
             card?.color === "red" ? "text-red-600" : "text-slate-900"
@@ -38,7 +36,6 @@ function Card3D({ card, flipped }: { card: GambleState["card"]; flipped: boolean
   );
 }
 
-/** Gamble : doubler un gain en devinant la couleur d'une carte (50 % de chances). */
 export default function GamblePanel({
   g,
   onChoose,
@@ -50,14 +47,16 @@ export default function GamblePanel({
   onCollect: () => void;
   onClose: () => void;
 }) {
+  const canContinue = g.won === true && g.rounds < GAMBLE_MAX_ROUNDS;
+
   useEffect(() => {
-    if (g.phase !== "result") return;
+    if (g.phase !== "result" || canContinue) return;
     const id = window.setTimeout(() => {
       onCollect();
       onClose();
     }, 2200);
     return () => window.clearTimeout(id);
-  }, [g.phase, onCollect, onClose]);
+  }, [g.phase, canContinue, onCollect, onClose]);
 
   return (
     <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-[radial-gradient(circle_at_center,#1b1005,#050505_70%)] px-4" role="dialog" aria-label="Gamble">
@@ -78,24 +77,29 @@ export default function GamblePanel({
         <p className="mt-1 text-xs text-white/55">Double to ◈ {money(g.amount * 2)}</p>
 
         <div className="mt-6 flex justify-center">
-          <Card3D card={g.card} flipped={g.phase === "result"} />
+          <Card3D card={g.card} flipped={g.phase === "result" || (g.phase === "choose" && g.won === true)} />
         </div>
 
         {g.phase === "choose" && (
-          <div className="mt-7 grid grid-cols-2 gap-3">
-            <button
-              onClick={() => onChoose("red")}
-              className="flex h-14 items-center justify-center rounded-xl border border-red-300/30 bg-[linear-gradient(180deg,#ef4444,#991b1b)] text-sm font-black tracking-widest text-white shadow-lg transition hover:brightness-110 active:scale-[.98]"
-            >
-              ♥♦ RED
-            </button>
-            <button
-              onClick={() => onChoose("black")}
-              className="flex h-14 items-center justify-center rounded-xl border border-white/15 bg-[linear-gradient(180deg,#334155,#020617)] text-sm font-black tracking-widest text-white shadow-lg transition hover:brightness-110 active:scale-[.98]"
-            >
-              ♠♣ BLACK
-            </button>
-          </div>
+          <>
+            <p className="mt-4 text-xs text-white/60">
+              {g.won === true ? "Choose again to double." : "Pick a colour (50 / 50)"}
+            </p>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <button
+                onClick={() => onChoose("red")}
+                className="flex h-14 items-center justify-center rounded-xl border border-red-300/30 bg-[linear-gradient(180deg,#ef4444,#991b1b)] text-sm font-black tracking-widest text-white shadow-lg transition hover:brightness-110 active:scale-[.98]"
+              >
+                ♥♦ RED
+              </button>
+              <button
+                onClick={() => onChoose("black")}
+                className="flex h-14 items-center justify-center rounded-xl border border-white/15 bg-[linear-gradient(180deg,#334155,#020617)] text-sm font-black tracking-widest text-white shadow-lg transition hover:brightness-110 active:scale-[.98]"
+              >
+                ♠♣ BLACK
+              </button>
+            </div>
+          </>
         )}
 
         {g.phase === "flip" && (
@@ -107,7 +111,7 @@ export default function GamblePanel({
         {g.phase === "result" && (
           <p className={`mt-6 text-sm font-bold ${g.won ? "text-emerald-300" : "text-red-300"}`} aria-live="polite">
             {g.won ? `Doubled to ◈ ${money(g.amount)}.` : "Wrong colour. The win is lost."}
-            <span className="ml-1 font-normal text-white/45">Collecting…</span>
+            {!canContinue && <span className="ml-1 font-normal text-white/45">Collecting…</span>}
           </p>
         )}
       </div>
