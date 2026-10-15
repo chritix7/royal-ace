@@ -1,7 +1,7 @@
 "use client";
 
 import { ACHIEVEMENTS } from "../lib/achievements";
-import { achievementsStore, useAchievements } from "../lib/achievementsStore";
+import { useAchievements } from "../lib/achievementsStore";
 
 type Props = {
   open: boolean;
@@ -17,14 +17,14 @@ export default function AchievementsPanel({ open, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label="Achievements"
       onClick={onClose}
     >
       <div
-        className="mt-16 w-full max-w-2xl rounded-3xl border border-[#c8a65b]/30 bg-[#0d1210] p-5 shadow-2xl sm:p-7"
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-[#c8a65b]/30 bg-[#0d1210] p-5 shadow-2xl sm:p-7"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-5 flex items-start justify-between gap-4">
