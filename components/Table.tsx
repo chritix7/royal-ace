@@ -22,23 +22,23 @@ export default function Table({ g }: { g: Game }) {
 
   return (
       <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl">
-        <div className="flex items-center justify-between border-b border-white/[0.07] px-6 py-4">
-          <div>
-            <h3 className="text-xl font-bold">Blackjack</h3>
-            <p className="mt-0.5 text-xs text-white/40">
+        <div className="flex items-center justify-between gap-3 border-b border-white/[0.07] px-4 py-3 sm:px-6 sm:py-4">
+          <div className="min-w-0">
+            <h3 className="text-lg font-bold sm:text-xl">Blackjack</h3>
+            <p className="mt-0.5 truncate text-[10px] text-white/40 sm:text-xs">
               {s.settings.decks} decks · dealer {s.settings.h17 ? "hits" : "stands on"} soft 17 · blackjack pays{" "}
               {s.settings.bj65 ? "6 to 5" : "3 to 2"}
             </p>
           </div>
-          <div className="w-28 text-right text-[11px] text-white/40">
-            Shoe · {s.shoe.length || totalCards} cards
+          <div className="w-20 shrink-0 text-right text-[10px] text-white/40 sm:w-28 sm:text-[11px]">
+            Shoe · {s.shoe.length || totalCards}
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10">
               <div className="h-full rounded-full bg-[#d7b45b]/70 transition-all duration-500" style={{ width: `${shoePct}%` }} />
             </div>
           </div>
         </div>
 
-        <div className={`relative ${THEMES[s.settings.theme]} px-3 py-8 sm:px-9`}>
+        <div className={`relative ${THEMES[s.settings.theme]} px-2 py-6 sm:px-9 sm:py-8`}>
           {s.celebrate > 0 && <Confetti key={s.celebrate} />}
           {s.shuffling && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/60" role="status">
@@ -51,7 +51,7 @@ export default function Table({ g }: { g: Game }) {
             </div>
           )}
           {/* Croupier */}
-          <div className="flex items-center justify-center gap-3 text-sm text-white/60">
+          <div className="flex items-center justify-center gap-2 text-sm text-white/60">
             Dealer
             {s.dealer.length > 0 && (
               <span className="rounded-full bg-black/30 px-3 py-0.5 text-xs font-bold text-white">
@@ -71,8 +71,8 @@ export default function Table({ g }: { g: Game }) {
           </div>
 
           {/* Message (annoncé aux lecteurs d'écran) */}
-          <div className="my-7 flex flex-col items-center gap-2" role="status" aria-live="polite">
-            <div key={s.message} className="animate-pop rounded-full border border-[#d7b45b]/30 bg-black/30 px-5 py-2 text-center text-sm text-[#e5c779]">
+          <div className="my-5 flex flex-col items-center gap-2 sm:my-7" role="status" aria-live="polite">
+            <div key={s.message} className="animate-pop max-w-full rounded-full border border-[#d7b45b]/30 bg-black/30 px-4 py-2 text-center text-sm text-[#e5c779]">
               {s.message}
             </div>
             {s.net !== null && s.net !== 0 && (
@@ -81,19 +81,19 @@ export default function Table({ g }: { g: Game }) {
               </div>
             )}
             {s.sideNote && (
-              <div className={`animate-pop rounded-full border px-4 py-1 text-xs ${s.sideNote.includes("+") ? "border-[#e5c779]/60 bg-[#e5c779]/15 text-[#f5d778]" : "border-white/15 text-white/50"}`}>
+              <div className={`animate-pop max-w-full rounded-full border px-4 py-1 text-center text-xs ${s.sideNote.includes("+") ? "border-[#e5c779]/60 bg-[#e5c779]/15 text-[#f5d778]" : "border-white/15 text-white/50"}`}>
                 {s.sideNote}
               </div>
             )}
             {advice && (
-              <div className="rounded-full border border-sky-300/40 bg-sky-400/10 px-4 py-1 text-xs text-sky-200">
+              <div className="max-w-full rounded-full border border-sky-300/40 bg-sky-400/10 px-4 py-1 text-center text-xs text-sky-200">
                 Basic strategy: {advice}
               </div>
             )}
           </div>
 
           {/* Joueur */}
-          <div className="flex flex-wrap items-start justify-center gap-3 sm:gap-5">
+          <div className="flex flex-wrap items-start justify-center gap-2 sm:gap-5">
             {s.hands.length === 0 && (
               <div className="flex min-h-28 items-center text-sm text-white/40 sm:min-h-36">Your cards will appear here</div>
             )}
@@ -132,56 +132,56 @@ export default function Table({ g }: { g: Game }) {
           </div>
 
           {/* Pile de jetons */}
-          <div className="mt-6 flex min-h-12 flex-col items-center justify-end gap-1">
+          <div className="mt-5 flex min-h-12 flex-col items-center justify-end gap-1 sm:mt-6">
             <ChipStack amount={pileAmount} />
             {pileAmount > 0 && <span className="text-[11px] text-white/50">◈ {money(pileAmount)}</span>}
           </div>
         </div>
 
         {/* Contrôles */}
-        <div className="sticky bottom-0 z-20 border-t border-white/10 bg-[#101713]/95 p-4 backdrop-blur sm:p-7 lg:static lg:border-0 lg:bg-transparent">
+        <div className="sticky bottom-0 z-20 border-t border-white/10 bg-[#101713]/95 p-3 backdrop-blur sm:p-7 lg:static lg:border-0 lg:bg-transparent">
           {s.phase === "insurance" ? (
-            <div className="flex flex-wrap justify-center gap-3">
-              <button onClick={() => takeInsurance(true)} disabled={s.busy} className={`${btn} bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c]`}>
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-center sm:gap-3">
+              <button onClick={() => takeInsurance(true)} disabled={s.busy} className={`${btn} h-12 w-full bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c] sm:w-auto`}>
                 Insurance (◈ {money(s.hands.reduce((a, h) => a + h.bet, 0) / 2)})
               </button>
-              <button onClick={() => takeInsurance(false)} disabled={s.busy} className={`${btn} border border-white/20 hover:border-[#d7b45b] hover:text-[#e5c779]`}>
+              <button onClick={() => takeInsurance(false)} disabled={s.busy} className={`${btn} h-12 w-full border border-white/20 hover:border-[#d7b45b] hover:text-[#e5c779] sm:w-auto`}>
                 No thanks
               </button>
             </div>
           ) : canBet ? (
             <div className="flex flex-col items-center gap-3">
               {outOfChips ? (
-                <button onClick={refill} className={`${btn} bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c]`}>
+                <button onClick={refill} className={`${btn} h-12 w-full bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c] sm:w-auto`}>
                   Out of chips · take a ◈ {REFILL} refill
                 </button>
               ) : (
                 <button
                   onClick={deal}
                   disabled={s.bet < MIN_BET || stake > s.balance}
-                  className={`${btn} bg-[#d7b45b] px-10 text-[#10130e] hover:bg-[#efd58c]`}
+                  className={`${btn} h-12 w-full max-w-sm bg-[#d7b45b] px-10 text-[#10130e] hover:bg-[#efd58c] sm:w-auto`}
                 >
                   {s.phase === "settled" ? "Deal again" : "Deal"} · ◈ {money(stake)}
                 </button>
               )}
-              <p className="text-[11px] text-white/30">Press Space to deal</p>
+              <p className="hidden text-[11px] text-white/30 sm:block">Press Space to deal</p>
             </div>
           ) : (
-            <div className="flex flex-wrap justify-center gap-3">
-              <button onClick={hit} disabled={!playing} className={`${btn} bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c]`}>
-                Hit <kbd className="ml-1 text-[10px] opacity-60">H</kbd>
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-center sm:gap-3">
+              <button onClick={hit} disabled={!playing} className={`${btn} h-12 w-full bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c] sm:w-auto`}>
+                Hit <kbd className="ml-1 hidden text-[10px] opacity-60 sm:inline">H</kbd>
               </button>
-              <button onClick={stand} disabled={!playing} className={`${btn} border border-white/20 hover:border-[#d7b45b] hover:text-[#e5c779]`}>
-                Stand <kbd className="ml-1 text-[10px] opacity-60">S</kbd>
+              <button onClick={stand} disabled={!playing} className={`${btn} h-12 w-full border border-white/20 hover:border-[#d7b45b] hover:text-[#e5c779] sm:w-auto`}>
+                Stand <kbd className="ml-1 hidden text-[10px] opacity-60 sm:inline">S</kbd>
               </button>
-              <button onClick={double} disabled={!canDouble} className={`${btn} border border-[#d7b45b]/50 text-[#e5c779] hover:bg-[#d7b45b]/10`}>
-                Double <kbd className="ml-1 text-[10px] opacity-60">D</kbd>
+              <button onClick={double} disabled={!canDouble} className={`${btn} h-12 w-full border border-[#d7b45b]/50 text-[#e5c779] hover:bg-[#d7b45b]/10 sm:w-auto`}>
+                Double <kbd className="ml-1 hidden text-[10px] opacity-60 sm:inline">D</kbd>
               </button>
-              <button onClick={split} disabled={!canSplit} className={`${btn} border border-amber-400/40 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20`}>
-                Split <kbd className="ml-1 text-[10px] opacity-60">P</kbd>
+              <button onClick={split} disabled={!canSplit} className={`${btn} h-12 w-full border border-amber-400/40 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 sm:w-auto`}>
+                Split <kbd className="ml-1 hidden text-[10px] opacity-60 sm:inline">P</kbd>
               </button>
-              <button onClick={surrender} disabled={!canSurrender} className={`${btn} border border-white/15 text-white/60 hover:border-red-300/50 hover:text-red-200`}>
-                Surrender <kbd className="ml-1 text-[10px] opacity-60">R</kbd>
+              <button onClick={surrender} disabled={!canSurrender} className={`${btn} h-12 w-full border border-white/15 text-white/60 hover:border-red-300/50 hover:text-red-200 sm:col-span-2 sm:w-auto`}>
+                Surrender <kbd className="ml-1 hidden text-[10px] opacity-60 sm:inline">R</kbd>
               </button>
             </div>
           )}
