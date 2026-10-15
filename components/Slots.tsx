@@ -51,7 +51,6 @@ export default function Slots({ active = true }: { active?: boolean }) {
     bonusPrice, buyBonus, vaultPick, vaultCollect, gambleChoose, gambleCollect,
   } = useSlots(active, skin.labels);
 
-  // Le thème choisi est mémorisé dans le navigateur
   const skinLoaded = useRef(false);
   useEffect(() => {
     try {
@@ -67,7 +66,6 @@ export default function Slots({ active = true }: { active?: boolean }) {
     } catch {}
   }, [skinId]);
 
-  // Rang de l'empire, avec une notification quand tu montes de rang pendant que tu joues
   const rank = rankOf(s.stats.won);
   const prevRank = useRef(rank.index);
   const [rankToast, setRankToast] = useState<string | null>(null);
@@ -81,7 +79,6 @@ export default function Slots({ active = true }: { active?: boolean }) {
     prevRank.current = rank.index;
   }, [rank.index, rank.current.name, s.busy]);
 
-  // Les lignes gagnantes s'affichent une par une, comme sur une vraie machine
   const spinningNow = s.spinning.some(Boolean);
   const [cursor, setCursor] = useState(0);
   useEffect(() => {
@@ -96,20 +93,17 @@ export default function Slots({ active = true }: { active?: boolean }) {
   const net = s.stats.won - s.stats.wagered;
   const outOfChips = !s.busy && balance < BET_LEVELS[0];
 
-  // Ferme l'écran Gamble si le gamble disparaît (nouveau spin, achat bonus, etc.)
   useEffect(() => {
     if (!s.gamble) setGambleScreen(false);
   }, [s.gamble]);
 
   return (
     <div className={`grid gap-6 lg:grid-cols-[1fr_320px] ${fullscreen ? "fixed inset-0 z-50 overflow-y-auto bg-black" : ""}`}>
-      {/* ================= MACHINE ================= */}
       <section className={`overflow-clip border border-white/10 bg-[#101713] shadow-2xl ${fullscreen ? "rounded-none border-0" : "rounded-3xl"}`}>
         <div className={`relative isolate ${skin.stage} px-2 pb-4 pt-4 sm:px-8 sm:pb-6 sm:pt-6 ${fullscreen ? "min-h-[100dvh] pb-24" : ""}`}>
           {skinId === "miami" && <MiamiBackdrop party={s.fs !== null} />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} colors={skin.confetti} />}
 
-          {/* Plein écran mobile */}
           <button
             onClick={() => setFullscreen((v) => !v)}
             aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
@@ -118,7 +112,6 @@ export default function Slots({ active = true }: { active?: boolean }) {
             {fullscreen ? "✕" : "⛶"}
           </button>
 
-          {/* Enseigne */}
           <header className={`text-center ${fullscreen ? "mb-2" : "mb-3 sm:mb-5"}`}>
             <div className={`inline-block rounded-2xl border-2 px-4 py-1.5 sm:px-8 sm:py-2 ${skin.signBox}`}>
               <h3 className={`text-2xl font-black uppercase tracking-[0.12em] sm:text-5xl sm:tracking-[0.14em] ${skin.titleClass}`}>{skin.title}</h3>
@@ -146,7 +139,6 @@ export default function Slots({ active = true }: { active?: boolean }) {
             canPull={canSpin}
           />
 
-          {/* Bannière gros gain / free spins */}
           {s.banner && (
             <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-black/60" role="status">
               <p className="animate-pop px-4 text-center text-2xl font-black tracking-widest text-[#ffd166] drop-shadow-[0_0_24px_#ff2e88] sm:text-6xl">
@@ -155,7 +147,6 @@ export default function Slots({ active = true }: { active?: boolean }) {
             </div>
           )}
 
-          {/* Gros gain : flash doré, pluie de pièces, compteur qui défile */}
           {s.winBanner && (
             <div key={s.celebrate} className="pointer-events-none absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/55" role="status">
               <div className="win-flash absolute inset-0" />
@@ -169,10 +160,8 @@ export default function Slots({ active = true }: { active?: boolean }) {
             </div>
           )}
 
-          {/* Bonus coffre */}
           {s.vault && <VaultGame vault={s.vault} onPick={vaultPick} onCollect={vaultCollect} />}
 
-          {/* Message et détail de la ligne affichée */}
           <div className="mt-3 flex min-h-14 flex-col items-center gap-1.5 sm:mt-5 sm:min-h-[4.5rem] sm:gap-2" role="status" aria-live="polite">
             <div key={s.message} className="animate-pop max-w-full rounded-full border border-white/20 bg-black/40 px-3 py-1 text-center text-xs text-white sm:px-5 sm:py-1.5 sm:text-sm">
               {s.message}
@@ -185,7 +174,6 @@ export default function Slots({ active = true }: { active?: boolean }) {
             )}
           </div>
 
-          {/* Compteurs lumineux */}
           <div className="mx-auto mt-2 grid max-w-2xl grid-cols-3 gap-1.5 sm:mt-3 sm:gap-3">
             <Led label="CREDIT" className={`${skin.ledBox} ${skin.led}`}>
               <Counter value={balance} />
@@ -196,12 +184,10 @@ export default function Slots({ active = true }: { active?: boolean }) {
             </Led>
           </div>
 
-          {/* Barre de mise */}
-          <div className="mx-auto mt-2 max-w-2xl sm:mt-3">
+          <div className={`mx-auto mt-2 max-w-2xl sm:mt-3 ${fullscreen ? "mb-24" : ""}`}>
             <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
           </div>
 
-          {/* Commandes (collées en bas de l'écran sur mobile) */}
           <div className="sticky bottom-0 z-20 -mx-2 mt-2 border-t border-white/10 bg-black/70 px-2 py-2 backdrop-blur sm:-mx-8 sm:mt-3 sm:px-8 sm:py-3 lg:static lg:border-0 lg:bg-transparent lg:backdrop-blur-none">
             {outOfChips ? (
               <div className="flex justify-center">
@@ -276,7 +262,6 @@ export default function Slots({ active = true }: { active?: boolean }) {
         </div>
       </section>
 
-      {/* ================= PANNEAU DE DROITE ================= */}
       <aside className={`flex flex-col gap-5 ${fullscreen ? "hidden" : ""}`}>
         {rankToast && (
           <div role="status" className="animate-pop fixed right-4 top-4 z-50 rounded-2xl border border-[#ff4fa3]/70 bg-[#1a0d2e] px-5 py-3 text-sm font-semibold text-[#ff9fd0] shadow-2xl">
@@ -414,7 +399,6 @@ export default function Slots({ active = true }: { active?: boolean }) {
         </p>
       </aside>
 
-      {/* Écran Gamble plein écran */}
       {s.gamble && gambleScreen && (
         <GamblePanel
           g={s.gamble}
