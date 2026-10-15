@@ -43,6 +43,7 @@ function Led({ label, children, className, on }: { label: string; children: Reac
 
 export default function Slots({ active = true }: { active?: boolean }) {
   const [skinId, setSkinId] = useState<SkinId>("miami");
+  const [fullscreen, setFullscreen] = useState(false);
   const skin = SKINS[skinId];
   const {
     s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, refill,
@@ -95,15 +96,24 @@ export default function Slots({ active = true }: { active?: boolean }) {
   const outOfChips = !s.busy && balance < BET_LEVELS[0];
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+    <div className={`grid gap-6 lg:grid-cols-[1fr_320px] ${fullscreen ? "fixed inset-0 z-50 overflow-y-auto bg-black" : ""}`}>
       {/* ================= MACHINE ================= */}
-      <section className="overflow-clip rounded-3xl border border-white/10 bg-[#101713] shadow-2xl">
-        <div className={`relative isolate ${skin.stage} px-2 pb-4 pt-4 sm:px-8 sm:pb-6 sm:pt-6`}>
+      <section className={`overflow-clip border border-white/10 bg-[#101713] shadow-2xl ${fullscreen ? "rounded-none border-0" : "rounded-3xl"}`}>
+        <div className={`relative isolate ${skin.stage} px-2 pb-4 pt-4 sm:px-8 sm:pb-6 sm:pt-6 ${fullscreen ? "min-h-[100dvh] pb-24" : ""}`}>
           {skinId === "miami" && <MiamiBackdrop party={s.fs !== null} />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} colors={skin.confetti} />}
 
+          {/* Plein écran mobile */}
+          <button
+            onClick={() => setFullscreen((v) => !v)}
+            aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            className="absolute right-2 top-2 z-40 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/60 text-sm text-white/80 backdrop-blur transition hover:border-[#ffd166] hover:text-[#ffd166] sm:hidden"
+          >
+            {fullscreen ? "✕" : "⛶"}
+          </button>
+
           {/* Enseigne */}
-          <header className="mb-3 text-center sm:mb-5">
+          <header className={`text-center ${fullscreen ? "mb-2" : "mb-3 sm:mb-5"}`}>
             <div className={`inline-block rounded-2xl border-2 px-4 py-1.5 sm:px-8 sm:py-2 ${skin.signBox}`}>
               <h3 className={`text-2xl font-black uppercase tracking-[0.12em] sm:text-5xl sm:tracking-[0.14em] ${skin.titleClass}`}>{skin.title}</h3>
             </div>
@@ -255,7 +265,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
       </section>
 
       {/* ================= PANNEAU DE DROITE ================= */}
-      <aside className="flex flex-col gap-5">
+      <aside className={`flex flex-col gap-5 ${fullscreen ? "hidden" : ""}`}>
         {rankToast && (
           <div role="status" className="animate-pop fixed right-4 top-4 z-50 rounded-2xl border border-[#ff4fa3]/70 bg-[#1a0d2e] px-5 py-3 text-sm font-semibold text-[#ff9fd0] shadow-2xl">
             ★ {rankToast}
