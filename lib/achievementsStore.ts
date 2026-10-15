@@ -6,7 +6,7 @@ import { wallet } from "./wallet";
 /**
  * Moteur des succès : écoute les événements des jeux et le solde,
  * puis sauvegarde les succès débloqués dans le navigateur.
- * L'interface 🏆 sera ajoutée dans une étape suivante.
+ * L'interface 🏆 est disponible via AchievementsPanel.
  */
 
 export type AchievementState = Record<string, number>;
@@ -81,13 +81,21 @@ export const achievementsStore = {
     try {
       const raw = localStorage.getItem(KEY);
       if (raw) {
-        const saved = JSON.parse(raw);
+        const saved: unknown = JSON.parse(raw);
         if (saved && typeof saved === "object") {
-          state = Object.fromEntries(
-            Object.entries(saved).filter(([id, value]) =>
-              ACHIEVEMENTS.some((achievement) => achievement.id === id) && typeof value === "number",
-            ),
-          );
+          const cleaned: AchievementState = {};
+
+          for (const [id, value] of Object.entries(saved)) {
+            const isValidAchievement = ACHIEVEMENTS.some(
+              (achievement) => achievement.id === id,
+            );
+
+            if (isValidAchievement && typeof value === "number") {
+              cleaned[id] = value;
+            }
+          }
+
+          state = cleaned;
         }
       }
     } catch {}
