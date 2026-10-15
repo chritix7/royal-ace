@@ -11,7 +11,6 @@ const randomSym = (): Sym => {
   return strip[Math.floor(Math.random() * strip.length)];
 };
 
-/** Une case : le wild et le scatter ont un fond spécial et une étiquette bien visible. */
 export function SymbolCell({ sym, skin, win }: { sym: Sym; skin: Skin; win: boolean }) {
   const special = sym === "wild" ? skin.wildBg : sym === "scatter" ? skin.scatterBg : "";
   const isSpecial = sym === "wild" || sym === "scatter";
@@ -39,34 +38,23 @@ export function SymbolCell({ sym, skin, win }: { sym: Sym; skin: Skin; win: bool
   );
 }
 
-/**
- * Un rouleau : une longue bande de symboles (résultat tout en haut, anciens symboles tout en bas).
- *
- * 1. Il tourne à vitesse CONSTANTE sur des symboles de remplissage : on ne voit jamais son résultat.
- * 2. À son heure d'arrêt, il ralentit sur les dernières cases : le résultat apparaît alors,
- *    "tombe" et se pose. Les rouleaux suivants continuent de tourner pendant ce temps.
- *
- * Le défilement utilise element.animate (API du navigateur), lancé dans le même rendu que la
- * nouvelle bande : aucune image où les anciens symboles restent figés, et pas de flou.
- */
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
-const MS_PER_CELL = 45; // vitesse de rotation : une case toutes les 45 ms
-const LAND_CELLS = 8; // le ralentissement final se fait sur les 8 dernières cases
+const MS_PER_CELL = 45;
+const LAND_CELLS = 8;
 
 export function Reel({
   spinId, prev, target, stopAt, landMs, spinning, anticipate, cells, skin, held = false, full = false, expanding = false,
 }: {
   spinId: number; prev: Sym[]; target: Sym[]; stopAt: number; landMs: number;
   spinning: boolean; anticipate: boolean; cells: boolean[]; skin: Skin;
-  held?: boolean; // rouleau gardé pendant un re-spin : il ne tourne pas
-  full?: boolean; // le rouleau est entièrement en wild (wild étendu)
-  expanding?: boolean; // le wild est en train de s'étendre
+  held?: boolean;
+  full?: boolean;
+  expanding?: boolean;
 }) {
   const [strip, setStrip] = useState<Sym[]>(prev);
   const stripEl = useRef<HTMLDivElement>(null);
   const job = useRef<{ total: number; land: number } | null>(null);
 
-  // 1) À chaque tour : on construit la bande
   useIsoLayoutEffect(() => {
     if (spinId === 0 || held) return;
     const total = Math.max(600, stopAt);
@@ -77,7 +65,6 @@ export function Reel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spinId]);
 
-  // 2) Dès que la nouvelle bande est affichée : rotation constante, puis ralentissement final
   useIsoLayoutEffect(() => {
     const j = job.current;
     const el = stripEl.current;
@@ -122,7 +109,6 @@ export function Reel({
   );
 }
 
-/** Ampoules qui clignotent autour du cadre (comme sur une vraie machine). */
 function Bulbs({ color, fast }: { color: string; fast: boolean }) {
   const style = { "--bulb": color } as CSSProperties;
   const strips = [
@@ -147,7 +133,6 @@ function Bulbs({ color, fast }: { color: string; fast: boolean }) {
   );
 }
 
-/** Numéros des lignes de gain sur les côtés, comme sur les machines des casinos. */
 function LineTabs({ from, to, winLines, active }: { from: number; to: number; winLines: Set<number>; active: number | null }) {
   const nums = Array.from({ length: to - from + 1 }, (_, i) => from + i);
   return (
@@ -167,9 +152,9 @@ function LineTabs({ from, to, winLines, active }: { from: number; to: number; wi
 }
 
 export default function SlotReels({
-  s, skin, activeLine, fast, shake = 0, onPull, canPull,
+  s, skin, activeLine, fast, shake = 0, onPull, canPull, large = false,
 }: {
-  s: SlotsGame["s"]; skin: Skin; activeLine: LineWin | null; fast: boolean; shake?: 0 | 1 | 2 | 3; onPull: () => void; canPull: boolean;
+  s: SlotsGame["s"]; skin: Skin; activeLine: LineWin | null; fast: boolean; shake?: 0 | 1 | 2 | 3; onPull: () => void; canPull: boolean; large?: boolean;
 }) {
   const winLines = new Set(s.lineWins.map((w) => w.line));
 
@@ -179,7 +164,7 @@ export default function SlotReels({
 
       <div className={`relative rounded-[26px] p-3.5 sm:p-5 ${skin.bezel}`}>
         <Bulbs color={skin.bulb} fast={fast} />
-        <div className="relative rounded-xl bg-black p-1 shadow-[inset_0_0_20px_#000] sm:p-1.5 [--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:5.2rem]">
+        <div className={`relative rounded-xl bg-black p-1 shadow-[inset_0_0_20px_#000] sm:p-1.5 ${large ? "[--cell:4.2rem] sm:[--cell:5rem] lg:[--cell:5.2rem]" : "[--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:5.2rem]"}`}>
           <div className="relative flex overflow-hidden rounded-lg">
             {Array.from({ length: REELS }, (_, k) => (
               <Reel
