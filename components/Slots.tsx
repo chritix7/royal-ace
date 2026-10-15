@@ -34,9 +34,9 @@ const PAY_ROWS: Paying[] = ["seven", "wild", "gem", "bell", "grape", "lemon", "c
 
 function Led({ label, children, className, on }: { label: string; children: ReactNode; className: string; on?: boolean }) {
   return (
-    <div className={`rounded-lg border px-2 py-1.5 text-center sm:px-3 ${className}`}>
-      <p className="text-[9px] tracking-[0.25em] text-white/50">{label}</p>
-      <p className={`font-mono text-lg font-black tracking-wider sm:text-2xl ${on ? "animate-pulse" : ""}`}>{children}</p>
+    <div className={`rounded-lg border px-2 py-1 text-center sm:px-3 sm:py-1.5 ${className}`}>
+      <p className="text-[8px] tracking-[0.2em] text-white/50 sm:text-[9px] sm:tracking-[0.25em]">{label}</p>
+      <p className={`font-mono text-base font-black tracking-wider sm:text-2xl ${on ? "animate-pulse" : ""}`}>{children}</p>
     </div>
   );
 }
@@ -98,22 +98,22 @@ export default function Slots({ active = true }: { active?: boolean }) {
     <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
       {/* ================= MACHINE ================= */}
       <section className="overflow-clip rounded-3xl border border-white/10 bg-[#101713] shadow-2xl">
-        <div className={`relative isolate ${skin.stage} px-3 pb-6 pt-6 sm:px-8`}>
+        <div className={`relative isolate ${skin.stage} px-2 pb-4 pt-4 sm:px-8 sm:pb-6 sm:pt-6`}>
           {skinId === "miami" && <MiamiBackdrop party={s.fs !== null} />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} colors={skin.confetti} />}
 
           {/* Enseigne */}
-          <header className="mb-5 text-center">
-            <div className={`inline-block rounded-2xl border-2 px-5 py-2 sm:px-8 ${skin.signBox}`}>
-              <h3 className={`text-3xl font-black uppercase tracking-[0.14em] sm:text-5xl ${skin.titleClass}`}>{skin.title}</h3>
+          <header className="mb-3 text-center sm:mb-5">
+            <div className={`inline-block rounded-2xl border-2 px-4 py-1.5 sm:px-8 sm:py-2 ${skin.signBox}`}>
+              <h3 className={`text-2xl font-black uppercase tracking-[0.12em] sm:text-5xl sm:tracking-[0.14em] ${skin.titleClass}`}>{skin.title}</h3>
             </div>
-            <p className="mt-2 text-[10px] uppercase tracking-[0.3em] text-white/70 sm:text-[11px]">{skin.tagline}</p>
+            <p className="mt-1.5 text-[9px] uppercase tracking-[0.22em] text-white/70 sm:mt-2 sm:text-[11px] sm:tracking-[0.3em]">{skin.tagline}</p>
           </header>
 
           <JackpotBar pools={s.pools} bet={bet} />
 
           {s.fs && (
-            <div className="mx-auto mb-4 flex max-w-2xl flex-wrap items-center justify-center gap-x-5 gap-y-1 rounded-xl border border-[#ffd166]/60 bg-black/40 px-4 py-2 text-xs text-[#ffd166]" role="status">
+            <div className="mx-auto mb-3 flex max-w-2xl flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-xl border border-[#ffd166]/60 bg-black/40 px-3 py-1.5 text-[11px] text-[#ffd166] sm:mb-4 sm:gap-x-5 sm:px-4 sm:py-2 sm:text-xs" role="status">
               <span className="font-black tracking-widest">{skin.labels.freeSpins} ×{FS_MULT}</span>
               <span>Spin {s.fs.played} / {s.fs.total}</span>
               <span>Won ◈ {money(s.fs.win)}</span>
@@ -133,7 +133,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
           {/* Bannière gros gain / free spins */}
           {s.banner && (
             <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-black/60" role="status">
-              <p className="animate-pop px-4 text-center text-3xl font-black tracking-widest text-[#ffd166] drop-shadow-[0_0_24px_#ff2e88] sm:text-6xl">
+              <p className="animate-pop px-4 text-center text-2xl font-black tracking-widest text-[#ffd166] drop-shadow-[0_0_24px_#ff2e88] sm:text-6xl">
                 {s.banner}
               </p>
             </div>
@@ -144,10 +144,10 @@ export default function Slots({ active = true }: { active?: boolean }) {
             <div key={s.celebrate} className="pointer-events-none absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/55" role="status">
               <div className="win-flash absolute inset-0" />
               <CoinRain count={s.winBanner.tier === "epic" ? 64 : 38} />
-              <p className="animate-pop relative px-4 text-center text-3xl font-black tracking-widest text-[#ffd166] drop-shadow-[0_0_24px_#ff2e88] sm:text-6xl">
+              <p className="animate-pop relative px-4 text-center text-2xl font-black tracking-widest text-[#ffd166] drop-shadow-[0_0_24px_#ff2e88] sm:text-6xl">
                 {s.winBanner.label}
               </p>
-              <p className="relative mt-3 font-mono text-4xl font-black text-white drop-shadow-[0_0_18px_#ffd166] sm:text-7xl">
+              <p className="relative mt-2 font-mono text-3xl font-black text-white drop-shadow-[0_0_18px_#ffd166] sm:mt-3 sm:text-7xl">
                 ◈ <RollingNumber value={s.winBanner.amount} fromZero ms={s.winBanner.tier === "epic" ? 2800 : 1900} />
               </p>
             </div>
@@ -157,12 +157,12 @@ export default function Slots({ active = true }: { active?: boolean }) {
           {s.vault && <VaultGame vault={s.vault} onPick={vaultPick} onCollect={vaultCollect} />}
 
           {/* Message et détail de la ligne affichée */}
-          <div className="mt-5 flex min-h-[4.5rem] flex-col items-center gap-2" role="status" aria-live="polite">
-            <div key={s.message} className="animate-pop rounded-full border border-white/20 bg-black/40 px-5 py-1.5 text-center text-sm text-white">
+          <div className="mt-3 flex min-h-14 flex-col items-center gap-1.5 sm:mt-5 sm:min-h-[4.5rem] sm:gap-2" role="status" aria-live="polite">
+            <div key={s.message} className="animate-pop max-w-full rounded-full border border-white/20 bg-black/40 px-3 py-1 text-center text-xs text-white sm:px-5 sm:py-1.5 sm:text-sm">
               {s.message}
             </div>
             {activeLine && (
-              <p className="rounded-full bg-black/40 px-3 py-1 text-[11px] text-white/70">
+              <p className="max-w-full rounded-full bg-black/40 px-2.5 py-1 text-center text-[10px] text-white/70 sm:text-[11px]">
                 Line {activeLine.line}: {activeLine.count}× <Glyph sym={activeLine.sym} skin={skin} /> · +◈ {money(activeLine.pay * lineBet)}
                 {s.lineWins.length > 1 && ` · ${s.lineWins.length} winning lines`}
               </p>
@@ -172,7 +172,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
           {s.gamble && <GamblePanel g={s.gamble} onChoose={gambleChoose} onCollect={gambleCollect} />}
 
           {/* Compteurs lumineux */}
-          <div className="mx-auto mt-3 grid max-w-2xl grid-cols-3 gap-2 sm:gap-3">
+          <div className="mx-auto mt-2 grid max-w-2xl grid-cols-3 gap-1.5 sm:mt-3 sm:gap-3">
             <Led label="CREDIT" className={`${skin.ledBox} ${skin.led}`}>
               <Counter value={balance} />
             </Led>
@@ -183,31 +183,31 @@ export default function Slots({ active = true }: { active?: boolean }) {
           </div>
 
           {/* Barre de mise */}
-          <div className="mx-auto mt-3 max-w-2xl">
+          <div className="mx-auto mt-2 max-w-2xl sm:mt-3">
             <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
           </div>
 
           {/* Commandes (collées en bas de l'écran sur mobile) */}
-          <div className="sticky bottom-0 z-20 -mx-3 mt-3 border-t border-white/10 bg-black/60 px-3 py-3 backdrop-blur sm:-mx-8 sm:px-8 lg:static lg:border-0 lg:bg-transparent lg:backdrop-blur-none">
+          <div className="sticky bottom-0 z-20 -mx-2 mt-2 border-t border-white/10 bg-black/70 px-2 py-2 backdrop-blur sm:-mx-8 sm:mt-3 sm:px-8 sm:py-3 lg:static lg:border-0 lg:bg-transparent lg:backdrop-blur-none">
             {outOfChips ? (
               <div className="flex justify-center">
-                <button onClick={refill} className={`rounded-full px-8 py-3 text-sm font-bold ${skin.betOn}`}>
+                <button onClick={refill} className={`rounded-full px-5 py-2.5 text-xs font-bold sm:px-8 sm:py-3 sm:text-sm ${skin.betOn}`}>
                   Out of chips · take a ◈ 500 refill
                 </button>
               </div>
             ) : (
-              <div className="mx-auto flex max-w-2xl items-center justify-between gap-3">
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-[10px] tracking-[0.25em] text-white/50">AUTO</span>
-                  <div className="flex gap-1.5">
+              <div className="mx-auto flex max-w-2xl items-center justify-between gap-2 sm:gap-3">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[8px] tracking-[0.2em] text-white/50 sm:text-[10px] sm:tracking-[0.25em]">AUTO</span>
+                  <div className="flex gap-1">
                     {[10, 25, 50].map((n) => (
-                      <button key={n} onClick={() => play(n)} disabled={!canSpin} className={`${small} px-3`}>{n}</button>
+                      <button key={n} onClick={() => play(n)} disabled={!canSpin} className={`${small} px-2 text-[11px] sm:px-3 sm:text-xs`}>{n}</button>
                     ))}
                   </div>
                   <button
                     onClick={toggleTurbo}
                     aria-pressed={s.turbo}
-                    className={`${small} ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
+                    className={`${small} px-2 text-[11px] sm:px-3 sm:text-xs ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
                   >
                     ⚡ Turbo
                   </button>
@@ -217,38 +217,38 @@ export default function Slots({ active = true }: { active?: boolean }) {
                   <button
                     onClick={stopAuto}
                     aria-label="Stop auto spin"
-                    className="h-24 w-24 shrink-0 rounded-full border-4 border-red-200/60 bg-red-600/80 text-sm font-black leading-4 text-white shadow-[0_0_24px_#ef4444aa] outline-none focus-visible:ring-4 focus-visible:ring-white"
+                    className="h-18 w-18 shrink-0 rounded-full border-4 border-red-200/60 bg-red-600/80 text-xs font-black leading-4 text-white shadow-[0_0_24px_#ef4444aa] outline-none focus-visible:ring-4 focus-visible:ring-white sm:h-24 sm:w-24 sm:text-sm"
                   >
                     STOP
-                    <span className="block text-[10px] font-normal">{s.autoLeft} left</span>
+                    <span className="block text-[9px] font-normal sm:text-[10px]">{s.autoLeft} left</span>
                   </button>
                 ) : (
                   <button
                     onClick={() => play(1)}
                     disabled={!canSpin}
                     aria-label="Spin"
-                    className={`h-24 w-24 shrink-0 rounded-full text-base font-black tracking-widest outline-none transition active:scale-95 focus-visible:ring-4 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn}`}
+                    className={`h-18 w-18 shrink-0 rounded-full text-sm font-black tracking-widest outline-none transition active:scale-95 focus-visible:ring-4 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-60 sm:h-24 sm:w-24 sm:text-base ${skin.spinBtn}`}
                   >
                     {s.busy ? "…" : "SPIN"}
                   </button>
                 )}
 
-                <div className="flex flex-col items-end gap-1.5">
-                  <button onClick={maxBet} disabled={s.busy} className={`${small} px-4`}>Max bet</button>
+                <div className="flex flex-col items-end gap-1">
+                  <button onClick={maxBet} disabled={s.busy} className={`${small} px-2 text-[11px] sm:px-4 sm:text-xs`}>Max bet</button>
                   <button
                     onClick={buyBonus}
                     disabled={s.busy || !!s.fs || balance < bonusPrice}
                     title="Start the free spins right away"
-                    className={`${small} px-3 ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
+                    className={`${small} max-w-28 px-2 text-[10px] leading-3 sm:max-w-none sm:px-3 sm:text-xs sm:leading-4 ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
                   >
                     {s.confirmBuy ? "Confirm?" : "Buy bonus"} ◈ {money(bonusPrice)}
                   </button>
-                  <p className="text-right text-[10px] leading-4 text-white/40">Space: spin<br />← →: bet</p>
+                  <p className="hidden text-right text-[10px] leading-4 text-white/40 sm:block">Space: spin<br />← →: bet</p>
                 </div>
               </div>
             )}
             {balance < bet && !s.busy && !outOfChips && (
-              <p className="mt-2 text-center text-xs text-red-300">Not enough chips for this bet. Pick a lower one.</p>
+              <p className="mt-1.5 text-center text-[11px] text-red-300 sm:mt-2 sm:text-xs">Not enough chips for this bet. Pick a lower one.</p>
             )}
           </div>
         </div>
