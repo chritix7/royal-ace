@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { GAMBLE_MAX_ROUNDS, type CardColor } from "../lib/gamble";
 import type { GambleState } from "../lib/useSlots";
 
@@ -48,15 +48,19 @@ export default function GamblePanel({
   onClose: () => void;
 }) {
   const canContinue = g.won === true && g.rounds < GAMBLE_MAX_ROUNDS;
+  const collectRef = useRef(onCollect);
+  const closeRef = useRef(onClose);
+  collectRef.current = onCollect;
+  closeRef.current = onClose;
 
   useEffect(() => {
     if (g.phase !== "result" || canContinue) return;
     const id = window.setTimeout(() => {
-      onCollect();
-      onClose();
+      collectRef.current();
+      closeRef.current();
     }, 2200);
     return () => window.clearTimeout(id);
-  }, [g.phase, canContinue, onCollect, onClose]);
+  }, [g.phase, canContinue]);
 
   return (
     <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-[radial-gradient(circle_at_center,#1b1005,#050505_70%)] px-4" role="dialog" aria-label="Gamble">
