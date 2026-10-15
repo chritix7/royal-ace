@@ -45,6 +45,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
   const [skinId, setSkinId] = useState<SkinId>("miami");
   const [fullscreen, setFullscreen] = useState(false);
   const [gambleScreen, setGambleScreen] = useState(false);
+  const [autoOpen, setAutoOpen] = useState(false);
   const skin = SKINS[skinId];
   const {
     s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, refill,
@@ -162,103 +163,128 @@ export default function Slots({ active = true }: { active?: boolean }) {
 
           {s.vault && <VaultGame vault={s.vault} onPick={vaultPick} onCollect={vaultCollect} />}
 
-          <div className="mt-3 flex min-h-14 flex-col items-center gap-1.5 sm:mt-5 sm:min-h-[4.5rem] sm:gap-2" role="status" aria-live="polite">
-            <div key={s.message} className="animate-pop max-w-full rounded-full border border-white/20 bg-black/40 px-3 py-1 text-center text-xs text-white sm:px-5 sm:py-1.5 sm:text-sm">
-              {s.message}
-            </div>
-            {activeLine && (
-              <p className="max-w-full rounded-full bg-black/40 px-2.5 py-1 text-center text-[10px] text-white/70 sm:text-[11px]">
-                Line {activeLine.line}: {activeLine.count}× <Glyph sym={activeLine.sym} skin={skin} /> · +◈ {money(activeLine.pay * lineBet)}
-                {s.lineWins.length > 1 && ` · ${s.lineWins.length} winning lines`}
-              </p>
-            )}
-          </div>
-
-          <div className="mx-auto mt-2 grid max-w-2xl grid-cols-3 gap-1.5 sm:mt-3 sm:gap-3">
-            <Led label="CREDIT" className={`${skin.ledBox} ${skin.led}`}>
-              <Counter value={balance} />
-            </Led>
-            <Led label="TOTAL BET" className={`${skin.ledBox} ${skin.led}`}>{money(bet)}</Led>
-            <Led label="WIN" className={`${skin.ledBox} ${skin.led}`} on={s.lastWin > 0 && !spinningNow}>
-              <RollingNumber value={s.lastWin} />
-            </Led>
-          </div>
-
           {fullscreen ? (
-            <div className="sticky bottom-0 z-30 -mx-2 mt-3 border-t border-white/10 bg-black/85 px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur sm:-mx-8 sm:px-8 sm:pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-              <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
-
-              {outOfChips ? (
-                <div className="mt-2 flex justify-center">
-                  <button onClick={refill} className={`rounded-full px-5 py-2.5 text-xs font-bold sm:px-8 sm:py-3 sm:text-sm ${skin.betOn}`}>
-                    Out of chips · take a ◈ 500 refill
-                  </button>
+            <div className="sticky bottom-0 z-30 -mx-2 mt-3 border-t border-white/10 bg-black/85 px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur sm:-mx-8 sm:px-8">
+              <div className="mx-auto flex max-w-md items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/45 px-3 py-2">
+                <div className="shrink-0">
+                  <p className="text-[8px] uppercase tracking-[0.2em] text-white/45">Balance</p>
+                  <p className="font-mono text-sm font-black text-white">◈ {money(balance)}</p>
                 </div>
-              ) : (
-                <div className="mx-auto mt-2 flex max-w-md items-end justify-between gap-2">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[8px] tracking-[0.2em] text-white/50">AUTO</span>
-                    <div className="flex gap-1">
-                      {[10, 25, 50].map((n) => (
-                        <button key={n} onClick={() => play(n)} disabled={!canSpin} className={`${small} px-2 text-[11px]`}>{n}</button>
-                      ))}
-                    </div>
-                    <button
-                      onClick={toggleTurbo}
-                      aria-pressed={s.turbo}
-                      className={`${small} px-2 text-[11px] ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
-                    >
-                      ⚡ Turbo
-                    </button>
-                  </div>
-
-                  <div className="flex flex-col items-end gap-1">
-                    {s.gamble && (
-                      <button
-                        onClick={() => setGambleScreen(true)}
-                        className="h-8 min-w-14 rounded-full border border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] px-3 text-[11px] font-black tracking-widest text-[#10130e]"
-                      >
-                        X2
-                      </button>
-                    )}
-                    <button onClick={maxBet} disabled={s.busy} className={`${small} px-2 text-[11px]`}>Max bet</button>
-                    <button
-                      onClick={buyBonus}
-                      disabled={s.busy || !!s.fs || balance < bonusPrice}
-                      className={`${small} max-w-28 px-2 text-[10px] leading-3 ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
-                    >
-                      {s.confirmBuy ? "Confirm?" : "Buy bonus"} ◈ {money(bonusPrice)}
-                    </button>
-                  </div>
-
-                  {auto ? (
-                    <button
-                      onClick={stopAuto}
-                      aria-label="Stop auto spin"
-                      className="h-16 w-16 shrink-0 rounded-full border-4 border-red-200/60 bg-red-600/80 text-xs font-black leading-4 text-white shadow-[0_0_24px_#ef4444aa]"
-                    >
-                      STOP
-                      <span className="block text-[9px] font-normal">{s.autoLeft} left</span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => play(1)}
-                      disabled={!canSpin}
-                      aria-label="Spin"
-                      className={`h-16 w-16 shrink-0 rounded-full text-sm font-black tracking-widest transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn}`}
-                    >
-                      {s.busy ? "…" : "SPIN"}
-                    </button>
+                <div className="min-w-0 flex-1 text-center">
+                  <p key={s.message} className="animate-pop truncate text-[11px] font-semibold text-white">{s.message}</p>
+                  {activeLine && (
+                    <p className="truncate text-[9px] text-white/55">
+                      Line {activeLine.line}: {activeLine.count}× <Glyph sym={activeLine.sym} skin={skin} /> · +◈ {money(activeLine.pay * lineBet)}
+                    </p>
                   )}
                 </div>
-              )}
+                <div className="shrink-0 text-right">
+                  <p className="text-[8px] uppercase tracking-[0.2em] text-white/45">Win</p>
+                  <p className="font-mono text-sm font-black text-[#ffd166]">◈ {money(s.lastWin)}</p>
+                </div>
+              </div>
+
+              <div className="mx-auto mt-2 max-w-md">
+                <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
+              </div>
+
+              <div className="relative mx-auto mt-3 flex max-w-md items-center justify-between gap-2">
+                <div className="relative">
+                  {autoOpen && !auto && !s.gamble && (
+                    <div className="absolute bottom-full left-0 mb-2 flex gap-1 rounded-xl border border-white/15 bg-black/85 p-1">
+                      {[10, 25, 50].map((n) => (
+                        <button
+                          key={n}
+                          onClick={() => {
+                            play(n);
+                            setAutoOpen(false);
+                          }}
+                          disabled={!canSpin}
+                          className={`${small} px-2 text-[11px]`}
+                        >
+                          {n}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <button
+                    onClick={() => {
+                      if (s.gamble) setGambleScreen(true);
+                      else if (auto) stopAuto();
+                      else setAutoOpen((v) => !v);
+                    }}
+                    className={`h-16 w-16 rounded-full border-2 text-[11px] font-black leading-3 ${
+                      s.gamble
+                        ? "border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] text-[#10130e]"
+                        : auto
+                          ? "border-red-200/60 bg-red-600/80 text-white"
+                          : "border-white/15 bg-black/50 text-white"
+                    }`}
+                  >
+                    {s.gamble ? "X2" : auto ? (<>STOP<span className="block text-[9px] font-normal">{s.autoLeft}</span></>) : "AUTO"}
+                  </button>
+                </div>
+
+                <div className="flex flex-col items-center">
+                  <button
+                    onClick={toggleTurbo}
+                    aria-pressed={s.turbo}
+                    className={`${small} mb-1 px-2 text-[10px] ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
+                  >
+                    ⚡ Turbo
+                  </button>
+                  <button
+                    onClick={() => play(1)}
+                    disabled={!canSpin}
+                    aria-label="Spin"
+                    className={`relative h-20 w-20 rounded-full text-sm font-black tracking-widest transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn}`}
+                  >
+                    <span className="absolute left-1 top-1/2 -translate-y-1/2 text-base opacity-70">⟲</span>
+                    {s.busy ? "…" : "SPIN"}
+                    <span className="absolute right-1 top-1/2 -translate-y-1/2 text-base opacity-70">⟳</span>
+                  </button>
+                </div>
+
+                <div className="flex flex-col items-end gap-1">
+                  <button onClick={maxBet} disabled={s.busy} className={`${small} px-2 text-[11px]`}>Max bet</button>
+                  <button
+                    onClick={buyBonus}
+                    disabled={s.busy || !!s.fs || balance < bonusPrice}
+                    className={`${small} max-w-28 px-2 text-[10px] leading-3 ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
+                  >
+                    {s.confirmBuy ? "Confirm?" : "Buy bonus"} ◈ {money(bonusPrice)}
+                  </button>
+                </div>
+              </div>
 
               {balance < bet && !s.busy && !outOfChips && (
-                <p className="mt-1.5 text-center text-[11px] text-red-300">Not enough chips for this bet. Pick a lower one.</p>
+                <p className="mt-2 text-center text-[11px] text-red-300">Not enough chips for this bet. Pick a lower one.</p>
               )}
             </div>
           ) : (
             <>
+              <div className="mt-3 flex min-h-14 flex-col items-center gap-1.5 sm:mt-5 sm:min-h-[4.5rem] sm:gap-2" role="status" aria-live="polite">
+                <div key={s.message} className="animate-pop max-w-full rounded-full border border-white/20 bg-black/40 px-3 py-1 text-center text-xs text-white sm:px-5 sm:py-1.5 sm:text-sm">
+                  {s.message}
+                </div>
+                {activeLine && (
+                  <p className="max-w-full rounded-full bg-black/40 px-2.5 py-1 text-center text-[10px] text-white/70 sm:text-[11px]">
+                    Line {activeLine.line}: {activeLine.count}× <Glyph sym={activeLine.sym} skin={skin} /> · +◈ {money(activeLine.pay * lineBet)}
+                    {s.lineWins.length > 1 && ` · ${s.lineWins.length} winning lines`}
+                  </p>
+                )}
+              </div>
+
+              <div className="mx-auto mt-2 grid max-w-2xl grid-cols-3 gap-1.5 sm:mt-3 sm:gap-3">
+                <Led label="CREDIT" className={`${skin.ledBox} ${skin.led}`}>
+                  <Counter value={balance} />
+                </Led>
+                <Led label="TOTAL BET" className={`${skin.ledBox} ${skin.led}`}>{money(bet)}</Led>
+                <Led label="WIN" className={`${skin.ledBox} ${skin.led}`} on={s.lastWin > 0 && !spinningNow}>
+                  <RollingNumber value={s.lastWin} />
+                </Led>
+              </div>
+
               <div className="mx-auto mt-2 max-w-2xl sm:mt-3">
                 <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
               </div>
