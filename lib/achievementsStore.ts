@@ -9,14 +9,18 @@ import { wallet } from "./wallet";
  */
 
 export type AchievementState = Record<string, number>;
+export type AchievementToast = { key: number; id: string; title: string };
 
 const EMPTY: AchievementState = {};
+const EMPTY_TOASTS: AchievementToast[] = [];
 const KEY = "royalace:achievements";
 const HIGH_ROLLER_BALANCE = 10_000;
 const SHARP_MIND_STREAK = 10;
 const HOT_STREAK = 5;
 
 let state: AchievementState = EMPTY;
+let toasts: AchievementToast[] = [];
+let toastKey = 0;
 let hydrated = false;
 let listening = false;
 let correctStreak = 0;
@@ -34,6 +38,8 @@ function unlock(id: string) {
   if (state[id]) return;
   state = { ...state, [id]: Date.now() };
   persist();
+  const achievement = ACHIEVEMENTS.find((item) => item.id === id);
+toasts = [...toasts, { key: ++toastKey, id, title: achievement?.title ?? id }];
   emit();
 }
 
@@ -82,6 +88,7 @@ function handleEvent(event: Parameters<Parameters<typeof onEvent>[0]>[0], amount
 
 export const achievementsStore = {
   get: () => state,
+  getToasts: () => toasts,
 
   subscribe(listener: () => void) {
     listeners.add(listener);
@@ -136,6 +143,11 @@ export const achievementsStore = {
     return Object.keys(state).length;
   },
 
+  dismissToast(key: number) {
+  toasts = toasts.filter((toast) => toast.key !== key);
+  emit();
+},
+
   /** Pour les tests. */
   _reset() {
     state = EMPTY;
@@ -147,3 +159,10 @@ export const achievementsStore = {
 
 export const useAchievements = () =>
   useSyncExternalStore(achievementsStore.subscribe, achievementsStore.get, () => EMPTY);
+
+export const useAchievementToasts = () =>
+  useSyncExternalStore(
+    achievementsStore.subscribe,
+    achievementsStore.getToasts,
+    () => EMPTY_TOASTS,
+  );

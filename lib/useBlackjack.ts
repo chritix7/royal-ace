@@ -146,13 +146,11 @@ export function useBlackjack(active = true) {
 
   // ---------- Déroulé d'une manche ----------
   function unlock(id: string) {
-    const c = ref.current;
-    if (c.unlocked.includes(id)) return;
-    const a = ACHIEVEMENTS.find((x) => x.id === id);
-    set({ unlocked: [...c.unlocked, id], toast: `Achievement unlocked: ${a?.title ?? id}` });
-    sfx.win();
-    window.setTimeout(() => set({ toast: null }), 3800);
-  }
+  const c = ref.current;
+  if (c.unlocked.includes(id)) return;
+  set({ unlocked: [...c.unlocked, id] });
+  sfx.win();
+}
 
   /** Note ta décision avant qu'elle ne s'exécute et la compare à la stratégie de base. */
   function grade(action: Advice) {

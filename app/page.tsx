@@ -11,6 +11,7 @@ import { achievementsStore } from "../lib/achievementsStore";
 import { dailyStore } from "../lib/daily";
 import { missionsStore } from "../lib/missions";
 import { useBalance, useLocked, wallet } from "../lib/wallet";
+import AchievementToasts from "../components/AchievementToasts";
 
 type Tab = "blackjack" | "slots";
 const TABS: { id: Tab; label: string }[] = [
@@ -112,6 +113,7 @@ export default function Home() {
         open={achievementsOpen}
         onClose={() => setAchievementsOpen(false)}
       />
+      <AchievementToasts />
     </main>
   );
 }
