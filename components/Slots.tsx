@@ -184,11 +184,11 @@ export default function Slots({ active = true }: { active?: boolean }) {
             </Led>
           </div>
 
-          <div className={`mx-auto mt-2 max-w-2xl sm:mt-3 ${fullscreen ? "mb-24" : ""}`}>
+          <div className="mx-auto mt-2 max-w-2xl sm:mt-3">
             <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
           </div>
 
-          <div className="sticky bottom-0 z-20 -mx-2 mt-2 border-t border-white/10 bg-black/70 px-2 py-2 backdrop-blur sm:-mx-8 sm:mt-3 sm:px-8 sm:py-3 lg:static lg:border-0 lg:bg-transparent lg:backdrop-blur-none">
+          <div className={`${fullscreen ? "" : "sticky bottom-0 z-20 "}-mx-2 mt-2 border-t border-white/10 bg-black/70 px-2 py-2 backdrop-blur sm:-mx-8 sm:mt-3 sm:px-8 sm:py-3 lg:static lg:border-0 lg:bg-transparent lg:backdrop-blur-none`}>
             {outOfChips ? (
               <div className="flex justify-center">
                 <button onClick={refill} className={`rounded-full px-5 py-2.5 text-xs font-bold sm:px-8 sm:py-3 sm:text-sm ${skin.betOn}`}>
