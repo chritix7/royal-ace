@@ -95,6 +95,10 @@ export default function Slots({ active = true }: { active?: boolean }) {
   const net = s.stats.won - s.stats.wagered;
   const outOfChips = !s.busy && balance < BET_LEVELS[0];
 
+  const gamblePanel = s.gamble ? (
+    <GamblePanel g={s.gamble} onChoose={gambleChoose} onCollect={gambleCollect} />
+  ) : null;
+
   return (
     <div className={`grid gap-6 lg:grid-cols-[1fr_320px] ${fullscreen ? "fixed inset-0 z-50 overflow-y-auto bg-black" : ""}`}>
       {/* ================= MACHINE ================= */}
@@ -179,7 +183,8 @@ export default function Slots({ active = true }: { active?: boolean }) {
             )}
           </div>
 
-          {s.gamble && <GamblePanel g={s.gamble} onChoose={gambleChoose} onCollect={gambleCollect} />}
+          {/* Gamble : en plein écran, il reste au-dessus des commandes */}
+          {gamblePanel && !fullscreen && gamblePanel}
 
           {/* Compteurs lumineux */}
           <div className="mx-auto mt-2 grid max-w-2xl grid-cols-3 gap-1.5 sm:mt-3 sm:gap-3">
@@ -263,6 +268,13 @@ export default function Slots({ active = true }: { active?: boolean }) {
           </div>
         </div>
       </section>
+
+      {/* Gamble plein écran : surimpression au-dessus des commandes */}
+      {gamblePanel && fullscreen && (
+        <div className="fixed inset-x-0 bottom-20 z-30 px-2">
+          {gamblePanel}
+        </div>
+      )}
 
       {/* ================= PANNEAU DE DROITE ================= */}
       <aside className={`flex flex-col gap-5 ${fullscreen ? "hidden" : ""}`}>
