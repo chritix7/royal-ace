@@ -100,7 +100,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
   return (
     <div className={`grid gap-6 lg:grid-cols-[1fr_320px] ${fullscreen ? "fixed inset-0 z-50 overflow-y-auto bg-black" : ""}`}>
       <section className={`overflow-clip border border-white/10 bg-[#101713] shadow-2xl ${fullscreen ? "rounded-none border-0" : "rounded-3xl"}`}>
-        <div className={`relative isolate ${skin.stage} px-2 pb-4 pt-4 sm:px-8 sm:pb-6 sm:pt-6 ${fullscreen ? "min-h-[100dvh] pb-24" : ""}`}>
+        <div className={`relative isolate ${skin.stage} px-2 pb-4 pt-4 sm:px-8 sm:pb-6 sm:pt-6 ${fullscreen ? "min-h-[100dvh] pb-4" : ""}`}>
           {skinId === "miami" && <MiamiBackdrop party={s.fs !== null} />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} colors={skin.confetti} />}
 
@@ -184,81 +184,158 @@ export default function Slots({ active = true }: { active?: boolean }) {
             </Led>
           </div>
 
-          <div className={`mx-auto mt-2 max-w-2xl sm:mt-3 ${fullscreen ? "mb-[calc(9rem+env(safe-area-inset-bottom))]" : ""}`}>
-            <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
-          </div>
+          {fullscreen ? (
+            <div className="sticky bottom-0 z-30 -mx-2 mt-3 border-t border-white/10 bg-black/85 px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur sm:-mx-8 sm:px-8 sm:pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+              <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
 
-          <div className={`sticky bottom-0 z-20 -mx-2 mt-2 border-t border-white/10 bg-black/70 px-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 backdrop-blur sm:-mx-8 sm:mt-3 sm:px-8 sm:pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pt-3 lg:static lg:border-0 lg:bg-transparent lg:backdrop-blur-none`}>
-            {outOfChips ? (
-              <div className="flex justify-center">
-                <button onClick={refill} className={`rounded-full px-5 py-2.5 text-xs font-bold sm:px-8 sm:py-3 sm:text-sm ${skin.betOn}`}>
-                  Out of chips · take a ◈ 500 refill
-                </button>
-              </div>
-            ) : (
-              <div className="mx-auto flex max-w-2xl items-center justify-between gap-2 sm:gap-3">
-                <div className="flex flex-col gap-1">
-                  <span className="text-[8px] tracking-[0.2em] text-white/50 sm:text-[10px] sm:tracking-[0.25em]">AUTO</span>
-                  <div className="flex gap-1">
-                    {[10, 25, 50].map((n) => (
-                      <button key={n} onClick={() => play(n)} disabled={!canSpin} className={`${small} px-2 text-[11px] sm:px-3 sm:text-xs`}>{n}</button>
-                    ))}
-                  </div>
-                  <button
-                    onClick={toggleTurbo}
-                    aria-pressed={s.turbo}
-                    className={`${small} px-2 text-[11px] sm:px-3 sm:text-xs ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
-                  >
-                    ⚡ Turbo
+              {outOfChips ? (
+                <div className="mt-2 flex justify-center">
+                  <button onClick={refill} className={`rounded-full px-5 py-2.5 text-xs font-bold sm:px-8 sm:py-3 sm:text-sm ${skin.betOn}`}>
+                    Out of chips · take a ◈ 500 refill
                   </button>
                 </div>
-
-                {auto ? (
-                  <button
-                    onClick={stopAuto}
-                    aria-label="Stop auto spin"
-                    className="h-18 w-18 shrink-0 rounded-full border-4 border-red-200/60 bg-red-600/80 text-xs font-black leading-4 text-white shadow-[0_0_24px_#ef4444aa] outline-none focus-visible:ring-4 focus-visible:ring-white sm:h-24 sm:w-24 sm:text-sm"
-                  >
-                    STOP
-                    <span className="block text-[9px] font-normal sm:text-[10px]">{s.autoLeft} left</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => play(1)}
-                    disabled={!canSpin}
-                    aria-label="Spin"
-                    className={`h-18 w-18 shrink-0 rounded-full text-sm font-black tracking-widest outline-none transition active:scale-95 focus-visible:ring-4 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-60 sm:h-24 sm:w-24 sm:text-base ${skin.spinBtn}`}
-                  >
-                    {s.busy ? "…" : "SPIN"}
-                  </button>
-                )}
-
-                <div className="flex flex-col items-end gap-1">
-                  {s.gamble && (
+              ) : (
+                <div className="mx-auto mt-2 flex max-w-md items-end justify-between gap-2">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[8px] tracking-[0.2em] text-white/50">AUTO</span>
+                    <div className="flex gap-1">
+                      {[10, 25, 50].map((n) => (
+                        <button key={n} onClick={() => play(n)} disabled={!canSpin} className={`${small} px-2 text-[11px]`}>{n}</button>
+                      ))}
+                    </div>
                     <button
-                      onClick={() => setGambleScreen(true)}
-                      className="h-9 min-w-14 rounded-full border border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] px-3 text-xs font-black tracking-widest text-[#10130e] shadow-[0_0_18px_rgba(255,209,102,.35)] transition hover:brightness-110 active:scale-95"
+                      onClick={toggleTurbo}
+                      aria-pressed={s.turbo}
+                      className={`${small} px-2 text-[11px] ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
                     >
-                      X2
+                      ⚡ Turbo
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-1">
+                    {s.gamble && (
+                      <button
+                        onClick={() => setGambleScreen(true)}
+                        className="h-8 min-w-14 rounded-full border border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] px-3 text-[11px] font-black tracking-widest text-[#10130e]"
+                      >
+                        X2
+                      </button>
+                    )}
+                    <button onClick={maxBet} disabled={s.busy} className={`${small} px-2 text-[11px]`}>Max bet</button>
+                    <button
+                      onClick={buyBonus}
+                      disabled={s.busy || !!s.fs || balance < bonusPrice}
+                      className={`${small} max-w-28 px-2 text-[10px] leading-3 ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
+                    >
+                      {s.confirmBuy ? "Confirm?" : "Buy bonus"} ◈ {money(bonusPrice)}
+                    </button>
+                  </div>
+
+                  {auto ? (
+                    <button
+                      onClick={stopAuto}
+                      aria-label="Stop auto spin"
+                      className="h-16 w-16 shrink-0 rounded-full border-4 border-red-200/60 bg-red-600/80 text-xs font-black leading-4 text-white shadow-[0_0_24px_#ef4444aa]"
+                    >
+                      STOP
+                      <span className="block text-[9px] font-normal">{s.autoLeft} left</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => play(1)}
+                      disabled={!canSpin}
+                      aria-label="Spin"
+                      className={`h-16 w-16 shrink-0 rounded-full text-sm font-black tracking-widest transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn}`}
+                    >
+                      {s.busy ? "…" : "SPIN"}
                     </button>
                   )}
-                  <button onClick={maxBet} disabled={s.busy} className={`${small} px-2 text-[11px] sm:px-4 sm:text-xs`}>Max bet</button>
-                  <button
-                    onClick={buyBonus}
-                    disabled={s.busy || !!s.fs || balance < bonusPrice}
-                    title="Start the free spins right away"
-                    className={`${small} max-w-28 px-2 text-[10px] leading-3 sm:max-w-none sm:px-3 sm:text-xs sm:leading-4 ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
-                  >
-                    {s.confirmBuy ? "Confirm?" : "Buy bonus"} ◈ {money(bonusPrice)}
-                  </button>
-                  <p className="hidden text-right text-[10px] leading-4 text-white/40 sm:block">Space: spin<br />← →: bet</p>
                 </div>
+              )}
+
+              {balance < bet && !s.busy && !outOfChips && (
+                <p className="mt-1.5 text-center text-[11px] text-red-300">Not enough chips for this bet. Pick a lower one.</p>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="mx-auto mt-2 max-w-2xl sm:mt-3">
+                <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
               </div>
-            )}
-            {balance < bet && !s.busy && !outOfChips && (
-              <p className="mt-1.5 text-center text-[11px] text-red-300 sm:mt-2 sm:text-xs">Not enough chips for this bet. Pick a lower one.</p>
-            )}
-          </div>
+
+              <div className="sticky bottom-0 z-20 -mx-2 mt-2 border-t border-white/10 bg-black/70 px-2 py-2 backdrop-blur sm:-mx-8 sm:mt-3 sm:px-8 sm:py-3 lg:static lg:border-0 lg:bg-transparent lg:backdrop-blur-none">
+                {outOfChips ? (
+                  <div className="flex justify-center">
+                    <button onClick={refill} className={`rounded-full px-5 py-2.5 text-xs font-bold sm:px-8 sm:py-3 sm:text-sm ${skin.betOn}`}>
+                      Out of chips · take a ◈ 500 refill
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mx-auto flex max-w-2xl items-center justify-between gap-2 sm:gap-3">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[8px] tracking-[0.2em] text-white/50 sm:text-[10px] sm:tracking-[0.25em]">AUTO</span>
+                      <div className="flex gap-1">
+                        {[10, 25, 50].map((n) => (
+                          <button key={n} onClick={() => play(n)} disabled={!canSpin} className={`${small} px-2 text-[11px] sm:px-3 sm:text-xs`}>{n}</button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={toggleTurbo}
+                        aria-pressed={s.turbo}
+                        className={`${small} px-2 text-[11px] sm:px-3 sm:text-xs ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
+                      >
+                        ⚡ Turbo
+                      </button>
+                    </div>
+
+                    {auto ? (
+                      <button
+                        onClick={stopAuto}
+                        aria-label="Stop auto spin"
+                        className="h-18 w-18 shrink-0 rounded-full border-4 border-red-200/60 bg-red-600/80 text-xs font-black leading-4 text-white shadow-[0_0_24px_#ef4444aa] outline-none focus-visible:ring-4 focus-visible:ring-white sm:h-24 sm:w-24 sm:text-sm"
+                      >
+                        STOP
+                        <span className="block text-[9px] font-normal sm:text-[10px]">{s.autoLeft} left</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => play(1)}
+                        disabled={!canSpin}
+                        aria-label="Spin"
+                        className={`h-18 w-18 shrink-0 rounded-full text-sm font-black tracking-widest outline-none transition active:scale-95 focus-visible:ring-4 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-60 sm:h-24 sm:w-24 sm:text-base ${skin.spinBtn}`}
+                      >
+                        {s.busy ? "…" : "SPIN"}
+                      </button>
+                    )}
+
+                    <div className="flex flex-col items-end gap-1">
+                      {s.gamble && (
+                        <button
+                          onClick={() => setGambleScreen(true)}
+                          className="h-9 min-w-14 rounded-full border border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] px-3 text-xs font-black tracking-widest text-[#10130e] shadow-[0_0_18px_rgba(255,209,102,.35)] transition hover:brightness-110 active:scale-95"
+                        >
+                          X2
+                        </button>
+                      )}
+                      <button onClick={maxBet} disabled={s.busy} className={`${small} px-2 text-[11px] sm:px-4 sm:text-xs`}>Max bet</button>
+                      <button
+                        onClick={buyBonus}
+                        disabled={s.busy || !!s.fs || balance < bonusPrice}
+                        title="Start the free spins right away"
+                        className={`${small} max-w-28 px-2 text-[10px] leading-3 sm:max-w-none sm:px-3 sm:text-xs sm:leading-4 ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
+                      >
+                        {s.confirmBuy ? "Confirm?" : "Buy bonus"} ◈ {money(bonusPrice)}
+                      </button>
+                      <p className="hidden text-right text-[10px] leading-4 text-white/40 sm:block">Space: spin<br />← →: bet</p>
+                    </div>
+                  </div>
+                )}
+                {balance < bet && !s.busy && !outOfChips && (
+                  <p className="mt-1.5 text-center text-[11px] text-red-300 sm:mt-2 sm:text-xs">Not enough chips for this bet. Pick a lower one.</p>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </section>
 
