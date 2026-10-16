@@ -165,7 +165,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
           {s.vault && <VaultGame vault={s.vault} onPick={vaultPick} onCollect={vaultCollect} />}
 
           {fullscreen ? (
-            <div className="sticky bottom-0 z-30 -mx-2 mt-4 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8">
+            <div className="sticky bottom-0 z-30 -mx-2 mt-8 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8">
               <div className="mx-auto flex max-w-md items-center justify-between gap-3 px-2">
                 <div className="shrink-0">
                   <p className="text-[8px] uppercase tracking-[0.2em] text-white/45">Balance</p>
@@ -179,87 +179,63 @@ export default function Slots({ active = true }: { active?: boolean }) {
                     </p>
                   )}
                 </div>
-                <div className="shrink-0 text-right">
-                  <p className="text-[8px] uppercase tracking-[0.2em] text-white/45">Win</p>
-                  <p className="font-mono text-sm font-black text-[#ffd166]">◈ {money(s.lastWin)}</p>
-                </div>
-              </div>
-
-              <div className="mx-auto mt-1 max-w-md">
-                <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
-              </div>
-
-              <div className="mx-auto mt-2 flex items-center justify-center gap-3">
-                <div className="relative">
-                  {autoOpen && !auto && !s.gamble && (
-                    <div className="absolute bottom-full left-1/2 mb-2 flex -translate-x-1/2 gap-1 rounded-xl border border-white/15 bg-black/85 p-1">
-                      {[10, 25, 50].map((n) => (
-                        <button
-                          key={n}
-                          onClick={() => {
-                            play(n);
-                            setAutoOpen(false);
-                          }}
-                          disabled={!canSpin}
-                          className={`${small} px-2 text-[11px]`}
-                        >
-                          {n}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  <button
-                    onClick={() => {
-                      if (s.gamble) setGambleScreen(true);
-                      else if (auto) stopAuto();
-                      else setAutoOpen((v) => !v);
-                    }}
-                    className={`h-16 w-16 rounded-full border-2 text-[11px] font-black leading-3 ${
-                      s.gamble
-                        ? "border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] text-[#10130e]"
-                        : auto
-                          ? "border-red-200/60 bg-red-600/80 text-white"
-                          : "border-white/15 bg-black/50 text-white"
-                    }`}
-                  >
-                    {s.gamble ? "X2" : auto ? (<>STOP<span className="block text-[9px] font-normal">{s.autoLeft}</span></>) : "AUTO"}
-                  </button>
-                </div>
-
-                <div className="flex flex-col items-center">
+                <div className="flex shrink-0 items-center gap-2">
+                  <div className="text-right">
+                    <p className="text-[8px] uppercase tracking-[0.2em] text-white/45">Win</p>
+                    <p className="font-mono text-sm font-black text-[#ffd166]">◈ {money(s.lastWin)}</p>
+                  </div>
                   <button
                     onClick={toggleTurbo}
                     aria-pressed={s.turbo}
-                    className={`${small} mb-1 px-2 text-[10px] ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
+                    className={`${small} px-2 text-[10px] ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
                   >
-                    ⚡ Turbo
-                  </button>
-                  <button
-                    onClick={() => play(1)}
-                    disabled={!canSpin}
-                    aria-label="Spin"
-                    className={`h-20 w-20 rounded-full text-sm font-black tracking-widest transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn}`}
-                  >
-                    {s.busy ? "…" : "SPIN"}
+                    ⚡
                   </button>
                 </div>
+              </div>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={maxBet}
-                    disabled={s.busy}
-                    className="flex h-14 w-14 flex-col items-center justify-center rounded-full border border-white/15 bg-black/50 text-[9px] font-black leading-3 text-white disabled:opacity-40"
-                  >
-                    MAX<br />BET
-                  </button>
-                  <button
-                    onClick={buyBonus}
-                    disabled={s.busy || !!s.fs || balance < bonusPrice}
-                    className={`flex h-14 w-14 flex-col items-center justify-center rounded-full border border-white/15 bg-black/50 text-[9px] font-black leading-3 text-white disabled:opacity-40 ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
-                  >
-                    BUY<br />◈ {money(bonusPrice)}
-                  </button>
-                </div>
+              <div className="mx-auto mt-2 max-w-md">
+                <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
+              </div>
+
+              <div className="mx-auto mt-3 flex items-center justify-center gap-3">
+                <button
+                  onClick={() => {
+                    if (s.gamble) setGambleScreen(true);
+                    else if (auto) stopAuto();
+                    else setAutoOpen((v) => !v);
+                  }}
+                  className={`flex h-16 min-w-16 items-center justify-center rounded-full border-2 px-3 text-[11px] font-black ${
+                    s.gamble
+                      ? "border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] text-[#10130e]"
+                      : auto
+                        ? "border-red-200/60 bg-red-600/80 text-white"
+                        : "border-white/15 bg-black/50 text-white"
+                  }`}
+                >
+                  {s.gamble ? "X2" : auto ? `STOP ${s.autoLeft}` : "AUTO"}
+                </button>
+
+                <button
+                  onClick={() => play(1)}
+                  disabled={!canSpin}
+                  aria-label="Spin"
+                  className={`h-20 w-20 shrink-0 rounded-full text-sm font-black tracking-widest transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn}`}
+                >
+                  {s.busy ? "…" : "SPIN"}
+                </button>
+
+                <button
+                  onClick={buyBonus}
+                  disabled={s.busy || !!s.fs || balance < bonusPrice}
+                  className={`flex h-16 items-center justify-center rounded-full border-2 px-4 text-[11px] font-black disabled:opacity-40 ${
+                    s.confirmBuy
+                      ? "border-[#ffd166] bg-[#ffd166]/15 text-[#ffd166] animate-pulse"
+                      : "border-white/15 bg-black/50 text-white"
+                  }`}
+                >
+                  BUY ◈ {money(bonusPrice)}
+                </button>
               </div>
 
               {balance < bet && !s.busy && !outOfChips && (
