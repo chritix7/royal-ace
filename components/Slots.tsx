@@ -168,20 +168,20 @@ export default function Slots({ active = true }: { active?: boolean }) {
             <div className="sticky bottom-0 z-30 -mx-2 mt-8 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8">
               <div className="mx-auto flex max-w-md items-center justify-between gap-3 px-2">
                 <div className="shrink-0">
-                  <p className="text-[8px] uppercase tracking-[0.2em] text-white/45">Balance</p>
+                  <p className="text-[8px] uppercase tracking-[0.2em] text-white/80">Balance</p>
                   <p className="font-mono text-sm font-black text-white">◈ {money(balance)}</p>
                 </div>
                 <div className="min-w-0 flex-1 text-center">
                   <p key={s.message} className="animate-pop truncate text-[11px] font-semibold text-white">{s.message}</p>
                   {activeLine && (
-                    <p className="truncate text-[9px] text-white/55">
+                    <p className="truncate text-[9px] text-white/80">
                       Line {activeLine.line}: {activeLine.count}× <Glyph sym={activeLine.sym} skin={skin} /> · +◈ {money(activeLine.pay * lineBet)}
                     </p>
                   )}
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <div className="text-right">
-                    <p className="text-[8px] uppercase tracking-[0.2em] text-white/45">Win</p>
+                    <p className="text-[8px] uppercase tracking-[0.2em] text-white/80">Win</p>
                     <p className="font-mono text-sm font-black text-[#ffd166]">◈ {money(s.lastWin)}</p>
                   </div>
                   <button
@@ -205,7 +205,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
                     else if (auto) stopAuto();
                     else setAutoOpen((v) => !v);
                   }}
-                  className={`flex h-16 min-w-16 items-center justify-center rounded-full border-2 px-3 text-[11px] font-black ${
+                  className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 text-[10px] font-black leading-3 ${
                     s.gamble
                       ? "border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] text-[#10130e]"
                       : auto
@@ -228,13 +228,14 @@ export default function Slots({ active = true }: { active?: boolean }) {
                 <button
                   onClick={buyBonus}
                   disabled={s.busy || !!s.fs || balance < bonusPrice}
-                  className={`flex h-16 items-center justify-center rounded-full border-2 px-4 text-[11px] font-black disabled:opacity-40 ${
+                  className={`flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-full border-2 text-[10px] font-black leading-3 disabled:opacity-40 ${
                     s.confirmBuy
                       ? "border-[#ffd166] bg-[#ffd166]/15 text-[#ffd166] animate-pulse"
                       : "border-white/15 bg-black/50 text-white"
                   }`}
                 >
-                  BUY ◈ {money(bonusPrice)}
+                  BUY
+<span className="block text-[8px] font-normal">◈ {money(bonusPrice)}</span>
                 </button>
               </div>
 
