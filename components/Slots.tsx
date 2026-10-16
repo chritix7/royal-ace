@@ -101,7 +101,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
   return (
     <div className={`grid gap-6 lg:grid-cols-[1fr_320px] ${fullscreen ? "fixed inset-0 z-50 overflow-y-auto bg-black" : ""}`}>
       <section className={`overflow-clip border border-white/10 bg-[#101713] shadow-2xl ${fullscreen ? "rounded-none border-0" : "rounded-3xl"}`}>
-        <div className={`relative isolate ${skin.stage} px-2 pb-4 pt-4 sm:px-8 sm:pb-6 sm:pt-6 ${fullscreen ? "min-h-[100dvh] pb-4" : ""}`}>
+        <div className={`relative isolate ${skin.stage} px-2 pb-4 pt-4 sm:px-8 sm:pb-6 sm:pt-6 ${fullscreen ? (s.fs ? "min-h-[100dvh] pb-44" : "min-h-[100dvh] pb-4") : ""}`}>
           {skinId === "miami" && <MiamiBackdrop party={s.fs !== null} />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} colors={skin.confetti} />}
 
