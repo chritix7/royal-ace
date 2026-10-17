@@ -28,6 +28,7 @@ import {
   THEORETICAL_RTP,
   type Paying,
 } from "../lib/slots";
+import { sfx } from "../lib/sound";
 
 const money = (n: number) => n.toLocaleString("en-US");
 const PAY_ROWS: Paying[] = ["seven", "wild", "gem", "bell", "grape", "lemon", "cherry"];
@@ -51,6 +52,26 @@ export default function Slots({ active = true }: { active?: boolean }) {
     s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, refill,
     bonusPrice, buyBonus, vaultPick, vaultCollect, gambleChoose, gambleCollect,
   } = useSlots(active, skin.labels);
+
+  const playWithSound = (n: number) => {
+  sfx.spin();
+  play(n);
+};
+
+const prevCelebrate = useRef(0);
+useEffect(() => {
+  if (s.celebrate > prevCelebrate.current) {
+    if (s.winBanner?.tier === "epic") sfx.jackpot();
+    else sfx.win();
+  }
+  prevCelebrate.current = s.celebrate;
+}, [s.celebrate, s.winBanner]);
+
+const prevFs = useRef(false);
+useEffect(() => {
+  if (s.fs && !prevFs.current) sfx.bonus();
+  prevFs.current = !!s.fs;
+}, [s.fs]);
 
   const skinLoaded = useRef(false);
   useEffect(() => {
@@ -217,7 +238,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
                 </button>
 
                 <button
-                  onClick={() => play(1)}
+                  onClick={() => playWithSound(1)}
                   disabled={!canSpin}
                   aria-label="Spin"
                   className={`h-20 w-20 shrink-0 rounded-full text-sm font-black tracking-widest transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn}`}
@@ -284,7 +305,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
                       <span className="text-[8px] tracking-[0.2em] text-white/50 sm:text-[10px] sm:tracking-[0.25em]">AUTO</span>
                       <div className="flex gap-1">
                         {[10, 25, 50].map((n) => (
-                          <button key={n} onClick={() => play(n)} disabled={!canSpin} className={`${small} px-2 text-[11px] sm:px-3 sm:text-xs`}>{n}</button>
+                          <button key={n} onClick={() => playWithSound(n)} disabled={!canSpin} className={`${small} px-2 text-[11px] sm:px-3 sm:text-xs`}>{n}</button>
                         ))}
                       </div>
                       <button
@@ -307,7 +328,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
                       </button>
                     ) : (
                       <button
-                        onClick={() => play(1)}
+                        onClick={() => playWithSound(1)}
                         disabled={!canSpin}
                         aria-label="Spin"
                         className={`h-18 w-18 shrink-0 rounded-full text-sm font-black tracking-widest outline-none transition active:scale-95 focus-visible:ring-4 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-60 sm:h-24 sm:w-24 sm:text-base ${skin.spinBtn}`}
