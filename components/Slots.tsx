@@ -186,7 +186,7 @@ useEffect(() => {
           {s.vault && <VaultGame vault={s.vault} onPick={vaultPick} onCollect={vaultCollect} />}
 
           {fullscreen ? (
-            <div className="sticky bottom-0 z-30 -mx-2 mt-8 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8">
+            <div className="sticky bottom-0 z-50 -mx-2 mt-8 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8">
               <div className="mx-auto flex max-w-md items-center justify-between gap-3 px-2">
                 <div className="shrink-0">
                   <p className="text-[8px] uppercase tracking-[0.2em] text-white/80">Balance</p>
@@ -226,7 +226,7 @@ useEffect(() => {
   else if (auto) stopAuto();
   else playWithSound(10);
 }}
-                  className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 text-[10px] font-black leading-3 ${
+                  className={`flex h-16 w-16 shrink-0 touch-manipulation items-center justify-center rounded-full border-2 text-[10px] font-black leading-3 ${
                     s.gamble
                       ? "border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] text-[#10130e]"
                       : auto
