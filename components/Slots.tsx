@@ -222,10 +222,10 @@ useEffect(() => {
               <div className="mx-auto mt-3 flex items-center justify-center gap-3">
                 <button
                   onClick={() => {
-                    if (s.gamble) setGambleScreen(true);
-                    else if (auto) stopAuto();
-                    else setAutoOpen((v) => !v);
-                  }}
+  if (s.gamble) setGambleScreen(true);
+  else if (auto) stopAuto();
+  else playWithSound(10);
+}}
                   className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 text-[10px] font-black leading-3 ${
                     s.gamble
                       ? "border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] text-[#10130e]"
