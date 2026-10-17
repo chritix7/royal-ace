@@ -157,7 +157,7 @@ useEffect(() => {
             activeLine={activeLine}
             fast={s.lastWin > 0 || s.celebrate > 0 || !!s.fs}
             shake={s.winBanner ? (s.winBanner.tier === "epic" ? 3 : s.winBanner.tier === "mega" ? 2 : 1) : 0}
-            onPull={() => play(1)}
+            onPull={() => playWithSound(1)}
             canPull={canSpin}
             large={fullscreen}
           />
