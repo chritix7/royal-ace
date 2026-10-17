@@ -219,12 +219,12 @@ useEffect(() => {
                 <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
               </div>
 
-              <div className="mx-auto mt-3 flex items-center justify-center gap-3">
+              <div className="pointer-events-auto relative z-[60] mx-auto mt-3 flex items-center justify-center gap-3">
                 <button
                   onClick={() => {
   if (s.gamble) setGambleScreen(true);
   else if (auto) stopAuto();
-  else alert("AUTO cliqué");
+  else playWithSound(10);
 }}
                   className={`flex h-16 w-16 shrink-0 touch-manipulation items-center justify-center rounded-full border-2 text-[10px] font-black leading-3 ${
                     s.gamble
