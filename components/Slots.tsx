@@ -29,6 +29,7 @@ import {
   type Paying,
 } from "../lib/slots";
 import { sfx } from "../lib/sound";
+import { AUTO_COUNTS, loadAutoCount, saveAutoCount, type AutoCount } from "../lib/autoSpin";
 
 const money = (n: number) => n.toLocaleString("en-US");
 const PAY_ROWS: Paying[] = ["seven", "wild", "gem", "bell", "grape", "lemon", "cherry"];
@@ -56,6 +57,16 @@ export default function Slots({ active = true }: { active?: boolean }) {
   sfx.spin();
   play(n);
 };
+
+  const [autoCount, setAutoCount] = useState<AutoCount>(10);
+  const [autoOpen, setAutoOpen] = useState(false);
+  useEffect(() => setAutoCount(loadAutoCount()), []);
+  const startAuto = (n: AutoCount) => {
+    setAutoCount(n);
+    saveAutoCount(n);
+    setAutoOpen(false);
+    playWithSound(n);
+  };
 
 const prevCelebrate = useRef(0);
 useEffect(() => {
@@ -219,22 +230,55 @@ useEffect(() => {
               </div>
 
               <div className="pointer-events-auto relative z-[60] mx-auto mt-3 flex items-center justify-center gap-3">
-                <button
-                  onClick={() => {
-  if (s.gamble) setGambleScreen(true);
-  else if (auto) stopAuto();
-  else playWithSound(10);
-}}
-                  className={`flex h-16 w-16 shrink-0 touch-manipulation items-center justify-center rounded-full border-2 text-[10px] font-black leading-3 ${
-                    s.gamble
-                      ? "border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] text-[#10130e]"
-                      : auto
-                        ? "border-red-200/60 bg-red-600/80 text-white"
-                        : "border-white/15 bg-black/50 text-white"
-                  }`}
-                >
-                  {s.gamble ? "X2" : auto ? `STOP ${s.autoLeft}` : "AUTO"}
-                </button>
+                <div className="relative shrink-0">
+                  {autoOpen && !auto && !s.gamble && (
+                    <>
+                      <button
+                        aria-label="Fermer le choix des tours"
+                        className="fixed inset-0 z-[59] cursor-default"
+                        onClick={() => setAutoOpen(false)}
+                      />
+                      <div
+                        role="menu"
+                        aria-label="Tours automatiques"
+                        className="absolute bottom-full left-1/2 z-[60] mb-3 -translate-x-1/2 rounded-xl border border-[#c8a65b]/40 bg-[#0b100e]/95 px-3 py-2 backdrop-blur"
+                      >
+                        <p className="mb-1.5 text-center text-[8px] uppercase tracking-[0.2em] text-white/50">Tours auto</p>
+                        <div className="flex gap-2">
+                          {AUTO_COUNTS.map((n) => (
+                            <button
+                              key={n}
+                              role="menuitem"
+                              onClick={() => startAuto(n)}
+                              disabled={!canSpin}
+                              className={`${small} h-10 w-12 px-0 text-xs ${n === autoCount ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
+                            >
+                              {n}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  <button
+                    onClick={() => {
+                      if (s.gamble) setGambleScreen(true);
+                      else if (auto) stopAuto();
+                      else setAutoOpen((v) => !v);
+                    }}
+                    aria-haspopup="menu"
+                    aria-expanded={autoOpen}
+                    className={`flex h-16 w-16 shrink-0 touch-manipulation items-center justify-center rounded-full border-2 text-[10px] font-black leading-3 ${
+                      s.gamble
+                        ? "border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] text-[#10130e]"
+                        : auto
+                          ? "border-red-200/60 bg-red-600/80 text-white"
+                          : "border-white/15 bg-black/50 text-white"
+                    }`}
+                  >
+                    {s.gamble ? "X2" : auto ? `STOP ${s.autoLeft}` : "AUTO"}
+                  </button>
+                </div>
 
                 <button
                   onClick={() => playWithSound(1)}
@@ -303,8 +347,15 @@ useEffect(() => {
                     <div className="flex flex-col gap-1">
                       <span className="text-[8px] tracking-[0.2em] text-white/50 sm:text-[10px] sm:tracking-[0.25em]">AUTO</span>
                       <div className="flex gap-1">
-                        {[10, 25, 50].map((n) => (
-                          <button key={n} onClick={() => playWithSound(n)} disabled={!canSpin} className={`${small} px-2 text-[11px] sm:px-3 sm:text-xs`}>{n}</button>
+                        {AUTO_COUNTS.map((n) => (
+                          <button
+                            key={n}
+                            onClick={() => startAuto(n)}
+                            disabled={!canSpin}
+                            className={`${small} px-2 text-[11px] sm:px-3 sm:text-xs ${n === autoCount ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
+                          >
+                            {n}
+                          </button>
                         ))}
                       </div>
                       <button

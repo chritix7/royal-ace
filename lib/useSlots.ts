@@ -24,6 +24,7 @@ import { VAULT_PICKS, VAULT_TRIGGER, drawVault, settleVault, type VaultPrize } f
 import { music } from "./music";
 import type { SlotLabels } from "./skins";
 import { sfx } from "./sound";
+import { runAutoSpins } from "./autoSpin";
 import { useBalance, wallet } from "./wallet";
 import { winHistory } from "./winHistory";
 
@@ -387,22 +388,24 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
     wallet.setLocked(true);
     sfx.lever();
 
-    let remaining = count;
-    while (remaining > 0) {
-      const b = BET_LEVELS[ref.current.betIdx];
-      if (wallet.getBalance() < b) {
-        set({ message: "Not enough chips for this bet. Lower it or refill." });
-        break;
-      }
-      const r = await oneRound();
-      remaining--;
-      set({ autoLeft: remaining > 0 ? remaining : 0 });
-      if (count === 1 && canGamble(r.total, b, r.triggered || r.vault)) {
-        set({ gamble: { amount: r.total, rounds: 0, phase: "choose", card: null, won: null } });
-      }
-      if (stopRef.current || r.triggered || r.vault || r.ratio >= 20) break;
-      if (remaining > 0) await sleep(450 * speed());
-    }
+    const b0 = BET_LEVELS[ref.current.betIdx];
+    await runAutoSpins(
+      count,
+      async () => {
+        const r = await oneRound();
+        if (count === 1 && canGamble(r.total, b0, r.triggered || r.vault)) {
+          set({ gamble: { amount: r.total, rounds: 0, phase: "choose", card: null, won: null } });
+        }
+        return { stop: r.triggered || r.vault || r.ratio >= 20 };
+      },
+      {
+        shouldStop: () => stopRef.current,
+        canAfford: () => wallet.getBalance() >= BET_LEVELS[ref.current.betIdx],
+        onInsufficientFunds: () => set({ message: "Not enough chips for this bet. Lower it or refill." }),
+        onProgress: (remaining) => set({ autoLeft: remaining > 0 ? remaining : 0 }),
+        pause: () => sleep(450 * speed()),
+      },
+    );
 
     wallet.setLocked(false);
     set({ busy: false, autoLeft: 0 });
@@ -536,6 +539,8 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!active || e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && t.closest("button, input, textarea, select, a, [contenteditable]")) return;
       const a = actions.current;
       if (e.key === " " || e.key === "Enter") {
         e.preventDefault();

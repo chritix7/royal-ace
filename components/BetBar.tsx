@@ -30,7 +30,7 @@ export default function BetBar({
         ref={box}
         role="group"
         aria-label="Bet amount"
-        className="relative flex flex-1 snap-x gap-1.5 overflow-x-auto scroll-smooth px-1 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="relative flex w-0 flex-1 snap-x gap-1.5 overflow-x-auto scroll-smooth px-1 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {levels.map((v, i) => (
           <button
