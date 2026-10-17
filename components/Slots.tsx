@@ -46,7 +46,6 @@ export default function Slots({ active = true }: { active?: boolean }) {
   const [skinId, setSkinId] = useState<SkinId>("miami");
   const [fullscreen, setFullscreen] = useState(false);
   const [gambleScreen, setGambleScreen] = useState(false);
-  const [autoOpen, setAutoOpen] = useState(false);
   const skin = SKINS[skinId];
   const {
     s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, refill,
