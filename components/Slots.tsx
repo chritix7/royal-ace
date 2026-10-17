@@ -224,7 +224,7 @@ useEffect(() => {
                   onClick={() => {
   if (s.gamble) setGambleScreen(true);
   else if (auto) stopAuto();
-  else playWithSound(10);
+  else alert("AUTO cliqué");
 }}
                   className={`flex h-16 w-16 shrink-0 touch-manipulation items-center justify-center rounded-full border-2 text-[10px] font-black leading-3 ${
                     s.gamble
