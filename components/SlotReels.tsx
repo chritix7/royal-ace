@@ -162,8 +162,14 @@ export default function SlotReels({
     <div className={`mx-auto flex w-fit items-stretch gap-1.5 sm:gap-3 ${shake ? `shake-${shake}` : ""}`}>
       <LineTabs from={1} to={10} winLines={winLines} active={activeLine?.line ?? null} />
 
-      <div className={`relative rounded-[26px] p-3.5 sm:p-5 ${skin.bezel}`}>
-        <Bulbs color={skin.bulb} fast={fast} />
+      <div className={`relative rounded-[28px] p-3.5 ring-1 ring-white/10 shadow-[0_18px_50px_rgba(0,0,0,.65),inset_0_1px_0_rgba(255,255,255,.12)] sm:p-5 ${skin.bezel}`}>
+  {["left-2 top-2", "right-2 top-2", "left-2 bottom-2", "right-2 bottom-2"].map((pos) => (
+    <span
+      key={pos}
+      className={`absolute ${pos} h-2.5 w-2.5 rounded-full bg-[radial-gradient(circle_at_35%_30%,#e5e7eb,#6b7280_60%,#374151)] shadow-inner`}
+    />
+  ))}
+  <Bulbs color={skin.bulb} fast={fast} />
         <div className={`relative rounded-xl bg-black p-1 shadow-[inset_0_0_20px_#000] sm:p-1.5 ${large ? "[--cell:4.2rem] sm:[--cell:5rem] lg:[--cell:5.2rem]" : "[--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:5.2rem]"}`}>
           <div className="relative flex overflow-hidden rounded-lg">
             {Array.from({ length: REELS }, (_, k) => (
@@ -203,9 +209,11 @@ export default function SlotReels({
                 />
               </svg>
             )}
-          </div>
-        </div>
+                  </div>
       </div>
+
+      <div className="pointer-events-none absolute inset-0 rounded-[20px] bg-gradient-to-br from-white/10 via-transparent to-transparent" />
+    </div>
 
       <LineTabs from={11} to={20} winLines={winLines} active={activeLine?.line ?? null} />
       <Lever spinId={s.spinId} onPull={onPull} disabled={!canPull} />
