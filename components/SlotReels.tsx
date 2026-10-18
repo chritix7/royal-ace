@@ -109,8 +109,10 @@ export function Reel({
   );
 }
 
-function Bulbs({ color, fast }: { color: string; fast: boolean }) {
-  const style = { "--bulb": color } as CSSProperties;
+function Bulbs({ color, fast, mood = "idle" }: { color: string; fast: boolean; mood?: "idle" | "win" | "jackpot" }) {
+  const led = mood === "jackpot" ? "#ff4d4d" : mood === "win" ? "#ffd166" : color;
+  const anim = mood === "jackpot" ? "animate-[pulse_0.5s_ease-in-out_infinite]" : mood === "win" ? "animate-pulse" : "";
+  const style = { "--bulb": led } as CSSProperties;
   const strips = [
     { pos: "inset-x-5 top-1 h-2", v: false },
     { pos: "inset-x-5 bottom-1 h-2", v: false },
@@ -125,7 +127,7 @@ function Bulbs({ color, fast }: { color: string; fast: boolean }) {
             key={`${i}-${alt}`}
             aria-hidden="true"
             style={style}
-            className={`pointer-events-none absolute ${st.pos} ${st.v ? "bulbs-v" : "bulbs"}${alt ? " alt" : ""}${fast ? " bulbs-fast" : ""}`}
+            className={`pointer-events-none absolute ${st.pos} ${st.v ? "bulbs-v" : "bulbs"}${alt ? " alt" : ""}${fast ? " bulbs-fast" : ""} ${anim}`}
           />
         ))
       )}
@@ -152,9 +154,9 @@ function LineTabs({ from, to, winLines, active }: { from: number; to: number; wi
 }
 
 export default function SlotReels({
-  s, skin, activeLine, fast, shake = 0, onPull, canPull, large = false,
+  s, skin, activeLine, fast, shake = 0, onPull, canPull, large = false, mood = "idle",
 }: {
-  s: SlotsGame["s"]; skin: Skin; activeLine: LineWin | null; fast: boolean; shake?: 0 | 1 | 2 | 3; onPull: () => void; canPull: boolean; large?: boolean;
+  s: SlotsGame["s"]; skin: Skin; activeLine: LineWin | null; fast: boolean; shake?: 0 | 1 | 2 | 3; onPull: () => void; canPull: boolean; large?: boolean; mood?: "idle" | "win" | "jackpot";
 }) {
   const winLines = new Set(s.lineWins.map((w) => w.line));
 
@@ -169,7 +171,7 @@ export default function SlotReels({
       className={`absolute ${pos} h-2.5 w-2.5 rounded-full bg-[radial-gradient(circle_at_35%_30%,#e5e7eb,#6b7280_60%,#374151)] shadow-inner`}
     />
   ))}
-  <Bulbs color={skin.bulb} fast={fast} />
+  <Bulbs color={skin.bulb} fast={fast} mood={mood} />
         <div className={`relative rounded-xl bg-black p-1 shadow-[inset_0_0_20px_#000] sm:p-1.5 ${large ? "[--cell:4.2rem] sm:[--cell:5rem] lg:[--cell:5.2rem]" : "[--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:5.2rem]"}`}>
           <div className="relative flex overflow-hidden rounded-lg">
             {Array.from({ length: REELS }, (_, k) => (

@@ -173,6 +173,13 @@ useEffect(() => {
             onPull={() => playWithSound(1)}
             canPull={canSpin}
             large={fullscreen}
+            mood={
+  s.fs || (s.winBanner && (s.winBanner.tier === "mega" || s.winBanner.tier === "epic"))
+    ? "jackpot"
+    : s.lastWin > 0 || s.celebrate > 0
+      ? "win"
+      : "idle"
+}
           />
 
           {s.fs && (
