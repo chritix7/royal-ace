@@ -232,79 +232,111 @@ useEffect(() => {
                 <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
               </div>
 
-              <div className="pointer-events-auto relative z-[60] mx-auto mt-6 flex items-center justify-center gap-3">
-                <div className="relative shrink-0">
-                  {autoOpen && !auto && !s.gamble && (
-                    <>
-                      <button
-                        aria-label="Fermer le choix des tours"
-                        className="fixed inset-0 z-[59] cursor-default"
-                        onClick={() => setAutoOpen(false)}
-                      />
-                      <div
-                        role="menu"
-                        aria-label="Tours automatiques"
-                        className="absolute bottom-full left-1/2 z-[60] mb-3 -translate-x-1/2 rounded-xl border border-[#c8a65b]/40 bg-[#0b100e]/95 px-3 py-2 backdrop-blur"
-                      >
-                        <p className="mb-1.5 text-center text-[8px] uppercase tracking-[0.2em] text-white/50">Tours auto</p>
-                        <div className="flex gap-2">
-                          {AUTO_COUNTS.map((n) => (
-                            <button
-                              key={n}
-                              role="menuitem"
-                              onClick={() => startAuto(n)}
-                              disabled={!canSpin}
-                              className={`${small} h-10 w-12 px-0 text-xs ${n === autoCount ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
-                            >
-                              {n}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                  <button
-                    onClick={() => {
-                      if (s.gamble) setGambleScreen(true);
-                      else if (auto) stopAuto();
-                      else setAutoOpen((v) => !v);
-                    }}
-                    aria-haspopup="menu"
-                    aria-expanded={autoOpen}
-                    className={`flex h-16 w-16 shrink-0 touch-manipulation items-center justify-center rounded-full border-2 text-[10px] font-black leading-3 ${
-                      s.gamble
-                        ? "border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] text-[#10130e]"
-                        : auto
-                          ? "border-red-200/60 bg-red-600/80 text-white"
-                          : "border-white/15 bg-black/50 text-white"
-                    }`}
-                  >
-                    {s.gamble ? "X2" : auto ? `STOP ${s.autoLeft}` : "AUTO"}
-                  </button>
-                </div>
+              <div className="pointer-events-auto relative z-[60] mx-auto mt-6 flex items-center justify-center gap-4">
+  <div className="relative shrink-0">
+    {autoOpen && !auto && !s.gamble && (
+      <>
+        <button
+          aria-label="Fermer le choix des tours"
+          className="fixed inset-0 z-[59] cursor-default"
+          onClick={() => setAutoOpen(false)}
+        />
+        <div
+          role="menu"
+          aria-label="Tours automatiques"
+          className="absolute bottom-full left-1/2 z-[60] mb-3 -translate-x-1/2 rounded-xl border border-[#c8a65b]/40 bg-[#0b100e]/95 px-3 py-2 backdrop-blur"
+        >
+          <p className="mb-1.5 text-center text-[8px] uppercase tracking-[0.2em] text-white/50">Tours auto</p>
+          <div className="flex gap-2">
+            {AUTO_COUNTS.map((n) => (
+              <button
+                key={n}
+                role="menuitem"
+                onClick={() => startAuto(n)}
+                disabled={!canSpin}
+                className={`${small} h-10 w-12 px-0 text-xs ${n === autoCount ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
+      </>
+    )}
+    <button
+      onClick={() => {
+        if (s.gamble) setGambleScreen(true);
+        else if (auto) stopAuto();
+        else setAutoOpen((v) => !v);
+      }}
+      aria-haspopup="menu"
+      aria-expanded={autoOpen}
+      className={`relative flex h-16 w-16 shrink-0 touch-manipulation items-center justify-center rounded-full text-[10px] font-black leading-3 text-white transition active:translate-y-0.5 ${
+        s.gamble
+          ? "text-[#3a2c05]"
+          : auto
+            ? "text-white"
+            : "text-white"
+      }`}
+      style={
+        s.gamble
+          ? {
+              background: "radial-gradient(circle at 32% 26%, #fff3c4, #eab308 45%, #a16207 85%)",
+              boxShadow: "0 8px 18px rgba(0,0,0,.7), inset 0 2px 6px rgba(255,255,255,.5), inset 0 -5px 10px rgba(0,0,0,.35)",
+            }
+          : auto
+            ? {
+                background: "radial-gradient(circle at 32% 26%, #7f1d1d, #450a0a 70%)",
+                boxShadow: "0 8px 18px rgba(0,0,0,.7), inset 0 2px 6px rgba(255,255,255,.15), inset 0 -5px 10px rgba(0,0,0,.45)",
+              }
+            : {
+                background: "radial-gradient(circle at 32% 26%, #3f3f46, #18181b 70%)",
+                boxShadow: "0 8px 18px rgba(0,0,0,.7), inset 0 2px 6px rgba(255,255,255,.15), inset 0 -5px 10px rgba(0,0,0,.45)",
+              }
+      }
+    >
+      <span
+        className={`absolute -top-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full ${
+          s.gamble
+            ? "bg-yellow-200 shadow-[0_0_8px_#fde047]"
+            : auto
+              ? "bg-red-400 shadow-[0_0_8px_#f87171]"
+              : "bg-emerald-400 shadow-[0_0_8px_#34d399]"
+        }`}
+      />
+      {s.gamble ? "X2" : auto ? "STOP" : "AUTO"}
+      {auto && <span className="block text-[8px] font-normal text-white/80">{s.autoLeft}</span>}
+    </button>
+  </div>
 
-                <button
-                  onClick={() => playWithSound(1)}
-                  disabled={!canSpin}
-                  aria-label="Spin"
-                  className={`h-24 w-24 shrink-0 rounded-full text-base font-black tracking-widest transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn}`}
-                >
-                  {s.busy ? "…" : "SPIN"}
-                </button>
+  <button
+    onClick={() => playWithSound(1)}
+    disabled={!canSpin}
+    aria-label="Spin"
+    className="relative h-24 w-24 shrink-0 touch-manipulation rounded-full text-base font-black tracking-widest text-white transition active:translate-y-0.5 disabled:opacity-50"
+    style={{
+      background: "radial-gradient(circle at 32% 26%, #ff9a9a, #ef4444 45%, #7f1d1d 85%)",
+      boxShadow: "0 12px 28px rgba(0,0,0,.75), inset 0 3px 10px rgba(255,255,255,.4), inset 0 -8px 14px rgba(0,0,0,.5)",
+    }}
+  >
+    <span className="absolute inset-1.5 rounded-full ring-2 ring-red-950/50" />
+    {s.busy ? "…" : "SPIN"}
+  </button>
 
-                <button
-                  onClick={buyBonus}
-                  disabled={s.busy || !!s.fs || balance < bonusPrice}
-                  className={`flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-full border-2 text-[10px] font-black leading-3 disabled:opacity-40 ${
-                    s.confirmBuy
-                      ? "border-[#ffd166] bg-[#ffd166]/15 text-[#ffd166] animate-pulse"
-                      : "border-white/15 bg-black/50 text-white"
-                  }`}
-                >
-                  BUY
-<span className="block text-[8px] font-normal">◈ {money(bonusPrice)}</span>
-                </button>
-              </div>
+  <button
+    onClick={buyBonus}
+    disabled={s.busy || !!s.fs || balance < bonusPrice}
+    className="relative flex h-16 w-16 shrink-0 touch-manipulation flex-col items-center justify-center rounded-full text-[10px] font-black leading-3 text-[#3a2c05] transition active:translate-y-0.5 disabled:opacity-40"
+    style={{
+      background: "radial-gradient(circle at 32% 26%, #fff3c4, #eab308 45%, #a16207 85%)",
+      boxShadow: "0 8px 18px rgba(0,0,0,.7), inset 0 2px 6px rgba(255,255,255,.5), inset 0 -5px 10px rgba(0,0,0,.35)",
+    }}
+  >
+    <span className="absolute inset-1 rounded-full ring-2 ring-yellow-100/40" />
+    BUY
+    <span className="block text-[8px] font-normal">◈ {money(bonusPrice)}</span>
+  </button>
+</div>
 
               {balance < bet && !s.busy && !outOfChips && (
                 <p className="mt-2 text-center text-[11px] text-red-300">Not enough chips for this bet. Pick a lower one.</p>
