@@ -148,13 +148,8 @@ useEffect(() => {
   {fullscreen ? "✕" : "⛶"}
 </button>
 
-<header className={`mx-auto w-fit text-center ${fullscreen ? "mb-2 mt-12" : "mb-3 mt-12 sm:mb-5 sm:mt-14"}`}>
+<header className={`mx-auto w-fit text-center ${fullscreen ? "mb-2 mt-12" : "mb-3 mt-2 sm:mb-5 sm:mt-3"}`}>
   <div className="mx-auto w-fit rounded-2xl border border-white/15 bg-[linear-gradient(180deg,#2a2f36,#14181d)] px-5 py-2 shadow-[0_12px_34px_rgba(0,0,0,.65),inset_0_1px_0_rgba(255,255,255,.15)] sm:px-8 sm:py-2.5">
-    <div className="absolute inset-x-4 top-1.5 flex justify-between">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <span key={i} className="h-1.5 w-1.5 rounded-full bg-[#ffd166] shadow-[0_0_6px_#ffd166]" />
-      ))}
-    </div>
     <div className={`mt-1.5 inline-block rounded-xl border-2 px-4 py-0.5 sm:px-6 sm:py-1 ${skin.signBox}`}>
       <h3 className={`text-lg font-black uppercase tracking-[0.12em] sm:text-3xl sm:tracking-[0.14em] ${skin.titleClass}`}>{skin.title}</h3>
     </div>
