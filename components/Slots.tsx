@@ -232,7 +232,7 @@ useEffect(() => {
                 <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
               </div>
 
-              <div className="pointer-events-auto relative z-[60] mx-auto mt-3 flex items-center justify-center gap-3">
+              <div className="pointer-events-auto relative z-[60] mx-auto mt-6 flex items-center justify-center gap-3">
                 <div className="relative shrink-0">
                   {autoOpen && !auto && !s.gamble && (
                     <>
@@ -287,7 +287,7 @@ useEffect(() => {
                   onClick={() => playWithSound(1)}
                   disabled={!canSpin}
                   aria-label="Spin"
-                  className={`h-20 w-20 shrink-0 rounded-full text-sm font-black tracking-widest transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn}`}
+                  className={`h-24 w-24 shrink-0 rounded-full text-base font-black tracking-widest transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn}`}
                 >
                   {s.busy ? "…" : "SPIN"}
                 </button>
