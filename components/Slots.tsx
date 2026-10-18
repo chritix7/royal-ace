@@ -156,7 +156,7 @@ useEffect(() => {
   {/* Titre centré, sous le bouton */}
   <header className="flex w-full justify-center text-center">
     <div
-      className="relative w-fit max-w-full rounded-2xl border border-white/15 px-4 py-2 sm:px-6 sm:py-2.5"
+      className="relative w-full max-w-full rounded-2xl border border-white/15 px-4 py-2 sm:px-6 sm:py-2.5"
       style={{
         background: "linear-gradient(180deg, #2a2f36, #14181d)",
         boxShadow:
