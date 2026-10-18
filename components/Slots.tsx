@@ -47,6 +47,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
   const [skinId, setSkinId] = useState<SkinId>("miami");
   const [fullscreen, setFullscreen] = useState(false);
   const [gambleScreen, setGambleScreen] = useState(false);
+  const [buyOpen, setBuyOpen] = useState(false);
   const skin = SKINS[skinId];
   const {
     s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, refill,
@@ -264,14 +265,15 @@ useEffect(() => {
       </>
     )}
     <button
-      onClick={() => {
-        if (s.gamble) setGambleScreen(true);
-        else if (auto) stopAuto();
-        else setAutoOpen((v) => !v);
-      }}
-      aria-haspopup="menu"
-      aria-expanded={autoOpen}
-      className={`relative flex h-16 w-16 shrink-0 touch-manipulation items-center justify-center rounded-full text-[10px] font-black leading-3 text-white transition active:translate-y-0.5 ${
+  onClick={() => {
+    if (s.gamble) setGambleScreen(true);
+    else if (auto) stopAuto();
+    else setAutoOpen((v) => !v);
+  }}
+  disabled={!!s.fs || (!auto && !canSpin)}
+  aria-haspopup="menu"
+  aria-expanded={autoOpen}
+  className={`flex h-16 w-16 shrink-0 touch-manipulation items-center justify-center rounded-full text-[10px] font-black leading-3 text-white transition active:translate-y-0.5 disabled:opacity-40 ${
         s.gamble
           ? "text-[#3a2c05]"
           : auto
@@ -324,7 +326,7 @@ useEffect(() => {
   </button>
 
   <button
-    onClick={buyBonus}
+    onClick={() => setBuyOpen(true)}
     disabled={s.busy || !!s.fs || balance < bonusPrice}
     className="relative flex h-16 w-16 shrink-0 touch-manipulation flex-col items-center justify-center rounded-full text-[10px] font-black leading-3 text-[#3a2c05] transition active:translate-y-0.5 disabled:opacity-40"
     style={{
@@ -597,6 +599,46 @@ useEffect(() => {
           Virtual chips only. No real money, deposits or cash-outs.
         </p>
       </aside>
+
+      {buyOpen && (
+  <div
+    className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+    onClick={() => setBuyOpen(false)}
+  >
+    <div
+      className="animate-pop w-[min(88vw,340px)] rounded-3xl border border-[#c8a65b]/50 bg-[#101713] p-6 text-center shadow-2xl"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <p className="text-[10px] uppercase tracking-[0.25em] text-white/50">Bonus purchase</p>
+      <h3 className="mt-2 text-xl font-black text-[#ffd166]">
+        Start {skin.labels.freeSpins}?
+      </h3>
+      <div className="mx-auto mt-4 w-fit rounded-2xl border border-white/10 bg-black/40 px-6 py-3">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">Price</p>
+        <p className="font-mono text-3xl font-black text-white">◈ {money(bonusPrice)}</p>
+      </div>
+      <div className="mt-5 flex gap-3">
+        <button
+          onClick={() => setBuyOpen(false)}
+          className={`${small} flex-1 py-3`}
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => {
+            buyBonus();
+            buyBonus();
+            setBuyOpen(false);
+          }}
+          disabled={balance < bonusPrice}
+          className={`${small} flex-1 py-3 !border-[#ffd166] !text-[#ffd166]`}
+        >
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {s.gamble && gambleScreen && (
         <GamblePanel
