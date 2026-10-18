@@ -70,7 +70,7 @@ export default function GamblePanel({
           onClose();
         }}
         aria-label="Close gamble"
-        className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white/70 backdrop-blur transition hover:border-[#ffd166] hover:text-[#ffd166]"
+        className="absolute right-4 top-[max(env(safe-area-inset-top),1rem)] flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white/70 backdrop-blur transition hover:border-[#ffd166] hover:text-[#ffd166]"
       >
         ✕
       </button>

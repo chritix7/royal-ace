@@ -529,9 +529,9 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
   const toggleTurbo = () => set({ turbo: !ref.current.turbo });
   function refill() {
     if (ref.current.busy || wallet.getBalance() >= BET_LEVELS[0]) return;
-    wallet.add(500);
+    wallet.add(1000);
     sfx.win();
-    set({ message: "Refill: ◈ 500 added. Good luck!" });
+    set({ message: "Refill: ◈ 1,000 added. Good luck!" });
   }
 
   const actions = useRef({ play, stopAuto, changeBet });

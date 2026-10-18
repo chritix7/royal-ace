@@ -156,14 +156,6 @@ useEffect(() => {
 
           <JackpotBar pools={s.pools} bet={bet} />
 
-          {s.fs && (
-            <div className="pointer-events-none absolute left-1/2 top-28 z-20 flex max-w-2xl -translate-x-1/2 flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-xl border border-[#ffd166]/60 bg-black/60 px-3 py-1.5 text-[11px] text-[#ffd166] backdrop-blur sm:top-32 sm:gap-x-5 sm:px-4 sm:py-2 sm:text-xs" role="status">
-              <span className="font-black tracking-widest">{skin.labels.freeSpins} ×{FS_MULT}</span>
-              <span>Spin {s.fs.played} / {s.fs.total}</span>
-              <span>Won ◈ {money(s.fs.win)}</span>
-            </div>
-          )}
-
           <SlotReels
             s={s}
             skin={skin}
@@ -174,6 +166,14 @@ useEffect(() => {
             canPull={canSpin}
             large={fullscreen}
           />
+
+          {s.fs && (
+            <div className="pointer-events-none mx-auto mt-1.5 flex w-fit max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-xl border border-[#ffd166]/60 bg-black/60 px-3 py-1.5 text-center text-[11px] text-[#ffd166] backdrop-blur sm:gap-x-5 sm:px-4 sm:py-2 sm:text-xs" role="status">
+              <span className="font-black tracking-widest">{skin.labels.freeSpins} ×{FS_MULT}</span>
+              <span>Spin {s.fs.played} / {s.fs.total}</span>
+              <span>Won ◈ {money(s.fs.win)}</span>
+            </div>
+          )}
 
           {s.banner && (
             <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-black/60" role="status">
@@ -309,6 +309,14 @@ useEffect(() => {
               {balance < bet && !s.busy && !outOfChips && (
                 <p className="mt-2 text-center text-[11px] text-red-300">Not enough chips for this bet. Pick a lower one.</p>
               )}
+
+              {outOfChips && (
+                <div className="mt-2 flex justify-center">
+                  <button onClick={refill} className={`rounded-full px-5 py-2.5 text-xs font-bold sm:px-8 sm:py-3 sm:text-sm ${skin.betOn}`}>
+                    Out of chips · take a ◈ 1,000 refill
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <>
@@ -342,7 +350,7 @@ useEffect(() => {
                 {outOfChips ? (
                   <div className="flex justify-center">
                     <button onClick={refill} className={`rounded-full px-5 py-2.5 text-xs font-bold sm:px-8 sm:py-3 sm:text-sm ${skin.betOn}`}>
-                      Out of chips · take a ◈ 500 refill
+                      Out of chips · take a ◈ 1,000 refill
                     </button>
                   </div>
                 ) : (
