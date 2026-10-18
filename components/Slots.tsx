@@ -140,29 +140,31 @@ useEffect(() => {
           {skinId === "miami" && <MiamiBackdrop party={s.fs !== null} />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} colors={skin.confetti} />}
 
-          <div className="flex justify-end px-1">
+          <div className="grid grid-cols-[2.25rem_1fr_2.25rem] items-start gap-2">
+  <span aria-hidden="true" />
+
+  <header className={`text-center ${fullscreen ? "mb-2" : "mb-3 sm:mb-5"}`}>
+    <div className="mx-auto w-fit rounded-2xl border border-white/15 bg-[linear-gradient(180deg,#2a2f36,#14181d)] px-5 py-2.5 shadow-[0_12px_34px_rgba(0,0,0,.65),inset_0_1px_0_rgba(255,255,255,.15)] sm:px-8 sm:py-3">
+      <div className="absolute inset-x-4 top-1.5 flex justify-between">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <span key={i} className="h-1.5 w-1.5 rounded-full bg-[#ffd166] shadow-[0_0_6px_#ffd166]" />
+        ))}
+      </div>
+      <div className={`mt-2 inline-block rounded-xl border-2 px-4 py-1 sm:px-6 sm:py-1.5 ${skin.signBox}`}>
+        <h3 className={`text-xl font-black uppercase tracking-[0.12em] sm:text-4xl sm:tracking-[0.14em] ${skin.titleClass}`}>{skin.title}</h3>
+      </div>
+      <p className="mt-1.5 text-[8px] uppercase tracking-[0.22em] text-white/70 sm:mt-2 sm:text-[10px] sm:tracking-[0.3em]">{skin.tagline}</p>
+    </div>
+  </header>
+
   <button
     onClick={() => setFullscreen((v) => !v)}
     aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-    className="relative z-40 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/60 text-sm text-white/80 backdrop-blur transition hover:border-[#ffd166] hover:text-[#ffd166] sm:hidden"
+    className="relative z-40 flex h-9 w-9 items-center justify-center justify-self-end rounded-full border border-white/20 bg-black/60 text-sm text-white/80 backdrop-blur transition hover:border-[#ffd166] hover:text-[#ffd166] sm:hidden"
   >
     {fullscreen ? "✕" : "⛶"}
   </button>
 </div>
-
-          <header className={`text-center ${fullscreen ? "mb-2" : "mb-3 sm:mb-5"}`}>
-  <div className="relative mx-auto mr-12 w-fit rounded-2xl border border-white/15 bg-[linear-gradient(180deg,#2a2f36,#14181d)] px-6 py-2.5 shadow-[0_12px_34px_rgba(0,0,0,.65),inset_0_1px_0_rgba(255,255,255,.15)] sm:mr-16 sm:px-10 sm:py-3">
-    <div className="absolute inset-x-4 top-1.5 flex justify-between">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <span key={i} className="h-1.5 w-1.5 rounded-full bg-[#ffd166] shadow-[0_0_6px_#ffd166]" />
-      ))}
-    </div>
-    <div className={`mt-2 inline-block rounded-xl border-2 px-4 py-1 sm:px-6 sm:py-1.5 ${skin.signBox}`}>
-      <h3 className={`text-2xl font-black uppercase tracking-[0.12em] sm:text-5xl sm:tracking-[0.14em] ${skin.titleClass}`}>{skin.title}</h3>
-    </div>
-    <p className="mt-1.5 text-[9px] uppercase tracking-[0.22em] text-white/70 sm:mt-2 sm:text-[11px] sm:tracking-[0.3em]">{skin.tagline}</p>
-  </div>
-</header>
 
           <JackpotBar pools={s.pools} bet={bet} />
 
