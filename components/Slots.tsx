@@ -140,22 +140,45 @@ useEffect(() => {
           {skinId === "miami" && <MiamiBackdrop party={s.fs !== null} />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} colors={skin.confetti} />}
 
-          <button
-  onClick={() => setFullscreen((v) => !v)}
-  aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-  className="absolute right-2 top-[max(env(safe-area-inset-top),0.5rem)] z-40 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/60 text-sm text-white/80 backdrop-blur transition hover:border-[#ffd166] hover:text-[#ffd166] sm:hidden"
->
-  {fullscreen ? "✕" : "⛶"}
-</button>
-
-<header className={`mx-auto w-fit text-center ${fullscreen ? "mb-2 mt-12" : "mb-3 mt-2 sm:mb-5 sm:mt-3"}`}>
-  <div className="mx-auto w-fit rounded-2xl border border-white/15 bg-[linear-gradient(180deg,#2a2f36,#14181d)] px-5 py-2 shadow-[0_12px_34px_rgba(0,0,0,.65),inset_0_1px_0_rgba(255,255,255,.15)] sm:px-8 sm:py-2.5">
-    <div className={`mt-1.5 inline-block rounded-xl border-2 px-4 py-0.5 sm:px-6 sm:py-1 ${skin.signBox}`}>
-      <h3 className={`text-lg font-black uppercase tracking-[0.12em] sm:text-3xl sm:tracking-[0.14em] ${skin.titleClass}`}>{skin.title}</h3>
-    </div>
-    <p className="mt-1 text-[8px] uppercase tracking-[0.22em] text-white/70 sm:text-[10px] sm:tracking-[0.3em]">{skin.tagline}</p>
+          <div className="relative z-10 mb-3 w-full sm:mb-5">
+  {/* Ligne réservée au bouton plein écran */}
+  <div className="mb-2 flex h-9 w-full items-center justify-end sm:hidden">
+    <button
+      type="button"
+      onClick={() => setFullscreen((v) => !v)}
+      aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/60 text-sm text-white/80 backdrop-blur transition hover:border-[#ffd166] hover:text-[#ffd166]"
+    >
+      {fullscreen ? "✕" : "⛶"}
+    </button>
   </div>
-</header>
+
+  {/* Titre centré, sous le bouton */}
+  <header className="flex w-full justify-center text-center">
+    <div
+      className="relative w-fit max-w-full rounded-2xl border border-white/15 px-4 py-2 sm:px-6 sm:py-2.5"
+      style={{
+        background: "linear-gradient(180deg, #2a2f36, #14181d)",
+        boxShadow:
+          "0 8px 24px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.12)",
+      }}
+    >
+      <div
+        className={`inline-block max-w-full rounded-xl border-2 px-3 py-1 sm:px-5 ${skin.signBox}`}
+      >
+        <h3
+          className={`text-lg font-black uppercase leading-tight tracking-[0.08em] sm:text-3xl sm:tracking-[0.12em] ${skin.titleClass}`}
+        >
+          {skin.title}
+        </h3>
+      </div>
+
+      <p className="mt-1 text-[8px] uppercase leading-relaxed tracking-[0.14em] text-white/60 sm:text-[10px] sm:tracking-[0.22em]">
+        {skin.tagline}
+      </p>
+    </div>
+  </header>
+</div>
 
           <JackpotBar pools={s.pools} bet={bet} />
 
