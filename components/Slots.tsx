@@ -149,7 +149,7 @@ useEffect(() => {
           </button>
 
           <header className={`text-center ${fullscreen ? "mb-2" : "mb-3 sm:mb-5"}`}>
-  <div className="relative mx-auto w-fit rounded-2xl border border-white/15 bg-[linear-gradient(180deg,#2a2f36,#14181d)] px-6 py-2.5 shadow-[0_12px_34px_rgba(0,0,0,.65),inset_0_1px_0_rgba(255,255,255,.15)] sm:px-10 sm:py-3">
+  <div className="relative mx-auto mr-12 w-fit rounded-2xl border border-white/15 bg-[linear-gradient(180deg,#2a2f36,#14181d)] px-6 py-2.5 shadow-[0_12px_34px_rgba(0,0,0,.65),inset_0_1px_0_rgba(255,255,255,.15)] sm:mr-16 sm:px-10 sm:py-3">
     <div className="absolute inset-x-4 top-1.5 flex justify-between">
       {Array.from({ length: 8 }).map((_, i) => (
         <span key={i} className="h-1.5 w-1.5 rounded-full bg-[#ffd166] shadow-[0_0_6px_#ffd166]" />
