@@ -140,13 +140,15 @@ useEffect(() => {
           {skinId === "miami" && <MiamiBackdrop party={s.fs !== null} />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} colors={skin.confetti} />}
 
-          <button
-            onClick={() => setFullscreen((v) => !v)}
-            aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-            className="absolute right-2 top-[max(env(safe-area-inset-top),0.5rem)] z-40 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/60 text-sm text-white/80 backdrop-blur transition hover:border-[#ffd166] hover:text-[#ffd166] sm:hidden"
-          >
-            {fullscreen ? "✕" : "⛶"}
-          </button>
+          <div className="flex justify-end px-1">
+  <button
+    onClick={() => setFullscreen((v) => !v)}
+    aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+    className="relative z-40 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/60 text-sm text-white/80 backdrop-blur transition hover:border-[#ffd166] hover:text-[#ffd166] sm:hidden"
+  >
+    {fullscreen ? "✕" : "⛶"}
+  </button>
+</div>
 
           <header className={`text-center ${fullscreen ? "mb-2" : "mb-3 sm:mb-5"}`}>
   <div className="relative mx-auto mr-12 w-fit rounded-2xl border border-white/15 bg-[linear-gradient(180deg,#2a2f36,#14181d)] px-6 py-2.5 shadow-[0_12px_34px_rgba(0,0,0,.65),inset_0_1px_0_rgba(255,255,255,.15)] sm:mr-16 sm:px-10 sm:py-3">
