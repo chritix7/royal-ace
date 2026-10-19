@@ -104,3 +104,5 @@ export const btn =
     "rounded-full px-6 py-3 text-sm font-bold outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-30";
 export const small =
     "rounded-full border border-white/10 py-2 text-xs text-white/60 outline-none transition hover:border-[#d7b45b] hover:text-[#e5c779] focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-30";
+export const machineSmall =
+  "rounded-full border border-white/15 bg-[linear-gradient(180deg,#30313b_0%,#1c1d26_48%,#14151d_100%)] py-2 text-xs text-white/70 shadow-[0_2px_0_#08090e,0_4px_7px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.10)] outline-none transition-[transform,box-shadow,border-color,color] duration-150 enabled:hover:border-[#d7b45b]/60 enabled:hover:text-[#e5c779] enabled:active:translate-y-px enabled:active:shadow-[0_1px_0_#08090e,inset_0_2px_4px_rgba(0,0,0,0.45)] focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-30 motion-reduce:transition-none";

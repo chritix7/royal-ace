@@ -11,7 +11,7 @@ import RollingNumber from "./RollingNumber";
 import Glyph from "./Glyph";
 import MiamiBackdrop from "./MiamiBackdrop";
 import SlotReels from "./SlotReels";
-import { Counter, small } from "./ui";
+import { Counter, small, machineSmall } from "./ui";
 import { RANKS, SKINS, rankOf, type SkinId } from "../lib/skins";
 import { useSlots } from "../lib/useSlots";
 import { VAULT_TRIGGER } from "../lib/vault";
@@ -486,7 +486,7 @@ useEffect(() => {
                             key={n}
                             onClick={() => startAuto(n)}
                             disabled={!canSpin}
-                            className={`${small} px-2 text-[11px] sm:px-3 sm:text-xs ${n === autoCount ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
+                            className={`${machineSmall} px-2 text-[11px] sm:px-3 sm:text-xs ${n === autoCount ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
                           >
                             {n}
                           </button>
@@ -495,7 +495,7 @@ useEffect(() => {
                       <button
                         onClick={toggleTurbo}
                         aria-pressed={s.turbo}
-                        className={`${small} px-2 text-[11px] sm:px-3 sm:text-xs ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
+                        className={`${machineSmall} px-2 text-[11px] sm:px-3 sm:text-xs ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
                       >
                         ⚡ Turbo
                       </button>
@@ -538,12 +538,12 @@ style={{
                           X2
                         </button>
                       )}
-                      <button onClick={maxBet} disabled={s.busy} className={`${small} px-2 text-[11px] sm:px-4 sm:text-xs`}>Max bet</button>
+                      <button onClick={maxBet} disabled={s.busy} className={`${machineSmall} px-2 text-[11px] sm:px-4 sm:text-xs`}>Max bet</button>
                       <button
                         onClick={buyBonus}
                         disabled={s.busy || !!s.fs || balance < bonusPrice}
                         title="Start the free spins right away"
-                        className={`${small} max-w-28 px-2 text-[10px] leading-3 sm:max-w-none sm:px-3 sm:text-xs sm:leading-4 ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
+                        className={`${machineSmall} max-w-28 px-2 text-[10px] leading-3 sm:max-w-none sm:px-3 sm:text-xs sm:leading-4 ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
                       >
                         {s.confirmBuy ? "Confirm?" : "Buy bonus"} ◈ {money(bonusPrice)}
                       </button>
