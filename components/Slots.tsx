@@ -225,48 +225,48 @@ useEffect(() => {
 
           <JackpotBar pools={s.pools} bet={bet} />
 
-<div
-  className="mx-auto mb-3 w-full max-w-md rounded-xl border border-white/10 px-3 py-2"
-  style={{
-    background: "linear-gradient(180deg, #10131c 0%, #080b12 100%)",
-    boxShadow: "inset 0 2px 5px rgba(0,0,0,0.65)",
-  }}
->
-  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.16em] text-white/50">
-    <span>Crown collection</span>
+          <div className="relative">
+  <SlotReels
+    s={s}
+    skin={skin}
+    activeLine={activeLine}
+    fast={s.lastWin > 0 || s.celebrate > 0 || !!s.fs}
+    shake={s.winBanner ? (s.winBanner.tier === "epic" ? 3 : s.winBanner.tier === "mega" ? 2 : 1) : 0}
+    onPull={() => playWithSound(1)}
+    canPull={canSpin}
+    large={fullscreen}
+    mood={
+      s.fs || (s.winBanner && (s.winBanner.tier === "mega" || s.winBanner.tier === "epic"))
+        ? "jackpot"
+        : s.lastWin > 0 || s.celebrate > 0
+          ? "win"
+          : "idle"
+    }
+  />
 
-    <span className="text-[#e5c779]">
-      {collection.crowns} / {collection.target}
-    </span>
-  </div>
-
-  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/10">
+  <div className="pointer-events-none absolute inset-x-0 top-2 z-20 flex justify-center px-3">
     <div
-      className="h-full rounded-full bg-gradient-to-r from-[#c8a65b] to-[#e5c779] transition-all"
-      style={{
-        width: `${(collection.crowns / collection.target) * 100}%`,
-      }}
-    />
+      className="w-full max-w-[320px] rounded-lg border border-white/15 bg-black/65 px-2.5 py-1 backdrop-blur-sm"
+    >
+      <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.16em] text-white/60">
+        <span>Crown collection</span>
+
+        <span className="text-[#e5c779]">
+          {collection.crowns} / {collection.target}
+        </span>
+      </div>
+
+      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/15">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-[#c8a65b] to-[#e5c779] transition-all"
+          style={{
+            width: `${(collection.crowns / collection.target) * 100}%`,
+          }}
+        />
+      </div>
+    </div>
   </div>
 </div>
-
-          <SlotReels
-            s={s}
-            skin={skin}
-            activeLine={activeLine}
-            fast={s.lastWin > 0 || s.celebrate > 0 || !!s.fs}
-            shake={s.winBanner ? (s.winBanner.tier === "epic" ? 3 : s.winBanner.tier === "mega" ? 2 : 1) : 0}
-            onPull={() => playWithSound(1)}
-            canPull={canSpin}
-            large={fullscreen}
-            mood={
-  s.fs || (s.winBanner && (s.winBanner.tier === "mega" || s.winBanner.tier === "epic"))
-    ? "jackpot"
-    : s.lastWin > 0 || s.celebrate > 0
-      ? "win"
-      : "idle"
-}
-          />
 
           {s.fs && !fullscreen && (
             <div className="pointer-events-none mx-auto mt-1.5 flex w-fit max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-xl border border-[#ffd166]/60 bg-black/60 px-3 py-1.5 text-center text-[11px] text-[#ffd166] backdrop-blur sm:gap-x-5 sm:px-4 sm:py-2 sm:text-xs" role="status">
