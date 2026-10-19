@@ -13,6 +13,7 @@ import {
 import { missionView, missionsStore, useMissions } from "../lib/missions";
 import { today } from "../lib/clock";
 import { progressionStore, useProgression, xpInLevel, xpForNextLevel } from "../lib/progression";
+import { useWeekly, weeklyStore } from "../lib/weekly";
 
 type Props = { open: boolean; onClose: () => void };
 
@@ -20,16 +21,24 @@ export default function RewardsPanel({ open, onClose }: Props) {
   const daily = useDaily();
   const missions = useMissions();
   const progression = useProgression();
+  const weekly = useWeekly();
   const vipTier = vipTierForLevel(progression.level);
   const nextTier = nextVipTier(progression.level);
   const [flash, setFlash] = useState<string | null>(null);
 
   useEffect(() => {
-  if (open) {
-    missionsStore.refresh();
-    progressionStore.hydrate();
-    setFlash(null);
-  }
+  if (!open) return;
+
+  missionsStore.refresh();
+  progressionStore.hydrate();
+  weeklyStore.refresh();
+  setFlash(null);
+
+  const timer = window.setInterval(() => {
+    weeklyStore.refresh();
+  }, 30_000);
+
+  return () => window.clearInterval(timer);
 }, [open]);
 
   if (!open) return null;
@@ -134,6 +143,63 @@ export default function RewardsPanel({ open, onClose }: Props) {
       </div>
     </>
   )}
+</section>
+
+<section className="mb-6 rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+  <div className="flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white/70">
+        Weekly challenge
+      </h3>
+
+      <p className="mt-1 text-xs text-white/45">
+        Your personal score · Monday to Sunday
+      </p>
+    </div>
+
+    <span className="rounded-full border border-[#e5c779]/20 bg-[#e5c779]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#e5c779]">
+      Local
+    </span>
+  </div>
+
+  <div className="mt-4 grid grid-cols-2 gap-3">
+    <div className="rounded-2xl border border-[#e5c779]/20 bg-[#e5c779]/[0.06] p-4">
+      <p className="text-[10px] uppercase tracking-[0.12em] text-white/45">
+        This week
+      </p>
+
+      <p className="mt-2 break-words font-mono text-2xl font-black tabular-nums text-[#e5c779]">
+        {weekly.points.toLocaleString("en-US")}
+      </p>
+
+      <p className="mt-1 text-[11px] text-white/40">
+        points
+      </p>
+    </div>
+
+    <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
+      <p className="text-[10px] uppercase tracking-[0.12em] text-white/45">
+        Last week
+      </p>
+
+      <p className="mt-2 break-words font-mono text-2xl font-black tabular-nums text-white/70">
+        {weekly.previousPoints.toLocaleString("en-US")}
+      </p>
+
+      <p className="mt-1 text-[11px] text-white/40">
+        points
+      </p>
+    </div>
+  </div>
+
+  <p className="mt-3 text-[11px] leading-relaxed text-white/40">
+    Paid spin or blackjack hand: +10 · Win: +20 · Bonus: +100
+    · Vault: +150 · Jackpot: +500
+  </p>
+
+  <p className="mt-2 text-[11px] leading-relaxed text-white/35">
+    Saved on this browser. No chip rewards or online ranking yet.
+  </p>
 </section>
 
         <section className="mb-6 rounded-3xl border border-white/10 bg-white/[0.03] p-5">
