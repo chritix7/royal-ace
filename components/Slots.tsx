@@ -788,36 +788,84 @@ style={{
 
       {buyOpen && (
   <div
-    className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+    className="fixed inset-0 z-[80] flex items-center justify-center bg-black/75 backdrop-blur-sm"
     onClick={() => setBuyOpen(false)}
   >
     <div
-      className="animate-pop w-[min(88vw,340px)] rounded-3xl border border-[#c8a65b]/50 bg-[#101713] p-6 text-center shadow-2xl"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="buy-bonus-title"
+      className="relative w-[min(88vw,340px)] rounded-2xl border border-white/20 p-6 text-center"
+      style={{
+        background:
+          "linear-gradient(180deg, rgba(255,255,255,0.04), transparent 25%), linear-gradient(135deg, #292b35 0%, #171923 45%, #10121a 100%)",
+        boxShadow:
+          "0 24px 70px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.50)",
+      }}
       onClick={(e) => e.stopPropagation()}
     >
-      <p className="text-[10px] uppercase tracking-[0.25em] text-white/50">Bonus purchase</p>
-      <h3 className="mt-2 text-xl font-black text-[#ffd166]">
+      {/* Reflet discret sur le bord supérieur */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-6 top-0 h-px"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(255,255,255,0.30), transparent)",
+        }}
+      />
+
+      <p className="text-[10px] uppercase tracking-[0.25em] text-white/45">
+        Bonus purchase
+      </p>
+
+      <h3
+        id="buy-bonus-title"
+        className="mt-2 text-xl font-black leading-tight text-[#ead5a3]"
+      >
         Start {skin.labels.freeSpins}?
       </h3>
-      <div className="mx-auto mt-4 w-fit rounded-2xl border border-white/10 bg-black/40 px-6 py-3">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">Price</p>
-        <p className="font-mono text-3xl font-black text-white">◈ {money(bonusPrice)}</p>
+
+      <div
+        className="mx-auto mt-4 rounded-xl border border-white/10 px-4 py-3"
+        style={{
+          background:
+            "linear-gradient(180deg, #10131c 0%, #080b12 100%)",
+          boxShadow:
+            "inset 0 2px 5px rgba(0,0,0,0.65), inset 0 -1px 0 rgba(255,255,255,0.04)",
+        }}
+      >
+        <p className="text-[10px] uppercase tracking-[0.2em] text-white/45">
+          Price
+        </p>
+
+        <p className="mt-1 font-mono text-3xl font-black tabular-nums text-[#f0dfb7]">
+          <span className="text-[#bfa76e]">◈</span>{" "}
+          {money(bonusPrice)}
+        </p>
       </div>
+
       <div className="mt-5 flex gap-3">
         <button
+          type="button"
           onClick={() => setBuyOpen(false)}
-          className={`${small} flex-1 py-3`}
+          className={`${machineSmall} flex-1 py-3`}
         >
           Cancel
         </button>
+
         <button
+          type="button"
           onClick={() => {
             buyBonus();
             buyBonus();
             setBuyOpen(false);
           }}
           disabled={balance < bonusPrice}
-          className={`${small} flex-1 py-3 !border-[#ffd166] !text-[#ffd166]`}
+          className={`${machineSmall} flex-1 py-3 !border-[#d7b45b]/70 !text-[#f0dfb7]`}
+          style={{
+            background:
+              "linear-gradient(180deg, #49402d 0%, #302a20 50%, #211e19 100%)",
+          }}
         >
           Confirm
         </button>
