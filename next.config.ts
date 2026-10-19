@@ -1,13 +1,4 @@
 import type { NextConfig } from "next";
-import withSerwistInit from "@serwist/next";
-
-const withSerwist = withSerwistInit({
-  swSrc: "app/sw.ts",
-  swDest: "public/sw.js",
-  cacheOnNavigation: true,
-  reloadOnOnline: true,
-  disable: process.env.NODE_ENV !== "production",
-});
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -25,4 +16,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSerwist(nextConfig);
+export default nextConfig;
