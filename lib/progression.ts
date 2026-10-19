@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { onEvent, type GameEvent } from "./events";
+import { wallet } from "./wallet";
+import { sfx } from "./sound";
 
 /**
  * Progression permanente : XP et niveaux.
@@ -63,6 +65,10 @@ const persist = () => {
 
 const levelFromXp = (xp: number) => Math.max(1, Math.floor(xp / XP_PER_LEVEL) + 1);
 
+export function levelReward(level: number) {
+  return 250 + (level - 1) * 100;
+}
+
 function handleEvent(event: GameEvent, amount = 1) {
   const gained = XP_BY_EVENT[event];
 
@@ -70,10 +76,19 @@ function handleEvent(event: GameEvent, amount = 1) {
 
   const xpGain = gained * amount;
 
+    const nextXp = state.xp + xpGain;
+  const nextLevel = levelFromXp(nextXp);
+
+  if (nextLevel > state.level) {
+    const reward = levelReward(nextLevel);
+    wallet.add(reward);
+    sfx.win();
+  }
+
   state = {
     ...state,
-    xp: state.xp + xpGain,
-    level: levelFromXp(state.xp + xpGain),
+    xp: nextXp,
+    level: nextLevel,
     totalSpins: state.totalSpins + (event === "spin" ? amount : 0),
     totalHands: state.totalHands + (event === "bjHand" ? amount : 0),
     totalWins:
