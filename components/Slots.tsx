@@ -244,7 +244,7 @@ useEffect(() => {
     }
   />
 
-  <div className="pointer-events-none absolute inset-x-0 -top-5 z-20 flex justify-center px-3">
+  <div className="pointer-events-none absolute inset-x-0 -top-2 z-20 flex justify-center px-3">
     <div
       className="w-full max-w-[320px] rounded-lg border border-white/15 bg-black/65 px-2.5 py-1 backdrop-blur-sm"
     >
