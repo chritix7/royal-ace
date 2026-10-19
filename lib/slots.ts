@@ -227,30 +227,57 @@ export function retriggerSpins(scatters: number, used: number, left: number) {
  * sont déjà tombés, les rouleaux restants ralentissent ("suspense" comme en casino).
  * Les temps sont en millisecondes depuis le début du tour.
  */
-export function reelTimings(grid: Sym[][], turbo = false, held: boolean[] = [], respin = false) {
-  const first = respin ? 900 : 1400;
-  const step = respin ? 480 : 650;
+export function reelTimings(
+  grid: Sym[][],
+  turbo = false,
+  held: boolean[] = [],
+  respin = false,
+) {
+  const first = respin
+    ? (turbo ? 800 : 900)
+    : (turbo ? 600 : 700);
+
+  const step = respin
+    ? (turbo ? 360 : 480)
+    : (turbo ? 230 : 325);
+
+  const suspense = turbo ? 450 : 650;
+
+  const landMs = respin
+    ? (turbo ? 360 : 420)
+    : (turbo ? 240 : 280);
+
   const stopAt: number[] = [];
   const anticipate: boolean[] = [];
+
   let scattersSoFar = 0;
-  let last = -1; // heure d'arrêt du dernier rouleau qui tourne
+  let last = -1;
+
   for (let k = 0; k < grid.length; k++) {
     if (held[k]) {
-      stopAt.push(0); // rouleau gardé : il ne tourne pas
+      stopAt.push(0);
       anticipate.push(false);
       continue;
     }
+
     const slow = !respin && k >= 2 && scattersSoFar >= 2;
-    const t = (last < 0 ? first : last + step) + (slow ? 1300 : 0);
+
+    const t =
+      (last < 0 ? first : last + step) +
+      (slow ? suspense : 0);
+
     anticipate.push(slow);
     stopAt.push(t);
+
     last = t;
     scattersSoFar += grid[k].filter((s) => s === "scatter").length;
   }
-  const f = turbo ? 0.5 : 1;
-  // landMs : durée du ralentissement final d'un rouleau. Elle est plus courte que l'écart entre
-  // deux arrêts, donc une colonne a fini de tomber avant que la suivante ne commence à ralentir.
-  return { stopAt: stopAt.map((x) => Math.round(x * f)), anticipate, landMs: Math.round((respin ? 420 : 560) * f) };
+
+  return {
+    stopAt,
+    anticipate,
+    landMs,
+  };
 }
 
 /** Un bonus de free spins complet (avec re-spins et retriggers). Renvoie le gain total du bonus. */
