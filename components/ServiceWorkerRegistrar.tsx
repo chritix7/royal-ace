@@ -7,25 +7,30 @@ export default function ServiceWorkerRegistrar() {
     if (typeof window === "undefined") return;
     if (!("serviceWorker" in navigator)) return;
 
-    const register = () => {
-      navigator.serviceWorker
-        .register("/sw.js", {
-          scope: "/",
-          updateViaCache: "none",
-        })
-        .catch((error) => {
-          console.error("Service worker registration failed", error);
-        });
+    const cleanup = async () => {
+      try {
+        const registrations =
+          await navigator.serviceWorker.getRegistrations();
+
+        await Promise.all(
+          registrations.map((registration) => registration.unregister()),
+        );
+
+        if ("caches" in window) {
+          const names = await caches.keys();
+          await Promise.all(names.map((name) => caches.delete(name)));
+        }
+      } catch (error) {
+        console.error("Service worker cleanup failed", error);
+      }
     };
 
     if (document.readyState === "complete") {
-      register();
-      return;
+      cleanup();
+    } else {
+      window.addEventListener("load", cleanup, { once: true });
+      return () => window.removeEventListener("load", cleanup);
     }
-
-    window.addEventListener("load", register, { once: true });
-
-    return () => window.removeEventListener("load", register);
   }, []);
 
   return null;
