@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { GAMBLE_MAX_ROUNDS, type CardColor } from "../lib/gamble";
 import type { GambleState } from "../lib/useSlots";
+import { useModalFocus } from "./useModalFocus";
 
 const money = (n: number) => n.toLocaleString("en-US");
 
@@ -65,12 +66,20 @@ export default function GamblePanel({
   onCollect: () => void;
   onClose: () => void;
 }) {
-  const canContinue = g.won === true && g.rounds < GAMBLE_MAX_ROUNDS;
+    const canContinue = g.won === true && g.rounds < GAMBLE_MAX_ROUNDS;
   const collectRef = useRef(onCollect);
   const closeRef = useRef(onClose);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   collectRef.current = onCollect;
   closeRef.current = onClose;
+
+  useModalFocus(panelRef, {
+    onClose: () => {
+      onCollect();
+      onClose();
+    },
+  });
 
   useEffect(() => {
     if (g.phase !== "result" || canContinue) return;
@@ -102,7 +111,8 @@ export default function GamblePanel({
         ✕
       </button>
 
-      <div
+            <div
+        ref={panelRef}
         className="relative w-full max-w-sm rounded-2xl border border-white/20 p-4 text-center sm:p-6"
         style={{
           background:

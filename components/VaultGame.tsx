@@ -6,6 +6,8 @@ import { CASE_ART } from "../lib/symbolArt";
 import { VAULT_PICKS, prizeValue, settleVault } from "../lib/vault";
 import type { VaultState } from "../lib/useSlots";
 import { machineSmall } from "./ui";
+import { useRef } from "react";
+import { useModalFocus } from "./useModalFocus";
 
 /** Bonus « Le coffre » : sélection et révélation des mallettes. */
 export default function VaultGame({
@@ -18,6 +20,9 @@ export default function VaultGame({
   onCollect: () => void;
 }) {
   const { prizes, picks, done, bet, pools } = vault;
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useModalFocus(panelRef);
   const result = settleVault(prizes, picks, pools, bet);
 
   return (
@@ -28,7 +33,8 @@ export default function VaultGame({
       aria-labelledby="vault-title"
     >
       <div
-        className="relative mx-auto max-w-xl rounded-2xl border border-white/20 p-3 text-center sm:p-5"
+  ref={panelRef}
+  className="relative mx-auto max-w-xl rounded-2xl border border-white/20 p-3 text-center sm:p-5"
         style={{
           background:
             "linear-gradient(180deg, rgba(255,255,255,0.04), transparent 25%), linear-gradient(135deg, #292b35 0%, #171923 45%, #10121a 100%)",
