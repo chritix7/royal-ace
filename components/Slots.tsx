@@ -241,7 +241,7 @@ useEffect(() => {
 }
           />
 
-          {s.fs && (
+          {s.fs && !fullscreen && (
             <div className="pointer-events-none mx-auto mt-1.5 flex w-fit max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-xl border border-[#ffd166]/60 bg-black/60 px-3 py-1.5 text-center text-[11px] text-[#ffd166] backdrop-blur sm:gap-x-5 sm:px-4 sm:py-2 sm:text-xs" role="status">
               <span className="font-black tracking-widest">{skin.labels.freeSpins} ×{FS_MULT}</span>
               <span>Spin {s.fs.played} / {s.fs.total}</span>
@@ -301,23 +301,37 @@ useEffect(() => {
   </div>
 
   <div
-    className="min-w-0 flex-1 text-center"
-    role="status"
-    aria-live="polite"
-    aria-atomic="true"
-  >
-    <p className="truncate text-[11px] font-semibold text-white/85">
-      {s.message}
-    </p>
-
-    {activeLine && (
-      <p className="truncate text-[9px] text-[#d8bb83]">
-        Line {activeLine.line}: {activeLine.count}×{" "}
-        <Glyph sym={activeLine.sym} skin={skin} />
-        {" "}· +◈ {money(activeLine.pay * lineBet)}
+  className="min-w-0 flex-1 text-center"
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
+>
+  {s.fs ? (
+    <>
+      <p className="truncate text-[9px] font-black uppercase tracking-[0.08em] text-[#e5b2cf]">
+        PENTHOUSE · ×{FS_MULT}
       </p>
-    )}
-  </div>
+
+      <p className="truncate text-[11px] font-semibold tabular-nums text-white/90">
+        TOUR {s.fs.played}/{s.fs.total}
+      </p>
+    </>
+  ) : (
+    <>
+      <p className="truncate text-[11px] font-semibold text-white/85">
+        {s.message}
+      </p>
+
+      {activeLine && (
+        <p className="truncate text-[9px] text-[#d8bb83]">
+          Line {activeLine.line}: {activeLine.count}×{" "}
+          <Glyph sym={activeLine.sym} skin={skin} />
+          {" "}· +◈ {money(activeLine.pay * lineBet)}
+        </p>
+      )}
+    </>
+  )}
+</div>
 
   <div className="flex shrink-0 items-center gap-2">
     <div className="text-right">
