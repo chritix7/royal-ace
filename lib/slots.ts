@@ -233,19 +233,13 @@ export function reelTimings(
   held: boolean[] = [],
   respin = false,
 ) {
-  const first = respin
-    ? (turbo ? 800 : 900)
-    : (turbo ? 600 : 700);
+  const first = respin ? 700 : (turbo ? 600 : 700);
 
-  const step = respin
-    ? (turbo ? 360 : 480)
-    : (turbo ? 230 : 325);
+const step = respin ? 325 : (turbo ? 230 : 325);
 
-  const suspense = turbo ? 450 : 650;
+const suspense = turbo ? 450 : 650;
 
-  const landMs = respin
-    ? (turbo ? 360 : 420)
-    : (turbo ? 240 : 280);
+const landMs = respin ? 280 : (turbo ? 240 : 280);
 
   const stopAt: number[] = [];
   const anticipate: boolean[] = [];
