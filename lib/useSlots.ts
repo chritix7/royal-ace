@@ -256,7 +256,7 @@ function bonusContinue() {
         if (ratio >= 20) sfx.bigWin();
         else sfx.win();
         haptic(ratio >= 20 ? HAPTIC.big : HAPTIC.win);
-        await sleep((ratio >= 10 ? 1500 : 900) * speed());
+        await sleep((ratio >= 10 ? 700 : 350) * speed());
       }
     }
     return { total: spinTotal, scatters: steps[0].scatters, freeSpins: steps[0].freeSpins };
@@ -434,14 +434,14 @@ if (collectionStore.isReady(b)) {
         set({ winBanner: null });
       }
     } else if (tier) {
-      sfx.bigWin();
-      sfx.coin(tier === "epic" ? 14 : 8);
-      music.duck(3400);
-      haptic(HAPTIC.epic);
-      set({ winBanner: { label: labelsRef.current[tier], amount: total, tier }, celebrate: Date.now() });
-      await sleep((tier === "epic" ? 4600 : 3400) * speed());
-      set({ winBanner: null });
-    }
+  sfx.bigWin();
+  sfx.coin(tier === "epic" ? 14 : 8);
+  music.duck(2200);
+  haptic(HAPTIC.epic);
+  set({ winBanner: { label: labelsRef.current[tier], amount: total, tier }, celebrate: Date.now() });
+  await sleep((tier === "epic" ? 2600 : 1800) * speed());
+  set({ winBanner: null });
+}
     return { total, triggered, vault: vaultHit, ratio, jackpots };
   }
 
@@ -474,7 +474,7 @@ if (collectionStore.isReady(b)) {
         canAfford: () => wallet.getBalance() >= BET_LEVELS[ref.current.betIdx],
         onInsufficientFunds: () => set({ message: "Not enough chips for this bet. Lower it or refill." }),
         onProgress: (remaining) => set({ autoLeft: remaining > 0 ? remaining : 0 }),
-        pause: () => sleep(450 * speed()),
+        pause: () => sleep(180 * speed()),
       },
     );
 
