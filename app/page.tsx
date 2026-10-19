@@ -129,7 +129,7 @@ export default function Home() {
           aria-selected={selected}
           disabled={blocked}
           title={blocked ? "Finish the current round first" : t.label}
-          onClick={() => setTab(t.id)}
+          onClick={() => {}}
           className={`relative touch-manipulation select-none [-webkit-tap-highlight-color:transparent] flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-xl outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-40 sm:h-auto sm:w-auto sm:px-6 sm:py-3 sm:text-sm sm:font-bold ${
             selected
               ? "border-[#e5c779]/70 bg-gradient-to-b from-[#efcf83] to-[#b9913f] text-[#10130e] shadow-[0_3px_0_#765b25,0_0_14px_rgba(229,199,121,0.15)]"
