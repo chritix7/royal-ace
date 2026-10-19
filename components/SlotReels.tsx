@@ -190,14 +190,40 @@ export default function SlotReels({
     <div className={`mx-auto flex w-fit items-stretch gap-1.5 sm:gap-3 ${shake ? `shake-${shake}` : ""}`}>
       <LineTabs from={1} to={10} winLines={winLines} active={activeLine?.line ?? null} />
 
-      <div className={`relative rounded-[28px] p-3.5 ring-1 ring-white/10 shadow-[0_18px_50px_rgba(0,0,0,.65),inset_0_1px_0_rgba(255,255,255,.12)] sm:p-5 ${skin.bezel}`}>
+      <div
+  className="relative rounded-[28px] p-3.5 sm:p-5"
+  style={{
+    background:
+      "linear-gradient(135deg, rgba(255,255,255,0.07), transparent 35%, rgba(0,0,0,0.30) 75%), linear-gradient(180deg, #42444c 0%, #25262e 12%, #16171e 48%, #292a33 88%, #454650 100%)",
+    boxShadow:
+      "0 18px 36px rgba(0,0,0,0.55), 0 4px 8px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.24), inset 0 -2px 0 rgba(0,0,0,0.70), inset 1px 0 0 rgba(255,255,255,0.08), inset -1px 0 0 rgba(0,0,0,0.50)",
+  }}
+>
+  {/* Liseré lumineux discret, sans ampoules */}
+  <div
+    aria-hidden="true"
+    className="pointer-events-none absolute inset-[5px] rounded-[23px]"
+    style={{
+      border: "1px solid rgba(244,114,182,0.28)",
+      boxShadow:
+        "0 0 5px rgba(236,72,153,0.10), inset 0 0 4px rgba(236,72,153,0.06)",
+    }}
+  />
   {["left-2 top-2", "right-2 top-2", "left-2 bottom-2", "right-2 bottom-2"].map((pos) => (
     <span
-      key={pos}
-      className={`absolute ${pos} h-2.5 w-2.5 rounded-full bg-[radial-gradient(circle_at_35%_30%,#e5e7eb,#6b7280_60%,#374151)] shadow-inner`}
-    />
+  key={pos}
+  aria-hidden="true"
+  className={`absolute ${pos} flex h-2.5 w-2.5 items-center justify-center rounded-full`}
+  style={{
+    background:
+      "radial-gradient(circle at 35% 30%, #a1a1aa, #52525b 55%, #27272a)",
+    boxShadow:
+      "0 1px 2px rgba(0,0,0,0.65), inset 0 1px 1px rgba(255,255,255,0.25)",
+  }}
+>
+  <span className="h-px w-1.5 -rotate-45 bg-black/65" />
+</span>
   ))}
-  <Bulbs color={skin.bulb} fast={fast} mood={mood} />
         <div className={`relative rounded-xl bg-black p-1 shadow-[inset_0_0_20px_#000] sm:p-1.5 ${large ? "[--cell:4.2rem] sm:[--cell:5rem] lg:[--cell:5.2rem]" : "[--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:5.2rem]"}`}>
           <div className="relative flex overflow-hidden rounded-lg">
             {Array.from({ length: REELS }, (_, k) => (
