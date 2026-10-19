@@ -129,7 +129,7 @@ export default function Home() {
   aria-selected={selected}
   disabled={blocked}
   onClick={() => setTab(t.id)}
-  className="flex h-11 w-11 items-center justify-center rounded-full border border-red-500 bg-[#151b15] text-xl text-white transition"
+  className="flex h-11 w-11 items-center justify-center rounded-full border border-red-500 bg-[#151b15] text-xl text-white transition shadow-[0_3px_0_#080c0b]"
 >
   <span aria-hidden="true" className="sm:hidden">
     {t.id === "blackjack" ? "♠" : "🎰"}
