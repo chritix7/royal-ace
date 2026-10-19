@@ -42,11 +42,11 @@ export default function WinFeed() {
   const [wins, setWins] = useState<Win[]>([]);
 
   useEffect(() => {
-    setWins([randomWin(), randomWin()]);
+    setWins([randomWin()]);
 
     const interval = setInterval(() => {
-      setWins((prev) => [randomWin(), ...prev].slice(0, 3));
-    }, 4000 + Math.random() * 5000);
+      setWins((prev) => [randomWin(), ...prev].slice(0, 2));
+    }, 2200 + Math.random() * 1800);
 
     return () => clearInterval(interval);
   }, []);
@@ -64,7 +64,7 @@ export default function WinFeed() {
               w.kind === "jackpot"
                 ? "border-[#e5c779]/60 bg-[#e5c779]/10 text-[#e5c779]"
                 : "border-white/10 bg-white/[0.03] text-white/55"
-            } ${i === 0 ? "opacity-100" : i === 1 ? "opacity-70" : "opacity-40"}`}
+            } ${i === 0 ? "opacity-100" : "opacity-60"}`}
           >
             <span aria-hidden="true">
               {w.kind === "jackpot" ? "💎" : w.game === "Blackjack" ? "♠️" : "🎰"}
