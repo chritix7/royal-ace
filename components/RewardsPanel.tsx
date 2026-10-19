@@ -4,20 +4,23 @@ import { useEffect, useState } from "react";
 import { DAILY_MAX_DAYS, dailyStatus, dailyStore, useDaily } from "../lib/daily";
 import { missionView, missionsStore, useMissions } from "../lib/missions";
 import { today } from "../lib/clock";
+import { progressionStore, useProgression, xpInLevel, xpForNextLevel } from "../lib/progression";
 
 type Props = { open: boolean; onClose: () => void };
 
 export default function RewardsPanel({ open, onClose }: Props) {
   const daily = useDaily();
   const missions = useMissions();
+  const progression = useProgression();
   const [flash, setFlash] = useState<string | null>(null);
 
   useEffect(() => {
-    if (open) {
-      missionsStore.refresh();
-      setFlash(null);
-    }
-  }, [open]);
+  if (open) {
+    missionsStore.refresh();
+    progressionStore.hydrate();
+    setFlash(null);
+  }
+}, [open]);
 
   if (!open) return null;
 
@@ -47,6 +50,42 @@ export default function RewardsPanel({ open, onClose }: Props) {
         </div>
 
         {flash && <div className="mb-5 rounded-2xl border border-[#e5c779]/30 bg-[#e5c779]/10 px-4 py-3 text-sm font-semibold text-[#e5c779]">{flash}</div>}
+
+        <section className="mb-6 rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+  <div className="flex items-center justify-between gap-4">
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white/70">
+        Player level
+      </h3>
+      <p className="mt-1 text-xs text-white/45">
+        Level {progression.level} · {progression.xp.toLocaleString("en-US")} XP
+      </p>
+    </div>
+
+    <p className="font-mono text-sm font-black tabular-nums text-[#e5c779]">
+      {xpInLevel(progression.xp)} / {xpForNextLevel()}
+    </p>
+  </div>
+
+  <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
+    <div
+      className="h-full rounded-full bg-gradient-to-r from-[#c8a65b] to-[#e5c779] transition-all"
+      style={{
+        width: `${Math.min(
+          100,
+          (xpInLevel(progression.xp) / xpForNextLevel()) * 100,
+        )}%`,
+      }}
+    />
+  </div>
+
+  <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-white/45 sm:grid-cols-4">
+    <p>Spins: {progression.totalSpins}</p>
+    <p>Hands: {progression.totalHands}</p>
+    <p>Bonuses: {progression.totalBonuses}</p>
+    <p>Jackpots: {progression.totalJackpots}</p>
+  </div>
+</section>
 
         <section className="mb-6 rounded-3xl border border-white/10 bg-white/[0.03] p-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
