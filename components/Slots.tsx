@@ -301,7 +301,7 @@ useEffect(() => {
           {s.vault && <VaultGame vault={s.vault} onPick={vaultPick} onCollect={vaultCollect} />}
 
           {collectionRewardOpen && (
-  <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/70 px-4">
+  <div className="absolute inset-0 z-[70] flex items-center justify-center bg-black/70 px-4">
     <div className="w-full max-w-sm rounded-2xl border border-[#e5c779]/40 bg-[#10150f] p-5 text-center shadow-2xl">
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#e5c779]">
         Crown collection complete
@@ -361,7 +361,7 @@ useEffect(() => {
   </div>
 
   <div
-  className="min-w-0 flex-1 text-center"
+  className="flex h-10 min-w-0 flex-1 flex-col items-center justify-center overflow-hidden text-center"
   role="status"
   aria-live="polite"
   aria-atomic="true"
@@ -533,17 +533,22 @@ useEffect(() => {
   </button>
 </div>
 
-              {balance < bet && !s.busy && !outOfChips && (
-                <p className="mt-2 text-center text-[11px] text-red-300">Not enough chips for this bet. Pick a lower one.</p>
-              )}
-
-              {outOfChips && (
-                <div className="mt-2 flex justify-center">
-                  <button onClick={refill} className={`rounded-full px-5 py-2.5 text-xs font-bold sm:px-8 sm:py-3 sm:text-sm ${skin.betOn}`}>
-                    Out of chips · take a ◈ 1,000 refill
-                  </button>
-                </div>
-              )}
+              <div className="mt-2 flex h-12 items-center justify-center">
+  {!s.busy && !s.fs && !collectionRewardOpen && (
+    outOfChips ? (
+      <button
+        onClick={refill}
+        className={`rounded-full px-5 py-2.5 text-xs font-bold sm:px-8 sm:py-3 sm:text-sm ${skin.betOn}`}
+      >
+        Out of chips · take a ◈ 1,000 refill
+      </button>
+    ) : balance < bet ? (
+      <p className="text-center text-[11px] text-red-300">
+        Not enough chips for this bet. Pick a lower one.
+      </p>
+    ) : null
+  )}
+</div>
             </div>
           ) : (
             <>
