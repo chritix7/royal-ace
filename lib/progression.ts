@@ -55,7 +55,31 @@ let hydrated = false;
 let listening = false;
 const listeners = new Set<() => void>();
 
+export type LevelToast = { key: number; level: number; reward: number };
+
+let toasts: LevelToast[] = [];
+let toastKey = 0;
+
 const emit = () => listeners.forEach((listener) => listener());
+
+const pushToast = (level: number, reward: number) => {
+  toasts = [...toasts, { key: ++toastKey, level, reward }];
+  emit();
+};
+
+export const dismissLevelToast = (key: number) => {
+  toasts = toasts.filter((toast) => toast.key !== key);
+  emit();
+};
+
+export const getLevelToasts = () => toasts;
+
+export const subscribeToLevelToasts = (listener: () => void) => {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+};
 
 const persist = () => {
   try {
@@ -76,13 +100,14 @@ function handleEvent(event: GameEvent, amount = 1) {
 
   const xpGain = gained * amount;
 
-    const nextXp = state.xp + xpGain;
+  const nextXp = state.xp + xpGain;
   const nextLevel = levelFromXp(nextXp);
 
   if (nextLevel > state.level) {
     const reward = levelReward(nextLevel);
     wallet.add(reward);
     sfx.win();
+    pushToast(nextLevel, reward);
   }
 
   state = {
