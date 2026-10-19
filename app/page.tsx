@@ -129,11 +129,11 @@ export default function Home() {
   aria-selected={selected}
   disabled={blocked}
   onClick={() => setTab(t.id)}
-  className={`flex h-11 w-11 items-center justify-center rounded-full border-2 border-red-500 text-xl transition ${
-  selected
-    ? "bg-[#d7b45b] text-[#10130e] shadow-[0_3px_0_#765b25]"
-    : "bg-[#1c2420] text-white/65 shadow-[0_3px_0_#080c0b]"
-}`}
+  className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-xl outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-40 sm:h-auto sm:w-auto sm:px-6 sm:py-3 sm:text-sm sm:font-bold ${
+    selected
+      ? "border-[#e5c779]/70 bg-[#d7b45b] text-[#10130e] shadow-[0_3px_0_#765b25]"
+      : "border-white/15 bg-[#1c2420] text-white/65 shadow-[0_3px_0_#080c0b] hover:border-[#e5c779]/40 hover:text-white"
+  }`}
 >
   <span aria-hidden="true" className="sm:hidden">
     {t.id === "blackjack" ? "♠" : "🎰"}
