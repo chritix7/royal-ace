@@ -59,18 +59,37 @@ export default function MiamiBackdrop({ party = false }: { party?: boolean }) {
     >
       <defs>
         <linearGradient id="mbSky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#0c0422" />
-          <stop offset="0.55" stopColor="#2d0f5c" />
-          <stop offset="1" stopColor="#8a1f73" />
-        </linearGradient>
-        <linearGradient id="mbSun" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#ffe066" />
-          <stop offset="1" stopColor="#ff2e88" />
-        </linearGradient>
-        <linearGradient id="mbFloor" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#3a0f66" />
-          <stop offset="1" stopColor="#0c0422" />
-        </linearGradient>
+  <stop offset="0" stopColor="#070912" />
+  <stop offset="0.55" stopColor="#171127" />
+  <stop offset="1" stopColor="#3b193e" />
+</linearGradient>
+
+<linearGradient id="mbSun" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stopColor="#c69260" />
+  <stop offset="0.55" stopColor="#b45a72" />
+  <stop offset="1" stopColor="#863455" />
+</linearGradient>
+
+<linearGradient id="mbFloor" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stopColor="#21152e" />
+  <stop offset="1" stopColor="#080a12" />
+</linearGradient>
+
+{/* Lumière diffuse derrière la scène */}
+<radialGradient id="mbAmbient" cx="50%" cy="58%" r="60%">
+  <stop offset="0" stopColor="#b44d85" stopOpacity="0.16" />
+  <stop offset="0.55" stopColor="#673b8b" stopOpacity="0.06" />
+  <stop offset="1" stopColor="#673b8b" stopOpacity="0" />
+</radialGradient>
+
+{/* Bords plus sombres, centre dégagé */}
+<radialGradient id="mbVignette" cx="50%" cy="48%" r="70%">
+  <stop offset="0" stopColor="#03050c" stopOpacity="0" />
+  <stop offset="0.48" stopColor="#03050c" stopOpacity="0.06" />
+  <stop offset="0.78" stopColor="#03050c" stopOpacity="0.35" />
+  <stop offset="1" stopColor="#03050c" stopOpacity="0.72" />
+</radialGradient>
+
         <mask id="mbStripes">
           <rect x="0" y="0" width="1000" height="560" fill="#fff" />
           <rect x="300" y="372" width="400" height="5" fill="#000" />
@@ -84,7 +103,14 @@ export default function MiamiBackdrop({ party = false }: { party?: boolean }) {
 
       <rect width="1000" height="560" fill="url(#mbSky)" />
       {STARS.map((s, i) => (
-        <circle key={i} cx={s.x} cy={s.y} r={s.r} fill="#fff" opacity={s.o} />
+        <circle
+  key={i}
+  cx={s.x}
+  cy={s.y}
+  r={s.r}
+  fill="#dce4f5"
+  opacity={s.o * 0.4}
+/>
       ))}
 
       {/* Étoiles filantes */}
@@ -98,14 +124,30 @@ export default function MiamiBackdrop({ party = false }: { party?: boolean }) {
         { y: 90, s: 1, d: 80, delay: -20 },
         { y: 150, s: 0.7, d: 110, delay: -70 },
       ].map((c, i) => (
-        <g key={i} className="cloud" style={{ ["--d" as string]: `${c.d}s`, ["--delay" as string]: `${c.delay}s` }} opacity="0.22">
+        <g key={i} className="cloud" style={{ ["--d" as string]: `${c.d}s`, ["--delay" as string]: `${c.delay}s` }} opacity="0.08">
           <ellipse cx="0" cy={c.y} rx={round2(70 * c.s)} ry={round2(14 * c.s)} fill="#ff9fd0" />
           <ellipse cx={round2(30 * c.s)} cy={round2(c.y - 10 * c.s)} rx={round2(40 * c.s)} ry={round2(11 * c.s)} fill="#ffc8e6" />
         </g>
       ))}
 
-      <circle cx="500" cy="330" r="150" fill="url(#mbSun)" mask="url(#mbStripes)" />
-      <circle cx="500" cy="330" r="160" fill="none" stroke="#ff4fa3" strokeWidth="2" opacity="0.35" />
+      <circle
+  cx="500"
+  cy="330"
+  r="150"
+  fill="url(#mbSun)"
+  mask="url(#mbStripes)"
+  opacity="0.55"
+/>
+
+<circle
+  cx="500"
+  cy="330"
+  r="160"
+  fill="none"
+  stroke="#d66b9b"
+  strokeWidth="1"
+  opacity="0.12"
+/>
 
       {LEFT.map(([x, w, h], i) => (
         <Building key={`l${i}`} x={x} w={w} h={h} i={i} />
@@ -122,9 +164,17 @@ export default function MiamiBackdrop({ party = false }: { party?: boolean }) {
         <path d={`M12 ${HORIZON - 4} L18 ${HORIZON - 12} L28 ${HORIZON - 12} L30 ${HORIZON - 4} Z`} fill="#0d0420" stroke="#22d3ee" strokeWidth="1.2" />
         <path d={`M-30 ${HORIZON + 2} L0 ${HORIZON - 1}`} stroke="#fff" strokeWidth="2" opacity="0.4" strokeLinecap="round" />
       </g>
-      <rect x="0" y={HORIZON - 1} width="1000" height="3" fill="#ff4fa3" filter="url(#mbGlow)" />
+      <rect
+  x="0"
+  y={HORIZON - 1}
+  width="1000"
+  height="2"
+  fill="#cc6297"
+  opacity="0.35"
+  filter="url(#mbGlow)"
+/>
       <rect x="0" y={HORIZON} width="1000" height="100" fill="url(#mbFloor)" />
-      <g stroke="#22d3ee" strokeWidth="1.2" opacity="0.5" fill="none">
+      <g stroke="#7393ac" strokeWidth="0.8" opacity="0.16" fill="none">
         {[8, 20, 38, 62, 94].map((d) => (
           <path key={d} d={`M0 ${HORIZON + d} H1000`} />
         ))}
@@ -145,6 +195,19 @@ export default function MiamiBackdrop({ party = false }: { party?: boolean }) {
           ))}
         </g>
       )}
+      {/* Lumière d'ambiance discrète */}
+<rect
+  width="1000"
+  height="560"
+  fill="url(#mbAmbient)"
+/>
+
+{/* Finition : bords assombris */}
+<rect
+  width="1000"
+  height="560"
+  fill="url(#mbVignette)"
+/>
     </svg>
   );
 }
