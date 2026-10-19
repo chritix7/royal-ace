@@ -361,7 +361,7 @@ useEffect(() => {
   </div>
 
   <div
-  className="flex h-10 min-w-0 flex-1 flex-col items-center justify-center overflow-hidden text-center"
+  className="min-w-0 flex-1 text-center"
   role="status"
   aria-live="polite"
   aria-atomic="true"
@@ -533,22 +533,28 @@ useEffect(() => {
   </button>
 </div>
 
-              <div className="mt-2 flex h-12 items-center justify-center">
-  {!s.busy && !s.fs && !collectionRewardOpen && (
-    outOfChips ? (
+              {balance < bet &&
+  !s.busy &&
+  !s.fs &&
+  !collectionRewardOpen &&
+  !outOfChips && (
+    <p className="mt-2 text-center text-[11px] text-red-300">
+      Not enough chips for this bet. Pick a lower one.
+    </p>
+  )}
+
+{outOfChips &&
+  !s.fs &&
+  !collectionRewardOpen && (
+    <div className="mt-2 flex justify-center">
       <button
         onClick={refill}
         className={`rounded-full px-5 py-2.5 text-xs font-bold sm:px-8 sm:py-3 sm:text-sm ${skin.betOn}`}
       >
         Out of chips · take a ◈ 1,000 refill
       </button>
-    ) : balance < bet ? (
-      <p className="text-center text-[11px] text-red-300">
-        Not enough chips for this bet. Pick a lower one.
-      </p>
-    ) : null
+    </div>
   )}
-</div>
             </div>
           ) : (
             <>
