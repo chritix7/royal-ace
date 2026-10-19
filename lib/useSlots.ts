@@ -213,6 +213,7 @@ function bonusContinue() {
         spinning: st.held.map((h) => !h),
         cells: emptyCells(),
         lineWins: [],
+        winBanner: null,
         ...(respin ? {} : { lastWin: 0 }),
         message: respin ? `Re-spin ${i}!` : free ? "Free spin…" : "Good luck…",
       });
@@ -249,15 +250,14 @@ function bonusContinue() {
       }
 
       if (st.total > 0) {
-        wallet.add(st.total);
-        spinTotal += st.total;
-        const ratio = st.total / b;
-        set({ cells: st.cells, lineWins: st.lineWins, lastWin: spinTotal, message: `You won ◈ ${fmt(spinTotal)}` });
-        if (ratio >= 20) sfx.bigWin();
-        else sfx.win();
-        haptic(ratio >= 20 ? HAPTIC.big : HAPTIC.win);
-        await sleep((ratio >= 10 ? 700 : 350) * speed());
-      }
+  wallet.add(st.total);
+  spinTotal += st.total;
+  const ratio = st.total / b;
+  set({ cells: st.cells, lineWins: st.lineWins, lastWin: spinTotal, message: `You won ◈ ${fmt(spinTotal)}` });
+  if (ratio >= 20) sfx.bigWin();
+  else sfx.win();
+  haptic(ratio >= 20 ? HAPTIC.big : HAPTIC.win);
+}
     }
     return { total: spinTotal, scatters: steps[0].scatters, freeSpins: steps[0].freeSpins };
   }
@@ -430,17 +430,27 @@ if (collectionStore.isReady(b)) {
         music.duck(5200);
         haptic(HAPTIC.epic);
         set({ winBanner: { label: `${JACKPOTS[j.tier].label} JACKPOT`, amount: j.amount, tier: JP_TIER[j.tier] }, celebrate: Date.now() });
-        await sleep(5400 * speed());
-        set({ winBanner: null });
+        window.setTimeout(() => {
+  if (ref.current.winBanner?.label.includes(JACKPOTS[j.tier].label)) {
+    set({ winBanner: null });
+  }
+}, 5400 * speed());
       }
     } else if (tier) {
   sfx.bigWin();
   sfx.coin(tier === "epic" ? 14 : 8);
   music.duck(2200);
   haptic(HAPTIC.epic);
-  set({ winBanner: { label: labelsRef.current[tier], amount: total, tier }, celebrate: Date.now() });
-  await sleep((tier === "epic" ? 2600 : 1800) * speed());
-  set({ winBanner: null });
+  set({
+    winBanner: { label: labelsRef.current[tier], amount: total, tier },
+    celebrate: Date.now(),
+  });
+
+  window.setTimeout(() => {
+    if (ref.current.winBanner?.tier === tier) {
+      set({ winBanner: null });
+    }
+  }, (tier === "epic" ? 2600 : 1800) * speed());
 }
     return { total, triggered, vault: vaultHit, ratio, jackpots };
   }
