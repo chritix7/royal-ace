@@ -273,34 +273,80 @@ useEffect(() => {
           {s.vault && <VaultGame vault={s.vault} onPick={vaultPick} onCollect={vaultCollect} />}
 
           {fullscreen ? (
-            <div className="sticky bottom-0 z-50 -mx-2 mt-8 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8">
-              <div className="mx-auto flex max-w-md items-center justify-between gap-3 px-2">
-                <div className="shrink-0">
-                  <p className="text-[8px] uppercase tracking-[0.2em] text-white/80">Balance</p>
-                  <p className="font-mono text-sm font-black text-white">◈ {money(balance)}</p>
-                </div>
-                <div className="min-w-0 flex-1 text-center">
-                  <p key={s.message} className="animate-pop truncate text-[11px] font-semibold text-white">{s.message}</p>
-                  {activeLine && (
-                    <p className="truncate text-[9px] text-white/80">
-                      Line {activeLine.line}: {activeLine.count}× <Glyph sym={activeLine.sym} skin={skin} /> · +◈ {money(activeLine.pay * lineBet)}
-                    </p>
-                  )}
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <div className="text-right">
-                    <p className="text-[8px] uppercase tracking-[0.2em] text-white/80">Win</p>
-                    <p className="font-mono text-sm font-black text-[#ffd166]">◈ {money(s.lastWin)}</p>
-                  </div>
-                  <button
-                    onClick={toggleTurbo}
-                    aria-pressed={s.turbo}
-                    className={`${small} px-2 text-[10px] ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
-                  >
-                    ⚡
-                  </button>
-                </div>
-              </div>
+            <div
+  className="sticky bottom-0 z-50 -mx-2 mt-8 border-t border-white/15 px-3 pt-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8"
+  style={{
+    background:
+      "linear-gradient(180deg, rgba(255,255,255,0.045) 0%, transparent 18%), linear-gradient(135deg, #24252e 0%, #15161e 45%, #101119 100%)",
+    boxShadow:
+      "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 3px 6px rgba(0,0,0,0.35), 0 -8px 24px rgba(0,0,0,0.28)",
+  }}
+>
+              <div
+  className="mx-auto flex max-w-md items-center justify-between gap-3 rounded-lg border border-white/15 px-2 py-2"
+  style={{
+    background:
+      "linear-gradient(180deg, #131620 0%, #090c13 60%, #10131c 100%)",
+    boxShadow:
+      "inset 0 2px 5px rgba(0,0,0,0.65), inset 0 -1px 0 rgba(255,255,255,0.04)",
+  }}
+>
+  <div className="shrink-0">
+    <p className="text-[8px] uppercase tracking-[0.2em] text-white/45">
+      Balance
+    </p>
+    <p className="font-mono text-sm font-black tabular-nums text-[#e5b2cf]">
+      ◈ {money(balance)}
+    </p>
+  </div>
+
+  <div
+    className="min-w-0 flex-1 text-center"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    <p className="truncate text-[11px] font-semibold text-white/85">
+      {s.message}
+    </p>
+
+    {activeLine && (
+      <p className="truncate text-[9px] text-[#d8bb83]">
+        Line {activeLine.line}: {activeLine.count}×{" "}
+        <Glyph sym={activeLine.sym} skin={skin} />
+        {" "}· +◈ {money(activeLine.pay * lineBet)}
+      </p>
+    )}
+  </div>
+
+  <div className="flex shrink-0 items-center gap-2">
+    <div className="text-right">
+      <p className="text-[8px] uppercase tracking-[0.2em] text-white/45">
+        Win
+      </p>
+      <p
+        className={`font-mono text-sm font-black tabular-nums ${
+          s.lastWin > 0 && !spinningNow
+            ? "text-[#ffe4f1]"
+            : "text-[#e5b2cf]"
+        }`}
+      >
+        ◈ {money(s.lastWin)}
+      </p>
+    </div>
+
+    <button
+      onClick={toggleTurbo}
+      aria-label="Turbo"
+      aria-pressed={s.turbo}
+      className={`${machineSmall} px-2 text-[10px] ${
+        s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""
+      }`}
+    >
+      ⚡
+    </button>
+  </div>
+</div>
 
               <div className="mx-auto mt-2 max-w-md">
                 <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
@@ -318,7 +364,7 @@ useEffect(() => {
         <div
           role="menu"
           aria-label="Tours automatiques"
-          className="absolute bottom-full left-1/2 z-[60] mb-3 -translate-x-1/2 rounded-xl border border-[#c8a65b]/40 bg-[#0b100e]/95 px-3 py-2 backdrop-blur"
+          className="absolute bottom-full left-1/2 z-[60] mb-3 -translate-x-1/2 rounded-xl border border-white/15 bg-[#11131c] px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]"
         >
           <p className="mb-1.5 text-center text-[8px] uppercase tracking-[0.2em] text-white/50">Tours auto</p>
           <div className="flex gap-2">
@@ -328,7 +374,7 @@ useEffect(() => {
                 role="menuitem"
                 onClick={() => startAuto(n)}
                 disabled={!canSpin}
-                className={`${small} h-10 w-12 px-0 text-xs ${n === autoCount ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
+                className={`${machineSmall} h-10 w-12 px-0 text-xs ${n === autoCount ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
               >
                 {n}
               </button>
@@ -346,7 +392,7 @@ useEffect(() => {
   disabled={!!s.fs || (!auto && !canSpin)}
   aria-haspopup="menu"
   aria-expanded={autoOpen}
-  className={`flex h-16 w-16 shrink-0 touch-manipulation items-center justify-center rounded-full text-[10px] font-black leading-3 text-white transition active:translate-y-0.5 disabled:opacity-40 ${
+  className={`relative flex h-16 w-16 shrink-0 touch-manipulation items-center justify-center rounded-full text-[10px] font-black leading-3 text-white transition active:translate-y-0.5 disabled:opacity-40 ${
         s.gamble
           ? "text-[#3a2c05]"
           : auto
