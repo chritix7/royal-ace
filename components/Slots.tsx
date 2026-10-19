@@ -34,11 +34,52 @@ import { AUTO_COUNTS, loadAutoCount, saveAutoCount, type AutoCount } from "../li
 const money = (n: number) => n.toLocaleString("en-US");
 const PAY_ROWS: Paying[] = ["seven", "wild", "gem", "bell", "grape", "lemon", "cherry"];
 
-function Led({ label, children, className, on }: { label: string; children: ReactNode; className: string; on?: boolean }) {
+function Led({
+  label,
+  children,
+  className,
+  on,
+}: {
+  label: string;
+  children: ReactNode;
+  className: string;
+  on?: boolean;
+}) {
   return (
-    <div className={`rounded-lg border px-2 py-1 text-center sm:px-3 sm:py-1.5 ${className}`}>
-      <p className="text-[8px] tracking-[0.2em] text-white/50 sm:text-[9px] sm:tracking-[0.25em]">{label}</p>
-      <p className={`font-mono text-base font-black tracking-wider sm:text-2xl ${on ? "animate-pulse" : ""}`}>{children}</p>
+    <div
+      className="relative min-w-0 rounded-lg border border-white/15 px-2 py-1 text-center sm:px-3 sm:py-1.5"
+      style={{
+        background:
+          "linear-gradient(180deg, #10131c 0%, #080b12 55%, #11121b 100%)",
+        boxShadow:
+          "inset 0 2px 5px rgba(0,0,0,0.75), inset 0 -1px 0 rgba(255,255,255,0.04), 0 1px 0 rgba(255,255,255,0.10)",
+      }}
+    >
+      {/* Reflet discret sur le bord supérieur */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-3 top-0 h-px"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(255,255,255,0.20), transparent)",
+        }}
+      />
+
+      <p className="text-[8px] tracking-[0.2em] text-white/45 sm:text-[9px] sm:tracking-[0.25em]">
+        {label}
+      </p>
+
+      <p
+        className={`font-mono text-base font-black tabular-nums tracking-wider sm:text-2xl ${className}`}
+        style={{
+          color: on ? "#ffe4f1" : "#e5b2cf",
+          textShadow: on
+            ? "0 0 8px rgba(244,114,182,0.35)"
+            : "0 0 5px rgba(244,114,182,0.12)",
+        }}
+      >
+        {children}
+      </p>
     </div>
   );
 }
@@ -399,14 +440,22 @@ useEffect(() => {
               </div>
 
               <div className="mx-auto mt-2 grid max-w-2xl grid-cols-3 gap-1.5 sm:mt-3 sm:gap-3">
-                <Led label="CREDIT" className={`${skin.ledBox} ${skin.led}`}>
-                  <Counter value={balance} />
-                </Led>
-                <Led label="TOTAL BET" className={`${skin.ledBox} ${skin.led}`}>{money(bet)}</Led>
-                <Led label="WIN" className={`${skin.ledBox} ${skin.led}`} on={s.lastWin > 0 && !spinningNow}>
-                  <RollingNumber value={s.lastWin} />
-                </Led>
-              </div>
+  <Led label="CREDIT" className="">
+    <Counter value={balance} />
+  </Led>
+
+  <Led label="TOTAL BET" className="">
+    {money(bet)}
+  </Led>
+
+  <Led
+    label="WIN"
+    className=""
+    on={s.lastWin > 0 && !spinningNow}
+  >
+    <RollingNumber value={s.lastWin} />
+  </Led>
+</div>
 
               <div className="mx-auto mt-2 max-w-2xl sm:mt-3">
                 <BetBar levels={BET_LEVELS} index={s.betIdx} onSelect={setBetIdx} balance={balance} disabled={s.busy} skin={skin} lines={PAYLINES.length} />
