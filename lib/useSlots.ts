@@ -213,7 +213,7 @@ function bonusContinue() {
         spinning: st.held.map((h) => !h),
         cells: emptyCells(),
         lineWins: [],
-        winBanner: null,
+        winBanner: null, 
         ...(respin ? {} : { lastWin: 0 }),
         message: respin ? `Re-spin ${i}!` : free ? "Free spin…" : "Good luck…",
       });
