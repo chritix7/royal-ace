@@ -152,6 +152,8 @@ function bonusContinue() {
 
   useEffect(() => {
     wallet.hydrate();
+    collectionStore.hydrate();
+
     try {
       const raw = localStorage.getItem(KEY);
       if (raw) {
