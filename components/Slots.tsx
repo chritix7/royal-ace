@@ -30,7 +30,10 @@ import {
 } from "../lib/slots";
 import { sfx } from "../lib/sound";
 import { AUTO_COUNTS, loadAutoCount, saveAutoCount, type AutoCount } from "../lib/autoSpin";
-import { useCollection } from "../lib/collection";
+import {
+  useCollection,
+  COLLECTION_CHIP_MULT,
+} from "../lib/collection";
 
 const money = (n: number) => n.toLocaleString("en-US");
 const PAY_ROWS: Paying[] = ["seven", "wild", "gem", "bell", "grape", "lemon", "cherry"];
@@ -91,12 +94,13 @@ export default function Slots({ active = true }: { active?: boolean }) {
   const [gambleScreen, setGambleScreen] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
   const skin = SKINS[skinId];
-  const collection = useCollection();
   const {
   s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, refill,
   bonusPrice, buyBonus, vaultPick, vaultCollect, gambleChoose, gambleCollect, bonusContinue,
   collectionRewardOpen, claimCollectionReward,
 } = useSlots(active, skin.labels);
+
+const collection = useCollection(bet);
 
   const playWithSound = (n: number) => {
   sfx.spin();
@@ -325,7 +329,7 @@ useEffect(() => {
           className="rounded-xl border border-[#e5c779]/50 bg-[#1a1f16] px-3 py-4 text-sm font-bold text-white transition hover:border-[#e5c779] hover:bg-[#22281d]"
         >
           <span className="block text-2xl">◈</span>
-          1,500 Chips
+          {money(bet * COLLECTION_CHIP_MULT)} Chips
         </button>
       </div>
     </div>

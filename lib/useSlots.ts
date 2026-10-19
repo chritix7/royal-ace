@@ -230,7 +230,7 @@ function bonusContinue() {
           scatters += sc;
           sfx.scatterLand(scatters);
         }
-        collectionStore.addCrowns(sc);
+        collectionStore.addCrowns(b, sc);
       }
       await sleep(250 * speed());
 
@@ -363,14 +363,14 @@ return fsWin;
 
 if (triggered) total += await runFreeSpins(base.freeSpins);
 
-if (collectionStore.isReady()) {
+if (collectionStore.isReady(b)) {
   const choice = await new Promise<"spins" | "chips">((resolve) => {
     collectionChoice.current = resolve;
     set({ collectionRewardOpen: true });
   });
 
   if (choice === "spins") {
-    const spins = collectionStore.claimFreeSpins();
+    const spins = collectionStore.claimFreeSpins(b);
 
     if (spins > 0) {
       triggered = true;
@@ -378,7 +378,7 @@ if (collectionStore.isReady()) {
       total += await runFreeSpins(spins);
     }
   } else {
-    const chips = collectionStore.claimChips();
+    const chips = collectionStore.claimChips(b);
 
     set({
       message: `Crown reward: ◈ ${fmt(chips)} added!`,
