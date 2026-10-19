@@ -65,6 +65,7 @@ type S = {
   lastWin: number;
   autoLeft: number;
   fs: FreeSpins | null;
+  bonusResult: { win: number; spins: number; label: string } | null;
   banner: string | null;
   celebrate: number;
   stats: SlotStats;
@@ -100,6 +101,7 @@ const INITIAL: S = {
   lastWin: 0,
   autoLeft: 0,
   fs: null,
+  bonusResult: null,
   banner: null,
   celebrate: 0,
   stats: EMPTY_STATS,
@@ -124,6 +126,16 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
   const [s, setS] = useState<S>(INITIAL);
   const [hydrated, setHydrated] = useState(false);
   const stopRef = useRef(false);
+  const bonusDone = useRef<(() => void) | null>(null);
+
+function bonusContinue() {
+  const resolve = bonusDone.current;
+  if (!resolve) return;
+
+  bonusDone.current = null;
+  set({ bonusResult: null });
+  resolve();
+}
   const balance = useBalance();
 
   const set = (patch: Partial<S>) => {
@@ -268,9 +280,21 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
       }
       set({ fs: { left, played: used, total: granted, win: fsWin } });
     }
-    set({ fs: null, message: `Bonus complete: ◈ ${fmt(fsWin)}` });
-    await sleep(900 * speed());
-    return fsWin;
+    await new Promise<void>((resolve) => {
+  bonusDone.current = resolve;
+
+  set({
+    fs: null,
+    bonusResult: {
+      win: fsWin,
+      spins: used,
+      label: labelsRef.current.freeSpins,
+    },
+    message: `Bonus complete: ◈ ${fmt(fsWin)}`,
+  });
+});
+
+return fsWin;
   }
 
   const vaultDone = useRef<(() => void) | null>(null);
@@ -569,9 +593,10 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
   const lineBet = bet / PAYLINES.length;
   const canSpin = !s.busy && balance >= bet;
   return {
-    s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, changeBet, maxBet, toggleTurbo, refill,
-    bonusPrice, buyBonus, vaultPick, vaultCollect, gambleChoose, gambleCollect,
-  };
+  s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, changeBet, maxBet, toggleTurbo, refill,
+  bonusPrice, buyBonus, vaultPick, vaultCollect, gambleChoose, gambleCollect,
+  bonusContinue,
+};
 }
 
 export type SlotsGame = ReturnType<typeof useSlots>;
