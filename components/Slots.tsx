@@ -427,17 +427,46 @@ useEffect(() => {
             </div>
           ) : (
             <>
-              <div className="mt-3 flex min-h-14 flex-col items-center gap-1.5 sm:mt-5 sm:min-h-[4.5rem] sm:gap-2" role="status" aria-live="polite">
-                <div key={s.message} className="animate-pop max-w-full rounded-full border border-white/20 bg-black/40 px-3 py-1 text-center text-xs text-white sm:px-5 sm:py-1.5 sm:text-sm">
-                  {s.message}
-                </div>
-                {activeLine && (
-                  <p className="max-w-full rounded-full bg-black/40 px-2.5 py-1 text-center text-[10px] text-white/70 sm:text-[11px]">
-                    Line {activeLine.line}: {activeLine.count}× <Glyph sym={activeLine.sym} skin={skin} /> · +◈ {money(activeLine.pay * lineBet)}
-                    {s.lineWins.length > 1 && ` · ${s.lineWins.length} winning lines`}
-                  </p>
-                )}
-              </div>
+              <div
+  className="mt-3 flex min-h-14 flex-col items-center sm:mt-5 sm:min-h-[4.5rem]"
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
+>
+  <div
+    className="relative w-full max-w-2xl rounded-lg border border-white/15 px-3 py-1 sm:px-5 sm:py-1.5"
+    style={{
+      background:
+        "linear-gradient(180deg, #131620 0%, #090c13 60%, #10131c 100%)",
+      boxShadow:
+        "inset 0 2px 5px rgba(0,0,0,0.65), inset 0 -1px 0 rgba(255,255,255,0.04), 0 1px 0 rgba(255,255,255,0.08)",
+    }}
+  >
+    {/* Reflet discret sur le bord supérieur */}
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-x-4 top-0 h-px"
+      style={{
+        background:
+          "linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)",
+      }}
+    />
+
+    <p className="text-center text-xs leading-5 text-white/85 sm:text-sm">
+      {s.message}
+    </p>
+
+    {activeLine && (
+      <p className="mt-1 border-t border-white/[0.07] pt-1 text-center text-[10px] leading-4 text-[#d8bb83] sm:text-[11px]">
+        Line {activeLine.line}: {activeLine.count}×{" "}
+        <Glyph sym={activeLine.sym} skin={skin} />
+        {" "}· +◈ {money(activeLine.pay * lineBet)}
+        {s.lineWins.length > 1 &&
+          ` · ${s.lineWins.length} winning lines`}
+      </p>
+    )}
+  </div>
+</div>
 
               <div className="mx-auto mt-2 grid max-w-2xl grid-cols-3 gap-1.5 sm:mt-3 sm:gap-3">
   <Led label="CREDIT" className="">
