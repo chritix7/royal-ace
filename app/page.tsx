@@ -131,7 +131,7 @@ export default function Home() {
   onClick={() => setTab(t.id)}
   className={`flex h-11 w-11 items-center justify-center rounded-full border-2 border-red-500 text-xl transition ${
   selected
-    ? "bg-gradient-to-b from-[#efcf83] to-[#b9913f] text-[#10130e] shadow-[0_3px_0_#765b25,0_0_14px_rgba(229,199,121,0.15)]"
+    ? "bg-gradient-to-b from-[#efcf83] to-[#b9913f] text-[#10130e] shadow-[0_3px_0_#765b25]"
     : "bg-gradient-to-b from-[#29312c] to-[#131a16] text-white/65 shadow-[0_3px_0_#080c0b]"
 }`}
 >
