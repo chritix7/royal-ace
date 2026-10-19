@@ -93,9 +93,10 @@ export default function Slots({ active = true }: { active?: boolean }) {
   const skin = SKINS[skinId];
   const collection = useCollection();
   const {
-    s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, refill,
-    bonusPrice, buyBonus, vaultPick, vaultCollect, gambleChoose, gambleCollect, bonusContinue,
-  } = useSlots(active, skin.labels);
+  s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, refill,
+  bonusPrice, buyBonus, vaultPick, vaultCollect, gambleChoose, gambleCollect, bonusContinue,
+  collectionRewardOpen, claimCollectionReward,
+} = useSlots(active, skin.labels);
 
   const playWithSound = (n: number) => {
   sfx.spin();
@@ -298,6 +299,38 @@ useEffect(() => {
           )}
 
           {s.vault && <VaultGame vault={s.vault} onPick={vaultPick} onCollect={vaultCollect} />}
+
+          {collectionRewardOpen && (
+  <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/70 px-4">
+    <div className="w-full max-w-sm rounded-2xl border border-[#e5c779]/40 bg-[#10150f] p-5 text-center shadow-2xl">
+      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#e5c779]">
+        Crown collection complete
+      </p>
+
+      <h4 className="mt-2 text-xl font-black text-white">
+        Choose your reward
+      </h4>
+
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <button
+          onClick={() => claimCollectionReward("spins")}
+          className="rounded-xl border border-[#e5c779]/50 bg-[#1a1f16] px-3 py-4 text-sm font-bold text-white transition hover:border-[#e5c779] hover:bg-[#22281d]"
+        >
+          <span className="block text-2xl">🎰</span>
+          5 Free Spins
+        </button>
+
+        <button
+          onClick={() => claimCollectionReward("chips")}
+          className="rounded-xl border border-[#e5c779]/50 bg-[#1a1f16] px-3 py-4 text-sm font-bold text-white transition hover:border-[#e5c779] hover:bg-[#22281d]"
+        >
+          <span className="block text-2xl">◈</span>
+          1,500 Chips
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
           {fullscreen ? (
             <div

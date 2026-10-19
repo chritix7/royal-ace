@@ -71,6 +71,7 @@ type S = {
   celebrate: number;
   stats: SlotStats;
   history: number[];
+  collectionRewardOpen: boolean;
 };
 
 const KEY = "royalace:slots";
@@ -107,6 +108,7 @@ const INITIAL: S = {
   celebrate: 0,
   stats: EMPTY_STATS,
   history: [],
+  collectionRewardOpen: false,
 };
 
 const DEFAULT_LABELS: SlotLabels = { big: "BIG WIN", mega: "MEGA WIN", epic: "EPIC WIN", freeSpins: "FREE SPINS" };
@@ -356,11 +358,7 @@ return fsWin;
 if (triggered) total += await runFreeSpins(base.freeSpins);
 
 if (collectionStore.isReady()) {
-  const collectionSpins = collectionStore.claimFreeSpins();
-
-  if (collectionSpins > 0) {
-    total += await runFreeSpins(collectionSpins);
-  }
+  set({ collectionRewardOpen: true });
 }
 
     const ratio = total / b;
@@ -602,12 +600,38 @@ if (collectionStore.isReady()) {
   }, [active, bonus]);
 
   const lineBet = bet / PAYLINES.length;
+  const collectionRewardOpen = ref.current.collectionRewardOpen;
   const canSpin = !s.busy && balance >= bet;
+
+  async function claimCollectionReward(kind: "spins" | "chips") {
+  if (!collectionStore.isReady()) return;
+
+  if (kind === "spins") {
+    const spins = collectionStore.claimFreeSpins();
+    set({ collectionRewardOpen: false });
+
+    if (spins > 0) {
+      await runFreeSpins(spins);
+    }
+
+    return;
+  }
+
+  const chips = collectionStore.claimChips();
+  set({
+    collectionRewardOpen: false,
+    message: `Crown reward: ◈ ${fmt(chips)} added!`,
+  });
+  sfx.win();
+}
+
   return {
   s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, changeBet, maxBet, toggleTurbo, refill,
   bonusPrice, buyBonus, vaultPick, vaultCollect, gambleChoose, gambleCollect,
   bonusContinue,
-};
+  collectionRewardOpen,
+  claimCollectionReward,
+  };
 }
 
 export type SlotsGame = ReturnType<typeof useSlots>;
