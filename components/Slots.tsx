@@ -604,9 +604,11 @@ useEffect(() => {
 </div>
 
               <div className="mx-auto mt-2 grid max-w-2xl grid-cols-3 gap-1.5 sm:mt-3 sm:gap-3">
-  <Led label="CREDIT" className="">
-    <Counter value={balance} />
-  </Led>
+  <div data-chips-counter className="contents">
+    <Led label="CREDIT" className="">
+      <Counter value={balance} />
+    </Led>
+  </div>
 
   <Led label="TOTAL BET" className="">
     {money(bet)}

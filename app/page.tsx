@@ -53,7 +53,7 @@ export default function Home() {
       </h1>
 
       <div
-        id="chips-counter"
+        data-chips-counter
         className="rounded-2xl border border-[#c8a65b]/30 bg-[#151b15] px-3 py-1.5 text-right"
       >
         <p className="text-[9px] leading-none text-white/50">Chips</p>
