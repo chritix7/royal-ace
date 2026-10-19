@@ -15,6 +15,7 @@ import { statsStore } from "../lib/statsStore";
 import { useBalance, useLocked, wallet } from "../lib/wallet";
 import AchievementToasts from "../components/AchievementToasts";
 import { progressionStore } from "../lib/progression";
+import { weeklyStore } from "../lib/weekly";
 
 type Tab = "blackjack" | "slots";
 const TABS: { id: Tab; label: string }[] = [
@@ -37,6 +38,7 @@ export default function Home() {
     missionsStore.hydrate();
     achievementsStore.hydrate();
     statsStore.hydrate();
+    weeklyStore.hydrate();
   }, []);
 
   return (
