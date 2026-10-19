@@ -16,6 +16,7 @@ import { useBalance, useLocked, wallet } from "../lib/wallet";
 import AchievementToasts from "../components/AchievementToasts";
 import { progressionStore } from "../lib/progression";
 import { weeklyStore } from "../lib/weekly";
+import WinFeed from "../components/WinFeed";
 
 type Tab = "blackjack" | "slots";
 const TABS: { id: Tab; label: string }[] = [
@@ -108,7 +109,7 @@ export default function Home() {
     </div>
   </div>
 </header>
-
+<WinFeed />
       <section className="mx-auto max-w-7xl px-4 pb-16 pt-4 sm:px-8 sm:pt-6">
         <div className="mb-6 flex min-w-0 items-center gap-2 sm:gap-3">
   <div
