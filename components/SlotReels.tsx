@@ -100,8 +100,34 @@ export function Reel({
           ))}
         </div>
       )}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-5 bg-gradient-to-b from-black/40 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-5 bg-gradient-to-t from-black/40 to-transparent" />
+      {/* Éclairage latéral : léger volume sur chaque rouleau */}
+<div
+  aria-hidden="true"
+  className="pointer-events-none absolute inset-0 z-[6]"
+  style={{
+    background:
+      "linear-gradient(90deg, rgba(0,0,0,0.20) 0%, rgba(255,255,255,0.025) 35%, transparent 65%, rgba(0,0,0,0.24) 100%)",
+  }}
+/>
+
+{/* Ombres aux extrémités du rouleau */}
+<div
+  aria-hidden="true"
+  className="pointer-events-none absolute inset-x-0 top-0 z-[7] h-[16%]"
+  style={{
+    background:
+      "linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.16) 45%, transparent)",
+  }}
+/>
+
+<div
+  aria-hidden="true"
+  className="pointer-events-none absolute inset-x-0 bottom-0 z-[7] h-[16%]"
+  style={{
+    background:
+      "linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0.16) 45%, transparent)",
+  }}
+/>
       {anticipate && spinning && (
         <div className="pointer-events-none absolute inset-0 animate-pulse ring-4 ring-inset ring-[#22d3ee]/80" />
       )}
@@ -211,10 +237,20 @@ export default function SlotReels({
                 />
               </svg>
             )}
+            {/* Vitre : reflet doux et profondeur du bord intérieur */}
+<div
+  aria-hidden="true"
+  className="pointer-events-none absolute inset-0 z-20 rounded-lg"
+  style={{
+    background:
+      "linear-gradient(125deg, rgba(255,255,255,0.065) 0%, rgba(255,255,255,0.025) 24%, transparent 42%, transparent 78%, rgba(255,255,255,0.015) 100%)",
+    boxShadow:
+      "inset 0 2px 2px rgba(255,255,255,0.10), inset 0 0 14px rgba(0,0,0,0.48), inset 0 -2px 4px rgba(0,0,0,0.35)",
+  }}
+/>
                   </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-0 rounded-[20px] bg-gradient-to-br from-white/10 via-transparent to-transparent" />
     </div>
 
       <LineTabs from={11} to={20} winLines={winLines} active={activeLine?.line ?? null} />
