@@ -1,11 +1,36 @@
 import { useSyncExternalStore } from "react";
 import { isNextDay, today } from "./clock";
 import { wallet } from "./wallet";
+import { progressionStore } from "./progression";
 
 /** Bonus quotidien : 200 chips le premier jour, +100 par jour consécutif, jusqu'à 800 le 7e jour. */
 export const DAILY_BASE = 200;
 export const DAILY_STEP = 100;
 export const DAILY_MAX_DAYS = 7;
+export type VipTier = {
+  id: string;
+  label: string;
+  minLevel: number;
+  dailyBonus: number;
+};
+
+export const VIP_TIERS: VipTier[] = [
+  { id: "bronze", label: "Bronze", minLevel: 1, dailyBonus: 0 },
+  { id: "silver", label: "Silver", minLevel: 5, dailyBonus: 250 },
+  { id: "gold", label: "Gold", minLevel: 10, dailyBonus: 500 },
+  { id: "platinum", label: "Platinum", minLevel: 20, dailyBonus: 1000 },
+  { id: "kingpin", label: "Kingpin", minLevel: 35, dailyBonus: 2000 },
+];
+
+export function vipTierForLevel(level: number): VipTier {
+  return [...VIP_TIERS]
+    .reverse()
+    .find((tier) => level >= tier.minLevel) ?? VIP_TIERS[0];
+}
+
+export function nextVipTier(level: number): VipTier | null {
+  return VIP_TIERS.find((tier) => level < tier.minLevel) ?? null;
+}
 
 export type DailyState = { lastClaim: string | null; streak: number };
 const EMPTY: DailyState = { lastClaim: null, streak: 0 };
@@ -14,10 +39,27 @@ const EMPTY: DailyState = { lastClaim: null, streak: 0 };
 export const dailyReward = (streakDay: number) => DAILY_BASE + DAILY_STEP * (Math.min(Math.max(streakDay, 1), DAILY_MAX_DAYS) - 1);
 
 /** Peut-on réclamer aujourd'hui, et quel jour de la série serait-ce ? */
-export function dailyStatus(state: DailyState, day: string) {
-  if (state.lastClaim === day) return { canClaim: false, streakDay: state.streak, reward: 0 };
-  const streakDay = state.lastClaim && isNextDay(state.lastClaim, day) ? state.streak + 1 : 1;
-  return { canClaim: true, streakDay, reward: dailyReward(streakDay) };
+export function dailyStatus(
+  state: DailyState,
+  day: string,
+  level = 1,
+) {
+  if (state.lastClaim === day) {
+    return { canClaim: false, streakDay: state.streak, reward: 0 };
+  }
+
+  const streakDay =
+    state.lastClaim && isNextDay(state.lastClaim, day)
+      ? state.streak + 1
+      : 1;
+
+  const vip = vipTierForLevel(level);
+
+  return {
+    canClaim: true,
+    streakDay,
+    reward: dailyReward(streakDay) + vip.dailyBonus,
+  };
 }
 
 const KEY = "royalace:daily";
@@ -56,15 +98,18 @@ export const dailyStore = {
   },
   /** Réclame le bonus du jour. Renvoie le nombre de chips gagnées (0 si déjà réclamé). */
   claim(): number {
-    const day = today();
-    const st = dailyStatus(state, day);
-    if (!st.canClaim) return 0;
-    state = { lastClaim: day, streak: st.streakDay };
-    persist();
-    wallet.add(st.reward);
-    emit();
-    return st.reward;
-  },
+  const day = today();
+  const progression = progressionStore.get();
+  const st = dailyStatus(state, day, progression.level);
+
+  if (!st.canClaim) return 0;
+
+  state = { lastClaim: day, streak: st.streakDay };
+  persist();
+  wallet.add(st.reward);
+  emit();
+  return st.reward;
+},
   /** Pour les tests. */
   _reset() {
     state = EMPTY;

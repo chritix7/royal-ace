@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DAILY_MAX_DAYS, dailyStatus, dailyStore, useDaily } from "../lib/daily";
+import {
+  DAILY_MAX_DAYS,
+  dailyStatus,
+  dailyStore,
+  dailyReward,
+  nextVipTier,
+  useDaily,
+  vipTierForLevel,
+} from "../lib/daily";
 import { missionView, missionsStore, useMissions } from "../lib/missions";
 import { today } from "../lib/clock";
 import { progressionStore, useProgression, xpInLevel, xpForNextLevel } from "../lib/progression";
@@ -12,6 +20,8 @@ export default function RewardsPanel({ open, onClose }: Props) {
   const daily = useDaily();
   const missions = useMissions();
   const progression = useProgression();
+  const vipTier = vipTierForLevel(progression.level);
+  const nextTier = nextVipTier(progression.level);
   const [flash, setFlash] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,7 +34,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
 
   if (!open) return null;
 
-  const status = dailyStatus(daily, today());
+  const status = dailyStatus(daily, today(), progression.level);
   const views = missionView(missions);
   const claimableMissions = views.filter((m) => m.done && !m.claimed).length;
 
@@ -87,6 +97,45 @@ export default function RewardsPanel({ open, onClose }: Props) {
   </div>
 </section>
 
+<section className="mb-6 rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+  <div className="flex items-center justify-between gap-4">
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white/70">
+        VIP status
+      </h3>
+      <p className="mt-1 text-xs text-white/45">
+        {vipTier.label} · +{vipTier.dailyBonus} daily bonus chips
+      </p>
+    </div>
+
+    <p className="text-sm font-black tracking-wide text-[#e5c779]">
+      {vipTier.label.toUpperCase()}
+    </p>
+  </div>
+
+  {nextTier && (
+    <>
+      <p className="mt-3 text-[11px] text-white/45">
+        Next tier: {nextTier.label} at level {nextTier.minLevel}
+      </p>
+
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-[#c8a65b] to-[#e5c779] transition-all"
+          style={{
+            width: `${Math.min(
+              100,
+              ((progression.level - vipTier.minLevel) /
+                (nextTier.minLevel - vipTier.minLevel)) *
+                100,
+            )}%`,
+          }}
+        />
+      </div>
+    </>
+  )}
+</section>
+
         <section className="mb-6 rounded-3xl border border-white/10 bg-white/[0.03] p-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -106,7 +155,9 @@ export default function RewardsPanel({ open, onClose }: Props) {
               return (
                 <div key={day} className={`rounded-xl border px-2 py-3 text-center ${current ? "border-[#e5c779] bg-[#e5c779]/15 text-[#e5c779]" : reached ? "border-[#c8a65b]/40 bg-[#c8a65b]/10 text-[#e5c779]" : "border-white/10 bg-white/[0.02] text-white/35"}`}>
                   <p className="text-[10px] font-bold uppercase">Day {day}</p>
-                  <p className="mt-1 text-xs font-semibold">{200 + 100 * (day - 1)}</p>
+                  <p className="mt-1 text-xs font-semibold">
+  {dailyReward(day) + vipTier.dailyBonus}
+</p>
                 </div>
               );
             })}
