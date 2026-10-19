@@ -17,6 +17,8 @@ import { useWeekly, weeklyStore } from "../lib/weekly";
 
 type Props = { open: boolean; onClose: () => void };
 
+const WEEKLY_GOAL = 1000;
+
 export default function RewardsPanel({ open, onClose }: Props) {
   const daily = useDaily();
   const missions = useMissions();
@@ -46,6 +48,24 @@ export default function RewardsPanel({ open, onClose }: Props) {
   const status = dailyStatus(daily, today(), progression.level);
   const views = missionView(missions);
   const claimableMissions = views.filter((m) => m.done && !m.claimed).length;
+
+  const weeklyPercent = Math.min(
+  100,
+  Math.floor((weekly.points / WEEKLY_GOAL) * 100),
+);
+
+const weeklyGoalReached = weekly.points >= WEEKLY_GOAL;
+
+const weeklyResetDate =
+  weekly.weekStart === null
+    ? null
+    : new Date((weekly.weekStart + 7) * 86_400_000)
+        .toLocaleDateString("en-GB", {
+          weekday: "long",
+          day: "numeric",
+          month: "short",
+          timeZone: "UTC",
+        });
 
   const claimDaily = () => {
     const gained = dailyStore.claim();
@@ -191,6 +211,57 @@ export default function RewardsPanel({ open, onClose }: Props) {
       </p>
     </div>
   </div>
+
+  <div className="mt-4 rounded-2xl border border-white/10 bg-black/15 p-4">
+  <div className="flex flex-wrap items-center justify-between gap-2">
+    <p className="text-xs font-semibold text-white/70">
+      Weekly goal
+    </p>
+
+    <span
+      className={`text-[11px] font-bold ${
+        weeklyGoalReached ? "text-emerald-300" : "text-[#e5c779]"
+      }`}
+    >
+      {weeklyGoalReached ? "✓ Goal reached" : `${weeklyPercent}%`}
+    </span>
+  </div>
+
+  <div
+    className="mt-3 h-2 overflow-hidden rounded-full bg-white/10"
+    role="progressbar"
+    aria-label="Weekly points goal"
+    aria-valuemin={0}
+    aria-valuemax={WEEKLY_GOAL}
+    aria-valuenow={Math.min(weekly.points, WEEKLY_GOAL)}
+  >
+    <div
+      className={`h-full rounded-full transition-all ${
+        weeklyGoalReached
+          ? "bg-gradient-to-r from-emerald-500 to-emerald-300"
+          : "bg-gradient-to-r from-[#c8a65b] to-[#e5c779]"
+      }`}
+      style={{ width: `${weeklyPercent}%` }}
+    />
+  </div>
+
+  <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-white/45">
+    <span>
+      {weekly.points.toLocaleString("en-US")} /{" "}
+      {WEEKLY_GOAL.toLocaleString("en-US")} points
+    </span>
+
+    <span>
+      {weeklyGoalReached ? "Keep building your score" : "Personal target"}
+    </span>
+  </div>
+</div>
+
+{weeklyResetDate && (
+  <p className="mt-3 text-[11px] leading-relaxed text-white/45">
+    Resets {weeklyResetDate} at 00:00 · Local time
+  </p>
+)}
 
   <p className="mt-3 text-[11px] leading-relaxed text-white/40">
     Paid spin or blackjack hand: +10 · Win: +20 · Bonus: +100
