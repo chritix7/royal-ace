@@ -93,15 +93,27 @@ body {
   }
 }
 
-/* Machine à sous : rouleau en rotation et arrêt avec petit rebond */
+/* Arrêt mécanique : petit rebond proportionnel à une seule case */
 @keyframes reel-land {
-  0% { transform: translateY(-2.5%); }
-  55% { transform: translateY(0.8%); }
-  100% { transform: translateY(0); }
+  0% {
+    transform: translateY(0);
+  }
+
+  35% {
+    transform: translateY(calc(var(--cell) * 0.035));
+  }
+
+  70% {
+    transform: translateY(calc(var(--cell) * -0.012));
+  }
+
+  100% {
+    transform: translateY(0);
+  }
 }
 
 .reel-land {
-  animation: reel-land 220ms ease-out both;
+  animation: reel-land 240ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
 /* Enseigne néon qui vacille légèrement */
