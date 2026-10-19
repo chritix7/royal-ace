@@ -694,15 +694,25 @@ style={{
                     )}
 
                     <div className="relative flex flex-col items-end gap-1">
-                      {s.gamble && (
-                        <button
-                          onClick={() => setGambleScreen(true)}
-                          className="absolute bottom-full right-0 mb-2 h-9 min-w-14 rounded-full border border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] px-3 text-xs font-black tracking-widest text-[#10130e] shadow-[0_0_18px_rgba(255,209,102,.35)] transition hover:brightness-110 active:scale-95"
-                        >
-                          X2
-                        </button>
-                     )}
-                      <button onClick={maxBet} disabled={s.busy} className={`${machineSmall} px-2 text-[11px] sm:px-4 sm:text-xs`}>Max bet</button>
+                      <div className="relative">
+  {s.gamble && (
+    <button
+      onClick={() => setGambleScreen(true)}
+      className="absolute right-full top-1/2 mr-2 flex h-8 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] text-xs font-black text-[#10130e] shadow-[0_0_18px_rgba(255,209,102,.35)] transition hover:brightness-110 active:scale-95"
+      aria-label="Open double or nothing"
+    >
+      X2
+    </button>
+  )}
+
+  <button
+    onClick={maxBet}
+    disabled={s.busy}
+    className={`${machineSmall} px-2 text-[11px] sm:px-4 sm:text-xs`}
+  >
+    Max bet
+  </button>
+</div>
                       <button
                         onClick={buyBonus}
                         disabled={s.busy || !!s.fs || balance < bonusPrice}
