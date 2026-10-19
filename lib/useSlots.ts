@@ -27,6 +27,7 @@ import { sfx } from "./sound";
 import { runAutoSpins } from "./autoSpin";
 import { useBalance, wallet } from "./wallet";
 import { winHistory } from "./winHistory";
+import { collectionStore } from "./collection";
 
 export type SlotStats = { spins: number; wagered: number; won: number; biggest: number; freeSpinRounds: number; vaults: number; jackpotWins: number };
 export type FreeSpins = { left: number; played: number; total: number; win: number };
@@ -222,6 +223,7 @@ function bonusContinue() {
           scatters += sc;
           sfx.scatterLand(scatters);
         }
+        collectionStore.addCrowns(sc);
       }
       await sleep(250 * speed());
 
@@ -344,13 +346,22 @@ return fsWin;
     let jackpots: { tier: JackpotTier; amount: number }[] = [];
 
     if (debugVault() || Math.random() < VAULT_TRIGGER) {
-      vaultHit = true;
-      const v = await runVault(b);
-      total += v.total;
-      jackpots = v.wins;
-      winHistory.record({ game: "slots", kind: "vault", amount: v.total });
-    }
-    if (triggered) total += await runFreeSpins(base.freeSpins);
+  vaultHit = true;
+  const v = await runVault(b);
+  total += v.total;
+  jackpots = v.wins;
+  winHistory.record({ game: "slots", kind: "vault", amount: v.total });
+}
+
+if (triggered) total += await runFreeSpins(base.freeSpins);
+
+if (collectionStore.isReady()) {
+  const collectionSpins = collectionStore.claimFreeSpins();
+
+  if (collectionSpins > 0) {
+    total += await runFreeSpins(collectionSpins);
+  }
+}
 
     const ratio = total / b;
     const tier = tierOf(ratio);

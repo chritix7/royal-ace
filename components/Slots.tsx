@@ -30,6 +30,7 @@ import {
 } from "../lib/slots";
 import { sfx } from "../lib/sound";
 import { AUTO_COUNTS, loadAutoCount, saveAutoCount, type AutoCount } from "../lib/autoSpin";
+import { useCollection } from "../lib/collection";
 
 const money = (n: number) => n.toLocaleString("en-US");
 const PAY_ROWS: Paying[] = ["seven", "wild", "gem", "bell", "grape", "lemon", "cherry"];
@@ -90,6 +91,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
   const [gambleScreen, setGambleScreen] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
   const skin = SKINS[skinId];
+  const collection = useCollection();
   const {
     s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, refill,
     bonusPrice, buyBonus, vaultPick, vaultCollect, gambleChoose, gambleCollect, bonusContinue,
@@ -222,6 +224,31 @@ useEffect(() => {
 </div>
 
           <JackpotBar pools={s.pools} bet={bet} />
+
+<div
+  className="mx-auto mb-3 w-full max-w-md rounded-xl border border-white/10 px-3 py-2"
+  style={{
+    background: "linear-gradient(180deg, #10131c 0%, #080b12 100%)",
+    boxShadow: "inset 0 2px 5px rgba(0,0,0,0.65)",
+  }}
+>
+  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.16em] text-white/50">
+    <span>Crown collection</span>
+
+    <span className="text-[#e5c779]">
+      {collection.crowns} / {collection.target}
+    </span>
+  </div>
+
+  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/10">
+    <div
+      className="h-full rounded-full bg-gradient-to-r from-[#c8a65b] to-[#e5c779] transition-all"
+      style={{
+        width: `${(collection.crowns / collection.target) * 100}%`,
+      }}
+    />
+  </div>
+</div>
 
           <SlotReels
             s={s}
