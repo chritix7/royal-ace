@@ -226,7 +226,7 @@ useEffect(() => {
 
           <JackpotBar pools={s.pools} bet={bet} />
 
-          <div className="relative translate-y-[4px]">
+          <div className="relative translate-y-[6px]">
   <SlotReels
     s={s}
     skin={skin}
