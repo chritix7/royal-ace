@@ -226,7 +226,7 @@ useEffect(() => {
 
           <JackpotBar pools={s.pools} bet={bet} />
 
-          <div className="relative translate-y-[6px]">
+          <div className="relative translate-y-[7px]">
   <SlotReels
     s={s}
     skin={skin}
@@ -245,7 +245,7 @@ useEffect(() => {
     }
   />
 
-  <div className="pointer-events-none absolute inset-x-0 -top-3 z-20 flex justify-center px-3">
+  <div className="pointer-events-none absolute inset-x-0 -top-4 z-20 flex justify-center px-3">
     <div
       className="w-full max-w-[320px] rounded-lg border border-white/15 bg-black/65 px-2.5 py-1 backdrop-blur-sm"
     >
