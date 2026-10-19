@@ -98,7 +98,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
   s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, refill,
   bonusPrice, buyBonus, vaultPick, vaultCollect, gambleChoose, gambleCollect, bonusContinue,
   collectionRewardOpen, claimCollectionReward,
-} = useSlots(active, skin.labels);
+} = useSlots(active, skin.labels, gambleScreen);
 
 const collection = useCollection(bet);
 
@@ -1035,13 +1035,13 @@ style={{
 )}
 
       {s.gamble && gambleScreen && (
-        <GamblePanel
-          g={s.gamble}
-          onChoose={gambleChoose}
-          onCollect={gambleCollect}
-          onClose={() => setGambleScreen(false)}
-        />
-      )}
+  <GamblePanel
+    g={s.gamble}
+    onChoose={gambleChoose}
+    onCollect={gambleCollect}
+    onClose={gambleCollect}
+  />
+)}
     </div>
   );
 }

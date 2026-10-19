@@ -122,13 +122,18 @@ function debugVault() {
 const tierOf = (ratio: number): Tier => (ratio >= 100 ? "epic" : ratio >= 50 ? "mega" : ratio >= 20 ? "big" : "");
 const fmt = (n: number) => n.toLocaleString("en-US");
 
-export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
+export function useSlots(
+  active: boolean,
+  labels: SlotLabels = DEFAULT_LABELS,
+  gambleScreen = false,
+) {
   const labelsRef = useRef(labels);
   labelsRef.current = labels;
   const ref = useRef<S>(INITIAL);
   const [s, setS] = useState<S>(INITIAL);
   const [hydrated, setHydrated] = useState(false);
   const stopRef = useRef(false);
+  const gambleResolving = useRef(false);
   const bonusDone = useRef<(() => void) | null>(null);
   const collectionChoice = useRef<
   ((kind: "spins" | "chips") => void) | null
@@ -441,7 +446,14 @@ if (collectionStore.isReady(b)) {
   }
 
   async function play(count = 1) {
-    if (ref.current.busy) return;
+    if (
+  !active ||
+  ref.current.busy ||
+  gambleScreen ||
+  gambleResolving.current
+) {
+  return;
+}
     stopRef.current = false;
     set({ busy: true, autoLeft: count > 1 ? count : 0, celebrate: 0, banner: null, gamble: null, confirmBuy: false });
     wallet.setLocked(true);
@@ -472,7 +484,21 @@ if (collectionStore.isReady(b)) {
 
   async function gambleChoose(guess: CardColor) {
     const g = ref.current.gamble;
-    if (!g || g.phase !== "choose" || ref.current.busy) return;
+
+if (
+  !active ||
+  !gambleScreen ||
+  !g ||
+  g.phase !== "choose" ||
+  ref.current.busy ||
+  gambleResolving.current
+) {
+  return;
+}
+
+gambleResolving.current = true;
+
+try {
     set({ gamble: { ...g, phase: "flip", guess } });
     sfx.card();
     await sleep(900 * speed());
@@ -507,14 +533,33 @@ if (collectionStore.isReady(b)) {
         stats: { ...st, won: st.won - lost },
       });
     }
+  } finally {
+    gambleResolving.current = false;
   }
-  const gambleCollect = () => set({ gamble: null });
+} 
+  const gambleCollect = () => {
+  if (gambleResolving.current) return;
 
-  const gambleOpen = s.gamble !== null;
-  useEffect(() => {
-    if (gambleOpen) wallet.setLocked(true);
-    else if (!ref.current.busy) wallet.setLocked(false);
-  }, [gambleOpen]);
+  set({ gamble: null });
+};
+
+  const gamblePanelOpen = gambleScreen && s.gamble !== null;
+
+useEffect(() => {
+  if (!active) return;
+
+  wallet.setLocked(s.busy || gamblePanelOpen);
+}, [active, s.busy, gamblePanelOpen]);
+
+useEffect(() => {
+  if (
+    !active &&
+    !ref.current.busy &&
+    ref.current.gamble !== null
+  ) {
+    set({ gamble: null });
+  }
+}, [active]);
 
   const bonusPrice = BONUS_PRICE_MULT * bet;
   async function runBuy(price: number) {

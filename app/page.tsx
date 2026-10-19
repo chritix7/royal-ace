@@ -110,32 +110,57 @@ export default function Home() {
 </header>
 
       <section className="mx-auto max-w-7xl px-4 pb-16 pt-4 sm:px-8 sm:pt-6">
-        <div className="mb-6 flex flex-wrap items-center gap-3" role="tablist" aria-label="Games">
-          {TABS.map((t) => {
-            const blocked = locked && tab !== t.id;
-            return (
-              <button
-                key={t.id}
-                role="tab"
-                aria-selected={tab === t.id}
-                disabled={blocked}
-                title={blocked ? "Finish the current round first" : undefined}
-                onClick={() => setTab(t.id)}
-                className={`rounded-full px-6 py-3 text-sm font-bold outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-40 ${
-                  tab === t.id
-                    ? "bg-[#d7b45b] text-[#10130e]"
-                    : "border border-white/10 bg-white/[0.03] text-white/60 hover:text-white"
-                }`}
-              >
-                {t.label}
-              </button>
-            );
-          })}
-          {locked && <span className="text-xs text-white/40">Round in progress…</span>}
-          <div className="ml-auto">
-            <AudioControls />
-          </div>
-        </div>
+        <div className="mb-6 flex min-w-0 items-center gap-2 sm:gap-3">
+  <div
+    className="flex shrink-0 items-center gap-2 sm:gap-3"
+    role="tablist"
+    aria-label="Games"
+  >
+    {TABS.map((t) => {
+      const blocked = locked && tab !== t.id;
+      const selected = tab === t.id;
+
+      return (
+        <button
+          key={t.id}
+          type="button"
+          role="tab"
+          aria-label={t.id === "blackjack" ? "Blackjack" : "Slot machine"}
+          aria-selected={selected}
+          disabled={blocked}
+          title={blocked ? "Finish the current round first" : t.label}
+          onClick={() => setTab(t.id)}
+          className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-xl outline-none transition active:translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-40 sm:h-auto sm:w-auto sm:px-6 sm:py-3 sm:text-sm sm:font-bold ${
+            selected
+              ? "border-[#e5c779]/70 bg-gradient-to-b from-[#efcf83] to-[#b9913f] text-[#10130e] shadow-[0_3px_0_#765b25,0_0_14px_rgba(229,199,121,0.15)]"
+              : "border-white/15 bg-gradient-to-b from-[#29312c] to-[#131a16] text-white/65 shadow-[0_3px_0_#080c0b] hover:border-[#e5c779]/40 hover:text-white"
+          }`}
+        >
+          <span aria-hidden="true" className="sm:hidden">
+            {t.id === "blackjack" ? "♠" : "🎰"}
+          </span>
+
+          <span className="hidden sm:inline">
+            {t.label}
+          </span>
+        </button>
+      );
+    })}
+  </div>
+
+  <span
+    role="status"
+    className={`min-w-0 flex-1 truncate text-[10px] text-white/40 sm:text-xs ${
+      locked ? "visible" : "invisible"
+    }`}
+  >
+    Round in progress…
+  </span>
+
+  <div className="ml-auto shrink-0">
+    <AudioControls />
+  </div>
+</div>
 
         {/* Les deux jeux restent montés : on ne perd pas une manche en changeant d'onglet. */}
         <div className={tab === "blackjack" ? "" : "hidden"}>
