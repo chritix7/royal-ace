@@ -34,29 +34,57 @@ export default function AudioControls() {
   const off = "border-white/10 text-white/45";
 
   return (
-    <div className="flex flex-wrap items-center justify-end gap-2" role="group" aria-label="Sound settings">
-      <button onClick={() => audio.set({ music: !a.music })} aria-pressed={a.music} className={`${btn} ${a.music ? on : off}`}>
-        ♪ Music
-      </button>
-      <button onClick={() => audio.set({ sfx: !a.sfx })} aria-pressed={a.sfx} className={`${btn} ${a.sfx ? on : off}`}>
-        🔊 Sounds
-      </button>
-      <button onClick={() => audio.set({ haptics: !a.haptics })} aria-pressed={a.haptics} className={`${btn} hidden sm:inline-block ${a.haptics ? on : off}`}>
-        📳 Vibration
-      </button>
-      <label className="flex items-center gap-2 text-[11px] text-white/45">
-        Volume
-        <input
-          type="range"
-          min={0}
-          max={1}
-          step={0.05}
-          value={a.volume}
-          onChange={(e) => audio.set({ volume: Number(e.target.value) })}
-          aria-label="Master volume"
-          className="h-1 w-20 accent-[#d7b45b]"
-        />
-      </label>
-    </div>
-  );
+  <div
+    className="flex items-center justify-end gap-1 sm:flex-wrap sm:gap-2"
+    role="group"
+    aria-label="Sound settings"
+  >
+    <button
+      onClick={() => audio.set({ music: !a.music })}
+      aria-pressed={a.music}
+      aria-label="Toggle music"
+      title="Music"
+      className={`${btn} !px-2 sm:!px-3 ${a.music ? on : off}`}
+    >
+      <span aria-hidden="true">♪</span>
+      <span className="hidden sm:inline"> Music</span>
+    </button>
+
+    <button
+      onClick={() => audio.set({ sfx: !a.sfx })}
+      aria-pressed={a.sfx}
+      aria-label="Toggle sound effects"
+      title="Sound effects"
+      className={`${btn} !px-2 sm:!px-3 ${a.sfx ? on : off}`}
+    >
+      <span aria-hidden="true">🔊</span>
+      <span className="hidden sm:inline"> Sounds</span>
+    </button>
+
+    <button
+      onClick={() => audio.set({ haptics: !a.haptics })}
+      aria-pressed={a.haptics}
+      className={`${btn} hidden sm:inline-block ${
+        a.haptics ? on : off
+      }`}
+    >
+      📳 Vibration
+    </button>
+
+    <label className="flex shrink-0 items-center gap-2 text-[11px] text-white/45">
+      <span className="hidden sm:inline">Volume</span>
+
+      <input
+        type="range"
+        min={0}
+        max={1}
+        step={0.05}
+        value={a.volume}
+        onChange={(e) => audio.set({ volume: Number(e.target.value) })}
+        aria-label="Master volume"
+        className="h-1 w-12 min-w-0 accent-[#d7b45b] sm:w-20"
+      />
+    </label>
+  </div>
+);
 }
