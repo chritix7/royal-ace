@@ -122,28 +122,23 @@ export default function Home() {
 
       return (
         <button
-          key={t.id}
-          type="button"
-          role="tab"
-          aria-label={t.id === "blackjack" ? "Blackjack" : "Slot machine"}
-          aria-selected={selected}
-          disabled={blocked}
-          title={blocked ? "Finish the current round first" : t.label}
-          onClick={() => setTab(t.id)}
-          className={`relative touch-manipulation select-none [-webkit-tap-highlight-color:transparent] flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-red-500 text-xl outline-none transition disabled:cursor-not-allowed disabled:opacity-40 sm:h-auto sm:w-auto sm:px-6 sm:py-3 sm:text-sm sm:font-bold ${
-            selected
-              ? "border-[#e5c779]/70 bg-gradient-to-b from-[#efcf83] to-[#b9913f] text-[#10130e] shadow-[0_3px_0_#765b25,0_0_14px_rgba(229,199,121,0.15)]"
-              : "border-white/15 bg-gradient-to-b from-[#29312c] to-[#131a16] text-white/65 shadow-[0_3px_0_#080c0b] hover:border-[#e5c779]/40 hover:text-white"
-          }`}
-        >
-          <span aria-hidden="true" className="sm:hidden">
-            {t.id === "blackjack" ? "♠" : "🎰"}
-          </span>
+  key={t.id}
+  type="button"
+  role="tab"
+  aria-label={t.id === "blackjack" ? "Blackjack" : "Slot machine"}
+  aria-selected={selected}
+  disabled={blocked}
+  onClick={() => setTab(t.id)}
+  className="flex h-11 w-11 items-center justify-center rounded-full border border-red-500 bg-[#151b15] text-xl text-white"
+>
+  <span aria-hidden="true" className="sm:hidden">
+    {t.id === "blackjack" ? "♠" : "🎰"}
+  </span>
 
-          <span className="hidden sm:inline">
-            {t.label}
-          </span>
-        </button>
+  <span className="hidden sm:inline">
+    {t.label}
+  </span>
+</button>
       );
     })}
   </div>
