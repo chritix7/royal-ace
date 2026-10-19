@@ -1,4 +1,4 @@
-const CACHE = "royal-ace-v2";
+const CACHE = "royal-ace-v3";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
