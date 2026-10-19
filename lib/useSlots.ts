@@ -130,6 +130,9 @@ export function useSlots(active: boolean, labels: SlotLabels = DEFAULT_LABELS) {
   const [hydrated, setHydrated] = useState(false);
   const stopRef = useRef(false);
   const bonusDone = useRef<(() => void) | null>(null);
+  const collectionChoice = useRef<
+  ((kind: "spins" | "chips") => void) | null
+>(null);
 
 function bonusContinue() {
   const resolve = bonusDone.current;
@@ -343,7 +346,8 @@ return fsWin;
     const b = BET_LEVELS[ref.current.betIdx];
     const base = await runSpin(false, 1);
     let total = base.total;
-    const triggered = base.freeSpins > 0;
+    let triggered = base.freeSpins > 0;
+    let bonusRounds = triggered ? 1 : 0;
     let vaultHit = false;
     let jackpots: { tier: JackpotTier; amount: number }[] = [];
 
@@ -358,7 +362,27 @@ return fsWin;
 if (triggered) total += await runFreeSpins(base.freeSpins);
 
 if (collectionStore.isReady()) {
-  set({ collectionRewardOpen: true });
+  const choice = await new Promise<"spins" | "chips">((resolve) => {
+    collectionChoice.current = resolve;
+    set({ collectionRewardOpen: true });
+  });
+
+  if (choice === "spins") {
+    const spins = collectionStore.claimFreeSpins();
+
+    if (spins > 0) {
+      triggered = true;
+      bonusRounds += 1;
+      total += await runFreeSpins(spins);
+    }
+  } else {
+    const chips = collectionStore.claimChips();
+
+    set({
+      message: `Crown reward: ◈ ${fmt(chips)} added!`,
+    });
+    sfx.win();
+  }
 }
 
     const ratio = total / b;
@@ -370,7 +394,7 @@ if (collectionStore.isReady()) {
         wagered: st.wagered + b,
         won: st.won + total,
         biggest: Math.max(st.biggest, total),
-        freeSpinRounds: st.freeSpinRounds + (triggered ? 1 : 0),
+        freeSpinRounds: st.freeSpinRounds + bonusRounds,
         vaults: st.vaults + (vaultHit ? 1 : 0),
         jackpotWins: st.jackpotWins + jackpots.length,
       },
@@ -603,26 +627,14 @@ if (collectionStore.isReady()) {
   const collectionRewardOpen = ref.current.collectionRewardOpen;
   const canSpin = !s.busy && balance >= bet;
 
-  async function claimCollectionReward(kind: "spins" | "chips") {
-  if (!collectionStore.isReady()) return;
+  function claimCollectionReward(kind: "spins" | "chips") {
+  const resolve = collectionChoice.current;
 
-  if (kind === "spins") {
-    const spins = collectionStore.claimFreeSpins();
-    set({ collectionRewardOpen: false });
+  if (!resolve || !ref.current.collectionRewardOpen) return;
 
-    if (spins > 0) {
-      await runFreeSpins(spins);
-    }
-
-    return;
-  }
-
-  const chips = collectionStore.claimChips();
-  set({
-    collectionRewardOpen: false,
-    message: `Crown reward: ◈ ${fmt(chips)} added!`,
-  });
-  sfx.win();
+  collectionChoice.current = null;
+  set({ collectionRewardOpen: false });
+  resolve(kind);
 }
 
   return {
