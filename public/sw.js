@@ -1,14 +1,15 @@
-const CACHE = "royal-ace-v1";
-const APP_SHELL = ["/", "/manifest.webmanifest"];
+const CACHE = "royal-ace-v2";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
       const cache = await caches.open(CACHE);
 
-      await cache.addAll(APP_SHELL).catch(() => {
-        // Une ressource manquante ne doit pas empêcher l’installation.
-      });
+      try {
+        await cache.addAll(["/", "/manifest.webmanifest"]);
+      } catch {
+        // On n’empêche pas l’installation si une ressource change.
+      }
 
       await self.skipWaiting();
     })(),
@@ -21,9 +22,7 @@ self.addEventListener("activate", (event) => {
       const names = await caches.keys();
 
       await Promise.all(
-        names
-          .filter((name) => name !== CACHE)
-          .map((name) => caches.delete(name)),
+        names.filter((name) => name !== CACHE).map((name) => caches.delete(name)),
       );
 
       await self.clients.claim();
@@ -40,29 +39,38 @@ self.addEventListener("fetch", (event) => {
 
   if (url.origin !== self.location.origin) return;
 
-  // Les pages HTML restent network-first : tu reçois toujours la dernière version en ligne.
-  if (
-    url.pathname.startsWith("/api/") ||
-    request.headers.get("accept")?.includes("text/html")
-  ) {
+  // Pages : réseau d’abord, puis dernière page connue en cache.
+  if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request).catch(async () => {
+      (async () => {
         const cache = await caches.open(CACHE);
 
-        return (
-          (await cache.match("/")) ??
-          new Response("Royal Ace is offline.", {
-            status: 503,
-            headers: { "Content-Type": "text/plain" },
-          })
-        );
-      }),
+        try {
+          const response = await fetch(request);
+
+          if (response.ok) {
+            await cache.put(request, response.clone());
+            await cache.put("/", response.clone());
+          }
+
+          return response;
+        } catch {
+          return (
+            (await cache.match(request)) ??
+            (await cache.match("/")) ??
+            new Response("Offline", {
+              status: 503,
+              headers: { "Content-Type": "text/plain" },
+            })
+          );
+        }
+      })(),
     );
 
     return;
   }
 
-  // JS, CSS, images et autres assets : cache d’abord, rafraîchissement en arrière-plan.
+  // Assets Next.js : cache d’abord, puis réseau et mise à jour.
   event.respondWith(
     (async () => {
       const cache = await caches.open(CACHE);
@@ -73,7 +81,6 @@ self.addEventListener("fetch", (event) => {
           if (response.ok) {
             cache.put(request, response.clone());
           }
-
           return response;
         })
         .catch(() => cached);
