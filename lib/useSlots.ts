@@ -251,6 +251,13 @@ function bonusContinue() {
 
       if (st.total > 0) {
   wallet.add(st.total);
+  
+  window.dispatchEvent(
+  new CustomEvent("royalace:chip-fly", {
+    detail: { count: st.total >= b * 10 ? 10 : 6 },
+  }),
+);
+
   spinTotal += st.total;
   const ratio = st.total / b;
   set({ cells: st.cells, lineWins: st.lineWins, lastWin: spinTotal, message: `You won ◈ ${fmt(spinTotal)}` });

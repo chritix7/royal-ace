@@ -17,6 +17,7 @@ import AchievementToasts from "../components/AchievementToasts";
 import { progressionStore } from "../lib/progression";
 import { weeklyStore } from "../lib/weekly";
 import WinFeed from "../components/WinFeed";
+import ChipFly from "../components/ChipFly";
 
 type Tab = "blackjack" | "slots";
 const TABS: { id: Tab; label: string }[] = [
@@ -51,7 +52,10 @@ export default function Home() {
         ROYAL <span className="text-[#d7b45b]">ACE</span>
       </h1>
 
-      <div className="rounded-2xl border border-[#c8a65b]/30 bg-[#151b15] px-3 py-1.5 text-right">
+      <div
+        id="chips-counter"
+        className="rounded-2xl border border-[#c8a65b]/30 bg-[#151b15] px-3 py-1.5 text-right"
+      >
         <p className="text-[9px] leading-none text-white/50">Chips</p>
         <p className="text-base font-bold leading-tight text-[#e5c779]">
           ◈ <Counter value={balance} />
@@ -170,6 +174,8 @@ export default function Home() {
           <Slots active={tab === "slots"} />
         </div>
       </section>
+
+      <ChipFly />
 
       <RewardsPanel open={rewardsOpen} onClose={() => setRewardsOpen(false)} />
       <AchievementsPanel
