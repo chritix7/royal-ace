@@ -17,7 +17,7 @@ import { useWeekly, weeklyStore } from "../lib/weekly";
 
 type Props = { open: boolean; onClose: () => void };
 
-const WEEKLY_GOAL = 1000;
+const WEEKLY_GOAL = 5000;
 
 export default function RewardsPanel({ open, onClose }: Props) {
   const daily = useDaily();
