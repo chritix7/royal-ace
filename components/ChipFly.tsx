@@ -104,7 +104,7 @@ export default function ChipFly() {
         setChips((prev) =>
           prev.filter((c) => !batch.some((b) => b.id === c.id)),
         );
-      }, 1700);
+      }, 1400);
     }
 
     window.addEventListener("royalace:chip-fly", fly);
