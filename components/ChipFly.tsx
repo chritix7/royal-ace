@@ -105,6 +105,7 @@ export default function ChipFly() {
 
 window.setTimeout(() => {
   sfx.coin(Math.min(count, 8));
+  window.dispatchEvent(new CustomEvent("balance-flash"));
 }, 350 + maxDelay);
 
       window.setTimeout(() => {

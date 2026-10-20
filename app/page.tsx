@@ -18,6 +18,7 @@ import { progressionStore } from "../lib/progression";
 import { weeklyStore } from "../lib/weekly";
 import WinFeed from "../components/WinFeed";
 import ChipFly from "../components/ChipFly";
+import { useBalanceFlash } from "../hooks/useBalanceFlash";
 
 type Tab = "blackjack" | "slots";
 const TABS: { id: Tab; label: string }[] = [
@@ -31,6 +32,7 @@ export default function Home() {
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
   const balance = useBalance();
+  const flash = useBalanceFlash();
   const locked = useLocked();
 
   useEffect(() => {
@@ -56,11 +58,14 @@ export default function Home() {
   data-chips-counter="header"
   className="rounded-2xl border border-[#c8a65b]/30 bg-[#151b15] px-3 py-1.5 text-right"
 >
-        <p className="text-[9px] leading-none text-white/50">Chips</p>
-        <p className="text-base font-bold leading-tight text-[#e5c779]">
-          ◈ <Counter value={balance} />
-        </p>
-      </div>
+  <p className="text-[9px] leading-none text-white/50">Chips</p>
+  <p className="text-base font-bold leading-tight text-[#e5c779]">
+    ◈{" "}
+    <span className={flash ? "balance-flash" : ""}>
+      <Counter value={balance} />
+    </span>
+  </p>
+</div>
     </div>
 
     <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">

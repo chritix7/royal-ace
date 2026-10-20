@@ -34,6 +34,7 @@ import {
   useCollection,
   COLLECTION_CHIP_MULT,
 } from "../lib/collection";
+import { useBalanceFlash } from "../hooks/useBalanceFlash";
 
 const money = (n: number) => n.toLocaleString("en-US");
 const PAY_ROWS: Paying[] = ["seven", "wild", "gem", "bell", "grape", "lemon", "cherry"];
@@ -99,6 +100,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
   bonusPrice, buyBonus, vaultPick, vaultCollect, gambleChoose, gambleCollect, bonusContinue,
   collectionRewardOpen, claimCollectionReward,
 } = useSlots(active, skin.labels, gambleScreen);
+const flash = useBalanceFlash();
 
 const collection = useCollection(bet);
 
@@ -360,7 +362,10 @@ useEffect(() => {
     Balance
   </p>
   <p className="font-mono text-sm font-black tabular-nums text-[#e5b2cf]">
-    ◈ {money(balance)}
+    ◈{" "}
+    <span className={flash ? "balance-flash" : ""}>
+      {money(balance)}
+    </span>
   </p>
 </div>
 
@@ -606,8 +611,10 @@ useEffect(() => {
               <div className="mx-auto mt-2 grid max-w-2xl grid-cols-3 gap-1.5 sm:mt-3 sm:gap-3">
   <div className="contents">
   <Led label="CREDIT" className="">
+  <span className={flash ? "balance-flash" : ""}>
     <Counter value={balance} />
-  </Led>
+  </span>
+</Led>
 </div>
 
   <Led label="TOTAL BET" className="">
