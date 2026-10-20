@@ -105,7 +105,7 @@ export default function ChipFly() {
 
 window.setTimeout(() => {
   sfx.coin(Math.min(count, 8));
-}, 400 + maxDelay);
+}, 350 + maxDelay);
 
       window.setTimeout(() => {
         setChips((prev) =>
