@@ -70,28 +70,33 @@ export default function ChipFly() {
           const midY = Math.min(c.sy, c.ty) - 90 - Math.random() * 70;
 
           el.animate(
-            [
-              {
-                transform: `translate(-50%, -50%) translate(${c.sx}px, ${c.sy}px) scale(0.6) rotateY(0deg)`,
-                opacity: 0,
-              },
-              {
-                transform: `translate(-50%, -50%) translate(${midX}px, ${midY}px) scale(1.15) rotateY(${c.spin / 2}deg)`,
-                opacity: 1,
-                offset: 0.35,
-              },
-              {
-                transform: `translate(-50%, -50%) translate(${c.tx}px, ${c.ty}px) scale(0.35) rotateY(${c.spin}deg)`,
-                opacity: 0.9,
-              },
-            ],
-            {
-              duration: 1100,
-              delay: c.delay,
-              easing: "cubic-bezier(0.25, 0.6, 0.3, 1)",
-              fill: "both",
-            },
-          );
+  [
+    {
+      transform: `translate(-50%, -50%) translate(${c.sx}px, ${c.sy}px) scale(0.6) rotateY(0deg)`,
+      opacity: 0,
+    },
+    {
+      transform: `translate(-50%, -50%) translate(${midX}px, ${midY}px) scale(1.15) rotateY(${c.spin / 2}deg)`,
+      opacity: 1,
+      offset: 0.35,
+    },
+    {
+      transform: `translate(-50%, -50%) translate(${c.tx}px, ${c.ty}px) scale(0.5) rotateY(${c.spin}deg)`,
+      opacity: 1,
+      offset: 0.82,
+    },
+    {
+      transform: `translate(-50%, -50%) translate(${c.tx}px, ${c.ty}px) scale(0.15) rotateY(${c.spin}deg)`,
+      opacity: 0,
+    },
+  ],
+  {
+    duration: 950,
+    delay: c.delay,
+    easing: "cubic-bezier(0.3, 0.6, 0.25, 1)",
+    fill: "both",
+  },
+);
         });
       });
 
