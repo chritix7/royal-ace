@@ -9,6 +9,7 @@ import { wallet } from "./wallet";
 import { CHIPS, MIN_BET, REFILL, EMPTY_STATS, EMPTY_RECORDS, DEFAULT_SETTINGS, INITIAL, BACKS, sleep, floor10 } from "./game";
 import type { S, Settings, Records } from "./game";
 import { winHistory } from "./winHistory";
+import { sessionStore } from "./sessionStore";
 
 export function useBlackjack(active = true) {
   const activeRef = useRef(active);
@@ -517,6 +518,8 @@ export function useBlackjack(active = true) {
         dealerBusts: c.stats.dealerBusts + (dealerPlayed && dv > 21 ? 1 : 0),
       },
     });
+
+    sessionStore.recordBj(wagered, Math.max(0, net));
 
     // On annonce ce qui s'est passé (les missions et succès écoutent)
     track("bjHand", hands.length);

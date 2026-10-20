@@ -35,6 +35,7 @@ import {
   COLLECTION_CHIP_MULT,
 } from "../lib/collection";
 import { useBalanceFlash } from "../hooks/useBalanceFlash";
+import { useSession } from "../lib/sessionStore";
 
 const money = (n: number) => n.toLocaleString("en-US");
 const PAY_ROWS: Paying[] = ["seven", "wild", "gem", "bell", "grape", "lemon", "cherry"];
@@ -101,6 +102,7 @@ export default function Slots({ active = true }: { active?: boolean }) {
   collectionRewardOpen, claimCollectionReward,
 } = useSlots(active, skin.labels, gambleScreen);
 const flash = useBalanceFlash();
+const session = useSession();
 
 const collection = useCollection(bet);
 
@@ -843,6 +845,20 @@ style={{
 
         <div className="rounded-3xl border border-white/[0.07] bg-[#101713] p-6">
           <h3 className="text-lg font-bold">Session</h3>
+          <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/45">Today</p>
+  <dl className="mt-2 grid grid-cols-2 gap-y-1.5 text-xs text-white/50">
+    <dt>Net</dt>
+    <dd className={`text-right font-bold ${(session.slots.won - session.slots.wagered) >= 0 ? "text-emerald-300" : "text-red-300"}`}>
+      {(session.slots.won - session.slots.wagered) >= 0 ? "+" : "−"}
+      ◈ {money(Math.abs(session.slots.won - session.slots.wagered))}
+    </dd>
+    <dt>Spins</dt>
+    <dd className="text-right text-white">{money(session.slots.spins)}</dd>
+    <dt>Biggest win</dt>
+    <dd className="text-right text-white">◈ {money(session.slots.biggest)}</dd>
+  </dl>
+</div>
           <dl className="mt-3 grid grid-cols-2 gap-y-2 text-xs text-white/50">
             <dt>Spins</dt><dd className="text-right text-white">{money(s.stats.spins)}</dd>
             <dt>Wagered</dt><dd className="text-right text-white">◈ {money(s.stats.wagered)}</dd>

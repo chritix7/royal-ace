@@ -6,6 +6,7 @@ import { Counter, Spark, Toggle, SideBet, small } from "./ui";
 import { ACHIEVEMENTS } from "../lib/achievements";
 import { audio, useAudioSettings } from "../lib/audio";
 import type { Game } from "../lib/useBlackjack";
+import { useSession } from "../lib/sessionStore";
 
 /** Pourcentage lisible. */
 const rate = (hits: number, n: number) => (n > 0 ? `${((100 * hits) / n).toFixed(1)}%` : "–");
@@ -19,6 +20,7 @@ const verdict = (hits: number, n: number, p: number) => {
 export default function Sidebar({ g }: { g: Game }) {
   const sound = useAudioSettings();
   const { s, showHint, setShowHint, showCount, setShowCount, canBet, winRate, spots, sides, stake, running, trueCount, decksLeft, addChip, setBetTo, adjustSide, updateSettings, resetAll } = g;
+  const session = useSession();
 
   return (
       <aside className="flex flex-col gap-5">
@@ -130,6 +132,20 @@ export default function Sidebar({ g }: { g: Game }) {
 
         <div className="rounded-3xl border border-white/[0.07] bg-[#101713] p-6">
           <h3 className="text-lg font-bold">Session</h3>
+          <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/45">Today</p>
+  <dl className="mt-2 grid grid-cols-2 gap-y-1.5 text-xs text-white/50">
+    <dt>Net</dt>
+    <dd className={`text-right font-bold ${(session.bj.won - session.bj.wagered) >= 0 ? "text-emerald-300" : "text-red-300"}`}>
+      {(session.bj.won - session.bj.wagered) >= 0 ? "+" : "−"}
+      ◈ {money(Math.abs(session.bj.won - session.bj.wagered))}
+    </dd>
+    <dt>Hands</dt>
+    <dd className="text-right text-white">{money(session.bj.spins)}</dd>
+    <dt>Biggest win</dt>
+    <dd className="text-right text-white">◈ {money(session.bj.biggest)}</dd>
+  </dl>
+</div>
           <dl className="mt-3 grid grid-cols-2 gap-y-2 text-xs text-white/50">
             <dt>Hands played</dt><dd className="text-right text-white">{s.stats.played}</dd>
             <dt>Won / lost / push</dt>

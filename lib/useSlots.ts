@@ -28,6 +28,7 @@ import { runAutoSpins } from "./autoSpin";
 import { useBalance, wallet } from "./wallet";
 import { winHistory } from "./winHistory";
 import { collectionStore } from "./collection";
+import { sessionStore } from "./sessionStore";
 
 export type SlotStats = { spins: number; wagered: number; won: number; biggest: number; freeSpinRounds: number; vaults: number; jackpotWins: number };
 export type FreeSpins = { left: number; played: number; total: number; win: number };
@@ -431,6 +432,8 @@ if (collectionStore.isReady(b)) {
       lastWin: total,
       message: total > 0 ? `You won ◈ ${fmt(total)}` : "No win this time. Spin again!",
     });
+
+    sessionStore.recordSlots(b, total);
 
     track("spin");
     if (total > 0) track("slotWin");
