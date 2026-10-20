@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { sfx } from "../lib/sound";
 
 type Chip = { id: number; sx: number; sy: number; tx: number; ty: number; delay: number; size: number; spin: number };
 
@@ -99,6 +100,12 @@ export default function ChipFly() {
 );
         });
       });
+
+      const maxDelay = Math.max(...batch.map((c) => c.delay));
+
+window.setTimeout(() => {
+  sfx.coin(Math.min(count, 8));
+}, 800 + maxDelay);
 
       window.setTimeout(() => {
         setChips((prev) =>
