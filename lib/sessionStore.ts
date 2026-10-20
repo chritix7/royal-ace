@@ -72,6 +72,17 @@ export const sessionStore = {
   },
   recordSlots: (wagered: number, net: number) => record("slots", wagered, net),
   recordBj: (wagered: number, net: number) => record("bj", wagered, net),
+
+  recordSlotAdjustment: (net: number) => {
+  rollDayIfNeeded();
+  const g = state.slots;
+  state = {
+    ...state,
+    slots: { ...g, net: g.net + net },
+  };
+  persist();
+  emit();
+  },
 };
 
 export const useSession = () =>
