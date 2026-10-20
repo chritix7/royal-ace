@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 type Chip = { id: number; x: number; y: number; delay: number };
 
@@ -14,7 +14,29 @@ export default function ChipFly() {
       const detail = (e as CustomEvent).detail ?? {};
       const count = Math.min(Math.max(detail.count ?? 6, 3), 12);
 
-      const target = document.getElementById("chips-counter");
+      const candidates = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-chips-counter]"),
+      );
+
+      let target: HTMLElement | null = null;
+
+      for (const el of candidates) {
+        const r = el.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) {
+          target = el;
+          break;
+        }
+
+        const child = el.querySelector<HTMLElement>("*");
+        if (child) {
+          const cr = child.getBoundingClientRect();
+          if (cr.width > 0 && cr.height > 0) {
+            target = child;
+            break;
+          }
+        }
+      }
+
       if (!target) return;
 
       const t = target.getBoundingClientRect();
@@ -44,7 +66,9 @@ export default function ChipFly() {
       );
 
       window.setTimeout(() => {
-        setChips((prev) => prev.filter((c) => !batch.some((b) => b.id === c.id)));
+        setChips((prev) =>
+          prev.filter((c) => !batch.some((b) => b.id === c.id)),
+        );
       }, 1500);
     }
 
