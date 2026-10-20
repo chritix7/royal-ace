@@ -363,7 +363,7 @@ useEffect(() => {
   </p>
   <p className="font-mono text-sm font-black tabular-nums text-[#e5b2cf]">
     ◈{" "}
-    <span className={flash ? "balance-flash" : ""}>
+    <span className={flash ? "balance-flash-pink" : ""}>
       {money(balance)}
     </span>
   </p>
@@ -611,10 +611,8 @@ useEffect(() => {
               <div className="mx-auto mt-2 grid max-w-2xl grid-cols-3 gap-1.5 sm:mt-3 sm:gap-3">
   <div className="contents">
   <Led label="CREDIT" className="">
-  <span className={flash ? "balance-flash" : ""}>
     <Counter value={balance} />
-  </span>
-</Led>
+  </Led>
 </div>
 
   <Led label="TOTAL BET" className="">
