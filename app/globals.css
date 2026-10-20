@@ -263,12 +263,25 @@ body {
   }
 }
 
+@keyframes balanceShake {
+  0% { transform: scale(1.15) translateX(0); }
+  20% { transform: scale(1.15) translateX(-2px); }
+  40% { transform: scale(1.15) translateX(2px); }
+  60% { transform: scale(1.15) translateX(-1px); }
+  80% { transform: scale(1.15) translateX(1px); }
+  100% { transform: scale(1) translateX(0); }
+}
+
 .balance-flash {
   display: inline-block;
-  animation: balanceFlashGold 0.6s ease-out;
+  animation:
+    balanceFlashGold 0.6s ease-out,
+    balanceShake 0.4s ease-out;
 }
 
 .balance-flash-pink {
   display: inline-block;
-  animation: balanceFlashPink 0.6s ease-out;
+  animation:
+    balanceFlashPink 0.6s ease-out,
+    balanceShake 0.4s ease-out;
 }
