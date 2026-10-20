@@ -543,6 +543,7 @@ try {
     if (draw.won) {
       track("gambleWin");
       wallet.add(g.amount);
+      sessionStore.recordSlotAdjustment(g.amount);
       const rounds = g.rounds + 1;
       const amount = g.amount * 2;
       sfx.win();
@@ -560,6 +561,7 @@ try {
     } else {
       const lost = Math.min(g.amount, wallet.getBalance());
       wallet.add(-lost);
+      sessionStore.recordSlotAdjustment(-lost);
       sfx.lose();
       set({
         gamble: { amount: 0, rounds: g.rounds + 1, phase: "result", card, won: false, guess },
@@ -604,6 +606,7 @@ useEffect(() => {
     wallet.add(-price);
     sfx.lever();
     const win = await runFreeSpins(FS_AWARD[3]);
+    sessionStore.recordSlots(price, win - price);
     track("bonus");
     const r = win / price;
     const tier: Tier = r >= 6 ? "epic" : r >= 3 ? "mega" : r >= 1.5 ? "big" : "";
