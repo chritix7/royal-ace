@@ -630,8 +630,32 @@ export function useBlackjack(active = true) {
   actions.current = { hit, stand, double, split, surrender, deal, addChip };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (!activeRef.current || e.metaKey || e.ctrlKey || e.altKey) return;
-      const k = e.key.toLowerCase();
+  if (
+    !activeRef.current ||
+    e.metaKey ||
+    e.ctrlKey ||
+    e.altKey ||
+    e.repeat ||
+    e.isComposing
+  ) {
+    return;
+  }
+
+  const target = e.target;
+
+  if (
+    target instanceof HTMLElement &&
+    (
+      target.isContentEditable ||
+      target.closest(
+        "input, textarea, select, button, summary, a, [role='dialog']"
+      )
+    )
+  ) {
+    return;
+  }
+
+  const k = e.key.toLowerCase();
       const a = actions.current;
       if (k === "h") a.hit();
       else if (k === "s") a.stand();

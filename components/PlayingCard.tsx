@@ -5,20 +5,29 @@ export default function PlayingCard({
   faceDown = false,
   overlap = false,
   compact = false,
+  fit = false,
   back = ["#142d27", "#1b3d33"],
 }: {
   card: Card;
   faceDown?: boolean;
   overlap?: boolean;
   compact?: boolean;
+  fit?: boolean;
   back?: [string, string];
 }) {
   const color =
     card.suit === "♥" || card.suit === "♦" ? "text-red-600" : "text-slate-900";
-  const size = compact
+  const size = fit
+    ? "h-[var(--bj-card-h)] w-[calc(var(--bj-card-h)*0.72)]"
+    : compact
     ? "h-[88px] w-[62px] sm:h-28 sm:w-20"
     : "h-28 w-20 sm:h-36 sm:w-[104px]";
-  const shift = compact ? "-ml-8 sm:-ml-10" : "-ml-10 sm:-ml-12";
+
+  const shift = fit
+    ? "-ml-[calc(var(--bj-card-h)*0.28)]"
+    : compact
+    ? "-ml-8 sm:-ml-10"
+    : "-ml-10 sm:-ml-12";
 
   return (
     <div
