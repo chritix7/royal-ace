@@ -604,7 +604,7 @@ useEffect(() => {
 </div>
 
               <div className="mx-auto mt-2 grid max-w-2xl grid-cols-3 gap-1.5 sm:mt-3 sm:gap-3">
-  <div data-chips-counter className="contents">
+  <div data-chips-counter="fullscreen" className="contents">
     <Led label="CREDIT" className="">
       <Counter value={balance} />
     </Led>

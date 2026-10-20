@@ -14,30 +14,27 @@ export default function ChipFly() {
       const detail = (e as CustomEvent).detail ?? {};
       const count = Math.min(Math.max(detail.count ?? 6, 3), 12);
 
-      const candidates = Array.from(
-        document.querySelectorAll<HTMLElement>("[data-chips-counter]"),
-      );
+      const isVisible = (el: HTMLElement) => {
+  const r = el.getBoundingClientRect();
+  return r.width > 0 && r.height > 0;
+};
 
-      let target: HTMLElement | null = null;
+const findVisible = (selector: string) => {
+  for (const el of Array.from(
+    document.querySelectorAll<HTMLElement>(selector),
+  )) {
+    if (isVisible(el)) return el;
+    const child = el.querySelector<HTMLElement>("*");
+    if (child && isVisible(child)) return child;
+  }
+  return null;
+};
 
-      for (const el of candidates) {
-        const r = el.getBoundingClientRect();
-        if (r.width > 0 && r.height > 0) {
-          target = el;
-          break;
-        }
+const target =
+  findVisible('[data-chips-counter="fullscreen"]') ??
+  findVisible('[data-chips-counter="header"]');
 
-        const child = el.querySelector<HTMLElement>("*");
-        if (child) {
-          const cr = child.getBoundingClientRect();
-          if (cr.width > 0 && cr.height > 0) {
-            target = child;
-            break;
-          }
-        }
-      }
-
-      if (!target) return;
+if (!target) return;
 
       const t = target.getBoundingClientRect();
       const tx = t.left + t.width / 2;
