@@ -613,17 +613,49 @@ export function useBlackjack(active = true) {
   }
 
   function resetAll() {
-    const c = ref.current;
-    if ((c.phase !== "betting" && c.phase !== "settled") || c.balance >= MIN_BET) return;
-    set({
-      ...INITIAL,
-      settings: c.settings,
-      shoe: c.shoe,
-      unlocked: c.unlocked,
-      records: c.records,
-      message: "Fresh start. Place your bet.",
-    });
+  const c = ref.current;
+
+  if (
+    c.phase !== "betting" &&
+    c.phase !== "settled"
+  ) {
+    return;
   }
+
+  const confirmed = window.confirm(
+    [
+      "Reset the shared wallet and Blackjack statistics?",
+      "",
+      `The shared Slots / Blackjack wallet will be set to ${INITIAL.balance.toLocaleString("en-US")} chips.`,
+      "",
+      "Blackjack session statistics and recent round history will be cleared.",
+      "",
+      "Table settings, achievements, personal records, Slots statistics and Today tracking will be kept.",
+      "",
+      "This cannot be undone.",
+    ].join("\n")
+  );
+
+  if (!confirmed) return;
+
+  setRoundBreakdown(null);
+
+  roundSides.current = {
+    wagered: 0,
+    perfectPairs: 0,
+    twentyOnePlusThree: 0,
+  };
+
+  set({
+    ...INITIAL,
+    settings: c.settings,
+    shoe: c.shoe,
+    unlocked: c.unlocked,
+    records: c.records,
+    trend: [INITIAL.balance],
+    message: "Wallet and Blackjack stats reset. Place your bet.",
+  });
+}
 
   // ---------- Raccourcis clavier ----------
   const actions = useRef({ hit, stand, double, split, surrender, deal, addChip });
@@ -689,7 +721,12 @@ export function useBlackjack(active = true) {
   const outOfChips = canBet && s.balance < MIN_BET;
   const totalCards = s.settings.decks * 52;
   const shoePct = s.shoe.length ? Math.min(100, Math.round((s.shoe.length / totalCards) * 100)) : 100;
-  const winRate = s.stats.played ? Math.round((s.stats.won / s.stats.played) * 100) : 0;
+  const resolvedHands =
+  s.stats.won + s.stats.lost + s.stats.pushed;
+
+const winRate = resolvedHands
+  ? Math.round((s.stats.won / resolvedHands) * 100)
+  : 0;
   const compact = s.hands.length > 1;
   const spots = s.settings.spots;
   const sides = s.ppBet + s.t3Bet;

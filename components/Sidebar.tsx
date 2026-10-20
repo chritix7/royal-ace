@@ -139,18 +139,21 @@ export default function Sidebar({ g }: { g: Game }) {
 <dd className={`text-right font-bold ${session.bj.net >= 0 ? "text-emerald-300" : "text-red-300"}`}>
   {session.bj.net >= 0 ? "+" : "−"}◈ {money(Math.abs(session.bj.net))}
 </dd>
-    <dt>Hands</dt>
+    <dt>Rounds</dt>
     <dd className="text-right text-white">{money(session.bj.spins)}</dd>
     <dt>Biggest win</dt>
     <dd className="text-right text-white">◈ {money(session.bj.biggest)}</dd>
   </dl>
 </div>
           <dl className="mt-3 grid grid-cols-2 gap-y-2 text-xs text-white/50">
-            <dt>Hands played</dt><dd className="text-right text-white">{s.stats.played}</dd>
+            <dt>Rounds played</dt>
+<dd className="text-right text-white">{s.stats.played}</dd>
             <dt>Won / lost / push</dt>
             <dd className="text-right text-white">{s.stats.won} / {s.stats.lost} / {s.stats.pushed}</dd>
-            <dt>Win rate</dt><dd className="text-right text-white">{winRate}%</dd>
-            <dt>Blackjacks</dt><dd className="text-right text-white">{s.stats.blackjacks}</dd>
+            <dt>Hand win rate</dt>
+<dd className="text-right text-white">{winRate}%</dd>
+            <dt>Rounds with blackjack</dt>
+<dd className="text-right text-white">{s.stats.blackjacks}</dd>
             <dt>Profit</dt>
             <dd className={`text-right font-bold ${s.stats.profit >= 0 ? "text-emerald-300" : "text-red-300"}`}>
               {s.stats.profit >= 0 ? "+" : "−"}{money(Math.abs(s.stats.profit))}
@@ -176,25 +179,40 @@ export default function Sidebar({ g }: { g: Game }) {
             </div>
           )}
 
-          <button onClick={resetAll} disabled={!canBet} className={`${small} mt-5 w-full`}>
-            Reset chips and stats
-          </button>
+          <button
+  type="button"
+  onClick={resetAll}
+  disabled={!canBet}
+  className={`${small} mt-5 w-full`}
+>
+  Reset wallet & Blackjack stats
+</button>
+
+<p className="mt-2 text-center text-[10px] leading-4 text-white/35">
+  Shared wallet reset. Today, achievements and records are kept.
+  Confirmation required.
+</p>
         </div>
 
         <div className="rounded-3xl border border-white/[0.07] bg-[#101713] p-6">
           <h3 className="text-lg font-bold">Fairness check</h3>
           <p className="mt-1 text-xs text-white/40">What the dealer really does in your session, against real casino figures.</p>
           <dl className="mt-3 grid grid-cols-[1fr_auto] gap-x-3 gap-y-2 text-xs text-white/50">
+          <p className="mt-2 text-[11px] leading-4 text-white/35">
+  Your blackjack figure counts rounds with at least one blackjack.
+  Sessions can include different numbers of starting hands, so no
+  single-hand reference is applied.
+</p>
             <dt>Rounds played</dt>
             <dd className="text-right text-white">{s.stats.played}</dd>
             <dt>Dealer blackjacks</dt>
             <dd className="text-right text-white">
               {rate(s.stats.dealerBJs, s.stats.played)} <span className="text-white/35">(≈ 4.8%)</span> {verdict(s.stats.dealerBJs, s.stats.played, 0.0475)}
             </dd>
-            <dt>Your blackjacks (1 hand)</dt>
-            <dd className="text-right text-white">
-              {rate(s.stats.blackjacks, s.stats.played)} <span className="text-white/35">(≈ 4.8%)</span> {verdict(s.stats.blackjacks, s.stats.played, 0.0475)}
-            </dd>
+            <dt>Rounds with your blackjack</dt>
+<dd className="text-right text-white">
+  {rate(s.stats.blackjacks, s.stats.played)}
+</dd>
             <dt>Dealer busts when he plays</dt>
             <dd className="text-right text-white">
               {rate(s.stats.dealerBusts, s.stats.dealerPlayed)} <span className="text-white/35">(28–32%)</span>
