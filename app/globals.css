@@ -246,7 +246,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   [class*="anim-"], .idle-wild, .idle-scatter, .wild-expand, .shake-1, .shake-2, .shake-3, .win-flash, .coin,
-  .cloud, .shooting, .boat, .beam { animation: none !important; }
+  .cloud, .shooting, .boat, .beam, .sym-win-pop { animation: none !important; }
 }
 
 @keyframes balanceFlashGold {
@@ -314,4 +314,15 @@ body {
 
 .balance-halo-gold {
   animation: haloGold 0.8s ease-out;
+}
+
+/* Pop des symboles gagnants */
+@keyframes sym-win-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+.sym-win-pop {
+  animation: sym-win-pop 0.4s ease-out;
 }

@@ -18,10 +18,10 @@ export function SymbolCell({ sym, skin, win }: { sym: Sym; skin: Skin; win: bool
   const tag = "absolute inset-x-0.5 bottom-0.5 rounded-[3px] bg-gradient-to-r py-px text-center text-[7px] font-black tracking-wider shadow sm:text-[10px]";
   return (
     <div
-      className={`relative flex h-[var(--cell)] items-center justify-center ${skin.art ? "border-b border-white/[0.05]" : ""} ${special} ${win ? skin.win : ""}`}
-      role="img"
-      aria-label={skin.names[sym]}
-    >
+  className={`relative flex h-[var(--cell)] items-center justify-center ${win ? "sym-win-pop" : ""} ${skin.art ? "border-b border-white/[0.05]" : ""} ${special} ${win ? skin.win : ""}`}
+  role="img"
+  aria-label={skin.names[sym]}
+>
       {skin.art ? (
         <img
           src={skin.art[sym]}
@@ -87,7 +87,7 @@ export function Reel({
   return (
     <div className={`relative h-[calc(var(--cell)*4)] w-[var(--cell)] overflow-hidden border-r last:border-r-0 ${skin.divider} ${skin.reel}`}>
       <div className={!spinning && spinId > 0 ? "reel-land" : ""}>
-        <div ref={stripEl}>
+        <div ref={stripEl} style={{ willChange: "transform" }}>
           {strip.map((sym, i) => (
             <SymbolCell key={i} sym={sym} skin={skin} win={!spinning && i < ROWS && !!cells?.[i]} />
           ))}
@@ -186,9 +186,25 @@ export default function SlotReels({
 }) {
   const winLines = new Set(s.lineWins.map((w) => w.line));
 
+  const [cycle, setCycle] = useState(0);
+
+useEffect(() => {
+  if (s.lineWins.length <= 1) {
+    setCycle(0);
+    return;
+  }
+  const id = setInterval(() => setCycle((c) => c + 1), 450);
+  return () => clearInterval(id);
+}, [s.lineWins]);
+
+const shownLine =
+  s.lineWins.length > 1
+    ? s.lineWins[cycle % s.lineWins.length]
+    : activeLine;
+
   return (
     <div className={`mx-auto flex w-fit items-stretch gap-1.5 sm:gap-3 ${shake ? `shake-${shake}` : ""}`}>
-      <LineTabs from={1} to={10} winLines={winLines} active={activeLine?.line ?? null} />
+      <LineTabs from={1} to={10} winLines={winLines} active={shownLine?.line ?? null} />
 
       <div
   className="relative rounded-[28px] p-3.5 sm:p-5"
@@ -243,7 +259,7 @@ export default function SlotReels({
                 expanding={s.expanding.includes(k)}
               />
             ))}
-            {activeLine && (
+            {shownLine && (
               <svg
                 className="pointer-events-none absolute inset-0 z-10 h-full w-full"
                 viewBox={`0 0 ${REELS} ${ROWS}`}
@@ -251,7 +267,7 @@ export default function SlotReels({
                 aria-hidden="true"
               >
                 <polyline
-                  points={PAYLINES[activeLine.line - 1].map((row, reel) => `${reel + 0.5},${row + 0.5}`).join(" ")}
+                  points={PAYLINES[shownLine.line - 1].map((row, reel) => `${reel + 0.5},${row + 0.5}`).join(" ")}
                   fill="none"
                   stroke={skin.lineColor}
                   strokeWidth={5}
@@ -279,7 +295,7 @@ export default function SlotReels({
 
     </div>
 
-      <LineTabs from={11} to={20} winLines={winLines} active={activeLine?.line ?? null} />
+      <LineTabs from={1} to={10} winLines={winLines} active={shownLine?.line ?? null} />
       <Lever spinId={s.spinId} onPull={onPull} disabled={!canPull} />
     </div>
   );
