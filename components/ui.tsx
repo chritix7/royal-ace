@@ -80,21 +80,74 @@ export function Toggle({ label, checked, onChange, disabled }: { label: string; 
 }
 
 export function SideBet({
-  label, hint, amount, onChange, minusDisabled, plusDisabled,
+  label,
+  hint,
+  amount,
+  onChange,
+  minusDisabled,
+  plusDisabled,
+  roomy = false,
 }: {
-  label: string; hint: string; amount: number; onChange: (d: number) => void; minusDisabled: boolean; plusDisabled: boolean;
+  label: string;
+  hint: string;
+  amount: number;
+  onChange: (d: number) => void;
+  minusDisabled: boolean;
+  plusDisabled: boolean;
+  roomy?: boolean;
 }) {
-  const b = "h-7 w-7 rounded-full border border-white/15 text-sm text-white/70 outline-none transition hover:border-[#d7b45b] focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-30";
+    const b = `${
+    roomy ? "h-9 w-9 text-base" : "h-7 w-7 text-sm"
+  } flex shrink-0 items-center justify-center rounded-full border border-white/15 text-white/70 outline-none transition hover:border-[#d7b45b] focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-30`;
+
   return (
-    <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-3 py-2">
-      <div>
-        <p className="text-xs font-semibold text-white">{label}</p>
-        <p className="text-[10px] text-white/40">{hint}</p>
+    <div
+      className={`flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 ${
+        roomy ? "gap-2 px-2 py-2" : "px-3 py-2"
+      }`}
+    >
+      <div className={roomy ? "min-w-0 flex-1" : ""}>
+        <p className="text-xs font-semibold text-white">
+          {label}
+        </p>
+        <p
+          className={`text-[10px] text-white/40 ${
+            roomy ? "truncate" : ""
+          }`}
+          title={hint}
+        >
+          {hint}
+        </p>
       </div>
-      <div className="flex items-center gap-2">
-        <button aria-label={`Decrease ${label}`} onClick={() => onChange(-10)} disabled={minusDisabled} className={b}>−</button>
-        <span className="w-8 text-center text-xs font-bold text-[#e5c779]">{amount}</span>
-        <button aria-label={`Increase ${label}`} onClick={() => onChange(10)} disabled={plusDisabled} className={b}>+</button>
+
+      <div
+        className={`flex shrink-0 items-center ${
+          roomy ? "gap-1.5" : "gap-2"
+        }`}
+      >
+        <button
+          type="button"
+          aria-label={`Decrease ${label}`}
+          onClick={() => onChange(-10)}
+          disabled={minusDisabled}
+          className={b}
+        >
+          −
+        </button>
+
+        <span className="w-8 shrink-0 text-center text-xs font-bold tabular-nums text-[#e5c779]">
+          {amount}
+        </span>
+
+        <button
+          type="button"
+          aria-label={`Increase ${label}`}
+          onClick={() => onChange(10)}
+          disabled={plusDisabled}
+          className={b}
+        >
+          +
+        </button>
       </div>
     </div>
   );

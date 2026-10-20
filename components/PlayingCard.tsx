@@ -67,26 +67,54 @@ export default function PlayingCard({
         >
           <div
             className={`absolute left-1.5 top-1 text-center font-bold leading-none ${
-              compact ? "text-sm" : "text-base sm:text-lg"
+              fit
+  ? "text-[clamp(9px,calc(var(--bj-card-h)*0.13),18px)]"
+  : compact
+  ? "text-sm"
+  : "text-base sm:text-lg"
             } ${color}`}
           >
             {card.rank}
-            <div className="mt-0.5 text-xs sm:text-sm">{card.suit}</div>
+            <div
+  className={
+    fit
+      ? "mt-0.5 text-[clamp(8px,calc(var(--bj-card-h)*0.1),14px)]"
+      : "mt-0.5 text-xs sm:text-sm"
+  }
+>
+  {card.suit}
+</div>
           </div>
           <div
             className={`absolute inset-0 flex items-center justify-center ${
-              compact ? "text-3xl" : "text-4xl sm:text-5xl"
+              fit
+  ? "text-[clamp(18px,calc(var(--bj-card-h)*0.32),48px)]"
+  : compact
+  ? "text-3xl"
+  : "text-4xl sm:text-5xl"
             } ${color}`}
           >
             {card.suit}
           </div>
           <div
             className={`absolute bottom-1 right-1.5 rotate-180 text-center font-bold leading-none ${
-              compact ? "text-sm" : "text-base sm:text-lg"
+              fit
+  ? "text-[clamp(9px,calc(var(--bj-card-h)*0.13),18px)]"
+  : compact
+  ? "text-sm"
+  : "text-base sm:text-lg"
             } ${color}`}
           >
             {card.rank}
-            <div className="mt-0.5 text-xs sm:text-sm">{card.suit}</div>
+            <div
+  className={
+    fit
+      ? "mt-0.5 text-[clamp(8px,calc(var(--bj-card-h)*0.1),14px)]"
+      : "mt-0.5 text-xs sm:text-sm"
+  }
+>
+  {card.suit}
+</div>
           </div>
         </div>
       </div>

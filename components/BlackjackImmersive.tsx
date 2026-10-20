@@ -61,7 +61,12 @@ function InfoPanel({
         tabIndex={-1}
         className="relative flex h-full w-full max-w-md flex-col border-l border-[#d7b45b]/25 bg-[#0d140f] shadow-2xl"
       >
-        <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3">
+        <div
+          className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 pb-3"
+          style={{
+            paddingTop: "calc(env(safe-area-inset-top, 0px) + 0.75rem)",
+          }}
+        >
           <h2 id="bj-panel-title" className="font-bold text-[#e5c779]">
             Blackjack · Menu
           </h2>
@@ -76,7 +81,12 @@ function InfoPanel({
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
+        <div
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4"
+          style={{
+            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)",
+          }}
+        >
           {g.s.phase === "settled" && breakdown && (
             <section className="mb-5 rounded-2xl border border-[#d7b45b]/30 bg-black/20 p-4">
               <h3 className="font-bold text-[#e5c779]">
@@ -194,6 +204,28 @@ export default function BlackjackImmersive({
       ? "clamp(60px, 14dvh, 118px)"
       : "clamp(68px, 18dvh, 160px)",
   } as CSSProperties;
+
+  const handCount = Math.max(1, s.hands.length);
+
+const maxHandCards = Math.max(
+  2,
+  ...s.hands.map((hand) => hand.cards.length)
+);
+
+const playerCardStyle = (
+  compact
+    ? {
+        "--bj-card-h": `min(
+          14dvh,
+          118px,
+          calc(
+            (100vw - ${32 + handCount * 24}px) /
+            ${handCount * (0.44 * maxHandCards + 0.28)}
+          )
+        )`,
+      }
+    : {}
+) as CSSProperties;
 
   return createPortal(
     <div className="fixed inset-0 z-[80] flex h-[100dvh] flex-col overflow-hidden bg-[#080e0a] text-white">
@@ -338,8 +370,16 @@ export default function BlackjackImmersive({
           )}
         </div>
 
-        <div className="min-h-0 overflow-auto overscroll-contain px-2 py-2 sm:px-5">
-          <div className="flex min-h-full flex-wrap items-center justify-center gap-2 sm:gap-4">
+        <div
+          className="min-h-0 overflow-auto overscroll-contain px-2 py-2 sm:px-5"
+          style={playerCardStyle}
+        >
+          <div
+            className="grid min-h-full items-center gap-1 sm:gap-3"
+            style={{
+              gridTemplateColumns: `repeat(${handCount}, minmax(0, 1fr))`,
+            }}
+          >
             {s.hands.length === 0 && (
               <p className="text-sm text-white/35">
                 Your cards will appear here
@@ -356,13 +396,13 @@ export default function BlackjackImmersive({
               return (
                 <div
                   key={index}
-                  className={`shrink-0 rounded-2xl border p-2 transition ${
+                  className={`min-w-0 rounded-2xl border p-1 transition sm:p-2 ${
                     selected
                       ? "border-[#e5c779]/70 bg-[#e5c779]/10"
                       : "border-transparent"
                   }`}
                 >
-                  <div className="mb-2 flex items-center justify-center gap-2 text-[10px] sm:text-xs">
+                  <div className="mb-2 flex min-h-8 flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-[9px] sm:text-xs">
                     {s.hands.length > 1 && (
                       <span className="text-white/40">
                         #{index + 1}
@@ -435,56 +475,70 @@ export default function BlackjackImmersive({
       >
         {bettingOpen ? (
           <div className="mx-auto mb-2 max-h-[28dvh] max-w-3xl overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-black/20 p-2">
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <span className="mr-1 text-xs font-semibold text-[#e5c779]">
-                Bet / hand · ◈ {money(s.bet)}
-              </span>
+            <div className="space-y-2">
+  <div className="flex min-w-0 items-center justify-between gap-3 px-1">
+    <span className="shrink-0 text-[10px] uppercase tracking-wider text-white/45">
+      Bet / hand
+    </span>
 
-              {CHIPS.map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => addChip(value)}
-                  disabled={
-                    !canBet ||
-                    (s.bet + value) * spots + sides > s.balance
-                  }
-                  aria-label={`Add ${value} chips`}
-                  className={`flex h-10 w-10 items-center justify-center rounded-full border-2 border-dashed border-white/60 text-[11px] font-black outline-none focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-30 ${CHIP_BG[value]}`}
-                >
-                  {value}
-                </button>
-              ))}
+    <span
+      className="min-w-0 truncate text-right font-mono text-sm font-bold tabular-nums text-[#e5c779]"
+      title={`◈ ${money(s.bet)}`}
+    >
+      ◈ {money(s.bet)}
+    </span>
+  </div>
 
-              <button
-                type="button"
-                onClick={() => setBetTo(s.lastBet)}
-                className={`${control} ${neutral}`}
-              >
-                Rebet
-              </button>
+  <div className="mx-auto grid w-full max-w-sm grid-cols-5 gap-2">
+    {CHIPS.map((value) => (
+      <button
+        key={value}
+        type="button"
+        onClick={() => addChip(value)}
+        disabled={
+          !canBet ||
+          (s.bet + value) * spots + sides > s.balance
+        }
+        aria-label={`Add ${value} chips`}
+        className={`mx-auto flex h-10 w-10 items-center justify-center rounded-full border-2 border-dashed border-white/60 text-[11px] font-black outline-none focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-30 ${CHIP_BG[value]}`}
+      >
+        {value}
+      </button>
+    ))}
+  </div>
 
-              <button
-                type="button"
-                onClick={() => setBetTo(s.bet * 2)}
-                disabled={s.bet === 0}
-                className={`${control} ${neutral}`}
-              >
-                ×2
-              </button>
+  <div className="mx-auto grid w-full max-w-sm grid-cols-3 gap-2">
+    <button
+      type="button"
+      onClick={() => setBetTo(s.lastBet)}
+      className={`${control} ${neutral} h-10 w-full min-w-0`}
+    >
+      Rebet
+    </button>
 
-              <button
-                type="button"
-                onClick={() => setBetTo(0)}
-                disabled={s.bet === 0}
-                className={`${control} ${neutral}`}
-              >
-                Clear
-              </button>
-            </div>
+    <button
+      type="button"
+      onClick={() => setBetTo(s.bet * 2)}
+      disabled={s.bet === 0}
+      className={`${control} ${neutral} h-10 w-full min-w-0`}
+    >
+      ×2
+    </button>
+
+    <button
+      type="button"
+      onClick={() => setBetTo(0)}
+      disabled={s.bet === 0}
+      className={`${control} ${neutral} h-10 w-full min-w-0`}
+    >
+      Clear
+    </button>
+  </div>
+</div>
 
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
               <SideBet
+                roomy
                 label="Perfect Pairs"
                 hint="First two cards · up to 25:1"
                 amount={s.ppBet}
@@ -496,6 +550,7 @@ export default function BlackjackImmersive({
               />
 
               <SideBet
+                roomy
                 label="21+3"
                 hint="Your cards + dealer upcard · up to 100:1"
                 amount={s.t3Bet}
