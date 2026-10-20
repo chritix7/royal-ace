@@ -362,11 +362,11 @@ useEffect(() => {
     Balance
   </p>
   <p className="font-mono text-sm font-black tabular-nums text-[#e5b2cf]">
-    ◈{" "}
-    <span className={flash ? "balance-flash-pink" : ""}>
-      {money(balance)}
-    </span>
-  </p>
+  ◈{" "}
+  <span className={flash ? "balance-flash-pink" : ""}>
+    <Counter value={balance} />
+  </span>
+</p>
 </div>
 
   <div
