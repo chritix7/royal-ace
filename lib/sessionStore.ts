@@ -1,10 +1,10 @@
 import { useSyncExternalStore } from "react";
 import { today } from "./clock";
 
-type GameDaily = { spins: number; wagered: number; won: number; biggest: number };
+type GameDaily = { spins: number; wagered: number; net: number; biggest: number };
 export type SessionState = { day: string; slots: GameDaily; bj: GameDaily };
 
-const emptyGame = (): GameDaily => ({ spins: 0, wagered: 0, won: 0, biggest: 0 });
+const emptyGame = (): GameDaily => ({ spins: 0, wagered: 0, net: 0, biggest: 0 });
 const EMPTY: SessionState = { day: "", slots: emptyGame(), bj: emptyGame() };
 
 const KEY = "royalace:session-today";
@@ -27,7 +27,7 @@ function rollDayIfNeeded() {
   }
 }
 
-function record(game: "slots" | "bj", wagered: number, won: number) {
+function record(game: "slots" | "bj", wagered: number, net: number) {
   rollDayIfNeeded();
   const g = state[game];
   state = {
@@ -35,8 +35,8 @@ function record(game: "slots" | "bj", wagered: number, won: number) {
     [game]: {
       spins: g.spins + 1,
       wagered: g.wagered + wagered,
-      won: g.won + won,
-      biggest: Math.max(g.biggest, won),
+      net: g.net + net,
+      biggest: Math.max(g.biggest, net),
     },
   };
   persist();
@@ -70,8 +70,8 @@ export const sessionStore = {
     rollDayIfNeeded();
     emit();
   },
-  recordSlots: (wagered: number, won: number) => record("slots", wagered, won),
-  recordBj: (wagered: number, won: number) => record("bj", wagered, won),
+  recordSlots: (wagered: number, net: number) => record("slots", wagered, net),
+  recordBj: (wagered: number, net: number) => record("bj", wagered, net),
 };
 
 export const useSession = () =>

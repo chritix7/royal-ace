@@ -433,7 +433,7 @@ if (collectionStore.isReady(b)) {
       message: total > 0 ? `You won ◈ ${fmt(total)}` : "No win this time. Spin again!",
     });
 
-    sessionStore.recordSlots(b, total);
+    sessionStore.recordSlots(b, total - b);
 
     track("spin");
     if (total > 0) track("slotWin");

@@ -849,10 +849,9 @@ style={{
   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/45">Today</p>
   <dl className="mt-2 grid grid-cols-2 gap-y-1.5 text-xs text-white/50">
     <dt>Net</dt>
-    <dd className={`text-right font-bold ${(session.slots.won - session.slots.wagered) >= 0 ? "text-emerald-300" : "text-red-300"}`}>
-      {(session.slots.won - session.slots.wagered) >= 0 ? "+" : "−"}
-      ◈ {money(Math.abs(session.slots.won - session.slots.wagered))}
-    </dd>
+<dd className={`text-right font-bold ${session.slots.net >= 0 ? "text-emerald-300" : "text-red-300"}`}>
+  {session.slots.net >= 0 ? "+" : "−"}◈ {money(Math.abs(session.slots.net))}
+</dd>
     <dt>Spins</dt>
     <dd className="text-right text-white">{money(session.slots.spins)}</dd>
     <dt>Biggest win</dt>

@@ -136,10 +136,9 @@ export default function Sidebar({ g }: { g: Game }) {
   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/45">Today</p>
   <dl className="mt-2 grid grid-cols-2 gap-y-1.5 text-xs text-white/50">
     <dt>Net</dt>
-    <dd className={`text-right font-bold ${(session.bj.won - session.bj.wagered) >= 0 ? "text-emerald-300" : "text-red-300"}`}>
-      {(session.bj.won - session.bj.wagered) >= 0 ? "+" : "−"}
-      ◈ {money(Math.abs(session.bj.won - session.bj.wagered))}
-    </dd>
+<dd className={`text-right font-bold ${session.bj.net >= 0 ? "text-emerald-300" : "text-red-300"}`}>
+  {session.bj.net >= 0 ? "+" : "−"}◈ {money(Math.abs(session.bj.net))}
+</dd>
     <dt>Hands</dt>
     <dd className="text-right text-white">{money(session.bj.spins)}</dd>
     <dt>Biggest win</dt>

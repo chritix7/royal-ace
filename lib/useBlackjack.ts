@@ -519,7 +519,7 @@ export function useBlackjack(active = true) {
       },
     });
 
-    sessionStore.recordBj(wagered, Math.max(0, net));
+    sessionStore.recordBj(wagered, net);
 
     // On annonce ce qui s'est passé (les missions et succès écoutent)
     track("bjHand", hands.length);

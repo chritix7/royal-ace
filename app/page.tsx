@@ -19,6 +19,7 @@ import { weeklyStore } from "../lib/weekly";
 import WinFeed from "../components/WinFeed";
 import ChipFly from "../components/ChipFly";
 import { useBalanceFlash } from "../hooks/useBalanceFlash";
+import { sessionStore } from "../lib/sessionStore";
 
 type Tab = "blackjack" | "slots";
 const TABS: { id: Tab; label: string }[] = [
@@ -37,6 +38,7 @@ export default function Home() {
 
   useEffect(() => {
     wallet.hydrate();
+    sessionStore.hydrate();
     progressionStore.hydrate();
     dailyStore.hydrate();
     missionsStore.hydrate();
