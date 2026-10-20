@@ -355,14 +355,14 @@ useEffect(() => {
       "inset 0 2px 5px rgba(0,0,0,0.65), inset 0 -1px 0 rgba(255,255,255,0.04)",
   }}
 >
-  <div className="shrink-0">
-    <p className="text-[8px] uppercase tracking-[0.2em] text-white/45">
-      Balance
-    </p>
-    <p className="font-mono text-sm font-black tabular-nums text-[#e5b2cf]">
-      ◈ {money(balance)}
-    </p>
-  </div>
+  <div data-chips-counter="fullscreen" className="shrink-0">
+  <p className="text-[8px] uppercase tracking-[0.2em] text-white/45">
+    Balance
+  </p>
+  <p className="font-mono text-sm font-black tabular-nums text-[#e5b2cf]">
+    ◈ {money(balance)}
+  </p>
+</div>
 
   <div
   className="min-w-0 flex-1 text-center"
@@ -604,11 +604,11 @@ useEffect(() => {
 </div>
 
               <div className="mx-auto mt-2 grid max-w-2xl grid-cols-3 gap-1.5 sm:mt-3 sm:gap-3">
-  <div data-chips-counter="fullscreen" className="contents">
-    <Led label="CREDIT" className="">
-      <Counter value={balance} />
-    </Led>
-  </div>
+  <div className="contents">
+  <Led label="CREDIT" className="">
+    <Counter value={balance} />
+  </Led>
+</div>
 
   <Led label="TOTAL BET" className="">
     {money(bet)}
