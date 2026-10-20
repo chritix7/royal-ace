@@ -41,6 +41,19 @@ export const wallet = {
     emit();
   },
 
+  setBalanceDurable(value: number) {
+  if (!Number.isFinite(value) || value < 0) {
+    throw new Error("Invalid wallet balance.");
+  }
+
+  localStorage.setItem(KEY, JSON.stringify({ balance: value }));
+
+  if (value === balance) return;
+
+  balance = value;
+  emit();
+},
+
   subscribe(listener: Listener) {
     listeners.add(listener);
     return () => {

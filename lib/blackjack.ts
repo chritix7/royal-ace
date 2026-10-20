@@ -30,14 +30,17 @@ export const DECKS = 6;
 export const SHOE_MIN = 60; // remélange sous ce nombre de cartes
 
 /** Sabot de 6 jeux, mélangé avec Fisher-Yates (mélange non biaisé). */
-export function makeShoe(decks = DECKS): Card[] {
+export function makeShoe(
+  decks = DECKS,
+  rng: () => number = Math.random
+): Card[] {
   const shoe: Card[] = [];
   for (let d = 0; d < decks; d++)
     for (const suit of SUITS)
       for (const r of RANKS) shoe.push({ ...r, suit });
 
   for (let i = shoe.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(rng() * (i + 1));
     [shoe[i], shoe[j]] = [shoe[j], shoe[i]];
   }
   return shoe;

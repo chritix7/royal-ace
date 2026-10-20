@@ -2,22 +2,25 @@ import { useEffect, useRef, useState } from "react";
 import { type Advice, type Card, type Hand, type Result, advise, canSplitCards, handValue, hiLo, isBlackjack, makeShoe } from "./blackjack";
 import { perfectPairs, twentyOnePlusThree } from "./sidebets";
 import { ACHIEVEMENTS } from "./achievements";
-import { track } from "./events";
+import { track as sendTrack } from "./events";
 import { sfx } from "./sound";
 import { music } from "./music";
 import { wallet } from "./wallet";
-import { CHIPS, MIN_BET, REFILL, EMPTY_STATS, EMPTY_RECORDS, DEFAULT_SETTINGS, INITIAL, BACKS, sleep, floor10 } from "./game";
+import { CHIPS, MIN_BET, REFILL, EMPTY_STATS, EMPTY_RECORDS, DEFAULT_SETTINGS, INITIAL, BACKS, sleep as delay, floor10 } from "./game";
 import type { S, Settings, Records } from "./game";
 import { winHistory } from "./winHistory";
 import { sessionStore } from "./sessionStore";
-
-type RoundBreakdown = {
-  main: number;
-  insurance: number;
-  perfectPairs: number;
-  twentyOnePlusThree: number;
-  total: number;
-};
+import {
+  createPending,
+  readRecovery,
+  seededRandom,
+  writeRecovery,
+  type ActionName,
+  type PendingAction,
+  type RecoverySave,
+  type RoundBreakdown,
+  type Snapshot,
+} from "./blackjackRecovery";
 
 export function useBlackjack(active = true) {
   const activeRef = useRef(active);
@@ -33,8 +36,15 @@ export function useBlackjack(active = true) {
   const [showHint, setShowHint] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [showCount, setShowCount] = useState(false);
-  const [roundBreakdown, setRoundBreakdown] =
-    useState<RoundBreakdown | null>(null);
+  const [roundBreakdown, setRoundBreakdownState] =
+  useState<RoundBreakdown | null>(null);
+
+const breakdownRef = useRef<RoundBreakdown | null>(null);
+
+function setRoundBreakdown(value: RoundBreakdown | null) {
+  breakdownRef.current = value;
+  setRoundBreakdownState(value);
+}
 
   const roundSides = useRef({
     wagered: 0,
@@ -42,31 +52,176 @@ export function useBlackjack(active = true) {
     twentyOnePlusThree: 0,
   });
 
-  const set = (patch: Partial<S>) => {
-    if (patch.balance !== undefined) wallet.setBalance(patch.balance); // solde commun
-    ref.current = { ...ref.current, ...patch };
-    setS(ref.current);
+  const ready = useRef(false);
+const initialized = useRef(false);
+const mounted = useRef(false);
+const blocked = useRef(false);
+
+const transaction = useRef<RecoverySave | null>(null);
+const pendingResume = useRef<PendingAction | null>(null);
+const actionRandom = useRef<() => number>(Math.random);
+
+useEffect(() => {
+  mounted.current = true;
+
+  return () => {
+    mounted.current = false;
   };
+}, []);
+
+function snapshot(): Snapshot {
+  return {
+    state: ref.current,
+    sides: { ...roundSides.current },
+    breakdown: breakdownRef.current,
+  };
+}
+
+function saveIdle() {
+  writeRecovery({
+    version: 1,
+    snapshot: snapshot(),
+    pending: null,
+  });
+}
+
+function storageFailure(error: unknown) {
+  console.error("Blackjack persistence error:", error);
+  blocked.current = true;
+
+  ref.current = {
+    ...ref.current,
+    busy: true,
+    message:
+      "Save interrupted. Stop playing and reload to recover the last action.",
+  };
+
+  setS(ref.current);
+}
+
+async function sleep(ms: number) {
+  await delay(ms);
+
+  if (!mounted.current) {
+    throw new Error("Blackjack component unmounted.");
+  }
+}
+
+function emitOnce(key: string, effect: () => void) {
+  const tx = transaction.current;
+  const pending = tx?.pending;
+
+  if (!tx || !pending) {
+    effect();
+    return;
+  }
+
+  if (pending.effects.includes(key)) return;
+
+  const next: RecoverySave = {
+    ...tx,
+    pending: {
+      ...pending,
+      effects: [...pending.effects, key],
+    },
+  };
+
+  writeRecovery(next);
+  transaction.current = next;
+  effect();
+}
+
+const track: typeof sendTrack = (...args) => {
+  emitOnce(`track:${args[0]}`, () => sendTrack(...args));
+};
+
+  const set = (patch: Partial<S>) => {
+  if (patch.balance !== undefined) {
+    wallet.setBalanceDurable(patch.balance);
+  }
+
+  ref.current = { ...ref.current, ...patch };
+  setS(ref.current);
+
+  if (
+    ready.current &&
+    !transaction.current &&
+    !blocked.current
+  ) {
+    try {
+      saveIdle();
+    } catch (error) {
+      storageFailure(error);
+    }
+  }
+};
   const setHand = (i: number, patch: Partial<Hand>) =>
     set({ hands: ref.current.hands.map((h, k) => (k === i ? { ...h, ...patch } : h)) });
 
   useEffect(() => {
-    wallet.hydrate();
-    const balance = wallet.getBalance();
-    set({ balance, trend: [balance], bet: Math.max(0, Math.min(ref.current.bet, floor10(balance))) });
-    try {
-      const raw = localStorage.getItem("royalace:blackjack");
-      const d = raw ? JSON.parse(raw) : {};
-      const settings = { ...DEFAULT_SETTINGS, ...d.settings };
+  if (initialized.current) return;
+  initialized.current = true;
+
+  wallet.hydrate();
+  sessionStore.hydrate();
+
+  const balance = wallet.getBalance();
+
+  set({
+    balance,
+    trend: [balance],
+    bet: Math.max(
+      0,
+      Math.min(ref.current.bet, floor10(balance))
+    ),
+  });
+
+  try {
+    const raw = localStorage.getItem("royalace:blackjack");
+    const d = raw ? JSON.parse(raw) : {};
+
+    set({
+      stats: { ...EMPTY_STATS, ...d.stats },
+      settings: { ...DEFAULT_SETTINGS, ...d.settings },
+      unlocked: Array.isArray(d.unlocked) ? d.unlocked : [],
+      records: { ...EMPTY_RECORDS, ...d.records },
+    });
+  } catch (error) {
+    console.warn("Could not read legacy Blackjack settings:", error);
+  }
+
+  try {
+    const saved = readRecovery();
+
+    if (saved) {
+      roundSides.current = { ...saved.snapshot.sides };
+      setRoundBreakdown(saved.snapshot.breakdown);
+
+      const restoredBalance = saved.pending
+        ? saved.snapshot.state.balance
+        : wallet.getBalance();
+
+      if (saved.pending) {
+        wallet.setBalanceDurable(restoredBalance);
+        pendingResume.current = saved.pending;
+      }
+
       set({
-        stats: { ...EMPTY_STATS, ...d.stats },
-        settings,
-        unlocked: Array.isArray(d.unlocked) ? d.unlocked : [],
-        records: { ...EMPTY_RECORDS, ...d.records },
+        ...saved.snapshot.state,
+        balance: restoredBalance,
+        busy: false,
+        shuffling: false,
+        celebrate: 0,
+        toast: null,
       });
-    } catch {}
+    }
+
+    ready.current = true;
     setHydrated(true);
-  }, []);
+  } catch (error) {
+    storageFailure(error);
+  }
+}, []);
 
   // Si l'autre jeu change le solde, on le recopie ici tout de suite.
   useEffect(
@@ -97,10 +252,118 @@ export function useBlackjack(active = true) {
     } catch {}
   }, [hydrated, s.balance, s.stats, s.settings, s.unlocked, s.records]);
 
+  async function runAction(
+  name: ActionName,
+  take?: boolean,
+  resume?: PendingAction
+) {
+  if (
+    !ready.current ||
+    blocked.current ||
+    transaction.current ||
+    !mounted.current
+  ) {
+    return;
+  }
+
+  try {
+    const pending = resume ?? createPending(name, take);
+
+    const tx: RecoverySave = {
+      version: 1,
+      snapshot: snapshot(),
+      pending,
+    };
+
+    writeRecovery(tx);
+    transaction.current = tx;
+    actionRandom.current = seededRandom(pending.seed);
+
+    switch (name) {
+      case "deal":
+        await dealImpl();
+        break;
+      case "insurance":
+        await takeInsuranceImpl(Boolean(pending.take));
+        break;
+      case "hit":
+        await hitImpl();
+        break;
+      case "stand":
+        await standImpl();
+        break;
+      case "double":
+        await doubleImpl();
+        break;
+      case "split":
+        await splitImpl();
+        break;
+      case "surrender":
+        await surrenderImpl();
+        break;
+    }
+
+    if (!mounted.current) return;
+
+    writeRecovery({
+      version: 1,
+      snapshot: snapshot(),
+      pending: null,
+    });
+
+    transaction.current = null;
+    actionRandom.current = Math.random;
+  } catch (error) {
+    if (mounted.current) storageFailure(error);
+  }
+}
+
+function deal() {
+  return runAction("deal");
+}
+
+function takeInsurance(take: boolean) {
+  return runAction("insurance", take);
+}
+
+function hit() {
+  return runAction("hit");
+}
+
+function stand() {
+  return runAction("stand");
+}
+
+function double() {
+  return runAction("double");
+}
+
+function split() {
+  return runAction("split");
+}
+
+function surrender() {
+  return runAction("surrender");
+}
+
+useEffect(() => {
+  if (!hydrated || !pendingResume.current) return;
+
+  const pending = pendingResume.current;
+  pendingResume.current = null;
+
+  void runAction(pending.name, pending.take, pending);
+}, [hydrated]);
+
   // ---------- Pioche ----------
   function draw(): Card {
     let shoe = ref.current.shoe;
-    if (shoe.length === 0) shoe = makeShoe(ref.current.settings.decks);
+    if (shoe.length === 0) {
+  shoe = makeShoe(
+    ref.current.settings.decks,
+    actionRandom.current
+  );
+}
     const card = shoe[shoe.length - 1];
     set({ shoe: shoe.slice(0, -1) });
     return card;
@@ -125,6 +388,7 @@ export function useBlackjack(active = true) {
   // ---------- Mise ----------
   const canBet = s.phase === "betting" || s.phase === "settled";
   function addChip(v: number) {
+    if (!ready.current || blocked.current || transaction.current) return;
     const c = ref.current;
     if (c.phase !== "betting" && c.phase !== "settled") return;
     if ((c.bet + v) * c.settings.spots + c.ppBet + c.t3Bet <= c.balance) {
@@ -133,6 +397,7 @@ export function useBlackjack(active = true) {
     }
   }
   function setBetTo(amount: number) {
+    if (!ready.current || blocked.current || transaction.current) return;
     const c = ref.current;
     if (c.phase !== "betting" && c.phase !== "settled") return;
     const room = c.balance - c.ppBet - c.t3Bet;
@@ -140,6 +405,7 @@ export function useBlackjack(active = true) {
     sfx.chip();
   }
   function updateSettings(patch: Partial<Settings>) {
+    if (!ready.current || blocked.current || transaction.current) return;
     const c = ref.current;
     if (patch.theme === undefined && c.phase !== "betting" && c.phase !== "settled") return;
     const settings = { ...c.settings, ...patch };
@@ -154,6 +420,7 @@ export function useBlackjack(active = true) {
 
   function adjustSide(key: "ppBet" | "t3Bet", delta: number) {
     const c = ref.current;
+    if (!ready.current || blocked.current || transaction.current) return;
     if (c.phase !== "betting" && c.phase !== "settled") return;
     const next = c[key] + delta;
     if (next < 0 || next > 100) return;
@@ -249,7 +516,7 @@ export function useBlackjack(active = true) {
   });
 }
 
-  async function deal() {
+  async function dealImpl() {
     const c = ref.current;
     const { spots, decks } = c.settings;
     const stake = c.bet * spots + c.ppBet + c.t3Bet;
@@ -265,7 +532,9 @@ export function useBlackjack(active = true) {
     const fresh = c.shoe.length < Math.max(26, Math.floor(decks * 52 * 0.25));
     sfx.chip();
     set({
-      shoe: fresh ? makeShoe(decks) : c.shoe,
+      shoe: fresh
+  ? makeShoe(decks, actionRandom.current)
+  : c.shoe,
       balance: c.balance - stake,
       lastBet: c.bet,
       hands: Array.from({ length: spots }, () => ({ cards: [], bet: c.bet, done: false, doubled: false, split: false })),
@@ -307,7 +576,7 @@ export function useBlackjack(active = true) {
     await peek();
   }
 
-  async function takeInsurance(take: boolean) {
+  async function takeInsuranceImpl(take: boolean) {
     const c = ref.current;
     if (c.phase !== "insurance" || c.busy) return;
     set({ busy: true });
@@ -345,7 +614,7 @@ export function useBlackjack(active = true) {
     set({ active: next, message: hands.length > 1 ? `Hand ${next + 1}: your move.` : "Your move." });
   }
 
-  async function hit() {
+  async function hitImpl() {
     const c = ref.current;
     if (c.phase !== "player" || c.busy) return;
     const i = c.active;
@@ -360,7 +629,7 @@ export function useBlackjack(active = true) {
     set({ busy: false });
   }
 
-  async function stand() {
+  async function standImpl() {
     const c = ref.current;
     if (c.phase !== "player" || c.busy) return;
     grade("Stand");
@@ -370,7 +639,7 @@ export function useBlackjack(active = true) {
     set({ busy: false });
   }
 
-  async function double() {
+  async function doubleImpl() {
     const c = ref.current;
     const h = c.hands[c.active];
     if (c.phase !== "player" || c.busy || !h || h.cards.length !== 2 || c.balance < h.bet) return;
@@ -385,7 +654,7 @@ export function useBlackjack(active = true) {
     set({ busy: false });
   }
 
-  async function split() {
+  async function splitImpl() {
     const c = ref.current;
     const h = c.hands[c.active];
     if (c.phase !== "player" || c.busy || !h || !canSplitCards(h.cards) || c.hands.length >= 4 || c.balance < h.bet) return;
@@ -416,7 +685,7 @@ export function useBlackjack(active = true) {
   }
 
   /** Abandon : seulement en début de main, sans split. Rend la moitié de la mise. */
-  async function surrender() {
+  async function surrenderImpl() {
     const c = ref.current;
     const h = c.hands[0];
     if (c.phase !== "player" || c.busy || c.hands.length !== 1 || !h || h.cards.length !== 2 || h.split) return;
@@ -447,6 +716,13 @@ export function useBlackjack(active = true) {
 
   async function settle() {
     const c = ref.current;
+    if (c.phase === "settled") return;
+
+const settlementId = transaction.current?.pending?.id;
+
+if (!settlementId) {
+  throw new Error("Missing Blackjack settlement identifier.");
+}
     const dv = handValue(c.dealer).total;
     const dBJ = isBlackjack(c.dealer);
     let payout = 0;
@@ -580,7 +856,11 @@ export function useBlackjack(active = true) {
       },
     });
 
-    sessionStore.recordBj(wagered + sides.wagered, net);
+    sessionStore.recordBjOnce(
+  settlementId,
+  wagered + sides.wagered,
+  net
+);
 
     // On annonce ce qui s'est passé (les missions et succès écoutent)
     track("bjHand", hands.length);
@@ -591,10 +871,12 @@ export function useBlackjack(active = true) {
     if (streak > 0) track("bjStreak", streak);
 
     if (gotBJ) {
-  winHistory.record({
-    game: "blackjack",
-    kind: "blackjack",
-    amount: Math.max(0, net),
+  emitOnce("blackjack-history", () => {
+    winHistory.record({
+      game: "blackjack",
+      kind: "blackjack",
+      amount: Math.max(0, net),
+    });
   });
 }
 
@@ -606,6 +888,7 @@ export function useBlackjack(active = true) {
   }
 
   function refill() {
+    if (!ready.current || blocked.current || transaction.current) return;
     const c = ref.current;
     if ((c.phase !== "betting" && c.phase !== "settled") || c.balance >= MIN_BET) return;
     sfx.win();
@@ -613,7 +896,8 @@ export function useBlackjack(active = true) {
   }
 
   function resetAll() {
-  const c = ref.current;
+    if (!ready.current || blocked.current || transaction.current) return;
+    const c = ref.current;
 
   if (
     c.phase !== "betting" &&

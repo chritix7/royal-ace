@@ -10,12 +10,16 @@ const EMPTY: SessionState = { day: "", slots: emptyGame(), bj: emptyGame() };
 const KEY = "royalace:session-today";
 let state: SessionState = EMPTY;
 let hydrated = false;
+let recordedBjIds: string[] = [];
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 
 function persist() {
   try {
-    localStorage.setItem(KEY, JSON.stringify(state));
+    localStorage.setItem(
+  KEY,
+  JSON.stringify({ ...state, recordedBjIds })
+);
   } catch {}
 }
 
@@ -58,6 +62,11 @@ export const sessionStore = {
       const raw = localStorage.getItem(KEY);
       if (raw) {
         const d = JSON.parse(raw);
+        recordedBjIds = Array.isArray(d.recordedBjIds)
+  ? d.recordedBjIds.filter(
+      (id: unknown): id is string => typeof id === "string"
+    )
+  : [];
         if (d && typeof d.day === "string") {
           state = {
             day: d.day,
@@ -72,6 +81,48 @@ export const sessionStore = {
   },
   recordSlots: (wagered: number, net: number) => record("slots", wagered, net),
   recordBj: (wagered: number, net: number) => record("bj", wagered, net),
+  recordBjOnce: (id: string, wagered: number, net: number) => {
+  sessionStore.hydrate();
+
+  if (recordedBjIds.includes(id)) return;
+
+  const day = today();
+
+  const current: SessionState =
+    state.day === day
+      ? state
+      : {
+          day,
+          slots: emptyGame(),
+          bj: emptyGame(),
+        };
+
+  const g = current.bj;
+
+  const next: SessionState = {
+    ...current,
+    bj: {
+      spins: g.spins + 1,
+      wagered: g.wagered + wagered,
+      net: g.net + net,
+      biggest: Math.max(g.biggest, net),
+    },
+  };
+
+  const nextIds = [...recordedBjIds, id].slice(-512);
+
+  localStorage.setItem(
+    KEY,
+    JSON.stringify({
+      ...next,
+      recordedBjIds: nextIds,
+    })
+  );
+
+  state = next;
+  recordedBjIds = nextIds;
+  emit();
+},
 
   recordSlotAdjustment: (net: number) => {
   rollDayIfNeeded();
