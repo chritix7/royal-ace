@@ -3,7 +3,7 @@
 import { handValue, isBlackjack } from "../lib/blackjack";
 import type { Result } from "../lib/blackjack";
 import { MIN_BET, REFILL, THEMES, money } from "../lib/game";
-import { ChipStack, btn } from "./ui";
+import { ChipStack } from "./ui";
 import PlayingCard from "./PlayingCard";
 import Confetti from "./Confetti";
 import type { Game } from "../lib/useBlackjack";
@@ -20,8 +20,11 @@ const RESULT_UI: Record<Result, { label: string; cls: string }> = {
 const mobileAction =
   "inline-flex h-10 w-full items-center justify-center rounded-xl border px-1 text-center text-[11px] font-semibold leading-none outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] focus-visible:ring-offset-2 focus-visible:ring-offset-[#101713] disabled:cursor-not-allowed disabled:opacity-40 lg:h-12";
 
-export default function Table({ g }: { g: Game }) {
-  const { s, canBet, playing, canDouble, canSplit, canSurrender, advice, dealerVal, outOfChips, totalCards, shoePct, compact, stake, back, pileAmount, deal, takeInsurance, hit, stand, double, split, surrender, refill } = g;
+const signedMoney = (value: number) =>
+  `${value > 0 ? "+" : value < 0 ? "−" : ""}◈ ${money(Math.abs(value))}`;
+
+  export default function Table({ g }: { g: Game }) {
+  const { s, roundBreakdown, canBet, playing, canDouble, canSplit, canSurrender, advice, dealerVal, outOfChips, totalCards, shoePct, compact, stake, back, pileAmount, deal, takeInsurance, hit, stand, double, split, surrender, refill } = g;
 
   return (
       <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl">
@@ -74,7 +77,11 @@ export default function Table({ g }: { g: Game }) {
           </div>
 
           {/* Message (annoncé aux lecteurs d'écran) */}
-          <div className="my-5 flex flex-col items-center gap-2 sm:my-7" role="status" aria-live="polite">
+          <div
+            className="my-5 flex flex-col items-center gap-2 sm:my-7 lg:min-h-[160px] lg:justify-center"
+            role="status"
+            aria-live="polite"
+          >
             <div key={s.message} className="animate-pop max-w-full rounded-full border border-[#d7b45b]/30 bg-black/30 px-3 py-1.5 text-center text-xs text-[#e5c779] sm:px-5 sm:py-2 sm:text-sm">
               {s.message}
             </div>
@@ -142,6 +149,52 @@ export default function Table({ g }: { g: Game }) {
         </div>
 
         {/* Contrôles */}
+        {s.phase === "settled" && roundBreakdown && (
+  <details className="mx-3 mb-3 rounded-2xl border border-[#d7b45b]/20 bg-black/20 sm:mx-7">
+    <summary className="cursor-pointer rounded-2xl px-4 py-3 text-xs font-semibold text-[#e5c779] outline-none focus-visible:ring-2 focus-visible:ring-[#e5c779]">
+      Round breakdown · {signedMoney(roundBreakdown.total)}
+    </summary>
+
+    <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-2 px-4 pb-4 text-xs">
+      {[
+        { label: "Main hands", value: roundBreakdown.main },
+        { label: "Insurance", value: roundBreakdown.insurance },
+        { label: "Perfect Pairs", value: roundBreakdown.perfectPairs },
+        { label: "21+3", value: roundBreakdown.twentyOnePlusThree },
+      ].map(({ label, value }) => (
+        <div key={label} className="contents">
+          <dt className="text-white/50">{label}</dt>
+          <dd
+            className={`text-right font-semibold tabular-nums ${
+              value > 0
+                ? "text-emerald-300"
+                : value < 0
+                ? "text-red-300"
+                : "text-white/50"
+            }`}
+          >
+            {signedMoney(value)}
+          </dd>
+        </div>
+      ))}
+
+      <dt className="border-t border-white/10 pt-2 font-semibold text-white">
+        Round net
+      </dt>
+      <dd
+        className={`border-t border-white/10 pt-2 text-right font-bold tabular-nums ${
+          roundBreakdown.total > 0
+            ? "text-emerald-300"
+            : roundBreakdown.total < 0
+            ? "text-red-300"
+            : "text-white/70"
+        }`}
+      >
+        {signedMoney(roundBreakdown.total)}
+      </dd>
+    </dl>
+  </details>
+)}
         <div className="sticky bottom-0 z-20 border-t border-white/10 bg-[#101713]/95 px-2 py-2 backdrop-blur sm:p-7 lg:static lg:border-0 lg:bg-transparent">
           {s.phase === "insurance" ? (
             <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:justify-center sm:gap-3">
@@ -184,7 +237,8 @@ export default function Table({ g }: { g: Game }) {
                 Split
               </button>
               <button onClick={surrender} disabled={!canSurrender} className={`${mobileAction} border-white/15 text-white/60 hover:border-red-300/50 hover:text-red-200  sm:w-auto sm:px-4 sm:text-base`}>
-                Surr.
+                <span className="lg:hidden">Surr.</span>
+                <span className="hidden lg:inline">Surrender</span>
               </button>
             </div>
           )}

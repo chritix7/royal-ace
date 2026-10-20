@@ -11,6 +11,14 @@ import type { S, Settings, Records } from "./game";
 import { winHistory } from "./winHistory";
 import { sessionStore } from "./sessionStore";
 
+type RoundBreakdown = {
+  main: number;
+  insurance: number;
+  perfectPairs: number;
+  twentyOnePlusThree: number;
+  total: number;
+};
+
 export function useBlackjack(active = true) {
   const activeRef = useRef(active);
   activeRef.current = active;
@@ -25,6 +33,14 @@ export function useBlackjack(active = true) {
   const [showHint, setShowHint] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [showCount, setShowCount] = useState(false);
+  const [roundBreakdown, setRoundBreakdown] =
+    useState<RoundBreakdown | null>(null);
+
+  const roundSides = useRef({
+    wagered: 0,
+    perfectPairs: 0,
+    twentyOnePlusThree: 0,
+  });
 
   const set = (patch: Partial<S>) => {
     if (patch.balance !== undefined) wallet.setBalance(patch.balance); // solde commun
@@ -175,48 +191,76 @@ export function useBlackjack(active = true) {
 
   /** Paris annexes : résolus dès la distribution, sur la 1re main. */
   function resolveSide() {
-    const c = ref.current;
-    if (c.ppBet + c.t3Bet === 0) return;
-    const p = c.hands[0].cards;
-    let payout = 0;
-    let big = false;
-    const notes: string[] = [];
-    if (c.ppBet > 0) {
-      const w = perfectPairs(p[0], p[1]);
-      if (w) {
-        payout += c.ppBet * (w.odds + 1);
-        notes.push(`${w.label} +${c.ppBet * w.odds}`);
-        unlock("pair");
-        track("pairWin");
-        if (w.odds >= 25) big = true;
-      }
+  const c = ref.current;
+  const sideWagered = c.ppBet + c.t3Bet;
+
+  if (sideWagered === 0) return;
+
+  const p = c.hands[0].cards;
+  let ppPayout = 0;
+  let t3Payout = 0;
+  let big = false;
+  const notes: string[] = [];
+
+  if (c.ppBet > 0) {
+    const w = perfectPairs(p[0], p[1]);
+
+    if (w) {
+      ppPayout = c.ppBet * (w.odds + 1);
+      notes.push(`${w.label} +${c.ppBet * w.odds}`);
+      unlock("pair");
+      track("pairWin");
+
+      if (w.odds >= 25) big = true;
     }
-    if (c.t3Bet > 0) {
-      const w = twentyOnePlusThree(p[0], p[1], c.dealer[0]);
-      if (w) {
-        payout += c.t3Bet * (w.odds + 1);
-        notes.push(`${w.label} +${c.t3Bet * w.odds}`);
-        unlock("suited");
-        track("suitedWin");
-        if (w.odds >= 40) big = true;
-      }
-    }
-    const sideNet = payout - c.ppBet - c.t3Bet;
-    const now = ref.current;
-    if (payout > 0) sfx.win();
-    set({
-      balance: now.balance + payout,
-      sideNote: notes.length ? `Side bets: ${notes.join(" · ")}` : "Side bets lost.",
-      stats: { ...now.stats, profit: now.stats.profit + sideNet },
-      ...(big ? { celebrate: Date.now() } : {}),
-    });
   }
+
+  if (c.t3Bet > 0) {
+    const w = twentyOnePlusThree(p[0], p[1], c.dealer[0]);
+
+    if (w) {
+      t3Payout = c.t3Bet * (w.odds + 1);
+      notes.push(`${w.label} +${c.t3Bet * w.odds}`);
+      unlock("suited");
+      track("suitedWin");
+
+      if (w.odds >= 40) big = true;
+    }
+  }
+
+  const payout = ppPayout + t3Payout;
+
+  roundSides.current = {
+    wagered: sideWagered,
+    perfectPairs: ppPayout - c.ppBet,
+    twentyOnePlusThree: t3Payout - c.t3Bet,
+  };
+
+  const now = ref.current;
+
+  if (payout > 0) sfx.win();
+
+  set({
+    balance: now.balance + payout,
+    sideNote: notes.length
+      ? `Side bets: ${notes.join(" · ")}`
+      : "Side bets lost.",
+    ...(big ? { celebrate: Date.now() } : {}),
+  });
+}
 
   async function deal() {
     const c = ref.current;
     const { spots, decks } = c.settings;
     const stake = c.bet * spots + c.ppBet + c.t3Bet;
     if ((c.phase !== "betting" && c.phase !== "settled") || c.bet < MIN_BET || stake > c.balance) return;
+    setRoundBreakdown(null);
+
+    roundSides.current = {
+      wagered: 0,
+      perfectPairs: 0,
+      twentyOnePlusThree: 0,
+    };
 
     const fresh = c.shoe.length < Math.max(26, Math.floor(decks * 52 * 0.25));
     sfx.chip();
@@ -450,9 +494,26 @@ export function useBlackjack(active = true) {
       return { ...h, result, done: true };
     });
 
-    if (dBJ) payout += c.insurance * 3; // assurance payée 2:1
-    const net = payout - wagered;
+    const insurancePayout = dBJ ? c.insurance * 3 : 0;
+    payout += insurancePayout;
+
+    const insuranceNet = insurancePayout - c.insurance;
+    const mainNet =
+      (payout - insurancePayout) - (wagered - c.insurance);
+
+    const sides = roundSides.current;
+    const sideNet = sides.perfectPairs + sides.twentyOnePlusThree;
+
+    const net = mainNet + insuranceNet + sideNet;
     const balance = c.balance + payout;
+
+    setRoundBreakdown({
+      main: mainNet,
+      insurance: insuranceNet,
+      perfectPairs: sides.perfectPairs,
+      twentyOnePlusThree: sides.twentyOnePlusThree,
+      total: net,
+    });
     const streak = net > 0 ? c.streak + 1 : net < 0 ? 0 : c.streak;
     const records: Records = {
       biggestWin: Math.max(c.records.biggestWin, net),
@@ -469,10 +530,10 @@ export function useBlackjack(active = true) {
       : hands.every((h) => h.result === "bust")
       ? "Bust. The dealer wins."
       : net > 0
-      ? "You win!"
+      ? "Round complete · net profit."
       : net < 0
-      ? "The dealer wins."
-      : "Push. Your bet is returned.";
+      ? "Round complete · net loss."
+      : "Round complete · break even.";
 
     if (gotBJ) sfx.blackjack();
     else if (net > 0) sfx.win();
@@ -519,7 +580,7 @@ export function useBlackjack(active = true) {
       },
     });
 
-    sessionStore.recordBj(wagered, net);
+    sessionStore.recordBj(wagered + sides.wagered, net);
 
     // On annonce ce qui s'est passé (les missions et succès écoutent)
     track("bjHand", hands.length);
@@ -621,6 +682,7 @@ export function useBlackjack(active = true) {
 
   return {
     s,
+    roundBreakdown,
     showHint,
     setShowHint,
     showCount,
