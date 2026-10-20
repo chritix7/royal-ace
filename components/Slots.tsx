@@ -340,7 +340,9 @@ useEffect(() => {
 
           {fullscreen ? (
             <div
-  className="sticky bottom-0 z-50 -mx-2 mt-8 border-t border-white/15 px-3 pt-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8"
+  className={`sticky bottom-0 z-50 -mx-2 mt-8 border-t border-white/15 px-3 pt-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8 ${
+    flash ? "balance-halo-pink" : ""
+  }`}
   style={{
     background:
       "linear-gradient(180deg, rgba(255,255,255,0.045) 0%, transparent 18%), linear-gradient(135deg, #24252e 0%, #15161e 45%, #101119 100%)",
@@ -357,10 +359,7 @@ useEffect(() => {
       "inset 0 2px 5px rgba(0,0,0,0.65), inset 0 -1px 0 rgba(255,255,255,0.04)",
   }}
 >
-  <div
-  data-chips-counter="fullscreen"
-  className={`shrink-0 ${flash ? "balance-halo-pink" : ""}`}
->
+  <div data-chips-counter="fullscreen" className="shrink-0">
   <p className="text-[8px] uppercase tracking-[0.2em] text-white/45">
     Balance
   </p>
