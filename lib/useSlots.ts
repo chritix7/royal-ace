@@ -196,11 +196,14 @@ function bonusContinue() {
       const st = steps[i];
       const respin = i > 0;
       if (respin) {
-        track("respin");
-        sfx.respin();
-        set({ message: `Re-spin ${i}!` });
-        await sleep(1300 * speed());
-      }
+  // Pause longue si le tour précédent (wild) a donné un gain, courte sinon
+  const prevWin = steps[i - 1].total > 0;
+  await sleep((prevWin ? 1300 : 400) * speed());
+
+  track("respin");
+  sfx.respin();
+  set({ message: `Re-spin ${i}!` });
+}
       const { stopAt, anticipate, landMs } = reelTimings(st.raw, ref.current.turbo, st.held, respin);
       set({
         target: st.raw,
