@@ -199,7 +199,7 @@ function bonusContinue() {
         track("respin");
         sfx.respin();
         set({ message: `Re-spin ${i}!` });
-        await sleep(650 * speed());
+        await sleep(1000 * speed());
       }
       const { stopAt, anticipate, landMs } = reelTimings(st.raw, ref.current.turbo, st.held, respin);
       set({
