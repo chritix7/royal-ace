@@ -357,7 +357,10 @@ useEffect(() => {
       "inset 0 2px 5px rgba(0,0,0,0.65), inset 0 -1px 0 rgba(255,255,255,0.04)",
   }}
 >
-  <div data-chips-counter="fullscreen" className="shrink-0">
+  <div
+  data-chips-counter="fullscreen"
+  className={`shrink-0 ${flash ? "balance-halo-pink" : ""}`}
+>
   <p className="text-[8px] uppercase tracking-[0.2em] text-white/45">
     Balance
   </p>

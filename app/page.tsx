@@ -56,7 +56,9 @@ export default function Home() {
 
       <div
   data-chips-counter="header"
-  className="rounded-2xl border border-[#c8a65b]/30 bg-[#151b15] px-3 py-1.5 text-right"
+  className={`rounded-2xl border border-[#c8a65b]/30 bg-[#151b15] px-3 py-1.5 text-right ${
+    flash ? "balance-halo-gold" : ""
+  }`}
 >
   <p className="text-[9px] leading-none text-white/50">Chips</p>
   <p className="text-base font-bold leading-tight text-[#e5c779]">
