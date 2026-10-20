@@ -241,13 +241,25 @@ function bonusContinue() {
       await sleep(250 * speed());
 
       if (st.expanded.length > 0) {
-        track("wildExpand");
-        sfx.wildExpand();
-        haptic(HAPTIC.big);
-        set({ expanding: st.expanded, message: "WILD EXPANDS!" });
-        await sleep(800 * speed());
-        set({ grid: st.grid, expanding: [] });
-      }
+  // Pause pour bien voir le wild avant qu'il s'étende
+  await sleep(300 * speed());
+
+  track("wildExpand");
+  sfx.wildExpand();
+  haptic(HAPTIC.big);
+  set({ expanding: st.expanded, message: "WILD EXPANDS!" });
+
+  // Laisse l'animation d'extension (600 ms) se terminer
+  await sleep(600 * speed());
+
+  // Le rouleau est maintenant rempli de wilds
+  set({ grid: st.grid });
+
+  // Pause pour admirer le rouleau complet avant le respin
+  await sleep(450 * speed());
+
+  set({ expanding: [] });
+}
 
       if (st.total > 0) {
   wallet.add(st.total);

@@ -186,10 +186,22 @@ body {
 
 /* Le wild s'étend sur tout le rouleau */
 @keyframes wild-expand {
-  0% { clip-path: inset(38% 0 38% 0); filter: brightness(2.2); }
-  100% { clip-path: inset(0 0 0 0); filter: brightness(1); }
+  0% {
+    clip-path: inset(38% 0 38% 0);
+    filter: brightness(2.2);
+  }
+  60% {
+    filter: brightness(1.5);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+    filter: brightness(1);
+  }
 }
-.wild-expand { animation: wild-expand 520ms ease-out both; }
+
+.wild-expand {
+  animation: wild-expand 600ms cubic-bezier(0.3, 0.7, 0.3, 1) both;
+}
 
 /* ===== Gros gains ===== */
 @keyframes shake-a {
