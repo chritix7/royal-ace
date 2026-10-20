@@ -300,22 +300,6 @@ body {
   }
 }
 
-@keyframes barGlowPink {
-  0% {
-    border-top-color: rgba(255, 255, 255, 0.15);
-  }
-  30% {
-    border-top-color: rgba(229, 178, 207, 0.9);
-  }
-  100% {
-    border-top-color: rgba(255, 255, 255, 0.15);
-  }
-}
-
 .balance-halo-gold {
   animation: haloGold 0.8s ease-out;
-}
-
-.bar-glow-pink {
-  animation: barGlowPink 0.8s ease-out;
 }
