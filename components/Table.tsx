@@ -17,7 +17,8 @@ const RESULT_UI: Record<Result, { label: string; cls: string }> = {
   surrender: { label: "Surrender", cls: "border-white/30 bg-white/10 text-white/70" },
 };
 
-const mobileAction = "inline-flex h-10 w-full items-center justify-center rounded-xl border px-1 text-center text-[11px] font-semibold leading-none transition disabled:cursor-not-allowed disabled:opacity-40";
+const mobileAction =
+  "inline-flex h-10 w-full items-center justify-center rounded-xl border px-1 text-center text-[11px] font-semibold leading-none outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] focus-visible:ring-offset-2 focus-visible:ring-offset-[#101713] disabled:cursor-not-allowed disabled:opacity-40 lg:h-12";
 
 export default function Table({ g }: { g: Game }) {
   const { s, canBet, playing, canDouble, canSplit, canSurrender, advice, dealerVal, outOfChips, totalCards, shoePct, compact, stake, back, pileAmount, deal, takeInsurance, hit, stand, double, split, surrender, refill } = g;
@@ -144,24 +145,24 @@ export default function Table({ g }: { g: Game }) {
         <div className="sticky bottom-0 z-20 border-t border-white/10 bg-[#101713]/95 px-2 py-2 backdrop-blur sm:p-7 lg:static lg:border-0 lg:bg-transparent">
           {s.phase === "insurance" ? (
             <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:justify-center sm:gap-3">
-              <button onClick={() => takeInsurance(true)} disabled={s.busy} className={`${mobileAction} border-transparent bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c] sm:h-auto sm:w-auto sm:px-4 sm:text-base`}>
+              <button onClick={() => takeInsurance(true)} disabled={s.busy} className={`${mobileAction} border-transparent bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c]  sm:w-auto sm:px-4 sm:text-base`}>
                 Insurance (◈ {money(s.hands.reduce((a, h) => a + h.bet, 0) / 2)})
               </button>
-              <button onClick={() => takeInsurance(false)} disabled={s.busy} className={`${mobileAction} border-white/20 text-white hover:border-[#d7b45b] hover:text-[#e5c779] sm:h-auto sm:w-auto sm:px-4 sm:text-base`}>
+              <button onClick={() => takeInsurance(false)} disabled={s.busy} className={`${mobileAction} border-white/20 text-white hover:border-[#d7b45b] hover:text-[#e5c779]  sm:w-auto sm:px-4 sm:text-base`}>
                 No thanks
               </button>
             </div>
           ) : canBet ? (
             <div className="flex flex-col items-center gap-2">
               {outOfChips ? (
-                <button onClick={refill} className={`${mobileAction} border-transparent bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c] sm:h-auto sm:w-auto sm:px-4 sm:text-base`}>
+                <button onClick={refill} className={`${mobileAction} border-transparent bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c]  sm:w-auto sm:px-4 sm:text-base`}>
                   Out of chips · take a ◈ {REFILL} refill
                 </button>
               ) : (
                 <button
                   onClick={deal}
                   disabled={s.bet < MIN_BET || stake > s.balance}
-                  className={`${mobileAction} max-w-sm border-transparent bg-[#d7b45b] text-xs text-[#10130e] hover:bg-[#efd58c] sm:h-auto sm:w-auto sm:px-10 sm:text-base`}
+                  className={`${mobileAction} max-w-sm border-transparent bg-[#d7b45b] text-xs text-[#10130e] hover:bg-[#efd58c] sm:w-auto sm:px-10 sm:text-base lg:min-w-[280px]`}
                 >
                   {s.phase === "settled" ? "Deal again" : "Deal"} · ◈ {money(stake)}
                 </button>
@@ -169,20 +170,20 @@ export default function Table({ g }: { g: Game }) {
               <p className="hidden text-[11px] text-white/30 sm:block">Press Space to deal</p>
             </div>
           ) : (
-            <div className="grid grid-cols-5 gap-1.5">
-              <button onClick={hit} disabled={!playing} className={`${mobileAction} border-transparent bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c] sm:h-auto sm:w-auto sm:px-4 sm:text-base`}>
+            <div className="grid grid-cols-5 gap-1.5 lg:mx-auto lg:max-w-3xl lg:gap-3">
+              <button onClick={hit} disabled={!playing} className={`${mobileAction} border-transparent bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c]  sm:w-auto sm:px-4 sm:text-base`}>
                 Hit
               </button>
-              <button onClick={stand} disabled={!playing} className={`${mobileAction} border-white/20 text-white hover:border-[#d7b45b] hover:text-[#e5c779] sm:h-auto sm:w-auto sm:px-4 sm:text-base`}>
+              <button onClick={stand} disabled={!playing} className={`${mobileAction} border-white/20 text-white hover:border-[#d7b45b] hover:text-[#e5c779]  sm:w-auto sm:px-4 sm:text-base`}>
                 Stand
               </button>
-              <button onClick={double} disabled={!canDouble} className={`${mobileAction} border-[#d7b45b]/50 text-[#e5c779] hover:bg-[#d7b45b]/10 sm:h-auto sm:w-auto sm:px-4 sm:text-base`}>
+              <button onClick={double} disabled={!canDouble} className={`${mobileAction} border-[#d7b45b]/50 text-[#e5c779] hover:bg-[#d7b45b]/10  sm:w-auto sm:px-4 sm:text-base`}>
                 Double
               </button>
-              <button onClick={split} disabled={!canSplit} className={`${mobileAction} border-amber-400/40 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 sm:h-auto sm:w-auto sm:px-4 sm:text-base`}>
+              <button onClick={split} disabled={!canSplit} className={`${mobileAction} border-amber-400/40 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20  sm:w-auto sm:px-4 sm:text-base`}>
                 Split
               </button>
-              <button onClick={surrender} disabled={!canSurrender} className={`${mobileAction} border-white/15 text-white/60 hover:border-red-300/50 hover:text-red-200 sm:h-auto sm:w-auto sm:px-4 sm:text-base`}>
+              <button onClick={surrender} disabled={!canSurrender} className={`${mobileAction} border-white/15 text-white/60 hover:border-red-300/50 hover:text-red-200  sm:w-auto sm:px-4 sm:text-base`}>
                 Surr.
               </button>
             </div>
