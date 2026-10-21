@@ -23,8 +23,98 @@ const mobileAction =
 const signedMoney = (value: number) =>
   `${value > 0 ? "+" : value < 0 ? "−" : ""}◈ ${money(Math.abs(value))}`;
 
+type SideCircleProps = {
+  label: string;
+  amount: number;
+  disabled: boolean;
+  onIncrease: () => void;
+  onDecrease: () => void;
+};
+
+function SideCircle({
+  label,
+  amount,
+  disabled,
+  onIncrease,
+  onDecrease,
+}: SideCircleProps) {
+  return (
+    <div className="flex w-16 flex-col items-center gap-1 sm:w-20">
+      <div
+        className={`relative flex aspect-square w-full items-center justify-center rounded-full border-2 text-center transition ${
+          amount > 0
+            ? "border-[#e5c779]/80 bg-[#e5c779]/15 shadow-[0_0_18px_rgba(229,199,121,0.18)]"
+            : "border-white/25 bg-black/25"
+        }`}
+      >
+        <div className="px-1">
+          <p className="text-[9px] font-black uppercase tracking-wide text-[#e5c779] sm:text-[10px]">
+            {label}
+          </p>
+          <p className="mt-0.5 text-[10px] font-bold text-white sm:text-xs">
+            {amount > 0 ? `◈ ${money(amount)}` : "—"}
+          </p>
+        </div>
+
+        {amount > 0 && (
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2">
+            <ChipStack amount={amount} />
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={onDecrease}
+          disabled={disabled || amount === 0}
+          aria-label={`Decrease ${label} side bet`}
+          className="flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black/30 text-xs font-bold text-white/80 transition hover:border-[#e5c779]/60 hover:text-[#e5c779] disabled:opacity-30"
+        >
+          −
+        </button>
+        <button
+          type="button"
+          onClick={onIncrease}
+          disabled={disabled}
+          aria-label={`Increase ${label} side bet`}
+          className="flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black/30 text-xs font-bold text-white/80 transition hover:border-[#e5c779]/60 hover:text-[#e5c779] disabled:opacity-30"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
+}
+
   export default function Table({ g }: { g: Game }) {
-  const { s, roundBreakdown, canBet, playing, canDouble, canSplit, canSurrender, advice, dealerVal, outOfChips, totalCards, shoePct, compact, stake, back, pileAmount, deal, takeInsurance, hit, stand, double, split, surrender, refill } = g;
+  const {
+  s,
+  roundBreakdown,
+  canBet,
+  playing,
+  canDouble,
+  canSplit,
+  canSurrender,
+  advice,
+  dealerVal,
+  outOfChips,
+  totalCards,
+  shoePct,
+  compact,
+  stake,
+  back,
+  pileAmount,
+  deal,
+  takeInsurance,
+  hit,
+  stand,
+  double,
+  split,
+  surrender,
+  refill,
+  adjustSide,
+} = g;
 
   return (
       <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl">
@@ -141,11 +231,66 @@ const signedMoney = (value: number) =>
             })}
           </div>
 
-          {/* Pile de jetons */}
-          <div className="mt-5 flex min-h-11 flex-col items-center justify-end gap-1 sm:mt-6 sm:min-h-12">
+          {/* Zone de mise Vegas */}
+<div className="mt-6 flex flex-col items-center gap-3 sm:mt-8">
+  <div className="flex items-end justify-center gap-3 sm:gap-5">
+    <SideCircle
+      label="PP"
+      amount={s.ppBet}
+      disabled={!canBet || s.busy}
+      onIncrease={() => adjustSide("ppBet", 10)}
+      onDecrease={() => adjustSide("ppBet", -10)}
+    />
+
+    <div className="flex flex-col items-center gap-2">
+      <div
+        className={`relative flex h-24 w-24 items-center justify-center rounded-full border-2 text-center transition sm:h-28 sm:w-28 ${
+          canBet
+            ? "border-[#e5c779]/80 bg-[#e5c779]/12 shadow-[0_0_28px_rgba(229,199,121,0.20)]"
+            : "border-white/20 bg-black/25"
+        }`}
+      >
+        <div className="px-2">
+          <p className="text-[9px] font-black uppercase tracking-widest text-[#e5c779] sm:text-[10px]">
+            Bet
+          </p>
+          <p className="mt-1 text-sm font-black text-white sm:text-base">
+            ◈ {money(s.bet)}
+          </p>
+          {s.settings.spots > 1 && (
+            <p className="mt-0.5 text-[9px] text-white/50">
+              × {s.settings.spots} spots
+            </p>
+          )}
+        </div>
+
+        {pileAmount > 0 && (
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
             <ChipStack amount={pileAmount} />
-            {pileAmount > 0 && <span className="text-[11px] text-white/50">◈ {money(pileAmount)}</span>}
           </div>
+        )}
+      </div>
+
+      {pileAmount > 0 && (
+        <span className="text-[11px] font-semibold text-white/60">
+          ◈ {money(pileAmount)}
+        </span>
+      )}
+    </div>
+
+    <SideCircle
+      label="21+3"
+      amount={s.t3Bet}
+      disabled={!canBet || s.busy}
+      onIncrease={() => adjustSide("t3Bet", 10)}
+      onDecrease={() => adjustSide("t3Bet", -10)}
+    />
+  </div>
+
+  <p className="text-center text-[10px] text-white/35 sm:text-[11px]">
+    Side bets · ◈ 10 per tap
+  </p>
+</div>
         </div>
 
         {/* Contrôles */}
