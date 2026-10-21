@@ -140,25 +140,43 @@ function SidePill({
               <p className="text-sm text-white/80">Shuffling the shoe…</p>
             </div>
           )}
-          {/* Croupier */}
-          <div className="flex items-center justify-center gap-2 text-sm text-white/60">
-            Dealer
-            {s.dealer.length > 0 && (
-              <span className="rounded-full bg-black/30 px-3 py-0.5 text-xs font-bold text-white">
-                {s.hole && isBlackjack(s.dealer)
-                  ? "Blackjack"
-                  : dealerVal.soft && dealerVal.total < 21 && s.hole
-                  ? `${dealerVal.total - 10}/${dealerVal.total}`
-                  : dealerVal.total}
-                {!s.hole && " + ?"}
-              </span>
-            )}
-          </div>
-          <div className="mt-1.5 flex min-h-[92px] justify-center sm:min-h-28">
-            {s.dealer.map((card, i) => (
-              <PlayingCard key={`d${i}-${card.rank}${card.suit}`} card={card} faceDown={i === 1 && !s.hole} overlap={i > 0} back={back} />
-            ))}
-          </div>
+          {/* Croupier — zone gravée dans le tapis */}
+<div className="relative flex min-h-[112px] flex-col items-center justify-center sm:min-h-32">
+  {/* Inscription DEALER sur le feutre */}
+  <p
+    aria-hidden="true"
+    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-[0.45em] text-white/[0.12] sm:text-xs"
+  >
+    Dealer
+  </p>
+
+  {/* Score du croupier */}
+  {s.dealer.length > 0 && (
+    <div className="relative z-20 mb-1.5 flex items-center justify-center">
+      <span className="rounded-full border border-white/10 bg-black/35 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white/80 backdrop-blur-sm sm:text-[11px]">
+        {s.hole && isBlackjack(s.dealer)
+          ? "Blackjack"
+          : dealerVal.soft && dealerVal.total < 21 && s.hole
+            ? `${dealerVal.total - 10}/${dealerVal.total}`
+            : dealerVal.total}
+        {!s.hole && " + ?"}
+      </span>
+    </div>
+  )}
+
+  {/* Cartes du croupier */}
+  <div className="relative z-10 mt-1.5 flex justify-center">
+    {s.dealer.map((card, i) => (
+      <PlayingCard
+        key={`d${i}-${card.rank}${card.suit}`}
+        card={card}
+        faceDown={i === 1 && !s.hole}
+        overlap={i > 0}
+        back={back}
+      />
+    ))}
+  </div>
+</div>
 
           {/* Marquages du tapis */}
 <div
