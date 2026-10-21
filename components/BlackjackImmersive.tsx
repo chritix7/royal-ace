@@ -127,6 +127,63 @@ function InfoPanel({
   );
 }
 
+function ImmersiveSidePill({
+  label,
+  amount,
+  disabled,
+  onIncrease,
+  onDecrease,
+  plusDisabled,
+}: {
+  label: string;
+  amount: number;
+  disabled: boolean;
+  onIncrease: () => void;
+  onDecrease: () => void;
+  plusDisabled: boolean;
+}) {
+  return (
+    <div
+      className={`flex min-w-0 items-center justify-between gap-1.5 rounded-full border px-2 py-1 transition ${
+        amount > 0
+          ? "border-[#e5c779]/60 bg-[#e5c779]/12"
+          : "border-white/15 bg-black/25"
+      }`}
+    >
+      <div className="min-w-0">
+        <p className="text-[9px] font-black uppercase tracking-wide text-[#e5c779]">
+          {label}
+        </p>
+        <p className="text-[10px] font-bold tabular-nums text-white">
+          {amount > 0 ? `◈ ${money(amount)}` : "Off"}
+        </p>
+      </div>
+
+      <div className="flex shrink-0 items-center gap-1">
+        <button
+          type="button"
+          onClick={onDecrease}
+          disabled={disabled || amount <= 0}
+          aria-label={`Decrease ${label} side bet`}
+          className="flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black/30 text-xs font-bold text-white/80 transition enabled:hover:border-[#e5c779]/60 enabled:hover:text-[#e5c779] disabled:opacity-30"
+        >
+          −
+        </button>
+
+        <button
+          type="button"
+          onClick={onIncrease}
+          disabled={disabled || plusDisabled}
+          aria-label={`Increase ${label} side bet`}
+          className="flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black/30 text-xs font-bold text-white/80 transition enabled:hover:border-[#e5c779]/60 enabled:hover:text-[#e5c779] disabled:opacity-30"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function BlackjackImmersive({
   g,
   onClose,
@@ -200,10 +257,10 @@ export default function BlackjackImmersive({
   }, [menuOpen, onClose]);
 
   const tableStyle = {
-    "--bj-card-h": compact
-      ? "clamp(60px, 14dvh, 118px)"
-      : "clamp(68px, 18dvh, 160px)",
-  } as CSSProperties;
+  "--bj-card-h": compact
+    ? "clamp(54px, 11dvh, 96px)"
+    : "clamp(60px, 14dvh, 124px)",
+} as CSSProperties;
 
   const handCount = Math.max(1, s.hands.length);
 
@@ -337,7 +394,7 @@ const playerCardStyle = (
           role="status"
           aria-live="polite"
           aria-atomic="true"
-          className="flex h-[76px] shrink-0 flex-col items-center justify-center gap-1 px-3 text-center sm:h-[88px]"
+          className="flex h-[52px] shrink-0 flex-col items-center justify-center gap-0.5 px-3 text-center sm:h-[60px]"
         >
           <p className="max-w-full text-xs font-semibold text-[#ead5a3] sm:text-sm">
             {s.message}
@@ -366,7 +423,7 @@ const playerCardStyle = (
               Basic strategy · {advice}
             </p>
           ) : (
-            <span aria-hidden="true" className="h-5" />
+            <span aria-hidden="true" className="h-3" />
           )}
         </div>
 
@@ -474,7 +531,7 @@ const playerCardStyle = (
         }}
       >
         {bettingOpen ? (
-          <div className="mx-auto mb-2 max-h-[34dvh] max-w-3xl overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-black/20 p-2 sm:max-h-[28dvh]">
+          <div className="mx-auto mb-1.5 max-h-[26dvh] max-w-3xl overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-black/20 p-2 sm:max-h-[22dvh]">
             <div className="space-y-2">
   <div className="flex min-w-0 items-center justify-between gap-3 px-1">
     <span className="shrink-0 text-[10px] uppercase tracking-wider text-white/45">
@@ -489,7 +546,7 @@ const playerCardStyle = (
     </span>
   </div>
 
-  <div className="mx-auto grid w-full max-w-sm grid-cols-5 gap-2">
+  <div className="mx-auto grid w-full max-w-sm grid-cols-5 gap-1.5">
     {CHIPS.map((value) => (
       <button
         key={value}
@@ -500,14 +557,14 @@ const playerCardStyle = (
           (s.bet + value) * spots + sides > s.balance
         }
         aria-label={`Add ${value} chips`}
-        className={`mx-auto flex h-10 w-10 items-center justify-center rounded-full border-2 border-dashed border-white/60 text-[11px] font-black outline-none focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-30 ${CHIP_BG[value]}`}
+        className={`mx-auto flex h-8 w-8 items-center justify-center rounded-full border-2 border-dashed border-white/60 text-[10px] font-black outline-none focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-30 ${CHIP_BG[value]}`}
       >
         {value}
       </button>
     ))}
   </div>
 
-  <div className="mx-auto grid w-full max-w-sm grid-cols-3 gap-2">
+  <div className="mx-auto grid w-full max-w-sm grid-cols-3 gap-1.5">
     <button
       type="button"
       onClick={() => setBetTo(s.lastBet)}
@@ -536,31 +593,29 @@ const playerCardStyle = (
   </div>
 </div>
 
-            <div className="mt-2 grid gap-2 sm:grid-cols-2">
-              <SideBet
-                roomy
-                label="Perfect Pairs"
-                hint="First two cards · up to 25:1"
-                amount={s.ppBet}
-                onChange={(delta) => adjustSide("ppBet", delta)}
-                minusDisabled={!canBet || s.ppBet <= 0}
-                plusDisabled={
-                  !canBet || s.ppBet >= 100 || stake + 10 > s.balance
-                }
-              />
+            <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+  <ImmersiveSidePill
+    label="PP"
+    amount={s.ppBet}
+    disabled={!canBet}
+    onIncrease={() => adjustSide("ppBet", 10)}
+    onDecrease={() => adjustSide("ppBet", -10)}
+    plusDisabled={
+      !canBet || s.ppBet >= 100 || stake + 10 > s.balance
+    }
+  />
 
-              <SideBet
-                roomy
-                label="21+3"
-                hint="Your cards + dealer upcard · up to 100:1"
-                amount={s.t3Bet}
-                onChange={(delta) => adjustSide("t3Bet", delta)}
-                minusDisabled={!canBet || s.t3Bet <= 0}
-                plusDisabled={
-                  !canBet || s.t3Bet >= 100 || stake + 10 > s.balance
-                }
-              />
-            </div>
+  <ImmersiveSidePill
+    label="21+3"
+    amount={s.t3Bet}
+    disabled={!canBet}
+    onIncrease={() => adjustSide("t3Bet", 10)}
+    onDecrease={() => adjustSide("t3Bet", -10)}
+    plusDisabled={
+      !canBet || s.t3Bet >= 100 || stake + 10 > s.balance
+    }
+  />
+</div>
           </div>
         ) : (
           <div className="mb-2 flex min-h-6 items-center justify-center gap-3 text-[11px] text-white/50">
@@ -626,7 +681,7 @@ const playerCardStyle = (
                   deal();
                 }}
                 disabled={s.bet < MIN_BET || stake > s.balance}
-                className={`${control} ${gold} min-w-0 flex-1 sm:min-h-12`}
+                className={`${control} ${gold} min-w-0 flex-1 sm:min-h-10`}
               >
                 {s.phase === "settled" ? "Deal again" : "Deal"} · ◈{" "}
                 {money(stake)}
@@ -649,7 +704,7 @@ const playerCardStyle = (
               type="button"
               onClick={hit}
               disabled={!playing}
-              className={`${control} ${gold} sm:min-h-12`}
+              className={`${control} ${gold} sm:min-h-10`}
             >
               Hit
             </button>
@@ -658,7 +713,7 @@ const playerCardStyle = (
               type="button"
               onClick={stand}
               disabled={!playing}
-              className={`${control} ${neutral} sm:min-h-12`}
+              className={`${control} ${neutral} sm:min-h-10`}
             >
               Stand
             </button>
@@ -667,7 +722,7 @@ const playerCardStyle = (
               type="button"
               onClick={double}
               disabled={!canDouble}
-              className={`${control} ${neutral} sm:min-h-12`}
+              className={`${control} ${neutral} sm:min-h-10`}
             >
               Double
             </button>
@@ -676,7 +731,7 @@ const playerCardStyle = (
               type="button"
               onClick={split}
               disabled={!canSplit}
-              className={`${control} ${neutral} sm:min-h-12`}
+              className={`${control} ${neutral} sm:min-h-10`}
             >
               Split
             </button>
@@ -685,7 +740,7 @@ const playerCardStyle = (
               type="button"
               onClick={surrender}
               disabled={!canSurrender}
-              className={`${control} ${neutral} sm:min-h-12`}
+              className={`${control} ${neutral} sm:min-h-10`}
             >
               <span className="sm:hidden">Surr.</span>
               <span className="hidden sm:inline">Surrender</span>
