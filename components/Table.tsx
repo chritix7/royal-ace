@@ -141,7 +141,7 @@ function SidePill({
             </div>
           )}
           {/* Croupier — zone gravée dans le tapis */}
-<div className="relative flex min-h-[112px] flex-col items-center justify-center sm:min-h-32">
+<div className="relative mt-1.5 flex min-h-[92px] items-center justify-center sm:min-h-28">
   {/* Inscription DEALER sur le feutre */}
   <p
     aria-hidden="true"
@@ -150,9 +150,9 @@ function SidePill({
     Dealer
   </p>
 
-  {/* Score du croupier */}
+  {/* Score du croupier — ne prend aucune hauteur */}
   {s.dealer.length > 0 && (
-    <div className="relative z-20 mb-1.5 flex items-center justify-center">
+    <div className="pointer-events-none absolute -top-6 left-1/2 z-20 -translate-x-1/2">
       <span className="rounded-full border border-white/10 bg-black/35 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white/80 backdrop-blur-sm sm:text-[11px]">
         {s.hole && isBlackjack(s.dealer)
           ? "Blackjack"
@@ -165,7 +165,7 @@ function SidePill({
   )}
 
   {/* Cartes du croupier */}
-  <div className="relative z-10 mt-1.5 flex justify-center">
+  <div className="relative z-10 flex justify-center">
     {s.dealer.map((card, i) => (
       <PlayingCard
         key={`d${i}-${card.rank}${card.suit}`}
