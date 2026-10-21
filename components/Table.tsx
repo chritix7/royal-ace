@@ -142,13 +142,6 @@ function SidePill({
           )}
           {/* Croupier — zone gravée dans le tapis */}
 <div className="relative mt-1.5 flex min-h-[92px] items-center justify-center sm:min-h-28">
-  {/* Inscription DEALER sur le feutre */}
-  <p
-    aria-hidden="true"
-    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-[0.45em] text-white/[0.12] sm:text-xs"
-  >
-    Dealer
-  </p>
 
   {/* Score du croupier — ne prend aucune hauteur */}
 {s.dealer.length > 0 && (
@@ -166,16 +159,23 @@ function SidePill({
 
   {/* Cartes du croupier */}
 <div className="relative z-10 mt-4 flex justify-center">
-    {s.dealer.map((card, i) => (
-      <PlayingCard
-        key={`d${i}-${card.rank}${card.suit}`}
-        card={card}
-        faceDown={i === 1 && !s.hole}
-        overlap={i > 0}
-        back={back}
-      />
-    ))}
-  </div>
+  <p
+    aria-hidden="true"
+    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pl-[0.45em] text-[10px] font-bold uppercase tracking-[0.45em] text-white/[0.12] sm:text-xs"
+  >
+    Dealer
+  </p>
+
+  {s.dealer.map((card, i) => (
+    <PlayingCard
+      key={`d${i}-${card.rank}${card.suit}`}
+      card={card}
+      faceDown={i === 1 && !s.hole}
+      overlap={i > 0}
+      back={back}
+    />
+  ))}
+</div>
 </div>
 
           {/* Message (annoncé aux lecteurs d'écran) */}
