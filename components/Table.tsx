@@ -163,18 +163,22 @@ function SidePill({
           {/* Marquages du tapis */}
 <div
   aria-hidden="true"
-  className="pointer-events-none mt-2 flex flex-col items-center gap-1 text-center"
+  className="pointer-events-none mt-1.5 flex items-center justify-center gap-2 text-center sm:gap-3"
 >
-  <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-white/25 sm:text-[10px]">
-    Blackjack pays {s.settings.bj65 ? "6 to 5" : "3 to 2"}
+  <p className="whitespace-nowrap text-[8px] font-bold uppercase tracking-[0.18em] text-white/20 sm:text-[9px]">
+    BJ {s.settings.bj65 ? "6:5" : "3:2"}
   </p>
 
-  <p className="text-[8px] font-semibold uppercase tracking-[0.22em] text-white/15 sm:text-[9px]">
-    Insurance pays 2 to 1
+  <span className="h-2 w-px bg-white/10" />
+
+  <p className="whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.18em] text-white/15 sm:text-[9px]">
+    Insurance 2:1
   </p>
 
-  <p className="text-[8px] font-semibold uppercase tracking-[0.22em] text-white/15 sm:text-[9px]">
-    Dealer must {s.settings.h17 ? "hit" : "stand on"} soft 17
+  <span className="h-2 w-px bg-white/10" />
+
+  <p className="whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.18em] text-white/15 sm:text-[9px]">
+    {s.settings.h17 ? "H17" : "S17"}
   </p>
 </div>
 
