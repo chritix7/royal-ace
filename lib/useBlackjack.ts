@@ -92,7 +92,7 @@ function scheduleResultReset() {
       phase: "betting",
       message: "Place your bet to start.",
     });
-  }, 6000);
+  }, 10000);
 }
 
 useEffect(() => {
