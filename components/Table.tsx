@@ -151,18 +151,18 @@ function SidePill({
   </p>
 
   {/* Score du croupier — ne prend aucune hauteur */}
-  {s.dealer.length > 0 && (
-    <div className="pointer-events-none absolute -top-5 left-1/2 z-20 -translate-x-1/2">
-      <span className="rounded-full border border-white/10 bg-black/35 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white/80 backdrop-blur-sm sm:text-[11px]">
-        {s.hole && isBlackjack(s.dealer)
-          ? "Blackjack"
-          : dealerVal.soft && dealerVal.total < 21 && s.hole
-            ? `${dealerVal.total - 10}/${dealerVal.total}`
-            : dealerVal.total}
-        {!s.hole && " + ?"}
-      </span>
-    </div>
-  )}
+{s.dealer.length > 0 && (
+  <div className="pointer-events-none absolute -top-5 left-1/2 z-20 -translate-x-1/2">
+    <span className="rounded-full bg-black/30 px-2.5 py-0.5 text-[11px] font-bold text-white sm:text-xs">
+      {s.hole && isBlackjack(s.dealer)
+        ? "Blackjack"
+        : dealerVal.soft && dealerVal.total < 21 && s.hole
+          ? `${dealerVal.total - 10}/${dealerVal.total}`
+          : dealerVal.total}
+      {!s.hole && " + ?"}
+    </span>
+  </div>
+)}
 
   {/* Cartes du croupier */}
 <div className="relative z-10 mt-4 flex justify-center">
