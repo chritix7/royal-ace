@@ -354,20 +354,24 @@ body {
 
 @keyframes card-flip-reveal {
   0% {
-    transform: perspective(900px) rotateY(180deg) translateY(-2px);
+    transform: perspective(1000px) rotateY(180deg) translateY(-3px);
   }
 
-  60% {
-    transform: perspective(900px) rotateY(-12deg) translateY(1px);
+  45% {
+    transform: perspective(1000px) rotateY(90deg) translateY(-1px);
+  }
+
+  78% {
+    transform: perspective(1000px) rotateY(-7deg) translateY(1px);
   }
 
   100% {
-    transform: perspective(900px) rotateY(0deg) translateY(0);
+    transform: perspective(1000px) rotateY(0deg) translateY(0);
   }
 }
 
 .animate-card-reveal {
-  animation: card-flip-reveal 0.5s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+  animation: card-flip-reveal 0.75s cubic-bezier(0.22, 0.8, 0.24, 1) both;
   transform-style: preserve-3d;
   will-change: transform;
 }
