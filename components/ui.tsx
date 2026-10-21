@@ -25,25 +25,48 @@ export function Counter({ value }: { value: number }) {
 
 export function ChipStack({ amount }: { amount: number }) {
   if (amount <= 0) return null;
+
   const stacks: { v: number; n: number }[] = [];
   let rest = amount;
+
   for (const v of [...CHIPS].reverse()) {
     const n = Math.floor(rest / v);
+
     if (n > 0) {
       stacks.push({ v, n: Math.min(n, 8) });
       rest -= n * v;
     }
   }
+
   return (
-    <div key={amount} className="animate-pop flex items-end justify-center gap-1.5" aria-label={`${amount} chips bet`}>
+    <div
+      key={amount}
+      className="animate-pop flex items-end justify-center gap-2"
+      aria-label={`${amount} chips bet`}
+    >
       {stacks.map(({ v, n }) => (
-        <div key={v} className="relative w-9" style={{ height: 14 + (n - 1) * 5 }}>
+        <div
+          key={v}
+          className="relative w-9"
+          style={{ height: 18 + (n - 1) * 5 }}
+        >
+          <div
+            aria-hidden="true"
+            className="absolute -bottom-1 left-1/2 h-1.5 w-8 -translate-x-1/2 rounded-full bg-black/45 blur-[2px]"
+          />
+
           {Array.from({ length: n }).map((_, k) => (
             <div
               key={k}
-              className={`absolute left-0 h-3.5 w-9 rounded-full border-2 border-dashed border-white/70 shadow ${CHIP_BG[v]}`}
+              className={`absolute left-0 h-4 w-9 overflow-hidden rounded-full border border-black/25 shadow-[0_1px_2px_rgba(0,0,0,0.35)] ${CHIP_BG[v]}`}
               style={{ bottom: k * 5 }}
-            />
+            >
+              <div className="absolute inset-x-[3px] top-[2px] h-[7px] rounded-full border border-dashed border-white/45" />
+
+              <div className="absolute inset-x-1 top-0 h-1 rounded-full bg-white/20" />
+
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-black/25" />
+            </div>
           ))}
         </div>
       ))}
