@@ -508,15 +508,15 @@ const playerCardStyle = (
     </span>
 
     {roundBreakdown && (
-      <button
-        type="button"
-        onClick={() => setResultOpen(true)}
-        aria-label="Open round details"
-        className="flex h-9 w-9 items-center justify-center rounded-full border border-[#d7b45b]/50 bg-black/50 text-base font-bold text-[#e5c779] transition hover:bg-[#d7b45b]/15 md:hidden"
-      >
-        ⓘ
-      </button>
-    )}
+  <button
+    type="button"
+    onClick={() => setResultOpen(true)}
+    aria-label="Open round details"
+    className={`${control} ${neutral} h-8 px-3 text-[11px] md:hidden`}
+  >
+    Details
+  </button>
+)}
   </div>
 ) : advice ? (
             <p className="text-[11px] text-sky-200">
