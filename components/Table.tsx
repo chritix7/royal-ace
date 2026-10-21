@@ -126,7 +126,7 @@ function SidePill({
           </div>
         </div>
 
-        <div className={`relative ${THEMES[s.settings.theme]} px-2 py-7 sm:px-9 sm:py-8`}>
+        <div className={`relative ${THEMES[s.settings.theme]} px-2 py-4 sm:px-9 sm:py-5`}>
           {s.celebrate > 0 && <Confetti key={s.celebrate} />}
           {s.shuffling && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/60" role="status">
@@ -152,7 +152,7 @@ function SidePill({
               </span>
             )}
           </div>
-          <div className="mt-4 flex min-h-28 justify-center sm:min-h-36">
+          <div className="mt-2 flex min-h-20 justify-center sm:min-h-24">
             {s.dealer.map((card, i) => (
               <PlayingCard key={`d${i}-${card.rank}${card.suit}`} card={card} faceDown={i === 1 && !s.hole} overlap={i > 0} back={back} />
             ))}
@@ -160,7 +160,7 @@ function SidePill({
 
           {/* Message (annoncé aux lecteurs d'écran) */}
           <div
-            className="my-5 flex flex-col items-center gap-2 sm:my-7 lg:min-h-[160px] lg:justify-center"
+            className="my-3 flex flex-col items-center gap-1.5 sm:my-4 lg:min-h-[92px] lg:justify-center"
             role="status"
             aria-live="polite"
           >
@@ -187,7 +187,7 @@ function SidePill({
           {/* Joueur */}
           <div className="flex flex-wrap items-start justify-center gap-2 sm:gap-5">
             {s.hands.length === 0 && (
-              <div className="flex min-h-28 items-center text-sm text-white/40 sm:min-h-36">Your cards will appear here</div>
+              <div className="flex min-h-20 items-center text-sm text-white/40 sm:min-h-24">Your cards will appear here</div>
             )}
             {s.hands.map((h, i) => {
               const v = handValue(h.cards);
@@ -213,7 +213,7 @@ function SidePill({
                       </span>
                     )}
                   </div>
-                  <div className={`flex justify-center ${compact ? "min-h-[88px] sm:min-h-28" : "min-h-28 sm:min-h-36"}`}>
+                  <div className={`flex justify-center ${compact ? "min-h-[72px] sm:min-h-24" : "min-h-20 sm:min-h-28"}`}>
                     {h.cards.map((card, k) => (
                       <PlayingCard key={`p${i}-${k}-${card.rank}${card.suit}`} card={card} overlap={k > 0} compact={compact} back={back} />
                     ))}
@@ -224,9 +224,9 @@ function SidePill({
           </div>
 
           {/* Zone de mise */}
-<div className="mt-6 flex flex-col items-center gap-4 sm:mt-8">
+<div className="mt-3 flex flex-col items-center gap-2.5 sm:mt-4">
   <div
-    className={`relative flex h-24 w-24 items-center justify-center rounded-full border-2 text-center transition sm:h-28 sm:w-28 ${
+    className={`relative flex h-20 w-20 items-center justify-center rounded-full border-2 text-center transition sm:h-24 sm:w-24 ${
       canBet
         ? "border-[#e5c779]/80 bg-[#e5c779]/12 shadow-[0_0_28px_rgba(229,199,121,0.20)]"
         : "border-white/20 bg-black/25"
@@ -326,7 +326,7 @@ function SidePill({
     </dl>
   </details>
 )}
-        <div className="sticky bottom-0 z-20 border-t border-white/10 bg-[#101713]/95 px-2 py-2 backdrop-blur sm:p-7 lg:static lg:border-0 lg:bg-transparent">
+        <div className="sticky bottom-0 z-20 border-t border-white/10 bg-[#101713]/95 px-2 py-2 backdrop-blur sm:px-7 sm:py-4 lg:static lg:border-0 lg:bg-transparent">
           {s.phase === "insurance" ? (
             <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:justify-center sm:gap-3">
               <button onClick={() => takeInsurance(true)} disabled={s.busy} className={`${mobileAction} border-transparent bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c]  sm:w-auto sm:px-4 sm:text-base`}>
