@@ -475,13 +475,6 @@ const playerCardStyle = (
         )}
 
                 <div className="relative flex min-h-0 flex-col items-center justify-center gap-2 overflow-y-auto overflow-x-hidden px-3 py-2">
-          {/* Inscription DEALER gravée dans le tapis */}
-          <p
-            aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-[0.45em] text-white/[0.10] sm:text-xs"
-          >
-            Dealer
-          </p>
 
           {/* Score du croupier */}
           {s.dealer.length > 0 && (
@@ -498,18 +491,25 @@ const playerCardStyle = (
           )}
 
           {/* Cartes du croupier */}
-          <div className="relative z-10 flex shrink-0 justify-center">
-            {s.dealer.map((card, index) => (
-              <PlayingCard
-                key={`dealer-${index}-${card.rank}${card.suit}`}
-                card={card}
-                faceDown={index === 1 && !s.hole}
-                overlap={index > 0}
-                back={back}
-                fit
-              />
-            ))}
-          </div>
+<div className="relative z-10 flex shrink-0 justify-center">
+  <p
+    aria-hidden="true"
+    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pl-[0.45em] text-[10px] font-bold uppercase tracking-[0.45em] text-white/[0.10] sm:text-xs"
+  >
+    Dealer
+  </p>
+
+  {s.dealer.map((card, index) => (
+    <PlayingCard
+      key={`dealer-${index}-${card.rank}${card.suit}`}
+      card={card}
+      faceDown={index === 1 && !s.hole}
+      overlap={index > 0}
+      back={back}
+      fit
+    />
+  ))}
+</div>
         </div>
 
         <div
