@@ -500,14 +500,18 @@ const playerCardStyle = (
   </p>
 
   {s.dealer.map((card, index) => (
-    <PlayingCard
-      key={`dealer-${index}-${card.rank}${card.suit}`}
-      card={card}
-      faceDown={index === 1 && !s.hole}
-      overlap={index > 0}
-      back={back}
-      fit
-    />
+    <div
+      key={`dealer-${index}-${card.rank}${card.suit}-${index === 1 ? s.hole : "static"}`}
+      className={index === 1 && s.hole ? "animate-card-reveal" : undefined}
+    >
+      <PlayingCard
+        card={card}
+        faceDown={index === 1 && !s.hole}
+        overlap={index > 0}
+        back={back}
+        fit
+      />
+    </div>
   ))}
 </div>
         </div>

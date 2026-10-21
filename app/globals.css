@@ -351,3 +351,26 @@ body {
     animation: none;
   }
 }
+
+@keyframes card-reveal {
+  0% {
+    opacity: 0.35;
+    transform: translateY(-10px) rotateY(75deg) scale(1.05);
+  }
+
+  55% {
+    opacity: 1;
+    transform: translateY(-3px) rotateY(-8deg) scale(1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateY(0) scale(1);
+  }
+}
+
+.animate-card-reveal {
+  animation: card-reveal 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
