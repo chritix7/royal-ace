@@ -20,14 +20,14 @@ export default function PlayingCard({
   const size = fit
     ? "h-[var(--bj-card-h)] w-[calc(var(--bj-card-h)*0.72)]"
     : compact
-    ? "h-[88px] w-[62px] sm:h-28 sm:w-20"
-    : "h-28 w-20 sm:h-36 sm:w-[104px]";
+? "h-[72px] w-[51px] sm:h-24 sm:w-[68px]"
+: "h-24 w-[68px] sm:h-28 sm:w-20";
 
   const shift = fit
     ? "-ml-[calc(var(--bj-card-h)*0.28)]"
     : compact
-    ? "-ml-8 sm:-ml-10"
-    : "-ml-10 sm:-ml-12";
+? "-ml-6 sm:-ml-8"
+: "-ml-8 sm:-ml-10";
 
   return (
     <div
@@ -70,8 +70,8 @@ export default function PlayingCard({
               fit
   ? "text-[clamp(9px,calc(var(--bj-card-h)*0.13),18px)]"
   : compact
-  ? "text-sm"
-  : "text-base sm:text-lg"
+? "text-xs"
+: "text-sm sm:text-base"
             } ${color}`}
           >
             {card.rank}
@@ -90,8 +90,8 @@ export default function PlayingCard({
               fit
   ? "text-[clamp(18px,calc(var(--bj-card-h)*0.32),48px)]"
   : compact
-  ? "text-3xl"
-  : "text-4xl sm:text-5xl"
+? "text-2xl"
+: "text-3xl sm:text-4xl"
             } ${color}`}
           >
             {card.suit}

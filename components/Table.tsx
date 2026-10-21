@@ -152,7 +152,7 @@ function SidePill({
               </span>
             )}
           </div>
-          <div className="mt-2 flex min-h-20 justify-center sm:min-h-24">
+          <div className="mt-1.5 flex min-h-[92px] justify-center sm:min-h-28">
             {s.dealer.map((card, i) => (
               <PlayingCard key={`d${i}-${card.rank}${card.suit}`} card={card} faceDown={i === 1 && !s.hole} overlap={i > 0} back={back} />
             ))}
@@ -160,7 +160,7 @@ function SidePill({
 
           {/* Message (annoncé aux lecteurs d'écran) */}
           <div
-            className="my-3 flex flex-col items-center gap-1.5 sm:my-4 lg:min-h-[92px] lg:justify-center"
+            className="my-2 flex flex-col items-center gap-1 sm:my-3 lg:min-h-[72px] lg:justify-center"
             role="status"
             aria-live="polite"
           >
@@ -187,7 +187,7 @@ function SidePill({
           {/* Joueur */}
           <div className="flex flex-wrap items-start justify-center gap-2 sm:gap-5">
             {s.hands.length === 0 && (
-              <div className="flex min-h-20 items-center text-sm text-white/40 sm:min-h-24">Your cards will appear here</div>
+              <div className="flex min-h-24 items-center text-sm text-white/40 sm:min-h-28">Your cards will appear here</div>
             )}
             {s.hands.map((h, i) => {
               const v = handValue(h.cards);
@@ -213,7 +213,7 @@ function SidePill({
                       </span>
                     )}
                   </div>
-                  <div className={`flex justify-center ${compact ? "min-h-[72px] sm:min-h-24" : "min-h-20 sm:min-h-28"}`}>
+                  <div className={`flex justify-center ${compact ? "min-h-[72px] sm:min-h-24" : "min-h-24 sm:min-h-28"}`}>
                     {h.cards.map((card, k) => (
                       <PlayingCard key={`p${i}-${k}-${card.rank}${card.suit}`} card={card} overlap={k > 0} compact={compact} back={back} />
                     ))}
@@ -226,7 +226,7 @@ function SidePill({
           {/* Zone de mise */}
 <div className="mt-3 flex flex-col items-center gap-2.5 sm:mt-4">
   <div
-    className={`relative flex h-20 w-20 items-center justify-center rounded-full border-2 text-center transition sm:h-24 sm:w-24 ${
+    className={`relative flex h-16 w-16 items-center justify-center rounded-full border-2 text-center transition sm:h-20 sm:w-20 ${
       canBet
         ? "border-[#e5c779]/80 bg-[#e5c779]/12 shadow-[0_0_28px_rgba(229,199,121,0.20)]"
         : "border-white/20 bg-black/25"
