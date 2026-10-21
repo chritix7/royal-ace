@@ -225,54 +225,56 @@ function SidePill({
 
           {/* Zone de mise */}
 <div className="mt-3 flex flex-col items-center gap-2.5 sm:mt-4 lg:flex-row lg:items-center lg:justify-center lg:gap-4">
-  <div className="order-2 w-full max-w-[280px] lg:order-1 lg:w-auto lg:max-w-none">
-    <SidePill
-      label="PP"
-      amount={s.ppBet}
-      disabled={!canBet || s.busy}
-      onIncrease={() => adjustSide("ppBet", 10)}
-      onDecrease={() => adjustSide("ppBet", -10)}
-    />
-  </div>
-
-  <div className="relative order-1 flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 text-center transition sm:h-20 sm:w-20 lg:order-2">
+  <div className="order-1 lg:order-2">
     <div
-      className={`absolute inset-0 rounded-full border-2 transition ${
+      className={`relative flex h-16 w-16 items-center justify-center rounded-full border-2 text-center transition sm:h-20 sm:w-20 ${
         canBet
           ? "border-[#e5c779]/80 bg-[#e5c779]/12 shadow-[0_0_28px_rgba(229,199,121,0.20)]"
           : "border-white/20 bg-black/25"
       }`}
-    />
-
-    <div className="relative px-2">
-      <p className="text-[9px] font-black uppercase tracking-widest text-[#e5c779] sm:text-[10px]">
-        Bet
-      </p>
-      <p className="mt-1 text-sm font-black text-white sm:text-base">
-        ◈ {money(s.bet)}
-      </p>
-      {s.settings.spots > 1 && (
-        <p className="mt-0.5 text-[9px] text-white/50">
-          × {s.settings.spots} spots
+    >
+      <div className="px-2">
+        <p className="text-[9px] font-black uppercase tracking-widest text-[#e5c779] sm:text-[10px]">
+          Bet
         </p>
+        <p className="mt-1 text-sm font-black text-white sm:text-base">
+          ◈ {money(s.bet)}
+        </p>
+        {s.settings.spots > 1 && (
+          <p className="mt-0.5 text-[9px] text-white/50">
+            × {s.settings.spots} spots
+          </p>
+        )}
+      </div>
+
+      {pileAmount > 0 && (
+        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
+          <ChipStack amount={pileAmount} />
+        </div>
       )}
     </div>
-
-    {pileAmount > 0 && (
-      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
-        <ChipStack amount={pileAmount} />
-      </div>
-    )}
   </div>
 
-  <div className="order-3 w-full max-w-[280px] lg:w-auto lg:max-w-none">
-    <SidePill
-      label="21+3"
-      amount={s.t3Bet}
-      disabled={!canBet || s.busy}
-      onIncrease={() => adjustSide("t3Bet", 10)}
-      onDecrease={() => adjustSide("t3Bet", -10)}
-    />
+  <div className="order-2 flex w-full max-w-[300px] items-stretch justify-center gap-2 lg:order-none lg:contents">
+    <div className="min-w-0 flex-1 lg:order-1 lg:w-36 lg:flex-none">
+      <SidePill
+        label="PP"
+        amount={s.ppBet}
+        disabled={!canBet || s.busy}
+        onIncrease={() => adjustSide("ppBet", 10)}
+        onDecrease={() => adjustSide("ppBet", -10)}
+      />
+    </div>
+
+    <div className="min-w-0 flex-1 lg:order-3 lg:w-36 lg:flex-none">
+      <SidePill
+        label="21+3"
+        amount={s.t3Bet}
+        disabled={!canBet || s.busy}
+        onIncrease={() => adjustSide("t3Bet", 10)}
+        onDecrease={() => adjustSide("t3Bet", -10)}
+      />
+    </div>
   </div>
 </div>
         </div>
