@@ -40,12 +40,14 @@ function SidePill({
 }: SidePillProps) {
   return (
     <div
-      className={`flex min-w-0 flex-1 items-center justify-between gap-2 rounded-full border px-2.5 py-1.5 transition ${
-        amount > 0
-          ? "border-[#e5c779]/60 bg-[#e5c779]/12"
-          : "border-white/15 bg-black/25"
-      }`}
-    >
+  className={`flex w-full min-w-0 items-center justify-between gap-2 rounded-full border px-2.5 py-1.5 transition lg:w-36 ${
+    disabled
+      ? "border-white/15 bg-black/25 opacity-70"
+      : amount > 0
+      ? "border-[#e5c779]/60 bg-[#e5c779]/12"
+      : "border-white/15 bg-black/25"
+  }`}
+>
       <div className="min-w-0">
         <p className="text-[9px] font-black uppercase tracking-wide text-[#e5c779] sm:text-[10px]">
           {label}
