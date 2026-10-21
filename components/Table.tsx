@@ -23,7 +23,7 @@ const mobileAction =
 const signedMoney = (value: number) =>
   `${value > 0 ? "+" : value < 0 ? "−" : ""}◈ ${money(Math.abs(value))}`;
 
-type SideCircleProps = {
+type SidePillProps = {
   label: string;
   amount: number;
   disabled: boolean;
@@ -31,39 +31,31 @@ type SideCircleProps = {
   onDecrease: () => void;
 };
 
-function SideCircle({
+function SidePill({
   label,
   amount,
   disabled,
   onIncrease,
   onDecrease,
-}: SideCircleProps) {
+}: SidePillProps) {
   return (
-    <div className="flex w-16 flex-col items-center gap-1 sm:w-20">
-      <div
-        className={`relative flex aspect-square w-full items-center justify-center rounded-full border-2 text-center transition ${
-          amount > 0
-            ? "border-[#e5c779]/80 bg-[#e5c779]/15 shadow-[0_0_18px_rgba(229,199,121,0.18)]"
-            : "border-white/25 bg-black/25"
-        }`}
-      >
-        <div className="px-1">
-          <p className="text-[9px] font-black uppercase tracking-wide text-[#e5c779] sm:text-[10px]">
-            {label}
-          </p>
-          <p className="mt-0.5 text-[10px] font-bold text-white sm:text-xs">
-            {amount > 0 ? `◈ ${money(amount)}` : "—"}
-          </p>
-        </div>
-
-        {amount > 0 && (
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2">
-            <ChipStack amount={amount} />
-          </div>
-        )}
+    <div
+      className={`flex min-w-0 flex-1 items-center justify-between gap-2 rounded-full border px-2.5 py-1.5 transition ${
+        amount > 0
+          ? "border-[#e5c779]/60 bg-[#e5c779]/12"
+          : "border-white/15 bg-black/25"
+      }`}
+    >
+      <div className="min-w-0">
+        <p className="text-[9px] font-black uppercase tracking-wide text-[#e5c779] sm:text-[10px]">
+          {label}
+        </p>
+        <p className="text-[10px] font-bold text-white sm:text-xs">
+          {amount > 0 ? `◈ ${money(amount)}` : "Off"}
+        </p>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex shrink-0 items-center gap-1">
         <button
           type="button"
           onClick={onDecrease}
@@ -231,10 +223,44 @@ function SideCircle({
             })}
           </div>
 
-          {/* Zone de mise Vegas */}
-<div className="mt-6 flex flex-col items-center gap-3 sm:mt-8">
-  <div className="flex items-end justify-center gap-3 sm:gap-5">
-    <SideCircle
+          {/* Zone de mise */}
+<div className="mt-6 flex flex-col items-center gap-4 sm:mt-8">
+  <div
+    className={`relative flex h-24 w-24 items-center justify-center rounded-full border-2 text-center transition sm:h-28 sm:w-28 ${
+      canBet
+        ? "border-[#e5c779]/80 bg-[#e5c779]/12 shadow-[0_0_28px_rgba(229,199,121,0.20)]"
+        : "border-white/20 bg-black/25"
+    }`}
+  >
+    <div className="px-2">
+      <p className="text-[9px] font-black uppercase tracking-widest text-[#e5c779] sm:text-[10px]">
+        Bet
+      </p>
+      <p className="mt-1 text-sm font-black text-white sm:text-base">
+        ◈ {money(s.bet)}
+      </p>
+      {s.settings.spots > 1 && (
+        <p className="mt-0.5 text-[9px] text-white/50">
+          × {s.settings.spots} spots
+        </p>
+      )}
+    </div>
+
+    {pileAmount > 0 && (
+      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
+        <ChipStack amount={pileAmount} />
+      </div>
+    )}
+  </div>
+
+  {pileAmount > 0 && (
+    <span className="text-[11px] font-semibold text-white/60">
+      ◈ {money(pileAmount)}
+    </span>
+  )}
+
+  <div className="flex w-full max-w-[280px] items-stretch justify-center gap-2 sm:max-w-[340px]">
+    <SidePill
       label="PP"
       amount={s.ppBet}
       disabled={!canBet || s.busy}
@@ -242,43 +268,7 @@ function SideCircle({
       onDecrease={() => adjustSide("ppBet", -10)}
     />
 
-    <div className="flex flex-col items-center gap-2">
-      <div
-        className={`relative flex h-24 w-24 items-center justify-center rounded-full border-2 text-center transition sm:h-28 sm:w-28 ${
-          canBet
-            ? "border-[#e5c779]/80 bg-[#e5c779]/12 shadow-[0_0_28px_rgba(229,199,121,0.20)]"
-            : "border-white/20 bg-black/25"
-        }`}
-      >
-        <div className="px-2">
-          <p className="text-[9px] font-black uppercase tracking-widest text-[#e5c779] sm:text-[10px]">
-            Bet
-          </p>
-          <p className="mt-1 text-sm font-black text-white sm:text-base">
-            ◈ {money(s.bet)}
-          </p>
-          {s.settings.spots > 1 && (
-            <p className="mt-0.5 text-[9px] text-white/50">
-              × {s.settings.spots} spots
-            </p>
-          )}
-        </div>
-
-        {pileAmount > 0 && (
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
-            <ChipStack amount={pileAmount} />
-          </div>
-        )}
-      </div>
-
-      {pileAmount > 0 && (
-        <span className="text-[11px] font-semibold text-white/60">
-          ◈ {money(pileAmount)}
-        </span>
-      )}
-    </div>
-
-    <SideCircle
+    <SidePill
       label="21+3"
       amount={s.t3Bet}
       disabled={!canBet || s.busy}
@@ -286,10 +276,6 @@ function SideCircle({
       onDecrease={() => adjustSide("t3Bet", -10)}
     />
   </div>
-
-  <p className="text-center text-[10px] text-white/35 sm:text-[11px]">
-    Side bets · ◈ 10 per tap
-  </p>
 </div>
         </div>
 
