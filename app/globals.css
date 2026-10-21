@@ -351,33 +351,3 @@ body {
     animation: none;
   }
 }
-
-@keyframes card-flip-reveal {
-  0% {
-    transform: perspective(1000px) rotateY(180deg);
-  }
-
-  25% {
-    transform: perspective(1000px) rotateY(155deg);
-  }
-
-  50% {
-    transform: perspective(1000px) rotateY(90deg);
-  }
-
-  82% {
-    transform: perspective(1000px) rotateY(-3deg);
-  }
-
-  100% {
-    transform: perspective(1000px) rotateY(0deg);
-  }
-}
-
-.animate-card-reveal {
-  animation: card-flip-reveal 0.9s cubic-bezier(0.3, 0.75, 0.2, 1) both;
-  transform-origin: center center;
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-  will-change: transform;
-}

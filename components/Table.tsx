@@ -167,18 +167,14 @@ function SidePill({
   </p>
 
   {s.dealer.map((card, i) => (
-    <div
-      key={`d${i}-${card.rank}${card.suit}-${i === 1 ? s.hole : "static"}`}
-      className={i === 1 && s.hole ? "animate-card-reveal" : undefined}
-    >
-      <PlayingCard
-        card={card}
-        faceDown={i === 1 && !s.hole}
-        overlap={i > 0}
-        back={back}
-      />
-    </div>
-  ))}
+  <PlayingCard
+    key={`d${i}-${card.rank}${card.suit}`}
+    card={card}
+    faceDown={i === 1 && !s.hole}
+    overlap={i > 0}
+    back={back}
+  />
+))}
 </div>
 </div>
 

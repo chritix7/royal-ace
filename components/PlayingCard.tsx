@@ -37,7 +37,7 @@ export default function PlayingCard({
       aria-label={faceDown ? "Face-down card" : `${card.rank} of ${card.suit}`}
     >
       <div
-        className="relative h-full w-full transition-transform duration-700 ease-in-out"
+        className="relative h-full w-full transition-transform duration-[900ms] ease-[cubic-bezier(0.3,0.75,0.2,1)]"
         style={{
           transformStyle: "preserve-3d",
           transform: faceDown ? "rotateY(0deg)" : "rotateY(180deg)",
