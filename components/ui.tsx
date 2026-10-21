@@ -44,32 +44,44 @@ export function ChipStack({ amount }: { amount: number }) {
       className="animate-pop flex items-end justify-center gap-2"
       aria-label={`${amount} chips bet`}
     >
-      {stacks.map(({ v, n }) => (
-        <div
-          key={v}
-          className="relative w-9"
-          style={{ height: 18 + (n - 1) * 5 }}
-        >
+      {stacks.map(({ v, n }) => {
+        const tilt = ((v % 7) - 3) * 0.8;
+
+        return (
           <div
-            aria-hidden="true"
-            className="absolute -bottom-1 left-1/2 h-1.5 w-8 -translate-x-1/2 rounded-full bg-black/45 blur-[2px]"
-          />
-
-          {Array.from({ length: n }).map((_, k) => (
+            key={v}
+            className="relative w-9"
+            style={{
+              height: 18 + (n - 1) * 5,
+              transform: `rotate(${tilt}deg)`,
+            }}
+          >
             <div
-              key={k}
-              className={`absolute left-0 h-4 w-9 overflow-hidden rounded-full border border-black/25 shadow-[0_1px_2px_rgba(0,0,0,0.35)] ${CHIP_BG[v]}`}
-              style={{ bottom: k * 5 }}
-            >
-              <div className="absolute inset-x-[3px] top-[2px] h-[7px] rounded-full border border-dashed border-white/45" />
+              aria-hidden="true"
+              className="absolute -bottom-1 left-1/2 h-1.5 w-8 -translate-x-1/2 rounded-full bg-black/45 blur-[2px]"
+            />
 
-              <div className="absolute inset-x-1 top-0 h-1 rounded-full bg-white/20" />
+            {Array.from({ length: n }).map((_, k) => (
+              <div
+                key={k}
+                className={`absolute left-0 h-4 w-9 overflow-hidden rounded-full border border-black/25 shadow-[0_1px_2px_rgba(0,0,0,0.35)] ${CHIP_BG[v]} ${
+                  k === n - 1 ? "animate-chip-drop" : ""
+                }`}
+                style={{
+                  bottom: k * 5,
+                  animationDelay: `${k * 35}ms`,
+                }}
+              >
+                <div className="absolute inset-x-[3px] top-[2px] h-[7px] rounded-full border border-dashed border-white/45" />
 
-              <div className="absolute inset-x-0 bottom-0 h-1 bg-black/25" />
-            </div>
-          ))}
-        </div>
-      ))}
+                <div className="absolute inset-x-1 top-0 h-1 rounded-full bg-white/20" />
+
+                <div className="absolute inset-x-0 bottom-0 h-1 bg-black/25" />
+              </div>
+            ))}
+          </div>
+        );
+      })}
     </div>
   );
 }
