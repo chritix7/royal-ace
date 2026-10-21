@@ -160,6 +160,24 @@ function SidePill({
             ))}
           </div>
 
+          {/* Marquages du tapis */}
+<div
+  aria-hidden="true"
+  className="pointer-events-none mt-2 flex flex-col items-center gap-1 text-center"
+>
+  <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-white/25 sm:text-[10px]">
+    Blackjack pays {s.settings.bj65 ? "6 to 5" : "3 to 2"}
+  </p>
+
+  <p className="text-[8px] font-semibold uppercase tracking-[0.22em] text-white/15 sm:text-[9px]">
+    Insurance pays 2 to 1
+  </p>
+
+  <p className="text-[8px] font-semibold uppercase tracking-[0.22em] text-white/15 sm:text-[9px]">
+    Dealer must {s.settings.h17 ? "hit" : "stand on"} soft 17
+  </p>
+</div>
+
           {/* Message (annoncé aux lecteurs d'écran) */}
           <div
             className="my-2 flex flex-col items-center gap-1 sm:my-3 lg:min-h-[72px] lg:justify-center"
@@ -230,7 +248,16 @@ function SidePill({
           </div>
 
           {/* Zone de mise */}
-<div className="mt-3 flex flex-col items-center gap-2.5 sm:mt-4 lg:flex-row lg:items-center lg:justify-center lg:gap-4">
+<div className="relative mt-3 flex flex-col items-center gap-2.5 sm:mt-4 lg:flex-row lg:items-center lg:justify-center lg:gap-4">
+  <div
+    aria-hidden="true"
+    className="pointer-events-none absolute -bottom-10 left-1/2 h-40 w-[min(94%,680px)] -translate-x-1/2 rounded-[50%] border border-white/[0.07]"
+  />
+
+  <div
+    aria-hidden="true"
+    className="pointer-events-none absolute -bottom-7 left-1/2 h-28 w-[min(78%,520px)] -translate-x-1/2 rounded-[50%] border border-white/[0.05]"
+  />
   <div className="order-1 lg:order-2">
     <div
       className={`relative flex h-16 w-16 items-center justify-center rounded-full border-2 text-center sm:h-20 sm:w-20 ${
