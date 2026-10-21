@@ -474,35 +474,43 @@ const playerCardStyle = (
           <Confetti key={s.celebrate} />
         )}
 
-        <div className="flex min-h-0 flex-col items-center justify-center gap-2 overflow-auto px-3 py-2">
-          <div className="flex items-center gap-2 text-xs text-white/60">
-            Dealer
+        <div className="relative flex min-h-0 flex-col items-center justify-center gap-2 overflow-auto px-3 py-2">
+  {/* Inscription DEALER gravée dans le tapis */}
+  <p
+    aria-hidden="true"
+    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-[0.45em] text-white/[0.10] sm:text-xs"
+  >
+    Dealer
+  </p>
 
-            {s.dealer.length > 0 && (
-              <span className="rounded-full bg-black/30 px-2.5 py-1 font-bold text-white">
-                {s.hole && isBlackjack(s.dealer)
-                  ? "Blackjack"
-                  : dealerVal.soft && dealerVal.total < 21 && s.hole
-                  ? `${dealerVal.total - 10}/${dealerVal.total}`
-                  : dealerVal.total}
-                {!s.hole && " + ?"}
-              </span>
-            )}
-          </div>
+  {/* Score du croupier */}
+  {s.dealer.length > 0 && (
+    <div className="relative z-20">
+      <span className="rounded-full bg-black/30 px-2.5 py-0.5 text-[11px] font-bold text-white sm:text-xs">
+        {s.hole && isBlackjack(s.dealer)
+          ? "Blackjack"
+          : dealerVal.soft && dealerVal.total < 21 && s.hole
+            ? `${dealerVal.total - 10}/${dealerVal.total}`
+            : dealerVal.total}
+        {!s.hole && " + ?"}
+      </span>
+    </div>
+  )}
 
-          <div className="flex shrink-0 justify-center">
-            {s.dealer.map((card, index) => (
-              <PlayingCard
-                key={`dealer-${index}-${card.rank}${card.suit}`}
-                card={card}
-                faceDown={index === 1 && !s.hole}
-                overlap={index > 0}
-                back={back}
-                fit
-              />
-            ))}
-          </div>
-        </div>
+  {/* Cartes du croupier */}
+  <div className="relative z-10 flex shrink-0 justify-center">
+    {s.dealer.map((card, index) => (
+      <PlayingCard
+        key={`dealer-${index}-${card.rank}${card.suit}`}
+        card={card}
+        faceDown={index === 1 && !s.hole}
+        overlap={index > 0}
+        back={back}
+        fit
+      />
+    ))}
+  </div>
+</div>
 
         <div
           role="status"
@@ -637,9 +645,42 @@ const playerCardStyle = (
                   </div>
                 </div>
               );
-            })}
-          </div>
+                      })}
         </div>
+
+        {/* Marquages du tapis */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none mt-1 flex translate-y-[2px] items-center justify-center gap-2 text-center sm:gap-3"
+        >
+          <p className="whitespace-nowrap text-[8px] font-bold uppercase tracking-[0.18em] text-white/20 sm:text-[9px]">
+            BJ {s.settings.bj65 ? "6:5" : "3:2"}
+          </p>
+
+          <span className="h-2 w-px bg-white/10" />
+
+          <p className="whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.18em] text-white/15 sm:text-[9px]">
+            Insurance 2:1
+          </p>
+
+          <span className="h-2 w-px bg-white/10" />
+
+          <p className="whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.18em] text-white/15 sm:text-[9px]">
+            {s.settings.h17 ? "H17" : "S17"}
+          </p>
+        </div>
+      </div>
+
+      {/* Arc de mise imprimé au bord du tapis */}
+<div
+  aria-hidden="true"
+  className="pointer-events-none absolute -bottom-24 left-1/2 z-0 h-48 w-[min(96%,980px)] -translate-x-1/2 rounded-[50%] border border-white/[0.06]"
+/>
+
+<div
+  aria-hidden="true"
+  className="pointer-events-none absolute -bottom-16 left-1/2 z-0 h-32 w-[min(82%,760px)] -translate-x-1/2 rounded-[50%] border border-white/[0.04]"
+/>
 
         {s.shuffling && (
           <div
