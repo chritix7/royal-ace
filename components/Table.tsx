@@ -186,9 +186,6 @@ function SidePill({
 
           {/* Joueur */}
           <div className="flex flex-wrap items-start justify-center gap-2 sm:gap-5">
-            {s.hands.length === 0 && (
-              <div className="flex min-h-24 items-center text-sm text-white/40 sm:min-h-28">Your cards will appear here</div>
-            )}
             {s.hands.map((h, i) => {
               const v = handValue(h.cards);
               const isActive = s.phase === "player" && i === s.active && s.hands.length > 1;

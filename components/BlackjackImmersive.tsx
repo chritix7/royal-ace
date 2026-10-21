@@ -565,12 +565,6 @@ const playerCardStyle = (
               gridTemplateColumns: `repeat(${handCount}, minmax(0, 1fr))`,
             }}
           >
-            {s.hands.length === 0 && (
-              <p className="text-sm text-white/35">
-                Your cards will appear here
-              </p>
-            )}
-
             {s.hands.map((hand, index) => {
               const value = handValue(hand.cards);
               const selected =
