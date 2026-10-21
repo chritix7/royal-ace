@@ -357,7 +357,11 @@ body {
     transform: perspective(1000px) rotateY(180deg) translateY(-3px);
   }
 
-  42% {
+  25% {
+    transform: perspective(1000px) rotateY(155deg) translateY(-2.5px);
+  }
+
+  50% {
     transform: perspective(1000px) rotateY(90deg) translateY(-1px);
   }
 
@@ -371,7 +375,7 @@ body {
 }
 
 .animate-card-reveal {
-  animation: card-flip-reveal 0.8s cubic-bezier(0.16, 0.84, 0.24, 1) both;
+  animation: card-flip-reveal 0.9s cubic-bezier(0.3, 0.75, 0.2, 1) both;
   transform-style: preserve-3d;
   will-change: transform;
 }
