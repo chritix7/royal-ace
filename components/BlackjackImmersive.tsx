@@ -184,6 +184,95 @@ function ImmersiveSidePill({
   );
 }
 
+function ResultRail({
+  g,
+}: {
+  g: Game;
+}) {
+  const { s, roundBreakdown } = g;
+  const showResult = s.phase === "settled" && roundBreakdown;
+
+  return (
+    <aside
+      className="absolute right-3 top-1/2 z-30 hidden -translate-y-1/2 md:block"
+      aria-live="polite"
+    >
+      <div
+        className={`origin-right transition-all duration-300 ease-out ${
+          showResult
+            ? "scale-100 opacity-100"
+            : "scale-95 opacity-90"
+        }`}
+      >
+        {showResult ? (
+          <div className="w-56 rounded-2xl border border-[#d7b45b]/40 bg-black/70 p-3 shadow-2xl backdrop-blur-sm">
+            <p className="text-[10px] font-black uppercase tracking-widest text-[#e5c779]">
+              Round result
+            </p>
+
+            <p
+              className={`mt-1 text-2xl font-black tabular-nums ${
+                roundBreakdown.total > 0
+                  ? "text-[#f5d778]"
+                  : roundBreakdown.total < 0
+                  ? "text-red-300"
+                  : "text-white/70"
+              }`}
+            >
+              {signed(roundBreakdown.total)}
+            </p>
+
+            <dl className="mt-3 space-y-1.5 text-[11px]">
+              {[
+                ["Main hands", roundBreakdown.main],
+                ["Insurance", roundBreakdown.insurance],
+                ["Perfect Pairs", roundBreakdown.perfectPairs],
+                ["21+3", roundBreakdown.twentyOnePlusThree],
+              ].map(([label, value]) => (
+                <div
+                  key={String(label)}
+                  className="flex items-center justify-between gap-2"
+                >
+                  <dt className="text-white/50">{label}</dt>
+                  <dd className="font-semibold tabular-nums text-white/85">
+                    {signed(Number(value))}
+                  </dd>
+                </div>
+              ))}
+
+              <div className="flex items-center justify-between gap-2 border-t border-white/10 pt-1.5">
+                <dt className="font-bold text-white">Total</dt>
+                <dd
+                  className={`font-black tabular-nums ${
+                    roundBreakdown.total > 0
+                      ? "text-[#f5d778]"
+                      : roundBreakdown.total < 0
+                      ? "text-red-300"
+                      : "text-white/70"
+                  }`}
+                >
+                  {signed(roundBreakdown.total)}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 rounded-full border border-[#d7b45b]/30 bg-black/60 px-3 py-2 backdrop-blur-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#e5c779]/60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#e5c779]" />
+            </span>
+
+            <span className="text-[10px] font-bold uppercase tracking-widest text-white/70">
+              Hand in progress
+            </span>
+          </div>
+        )}
+      </div>
+    </aside>
+  );
+}
+
 export default function BlackjackImmersive({
   g,
   onClose,
@@ -193,6 +282,7 @@ export default function BlackjackImmersive({
 }) {
   const {
     s,
+    roundBreakdown,
     canBet,
     playing,
     canDouble,
@@ -222,6 +312,7 @@ export default function BlackjackImmersive({
   const session = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const [editBet, setEditBet] = useState(s.phase === "betting");
+  const [resultOpen, setResultOpen] = useState(false);
 
   const bettingOpen =
     canBet && (editBet || s.phase === "betting");
@@ -247,14 +338,15 @@ export default function BlackjackImmersive({
 
       event.preventDefault();
 
-      if (menuOpen) setMenuOpen(false);
+      if (resultOpen) setResultOpen(false);
+      else if (menuOpen) setMenuOpen(false);
       else onClose();
     };
 
     window.addEventListener("keydown", onKey);
 
     return () => window.removeEventListener("keydown", onKey);
-  }, [menuOpen, onClose]);
+  }, [menuOpen, resultOpen, onClose]);
 
   const tableStyle = {
   "--bj-card-h": compact
@@ -401,24 +493,31 @@ const playerCardStyle = (
           </p>
 
           {s.phase === "settled" && s.net !== null ? (
-            <button
-              type="button"
-              onClick={() => setMenuOpen(true)}
-              aria-label={`Round net ${signed(s.net)}. Open breakdown`}
-              className={`rounded-lg px-3 py-1 text-xl font-black tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-[#e5c779] ${
-                s.net > 0
-                  ? "text-[#f5d778]"
-                  : s.net < 0
-                  ? "text-red-300"
-                  : "text-white/70"
-              }`}
-            >
-              {signed(s.net)}
-              <span className="ml-2 text-xs font-normal text-white/40">
-                ⓘ
-              </span>
-            </button>
-          ) : advice ? (
+  <div className="flex items-center justify-center gap-2">
+    <span
+      className={`text-xl font-black tabular-nums ${
+        s.net > 0
+          ? "text-[#f5d778]"
+          : s.net < 0
+          ? "text-red-300"
+          : "text-white/70"
+      }`}
+    >
+      {signed(s.net)}
+    </span>
+
+    {roundBreakdown && (
+      <button
+        type="button"
+        onClick={() => setResultOpen(true)}
+        aria-label="Open round details"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-[#d7b45b]/50 bg-black/50 text-base font-bold text-[#e5c779] transition hover:bg-[#d7b45b]/15 md:hidden"
+      >
+        ⓘ
+      </button>
+    )}
+  </div>
+) : advice ? (
             <p className="text-[11px] text-sky-200">
               Basic strategy · {advice}
             </p>
@@ -522,6 +621,7 @@ const playerCardStyle = (
             </p>
           </div>
         )}
+                <ResultRail g={g} />
       </main>
 
       <footer
@@ -630,12 +730,12 @@ const playerCardStyle = (
 
             {canBet && (
               <button
-                type="button"
-                onClick={() => setEditBet(true)}
-                className="rounded px-2 py-1 text-[#e5c779] outline-none focus-visible:ring-2 focus-visible:ring-[#e5c779]"
-              >
-                Edit bet
-              </button>
+  type="button"
+  onClick={() => setEditBet(true)}
+  className={`${control} ${neutral} h-8 px-3 text-[11px]`}
+>
+  Edit bet · ◈ {money(s.bet)}
+</button>
             )}
           </div>
         )}
@@ -748,6 +848,84 @@ const playerCardStyle = (
           </div>
         )}
       </footer>
+
+      {resultOpen && roundBreakdown && (
+  <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm md:hidden">
+    <button
+      type="button"
+      className="absolute inset-0 cursor-default"
+      aria-label="Close round details"
+      onClick={() => setResultOpen(false)}
+      tabIndex={-1}
+    />
+
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Round details"
+      className="animate-pop relative w-full max-w-sm rounded-2xl border border-[#d7b45b]/40 bg-[#0d140f] p-4 shadow-2xl"
+    >
+      <button
+        type="button"
+        onClick={() => setResultOpen(false)}
+        aria-label="Close round details"
+        className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white/80 transition hover:border-[#d7b45b] hover:text-[#e5c779]"
+      >
+        ✕
+      </button>
+
+      <p className="text-[10px] font-black uppercase tracking-widest text-[#e5c779]">
+        Round result
+      </p>
+
+      <p
+        className={`mt-1 text-3xl font-black tabular-nums ${
+          roundBreakdown.total > 0
+            ? "text-[#f5d778]"
+            : roundBreakdown.total < 0
+            ? "text-red-300"
+            : "text-white/70"
+        }`}
+      >
+        {signed(roundBreakdown.total)}
+      </p>
+
+      <dl className="mt-4 space-y-2 text-sm">
+        {[
+          ["Main hands", roundBreakdown.main],
+          ["Insurance", roundBreakdown.insurance],
+          ["Perfect Pairs", roundBreakdown.perfectPairs],
+          ["21+3", roundBreakdown.twentyOnePlusThree],
+        ].map(([label, value]) => (
+          <div
+            key={String(label)}
+            className="flex items-center justify-between gap-3"
+          >
+            <dt className="text-white/50">{label}</dt>
+            <dd className="font-semibold tabular-nums text-white/85">
+              {signed(Number(value))}
+            </dd>
+          </div>
+        ))}
+
+        <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-2">
+          <dt className="font-bold text-white">Total</dt>
+          <dd
+            className={`font-black tabular-nums ${
+              roundBreakdown.total > 0
+                ? "text-[#f5d778]"
+                : roundBreakdown.total < 0
+                ? "text-red-300"
+                : "text-white/70"
+            }`}
+          >
+            {signed(roundBreakdown.total)}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+)}
 
       {menuOpen && (
         <InfoPanel g={g} onClose={() => setMenuOpen(false)} />

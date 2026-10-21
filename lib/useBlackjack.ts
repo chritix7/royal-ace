@@ -60,6 +60,40 @@ const blocked = useRef(false);
 const transaction = useRef<RecoverySave | null>(null);
 const pendingResume = useRef<PendingAction | null>(null);
 const actionRandom = useRef<() => number>(Math.random);
+const resultTimer = useRef<number | null>(null);
+
+function clearResultTimer() {
+  if (resultTimer.current !== null) {
+    clearTimeout(resultTimer.current);
+    resultTimer.current = null;
+  }
+}
+
+function scheduleResultReset() {
+  clearResultTimer();
+
+  resultTimer.current = window.setTimeout(() => {
+    resultTimer.current = null;
+
+    if (!mounted.current) return;
+
+    const current = ref.current;
+
+    if (current.phase !== "settled") return;
+
+    set({
+      hands: [],
+      dealer: [],
+      hole: false,
+      insurance: 0,
+      net: null,
+      sideNote: null,
+      celebrate: 0,
+      phase: "betting",
+      message: "Place your bet to start.",
+    });
+  }, 6000);
+}
 
 useEffect(() => {
   mounted.current = true;
@@ -194,27 +228,59 @@ const track: typeof sendTrack = (...args) => {
     const saved = readRecovery();
 
     if (saved) {
-      roundSides.current = { ...saved.snapshot.sides };
-      setRoundBreakdown(saved.snapshot.breakdown);
+  roundSides.current = { ...saved.snapshot.sides };
 
-      const restoredBalance = saved.pending
-        ? saved.snapshot.state.balance
-        : wallet.getBalance();
+  const restoredBalance = saved.pending
+    ? saved.snapshot.state.balance
+    : wallet.getBalance();
 
-      if (saved.pending) {
-        wallet.setBalanceDurable(restoredBalance);
-        pendingResume.current = saved.pending;
-      }
+  if (saved.pending) {
+    wallet.setBalanceDurable(restoredBalance);
+    pendingResume.current = saved.pending;
 
-      set({
-        ...saved.snapshot.state,
-        balance: restoredBalance,
-        busy: false,
-        shuffling: false,
-        celebrate: 0,
-        toast: null,
-      });
-    }
+    setRoundBreakdown(saved.snapshot.breakdown);
+
+    set({
+      ...saved.snapshot.state,
+      balance: restoredBalance,
+      busy: false,
+      shuffling: false,
+      celebrate: 0,
+      toast: null,
+    });
+  } else if (saved.snapshot.state.phase === "settled") {
+    // Manche déjà réglée avant le refresh : on repart sur l'écran de mise.
+    setRoundBreakdown(null);
+
+    set({
+      ...saved.snapshot.state,
+      balance: restoredBalance,
+      busy: false,
+      shuffling: false,
+      celebrate: 0,
+      toast: null,
+      hands: [],
+      dealer: [],
+      hole: false,
+      insurance: 0,
+      net: null,
+      sideNote: null,
+      phase: "betting",
+      message: "Place your bet to start.",
+    });
+  } else {
+    setRoundBreakdown(saved.snapshot.breakdown);
+
+    set({
+      ...saved.snapshot.state,
+      balance: restoredBalance,
+      busy: false,
+      shuffling: false,
+      celebrate: 0,
+      toast: null,
+    });
+  }
+}
 
     ready.current = true;
     setHydrated(true);
@@ -518,6 +584,7 @@ useEffect(() => {
 
   async function dealImpl() {
     const c = ref.current;
+    clearResultTimer();
     const { spots, decks } = c.settings;
     const stake = c.bet * spots + c.ppBet + c.t3Bet;
     if ((c.phase !== "betting" && c.phase !== "settled") || c.bet < MIN_BET || stake > c.balance) return;
@@ -856,6 +923,8 @@ if (!settlementId) {
       },
     });
 
+    scheduleResultReset();
+
     sessionStore.recordBjOnce(
   settlementId,
   wagered + sides.wagered,
@@ -898,6 +967,7 @@ if (!settlementId) {
   function resetAll() {
     if (!ready.current || blocked.current || transaction.current) return;
     const c = ref.current;
+    clearResultTimer();
 
   if (
     c.phase !== "betting" &&
