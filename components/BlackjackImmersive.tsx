@@ -513,8 +513,15 @@ const playerCardStyle = (
     type="button"
     onClick={() => setResultOpen(true)}
     aria-label="Open round details"
-    className={`${control} ${neutral} h-8 px-3 text-[11px] md:hidden`}
+    className="group inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-[#d7b45b]/70 bg-gradient-to-b from-[#d7b45b]/25 to-[#d7b45b]/10 px-3 text-[11px] font-bold uppercase tracking-wider text-[#f0d38b] shadow-[0_0_14px_rgba(215,180,91,0.18)] outline-none transition hover:border-[#e5c779] hover:from-[#d7b45b]/35 hover:to-[#d7b45b]/15 hover:text-[#f7dd9b] focus-visible:ring-2 focus-visible:ring-[#e5c779] md:hidden"
   >
+    <span
+      aria-hidden="true"
+      className="text-[10px] leading-none transition-transform duration-300 group-hover:scale-110"
+    >
+      ✦
+    </span>
+
     Details
   </button>
 )}
