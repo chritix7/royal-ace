@@ -186,7 +186,14 @@ function SidePill({
 
           {/* Joueur */}
           <div className="flex flex-wrap items-start justify-center gap-2 sm:gap-5">
-            {s.hands.map((h, i) => {
+  {s.hands.length === 0 && (
+    <div
+      aria-hidden="true"
+      className="min-h-24 w-full sm:min-h-28"
+    />
+  )}
+
+  {s.hands.map((h, i) => {
               const v = handValue(h.cards);
               const isActive = s.phase === "player" && i === s.active && s.hands.length > 1;
               return (

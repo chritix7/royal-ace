@@ -560,12 +560,19 @@ const playerCardStyle = (
           style={playerCardStyle}
         >
           <div
-            className="grid min-h-full items-center gap-1 sm:gap-3"
-            style={{
-              gridTemplateColumns: `repeat(${handCount}, minmax(0, 1fr))`,
-            }}
-          >
-            {s.hands.map((hand, index) => {
+  className="grid min-h-full items-center gap-1 sm:gap-3"
+  style={{
+    gridTemplateColumns: `repeat(${handCount}, minmax(0, 1fr))`,
+  }}
+>
+  {s.hands.length === 0 && (
+    <div
+      aria-hidden="true"
+      className="min-h-[60px] w-full sm:min-h-[80px]"
+    />
+  )}
+
+  {s.hands.map((hand, index) => {
               const value = handValue(hand.cards);
               const selected =
                 s.phase === "player" &&
