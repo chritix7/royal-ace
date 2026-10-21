@@ -233,7 +233,7 @@ function SidePill({
 <div className="mt-3 flex flex-col items-center gap-2.5 sm:mt-4 lg:flex-row lg:items-center lg:justify-center lg:gap-4">
   <div className="order-1 lg:order-2">
     <div
-      className={`relative flex h-16 w-16 items-center justify-center rounded-full border-2 text-center transition sm:h-20 sm:w-20 ${
+      className={`relative flex h-16 w-16 items-center justify-center rounded-full border-2 text-center sm:h-20 sm:w-20 ${
         canBet
           ? "border-[#e5c779]/80 bg-[#e5c779]/12 shadow-[0_0_28px_rgba(229,199,121,0.20)]"
           : "border-white/20 bg-black/25"
