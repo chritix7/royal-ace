@@ -152,7 +152,7 @@ function SidePill({
 
   {/* Score du croupier — ne prend aucune hauteur */}
   {s.dealer.length > 0 && (
-    <div className="pointer-events-none absolute -top-6 left-1/2 z-20 -translate-x-1/2">
+    <div className="pointer-events-none absolute -top-7 left-1/2 z-20 -translate-x-1/2">
       <span className="rounded-full border border-white/10 bg-black/35 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white/80 backdrop-blur-sm sm:text-[11px]">
         {s.hole && isBlackjack(s.dealer)
           ? "Blackjack"
@@ -176,28 +176,6 @@ function SidePill({
       />
     ))}
   </div>
-</div>
-
-          {/* Marquages du tapis */}
-<div
-  aria-hidden="true"
-  className="pointer-events-none mt-1.5 flex translate-y-[2px] items-center justify-center gap-2 text-center sm:gap-3"
->
-  <p className="whitespace-nowrap text-[8px] font-bold uppercase tracking-[0.18em] text-white/20 sm:text-[9px]">
-    BJ {s.settings.bj65 ? "6:5" : "3:2"}
-  </p>
-
-  <span className="h-2 w-px bg-white/10" />
-
-  <p className="whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.18em] text-white/15 sm:text-[9px]">
-    Insurance 2:1
-  </p>
-
-  <span className="h-2 w-px bg-white/10" />
-
-  <p className="whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.18em] text-white/15 sm:text-[9px]">
-    {s.settings.h17 ? "H17" : "S17"}
-  </p>
 </div>
 
           {/* Message (annoncé aux lecteurs d'écran) */}
@@ -268,6 +246,28 @@ function SidePill({
               );
             })}
           </div>
+
+          {/* Marquages du tapis */}
+<div
+  aria-hidden="true"
+  className="pointer-events-none mt-1.5 flex translate-y-[3px] items-center justify-center gap-2 text-center sm:gap-3"
+>
+  <p className="whitespace-nowrap text-[8px] font-bold uppercase tracking-[0.18em] text-white/20 sm:text-[9px]">
+    BJ {s.settings.bj65 ? "6:5" : "3:2"}
+  </p>
+
+  <span className="h-2 w-px bg-white/10" />
+
+  <p className="whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.18em] text-white/15 sm:text-[9px]">
+    Insurance 2:1
+  </p>
+
+  <span className="h-2 w-px bg-white/10" />
+
+  <p className="whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.18em] text-white/15 sm:text-[9px]">
+    {s.settings.h17 ? "H17" : "S17"}
+  </p>
+</div>
 
           {/* Zone de mise */}
 <div className="relative mt-3 flex flex-col items-center gap-2.5 sm:mt-4 lg:flex-row lg:items-center lg:justify-center lg:gap-4">
