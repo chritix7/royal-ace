@@ -40,7 +40,7 @@ function SidePill({
 }: SidePillProps) {
   return (
     <div
-  className={`flex w-full min-w-0 items-center justify-between gap-2 rounded-full border px-2.5 py-1.5 transition lg:w-36 ${
+  className={`flex w-full min-w-0 items-center justify-between gap-2 rounded-full border px-2.5 py-1.5 lg:w-36 ${
     disabled
       ? "border-white/15 bg-black/25 opacity-70"
       : amount > 0
