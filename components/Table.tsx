@@ -181,7 +181,7 @@ function SidePill({
           {/* Marquages du tapis */}
 <div
   aria-hidden="true"
-  className="pointer-events-none mt-1.5 flex translate-y-[1px] items-center justify-center gap-2 text-center sm:gap-3"
+  className="pointer-events-none mt-1.5 flex translate-y-[2px] items-center justify-center gap-2 text-center sm:gap-3"
 >
   <p className="whitespace-nowrap text-[8px] font-bold uppercase tracking-[0.18em] text-white/20 sm:text-[9px]">
     BJ {s.settings.bj65 ? "6:5" : "3:2"}
