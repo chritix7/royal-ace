@@ -531,7 +531,7 @@ const playerCardStyle = (
         }}
       >
         {bettingOpen ? (
-          <div className="mx-auto mb-2 max-h-[26dvh] max-w-3xl overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-black/20 p-2 pb-2.5 sm:max-h-[26dvh]">
+          <div className="mx-auto mb-2 max-h-[26dvh] max-w-xl overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-black/20 p-2 pb-2.5 sm:max-h-[26dvh]">
             <div className="space-y-2">
   <div className="flex min-w-0 items-center justify-between gap-3 px-1">
     <span className="shrink-0 text-[10px] uppercase tracking-wider text-white/45">
@@ -546,7 +546,7 @@ const playerCardStyle = (
     </span>
   </div>
 
-  <div className="mx-auto grid w-full max-w-sm grid-cols-5 gap-1.5">
+  <div className="mx-auto grid w-full max-w-[300px] grid-cols-5 gap-1.5">
     {CHIPS.map((value) => (
       <button
         key={value}
@@ -564,7 +564,7 @@ const playerCardStyle = (
     ))}
   </div>
 
-  <div className="mx-auto grid w-full max-w-sm grid-cols-3 gap-1.5">
+  <div className="mx-auto grid w-full max-w-[300px] grid-cols-3 gap-1.5">
     <button
       type="button"
       onClick={() => setBetTo(s.lastBet)}
