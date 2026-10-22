@@ -19,14 +19,13 @@ function ShoeCard({
 }) {
   return (
     <div
-      className={`absolute h-[56px] w-[40px] rounded-[4px] border border-black/60 shadow-[0_10px_20px_rgba(0,0,0,0.6)] ${className}`}
+      className={`absolute h-[58px] w-[42px] rounded-[4px] border border-black/60 shadow-[0_12px_22px_rgba(0,0,0,0.65)] ${className}`}
       style={{ background: CARD_BG, ...style }}
     >
       <div className="absolute inset-[5px] flex items-center justify-center rounded-[3px] border border-[#d7b45b]/40 text-[#d7b45b]">
         ♠
       </div>
       <div className="absolute inset-x-[6px] top-[6px] h-[2px] rounded-full bg-white/15" />
-
       {children}
     </div>
   );
@@ -53,7 +52,7 @@ export default function DealerShoe({
     setCycle("dispense");
 
     const t1 = setTimeout(() => setCycle("refill"), 450);
-    const t2 = setTimeout(() => setCycle("idle"), 900);
+    const t2 = setTimeout(() => setCycle("idle"), 950);
 
     return () => {
       clearTimeout(t1);
@@ -85,26 +84,26 @@ export default function DealerShoe({
         className="relative"
         style={{
           width: "300px",
-          height: "210px",
+          height: "230px",
           transformStyle: "preserve-3d",
           transform: "rotateX(56deg) rotateZ(-28deg)",
         }}
       >
         {/* Ombre au sol */}
         <div
-          className="absolute left-2 top-20 h-[170px] w-[290px] rounded-[70px] bg-black/75 blur-3xl"
+          className="absolute left-2 top-24 h-[180px] w-[290px] rounded-[70px] bg-black/75 blur-3xl"
           style={{ transform: "translateZ(-55px)" }}
         />
 
-        {/* Halo or sous la machine */}
+        {/* Halo or */}
         <div
-          className="absolute left-10 top-28 h-[110px] w-[240px] rounded-full bg-[#d7b45b]/10 blur-2xl"
+          className="absolute left-10 top-32 h-[110px] w-[240px] rounded-full bg-[#d7b45b]/10 blur-2xl"
           style={{ transform: "translateZ(-35px)" }}
         />
 
         {/* Côté gauche */}
         <div
-          className="absolute left-0 top-0 h-[160px] w-[42px] rounded-l-[26px] bg-gradient-to-b from-[#111614] via-[#070b09] to-black"
+          className="absolute left-0 top-[46px] h-[160px] w-[42px] rounded-l-[26px] bg-gradient-to-b from-[#111614] via-[#070b09] to-black"
           style={{
             transformOrigin: "right center",
             transform: "rotateY(-90deg)",
@@ -118,14 +117,14 @@ export default function DealerShoe({
 
         {/* Côté droit */}
         <div
-          className="absolute left-[258px] top-0 h-[160px] w-[42px] rounded-r-[26px] border border-black/80 bg-gradient-to-b from-[#2b3230] via-[#101513] to-[#020403]"
+          className="absolute left-[258px] top-[46px] h-[160px] w-[42px] rounded-r-[26px] border border-black/80 bg-gradient-to-b from-[#2b3230] via-[#101513] to-[#020403]"
           style={{
             transformOrigin: "left center",
             transform: "rotateY(90deg)",
           }}
         >
           <div className="absolute inset-y-5 left-[5px] w-[3px] rounded-full bg-gradient-to-b from-white/25 to-white/5" />
-          <div className="absolute right-3 top-9 flex flex-col gap-[6px]">
+          <div className="absolute right-3 top-10 flex flex-col gap-[6px]">
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
@@ -133,45 +132,22 @@ export default function DealerShoe({
               />
             ))}
           </div>
-          <div className="absolute bottom-6 left-3 h-3 w-3 rounded-full border border-white/15 bg-gradient-to-b from-[#3f4543] to-[#0f1312]">
-            <div className="absolute left-1/2 top-1/2 h-[1px] w-[8px] -translate-x-1/2 -translate-y-1/2 rotate-45 bg-black/80" />
-          </div>
         </div>
 
         {/* Face avant (côté joueur) */}
         <div
-          className="absolute left-0 top-[160px] h-[46px] w-[260px] rounded-b-[26px] border border-black/80 bg-gradient-to-b from-[#2b3230] via-[#121615] to-[#020403]"
+          className="absolute left-0 top-[206px] h-[24px] w-[260px] rounded-b-[20px] border border-black/80 bg-gradient-to-b from-[#202624] to-[#020403]"
           style={{
             transformOrigin: "top center",
             transform: "rotateX(-90deg)",
           }}
         >
-          <div className="mx-8 mt-4 h-[3px] rounded-full bg-white/[0.07]" />
-          <div className="mx-8 mt-[3px] h-[2px] rounded-full bg-black/75" />
-          <div className="absolute bottom-2.5 left-5 h-3 w-3 rounded-full border border-white/15 bg-gradient-to-b from-[#3f4543] to-[#0f1312]">
-            <div className="absolute left-1/2 top-1/2 h-[1px] w-[8px] -translate-x-1/2 -translate-y-1/2 rotate-45 bg-black/80" />
-          </div>
-          <div className="absolute bottom-2.5 right-5 h-3 w-3 rounded-full border border-white/15 bg-gradient-to-b from-[#3f4543] to-[#0f1312]">
-            <div className="absolute left-1/2 top-1/2 h-[1px] w-[8px] -translate-x-1/2 -translate-y-1/2 rotate-45 bg-black/80" />
-          </div>
-        </div>
-
-        {/* Face arrière : bouche de sortie côté dealer */}
-        <div
-          className="absolute left-0 top-[-14px] h-[46px] w-[260px] rounded-t-[26px] border border-black/80 bg-gradient-to-b from-[#050807] via-[#101513] to-[#1d2321]"
-          style={{
-            transformOrigin: "bottom center",
-            transform: "rotateX(90deg) translateZ(-46px)",
-          }}
-        >
-          {/* Bouche de sortie */}
-          <div className="absolute inset-x-10 top-4 h-[16px] rounded-full bg-black shadow-[inset_0_5px_14px_rgba(0,0,0,0.98)]" />
-          <div className="absolute inset-x-10 top-[22px] h-[3px] rounded-full bg-gradient-to-r from-transparent via-[#e5c779]/70 to-transparent" />
+          <div className="mx-8 mt-2 h-[2px] rounded-full bg-white/[0.07]" />
         </div>
 
         {/* Dessus de la machine */}
         <div
-          className="absolute left-0 top-0 h-[160px] w-[260px] rounded-[26px] border border-black/80 bg-gradient-to-br from-[#3d4543] via-[#171c1a] to-[#030504] shadow-[0_70px_130px_rgba(0,0,0,0.9)]"
+          className="absolute left-0 top-[46px] h-[160px] w-[260px] rounded-[26px] border border-black/80 bg-gradient-to-br from-[#3d4543] via-[#171c1a] to-[#030504] shadow-[0_70px_130px_rgba(0,0,0,0.9)]"
           style={{ transform: "translateZ(44px)" }}
         >
           {/* Métal brossé */}
@@ -219,8 +195,6 @@ export default function DealerShoe({
                 6 DECKS
               </span>
             </div>
-
-            <div className="absolute inset-x-3 top-[26px] h-[2px] rounded-full bg-gradient-to-r from-[#e5c779]/40 via-white/10 to-transparent" />
           </div>
 
           {/* Bouton doré */}
@@ -229,52 +203,59 @@ export default function DealerShoe({
             <div className="absolute left-2.5 top-2 h-[4px] w-5 rounded-full bg-white/45" />
           </div>
 
-          {/* Puits à cartes : ouvert vers le dealer (haut) */}
-          <div className="absolute left-[62px] top-[14px] h-[96px] w-[130px] overflow-hidden rounded-t-[14px] rounded-b-[8px] border border-white/10 bg-gradient-to-b from-black/85 to-black/40 shadow-[inset_0_10px_24px_rgba(0,0,0,0.95)]">
-            {/* Vitre fumée */}
-            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.07] via-transparent to-black/40" />
-            <div className="absolute inset-x-3 top-1 h-[2px] rounded-full bg-white/10" />
-
-            {/* Pile de 4 cartes identiques, carte du haut côté dealer */}
-            {[0, 1, 2, 3].map((i) => {
-              const isTop = i === 3;
-              const offset = (3 - i) * 8;
-
-              return (
-                <ShoeCard
-                  key={i}
-                  className={
-                    isTop && cycle === "dispense"
-                      ? "animate-shoe-top-dispense"
-                      : cycle === "refill"
-                        ? "animate-shoe-stack-rise"
-                        : ""
-                  }
-                  style={{
-                    right: `${10 + offset}px`,
-                    top: `${10 + offset}px`,
-                    transform: `translateZ(${3 + i * 5}px)`,
-                  }}
-                >
-                  {i === 0 && cycle === "refill" && (
-                    <div
-                      className="animate-shoe-new-card-enter absolute inset-0 rounded-[4px] border border-black/60"
-                      style={{ background: CARD_BG }}
-                    >
-                      <div className="absolute inset-[5px] flex items-center justify-center rounded-[3px] border border-[#d7b45b]/40 text-[#d7b45b]">
-                        ♠
-                      </div>
-                    </div>
-                  )}
-                </ShoeCard>
-              );
-            })}
-          </div>
-
           {/* Texte gravé */}
           <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[8px] font-black uppercase tracking-[0.42em] text-white/25">
             Automatic Dealer
           </div>
+        </div>
+
+        {/* Plateau de sortie : les cartes reposent sur le tapis, devant la machine */}
+        <div
+          className="absolute left-[70px] top-[-52px] h-[110px] w-[150px]"
+          style={{ transform: "translateZ(20px)" }}
+        >
+          {/* Rampe / rebord métallique */}
+          <div className="absolute inset-x-0 bottom-0 h-[34px] rounded-[12px] border border-black/80 bg-gradient-to-b from-[#2b3230] via-[#101513] to-[#050807] shadow-[0_18px_36px_rgba(0,0,0,0.7)]">
+            <div className="absolute inset-x-3 top-1 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#e5c779]/60 to-transparent" />
+          </div>
+
+          {/* Fente d’où sortent les cartes */}
+          <div className="absolute inset-x-6 bottom-[30px] h-[10px] rounded-full bg-black shadow-[inset_0_4px_10px_rgba(0,0,0,0.98)]" />
+
+          {/* Pile de cartes qui dépasse de la machine, posée sur le tapis */}
+          {[0, 1, 2, 3].map((i) => {
+            const isTop = i === 3;
+            const offset = (3 - i) * 8;
+
+            return (
+              <ShoeCard
+                key={i}
+                className={
+                  isTop && cycle === "dispense"
+                    ? "animate-shoe-top-dispense"
+                    : cycle === "refill"
+                      ? "animate-shoe-stack-rise"
+                      : ""
+                }
+                style={{
+                  left: `${34 + offset * 0.4}px`,
+                  bottom: `${26 + offset}px`,
+                  transform: `translateZ(${2 + i * 4}px) rotate(${(i - 1.5) * 1.5}deg)`,
+                }}
+              >
+                {i === 0 && cycle === "refill" && (
+                  <div
+                    className="animate-shoe-new-card-enter absolute inset-0 rounded-[4px] border border-black/60"
+                    style={{ background: CARD_BG }}
+                  >
+                    <div className="absolute inset-[5px] flex items-center justify-center rounded-[3px] border border-[#d7b45b]/40 text-[#d7b45b]">
+                      ♠
+                    </div>
+                  </div>
+                )}
+              </ShoeCard>
+            );
+          })}
         </div>
       </div>
     </div>
