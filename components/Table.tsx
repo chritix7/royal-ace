@@ -128,8 +128,23 @@ function SidePill({
           </div>
         </div>
 
-        <div className={`relative ${THEMES[s.settings.theme]} px-2 py-4 sm:px-9 sm:py-5`}>
+        <div className={`relative overflow-hidden ${THEMES[s.settings.theme]} px-2 py-4 sm:px-9 sm:py-5`}>
           {s.celebrate > 0 && <Confetti key={s.celebrate} />}
+          {/* Demi-sabot dans l’angle supérieur droit */}
+<div
+  aria-hidden="true"
+  className="pointer-events-none absolute -right-10 -top-6 z-0 hidden sm:block"
+>
+  <div className="relative h-24 w-40 rounded-l-xl border border-black/50 bg-gradient-to-br from-[#223a31] to-[#0e1c17] shadow-[0_12px_28px_rgba(0,0,0,0.45)]">
+    {/* Cartes visibles dans le sabot */}
+    <div className="absolute left-3 top-3 h-16 w-10 rotate-[-4deg] rounded-sm border border-black/40 bg-[#f8f5ec] shadow-md" />
+    <div className="absolute left-5 top-2.5 h-16 w-10 rotate-[-2deg] rounded-sm border border-black/40 bg-[#f3efe4] shadow-md" />
+    <div className="absolute left-7 top-2 h-16 w-10 rounded-sm border border-black/40 bg-[#f8f5ec] shadow-md" />
+
+    {/* Fente du sabot */}
+    <div className="absolute bottom-3 left-3 h-1.5 w-20 rounded-full bg-black/50" />
+  </div>
+</div>
           {s.shuffling && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/60" role="status">
               <div className="flex gap-3 text-3xl text-[#e5c779]">

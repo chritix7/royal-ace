@@ -471,8 +471,24 @@ const playerCardStyle = (
         className={`relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${THEMES[s.settings.theme]}`}
       >
         {s.celebrate > 0 && (
-          <Confetti key={s.celebrate} />
-        )}
+  <Confetti key={s.celebrate} />
+)}
+
+{/* Demi-sabot dans l’angle supérieur droit */}
+<div
+  aria-hidden="true"
+  className="pointer-events-none absolute -right-12 -top-8 z-0 hidden md:block"
+>
+  <div className="relative h-28 w-48 rounded-l-xl border border-black/50 bg-gradient-to-br from-[#223a31] to-[#0e1c17] shadow-[0_16px_34px_rgba(0,0,0,0.5)]">
+    {/* Cartes visibles dans le sabot */}
+    <div className="absolute left-4 top-4 h-20 w-12 rotate-[-5deg] rounded-sm border border-black/40 bg-[#f8f5ec] shadow-lg" />
+    <div className="absolute left-6 top-3.5 h-20 w-12 rotate-[-2deg] rounded-sm border border-black/40 bg-[#f3efe4] shadow-lg" />
+    <div className="absolute left-8 top-3 h-20 w-12 rounded-sm border border-black/40 bg-[#f8f5ec] shadow-lg" />
+
+    {/* Fente du sabot */}
+    <div className="absolute bottom-4 left-4 h-2 w-24 rounded-full bg-black/50" />
+  </div>
+</div>
 
                 <div className="relative flex min-h-0 flex-col items-center justify-center gap-2 overflow-y-auto overflow-x-hidden px-3 py-2">
 
