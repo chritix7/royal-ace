@@ -434,15 +434,20 @@ useEffect(() => {
     set({ shoe: shoe.slice(0, -1) });
     return card;
   }
+  function bumpDeal() {
+  set({ dealTick: ref.current.dealTick + 1 });
+  }
   function giveCard(i: number) {
     const card = draw();
     sfx.deal();
     setHand(i, { cards: [...ref.current.hands[i].cards, card] });
+    bumpDeal();
   }
   function giveDealer() {
     const card = draw();
     sfx.deal();
     set({ dealer: [...ref.current.dealer, card] });
+    bumpDeal();
   }
   function reveal() {
     if (!ref.current.hole) {

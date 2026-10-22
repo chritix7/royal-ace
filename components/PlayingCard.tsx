@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type { Card } from "../lib/blackjack";
 
 export default function PlayingCard({
@@ -29,8 +30,31 @@ export default function PlayingCard({
 ? "-ml-6 sm:-ml-8"
 : "-ml-8 sm:-ml-10";
 
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    const shoe = document.getElementById("dealer-shoe");
+
+    if (!el || !shoe) return;
+
+    const cardRect = el.getBoundingClientRect();
+    const shoeRect = shoe.getBoundingClientRect();
+
+    el.style.setProperty(
+      "--deal-x",
+      `${shoeRect.left + shoeRect.width * 0.5 - (cardRect.left + cardRect.width / 2)}px`
+    );
+
+    el.style.setProperty(
+      "--deal-y",
+      `${shoeRect.top + shoeRect.height * 0.55 - (cardRect.top + cardRect.height / 2)}px`
+    );
+  }, []);
+
   return (
-    <div
+        <div
+      ref={cardRef}
       className={`animate-deal shrink-0 ${size} ${overlap ? shift : ""}`}
       style={{ perspective: "1000px" }}
       role="img"

@@ -35,6 +35,7 @@ export type S = {
   toast: string | null;
   celebrate: number;
   shuffling: boolean;
+  dealTick: number;
 };
 
 export const CHIPS = [10, 20, 50, 100, 500];
@@ -80,6 +81,7 @@ export const INITIAL: S = {
   toast: null,
   celebrate: 0,
   shuffling: false,
+  dealTick: 0,
 };
 
 export const THEMES: Record<Theme, string> = {

@@ -8,54 +8,33 @@ type ShoeStatus = {
 export default function DealerShoe({
   className = "",
   status = { label: "Ready", tone: "gold" },
+  dealTick = 0,
 }: {
   className?: string;
   status?: ShoeStatus;
+  dealTick?: number;
 }) {
   const label = status.label.toLowerCase();
 
-  const [cardPhase, setCardPhase] = useState<"idle" | "out" | "in">("idle");
-  const firstRender = useRef(true);
+  const [cycle, setCycle] = useState<"idle" | "dispense" | "refill">("idle");
+  const firstTick = useRef(true);
 
   useEffect(() => {
-    // Ignore le premier montage : évite l’animation au changement de mode
-    if (firstRender.current) {
-      firstRender.current = false;
+    if (firstTick.current) {
+      firstTick.current = false;
       return;
     }
 
-    if (label === "dealing") {
-      setCardPhase("out");
+    setCycle("dispense");
 
-      const timeout = setTimeout(() => {
-        setCardPhase("in");
-      }, 950);
+    const t1 = setTimeout(() => setCycle("refill"), 450);
+    const t2 = setTimeout(() => setCycle("idle"), 900);
 
-      return () => clearTimeout(timeout);
-    }
-
-    if (label === "shuffling") {
-      setCardPhase("idle");
-      return;
-    }
-
-    if (cardPhase === "in") {
-      const timeout = setTimeout(() => {
-        setCardPhase("idle");
-      }, 750);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [label]);
-
-  const cardAnimation =
-    cardPhase === "out"
-      ? "animate-shoe-card-dispense"
-      : cardPhase === "in"
-        ? "animate-shoe-card-return"
-        : label === "shuffling"
-          ? "opacity-0"
-          : "";
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [dealTick]);
 
     const toneStyles: Record<ShoeStatus["tone"], string> = {
     gold: "bg-[#e5c779] shadow-[0_0_14px_rgba(229,199,121,0.95)]",
@@ -71,6 +50,7 @@ export default function DealerShoe({
       : "";
   return (
     <div
+      id="dealer-shoe"  
       aria-hidden="true"
       className={`pointer-events-none select-none ${className}`}
       style={{ perspective: "1700px" }}
@@ -232,39 +212,48 @@ export default function DealerShoe({
             ))}
           </div>
 
-          {/* Fenêtre des cartes */}
-          <div className="absolute bottom-6 left-6 h-[78px] w-[165px] rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.09] to-black/70 shadow-[inset_0_10px_28px_rgba(0,0,0,0.98)]">
-            <div className="absolute inset-x-4 top-2 h-[3px] rounded-full bg-white/10" />
+                  {/* Fenêtre des cartes */}
+        <div className="absolute bottom-6 left-6 h-[78px] w-[165px] rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.09] to-black/70 shadow-[inset_0_10px_28px_rgba(0,0,0,0.98)]">
+          <div className="absolute inset-x-4 top-2 h-[3px] rounded-full bg-white/10" />
 
-                        {/* Pile de cartes */}
-            <div
-              className="absolute bottom-3 left-3 h-[58px] w-[42px] rounded-[4px] border border-black/50 bg-gradient-to-b from-[#e9e2d1] to-[#cfc7b1] shadow-[0_10px_18px_rgba(0,0,0,0.55)]"
-              style={{ transform: "translateZ(4px)" }}
-            />
-            <div
-              className="absolute bottom-4 left-[22px] h-[58px] w-[42px] rounded-[4px] border border-black/50 bg-gradient-to-b from-[#f1ecdf] to-[#d9d2bf] shadow-[0_10px_18px_rgba(0,0,0,0.55)]"
-              style={{ transform: "translateZ(9px)" }}
-            />
-            <div
-              className="absolute bottom-5 left-[31px] h-[58px] w-[42px] rounded-[4px] border border-black/50 bg-gradient-to-b from-[#f8f5ec] to-[#e7e1d1] shadow-[0_10px_18px_rgba(0,0,0,0.55)]"
-              style={{ transform: "translateZ(14px)" }}
-            />
+          {/* Pile : la carte du haut est la plus proche du dealer */}
+          {[0, 1, 2, 3].map((i) => {
+            const isTop = i === 3;
+            const offset = (3 - i) * 9;
 
-            {/* Carte au repos, prête à sortir */}
-            <div
-              className={`absolute bottom-[14px] left-[38px] h-[62px] w-[44px] rounded-[4px] border border-black/50 shadow-[0_10px_18px_rgba(0,0,0,0.55)] transition-opacity duration-200 ${
-                cardPhase === "idle" ? "opacity-100" : "opacity-0"
-              }`}
-              style={{
-                background:
-                  "repeating-linear-gradient(45deg, #142d27 0 5px, #1b3d33 5px 10px)",
-              }}
-            >
-              <div className="absolute inset-1.5 flex items-center justify-center rounded-[3px] border border-[#d7b45b]/45 text-[#d7b45b]">
-                ♠
+            return (
+              <div
+                key={i}
+                className={`absolute h-[58px] w-[42px] rounded-[4px] border border-black/50 shadow-[0_10px_18px_rgba(0,0,0,0.55)] ${
+                  isTop && cycle === "dispense"
+                    ? "animate-shoe-top-dispense"
+                    : cycle === "refill"
+                      ? "animate-shoe-stack-rise"
+                      : ""
+                }`}
+                style={{
+                  right: `${8 + offset}px`,
+                  bottom: `${8 + offset}px`,
+                  transform: `translateZ(${4 + i * 5}px)`,
+                  background:
+                    "repeating-linear-gradient(45deg, #142d27 0 5px, #1b3d33 5px 10px)",
+                }}
+              >
+                <div className="absolute inset-1.5 flex items-center justify-center rounded-[3px] border border-[#d7b45b]/45 text-[#d7b45b]">
+                  ♠
+                </div>
+
+                {i === 0 && cycle === "refill" && (
+                  <div className="animate-shoe-new-card-enter absolute inset-0 rounded-[4px] border border-black/50 bg-[repeating-linear-gradient(45deg,#142d27_0_5px,#1b3d33_5px_10px)]">
+                    <div className="absolute inset-1.5 flex items-center justify-center rounded-[3px] border border-[#d7b45b]/45 text-[#d7b45b]">
+                      ♠
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          </div>
+            );
+          })}
+        </div>
 
           {/* Bouton doré */}
           <div className="absolute bottom-8 right-8 flex h-11 w-11 items-center justify-center rounded-full border border-[#e5c779]/80 bg-gradient-to-b from-[#f7e2a3] via-[#d7b45b] to-[#6f571f] shadow-[0_10px_24px_rgba(0,0,0,0.7),inset_0_1px_4px_rgba(255,255,255,0.6)]">
@@ -275,29 +264,6 @@ export default function DealerShoe({
           {/* Texte gravé */}
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[8px] font-black uppercase tracking-[0.42em] text-white/25">
             Automatic Dealer
-          </div>
-        </div>
-      </div>
-
-      {/* Carte d’animation : sort par la fente avant */}
-      <div className="pointer-events-none absolute inset-0">
-        <div
-          className={`absolute h-[58px] w-[42px] rounded-[4px] border border-black/50 shadow-[0_16px_30px_rgba(0,0,0,0.6)] ${
-            cardPhase === "out"
-              ? "animate-shoe-card-dispense"
-              : cardPhase === "in"
-                ? "animate-shoe-card-return"
-                : "opacity-0"
-          }`}
-          style={{
-            left: "52%",
-            top: "62%",
-            background:
-              "repeating-linear-gradient(45deg, #142d27 0 5px, #1b3d33 5px 10px)",
-          }}
-        >
-          <div className="absolute inset-1.5 flex items-center justify-center rounded-[3px] border border-[#d7b45b]/45 text-[#d7b45b]">
-            ♠
           </div>
         </div>
       </div>

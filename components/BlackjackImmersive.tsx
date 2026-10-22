@@ -518,6 +518,7 @@ const playerCardStyle = (
 <DealerShoe
   className="absolute -right-12 -top-6 z-0 hidden md:block"
   status={getShoeStatus(g)}
+  dealTick={s.dealTick}
 />
 
                 <div className="relative flex min-h-0 flex-col items-center justify-center gap-2 overflow-y-auto overflow-x-hidden px-3 py-2">
