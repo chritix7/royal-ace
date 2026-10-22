@@ -12,81 +12,86 @@ export default function DealerShoe({
       <div
         className="relative"
         style={{
-          width: "230px",
-          height: "150px",
+          width: "240px",
+          height: "160px",
           transformStyle: "preserve-3d",
           transform: "rotateX(58deg) rotateZ(-30deg)",
         }}
       >
         {/* Ombre de contact */}
         <div
-          className="absolute left-1 top-10 h-[130px] w-[225px] rounded-[40px] bg-black/55 blur-2xl"
-          style={{ transform: "translateZ(-36px)" }}
+          className="absolute left-1 top-10 h-[135px] w-[235px] rounded-[44px] bg-black/60 blur-2xl"
+          style={{ transform: "translateZ(-38px)" }}
         />
 
-        {/* Dessus incliné du sabot */}
+        {/* Dessus du sabot */}
         <div
-          className="absolute left-0 top-0 h-[120px] w-[210px] rounded-[14px] border border-black/70 bg-gradient-to-br from-[#3a5a4b] via-[#1e332a] to-[#0a1310] shadow-[0_40px_80px_rgba(0,0,0,0.65)]"
-          style={{ transform: "translateZ(30px)" }}
+          className="absolute left-0 top-0 h-[125px] w-[220px] rounded-[16px] border border-black/80 bg-gradient-to-br from-[#2b2f2d] via-[#141816] to-[#050706] shadow-[0_45px_85px_rgba(0,0,0,0.7)]"
+          style={{ transform: "translateZ(32px)" }}
         >
-          {/* Reflet satiné */}
-          <div className="absolute inset-0 rounded-[14px] bg-gradient-to-br from-white/18 via-transparent to-black/35" />
+          {/* Reflet plastique brillant */}
+          <div className="absolute inset-0 rounded-[16px] bg-gradient-to-br from-white/20 via-transparent to-black/45" />
+          <div className="absolute left-8 top-7 h-14 w-32 rotate-[-8deg] rounded-full bg-gradient-to-r from-white/20 via-white/5 to-transparent blur-[3px]" />
 
-          {/* Ouverture avant : l’endroit d’où sortent les cartes */}
-          <div className="absolute bottom-3 left-4 right-4 h-[42px] rounded-lg bg-black/80 shadow-[inset_0_8px_18px_rgba(0,0,0,0.95)]">
-            <div className="absolute inset-x-3 top-1.5 h-[3px] rounded-full bg-white/10" />
+          {/* Fenêtre transparente : pile de cartes visible */}
+          <div className="absolute bottom-4 left-5 h-[72px] w-[130px] rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.08] to-black/50 shadow-[inset_0_6px_20px_rgba(0,0,0,0.85)]">
+            {/* Cartes à l’intérieur */}
+            <div
+              className="absolute bottom-3 left-3 h-[58px] w-[42px] rounded-[4px] border border-black/50 bg-gradient-to-b from-[#e9e2d1] to-[#cfc7b1] shadow-[0_8px_16px_rgba(0,0,0,0.55)]"
+              style={{ transform: "translateZ(2px)" }}
+            />
+            <div
+              className="absolute bottom-4 left-[18px] h-[58px] w-[42px] rounded-[4px] border border-black/50 bg-gradient-to-b from-[#f1ecdf] to-[#d9d2bf] shadow-[0_8px_16px_rgba(0,0,0,0.55)]"
+              style={{ transform: "translateZ(6px)" }}
+            />
+            <div
+              className="absolute bottom-5 left-[24px] h-[58px] w-[42px] rounded-[4px] border border-black/50 bg-gradient-to-b from-[#f8f5ec] to-[#e7e1d1] shadow-[0_8px_16px_rgba(0,0,0,0.55)]"
+              style={{ transform: "translateZ(10px)" }}
+            />
           </div>
 
-          {/* Cartes qui dépassent de l’ouverture */}
-          <div
-            className="absolute bottom-[16px] left-[22px] h-[64px] w-[46px] rounded-[4px] border border-black/50 bg-gradient-to-b from-[#e9e2d1] to-[#cfc7b1] shadow-[0_10px_20px_rgba(0,0,0,0.55)]"
-            style={{ transform: "translateZ(2px)" }}
-          />
-          <div
-            className="absolute bottom-[20px] left-[26px] h-[64px] w-[46px] rounded-[4px] border border-black/50 bg-gradient-to-b from-[#f1ecdf] to-[#d9d2bf] shadow-[0_10px_20px_rgba(0,0,0,0.55)]"
-            style={{ transform: "translateZ(7px)" }}
-          />
-          <div
-            className="absolute bottom-[24px] left-[30px] h-[64px] w-[46px] rounded-[4px] border border-black/50 bg-gradient-to-b from-[#f8f5ec] to-[#e7e1d1] shadow-[0_10px_20px_rgba(0,0,0,0.55)]"
-            style={{ transform: "translateZ(12px)" }}
-          />
-
-          {/* Carte prête à être distribuée */}
-          <div
-            className="absolute bottom-[28px] left-[34px] h-[64px] w-[46px] rounded-[4px] border border-[#d7b45b]/60 shadow-[0_16px_30px_rgba(0,0,0,0.6)]"
-            style={{
-              transform: "translateZ(18px)",
-              background:
-                "repeating-linear-gradient(45deg, #142d27 0 5px, #1b3d33 5px 10px)",
-            }}
-          >
-            <div className="absolute inset-2 flex items-center justify-center rounded-[3px] border border-[#d7b45b]/45 text-[#d7b45b]">
-              ♠
-            </div>
-            <div className="absolute inset-x-2 top-1.5 h-[4px] rounded-full bg-gradient-to-r from-white/20 to-transparent" />
+          {/* Poids / pression sur les cartes */}
+          <div className="absolute bottom-[52px] left-[38px] h-6 w-24 rounded-md border border-black/70 bg-gradient-to-b from-[#22282a] to-[#0a0d0c] shadow-[0_8px_16px_rgba(0,0,0,0.6)]">
+            <div className="absolute inset-x-2 top-1 h-[3px] rounded-full bg-white/15" />
           </div>
 
-          {/* Reflet sur le plastique */}
-          <div className="absolute left-8 top-8 h-12 w-28 rotate-[-8deg] rounded-full bg-gradient-to-r from-white/18 via-white/5 to-transparent blur-[2px]" />
+          {/* Reflet du poids */}
+          <div className="absolute bottom-[74px] left-[44px] h-[3px] w-16 rounded-full bg-white/10" />
         </div>
 
         {/* Face avant : lèvre de sortie */}
         <div
-          className="absolute left-0 top-[120px] h-[30px] w-[210px] rounded-b-[14px] border border-black/70 bg-gradient-to-b from-[#243c32] via-[#12211b] to-[#040806]"
+          className="absolute left-0 top-[125px] h-[32px] w-[220px] rounded-b-[16px] border border-black/80 bg-gradient-to-b from-[#1f2624] via-[#0d1210] to-[#030504]"
           style={{
             transformOrigin: "top center",
             transform: "rotateX(-90deg)",
           }}
         >
-          {/* Lèvre de sortie des cartes */}
-          <div className="absolute inset-x-4 top-1.5 h-[10px] rounded-full bg-black shadow-[inset_0_2px_6px_rgba(0,0,0,0.95)]" />
-          <div className="absolute inset-x-4 top-[14px] h-[3px] rounded-full bg-white/10" />
-          <div className="mx-6 mt-3 h-[3px] rounded-full bg-white/5" />
+          {/* Fente de sortie */}
+          <div className="absolute inset-x-5 top-1.5 h-[12px] rounded-full bg-black shadow-[inset_0_3px_8px_rgba(0,0,0,0.95)]" />
+          <div className="absolute inset-x-5 top-[16px] h-[3px] rounded-full bg-white/10" />
+          <div className="mx-8 mt-3 h-[3px] rounded-full bg-white/5" />
+        </div>
+
+        {/* Carte qui dépasse de la fente */}
+        <div
+          className="absolute bottom-[10px] left-[30px] h-[70px] w-[48px] rounded-[4px] border border-black/60 shadow-[0_18px_34px_rgba(0,0,0,0.65)]"
+          style={{
+            transform: "translateZ(26px) rotateZ(-2deg)",
+            background:
+              "repeating-linear-gradient(45deg, #142d27 0 5px, #1b3d33 5px 10px)",
+          }}
+        >
+          <div className="absolute inset-2 flex items-center justify-center rounded-[3px] border border-[#d7b45b]/45 text-[#d7b45b]">
+            ♠
+          </div>
+          <div className="absolute inset-x-2 top-1.5 h-[4px] rounded-full bg-gradient-to-r from-white/20 to-transparent" />
+          <div className="absolute inset-x-2 bottom-1.5 h-[2px] rounded-full bg-black/40" />
         </div>
 
         {/* Côté droit */}
         <div
-          className="absolute left-[210px] top-0 h-[120px] w-[30px] rounded-r-[14px] border border-black/70 bg-gradient-to-b from-[#1a2c25] via-[#0d1814] to-[#030604]"
+          className="absolute left-[220px] top-0 h-[125px] w-[32px] rounded-r-[16px] border border-black/80 bg-gradient-to-b from-[#191d1b] via-[#0b0f0d] to-[#020403]"
           style={{
             transformOrigin: "left center",
             transform: "rotateY(90deg)",
@@ -97,10 +102,10 @@ export default function DealerShoe({
 
         {/* Côté gauche */}
         <div
-          className="absolute left-0 top-0 h-[120px] w-[30px] rounded-l-[14px] bg-gradient-to-b from-[#0b1512] to-black"
+          className="absolute left-0 top-0 h-[125px] w-[32px] rounded-l-[16px] bg-gradient-to-b from-[#0b0f0d] to-black"
           style={{
             transformOrigin: "right center",
-            transform: "rotateY(-90deg) translateZ(0px)",
+            transform: "rotateY(-90deg)",
           }}
         />
       </div>
