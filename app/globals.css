@@ -351,3 +351,40 @@ body {
     animation: none;
   }
 }
+
+@keyframes shoe-card-dispense {
+  0% {
+    transform: translateZ(38px) rotateZ(-2deg);
+    opacity: 1;
+  }
+
+  55% {
+    transform: translateZ(58px) rotateZ(-1deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateZ(78px) rotateZ(0deg);
+    opacity: 0;
+  }
+}
+
+.animate-shoe-card-dispense {
+  animation: shoe-card-dispense 0.9s cubic-bezier(0.3, 0.75, 0.2, 1) both;
+}
+
+@keyframes shoe-card-return {
+  0% {
+    transform: translateZ(78px) rotateZ(0deg);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateZ(38px) rotateZ(-2deg);
+    opacity: 1;
+  }
+}
+
+.animate-shoe-card-return {
+  animation: shoe-card-return 0.7s cubic-bezier(0.22, 0.8, 0.24, 1) both;
+}

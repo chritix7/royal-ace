@@ -10,6 +10,15 @@ export default function DealerShoe({
   className?: string;
   status?: ShoeStatus;
 }) {
+  const label = status.label.toLowerCase();
+
+  const cardAnimation =
+    label === "dealing"
+      ? "animate-shoe-card-dispense"
+      : label === "shuffling"
+        ? "opacity-0"
+        : "animate-shoe-card-return";
+
     const toneStyles: Record<ShoeStatus["tone"], string> = {
     gold: "bg-[#e5c779] shadow-[0_0_14px_rgba(229,199,121,0.95)]",
     green: "bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.9)]",
@@ -218,9 +227,9 @@ export default function DealerShoe({
 
         {/* Carte prête à être distribuée */}
         <div
-          className="absolute bottom-[16px] left-[42px] h-[82px] w-[56px] rounded-[5px] border border-black/60 shadow-[0_28px_52px_rgba(0,0,0,0.8)]"
+          key={status.label}
+          className={`absolute bottom-[16px] left-[42px] h-[82px] w-[56px] rounded-[5px] border border-black/60 shadow-[0_28px_52px_rgba(0,0,0,0.8)] ${cardAnimation}`}
           style={{
-            transform: "translateZ(38px) rotateZ(-2deg)",
             background:
               "repeating-linear-gradient(45deg, #142d27 0 5px, #1b3d33 5px 10px)",
           }}
