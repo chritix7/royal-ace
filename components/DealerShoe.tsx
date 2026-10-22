@@ -11,28 +11,35 @@ type DealerShoeProps = {
   dealTick?: number;
 };
 
-const STATUS_STYLES: Record<ShoeStatus["tone"], { dot: string; text: string; glow: string }> = {
-  gold: { dot: "bg-amber-300", text: "text-amber-100", glow: "shadow-[0_0_12px_rgba(251,191,36,.65)]" },
-  green: { dot: "bg-emerald-400", text: "text-emerald-100", glow: "shadow-[0_0_12px_rgba(52,211,153,.65)]" },
-  red: { dot: "bg-red-400", text: "text-red-100", glow: "shadow-[0_0_12px_rgba(248,113,113,.7)]" },
-  orange: { dot: "bg-orange-400", text: "text-orange-100", glow: "shadow-[0_0_12px_rgba(251,146,60,.7)]" },
-  white: { dot: "bg-white", text: "text-white", glow: "shadow-[0_0_12px_rgba(255,255,255,.6)]" },
+const CARD_BG =
+  "repeating-linear-gradient(45deg, #102b25 0 3px, #1a4034 3px 6px), linear-gradient(135deg, #245b49, #102b25)";
+
+const STATUS_STYLES: Record<ShoeStatus["tone"], string> = {
+  gold: "bg-[#e5c779] shadow-[0_0_13px_rgba(229,199,121,0.9)]",
+  green: "bg-emerald-400 shadow-[0_0_13px_rgba(52,211,153,0.9)]",
+  red: "bg-red-400 shadow-[0_0_13px_rgba(248,113,113,0.9)]",
+  orange: "bg-orange-400 shadow-[0_0_13px_rgba(251,146,60,0.9)]",
+  white: "bg-white shadow-[0_0_13px_rgba(255,255,255,0.85)]",
 };
 
-const CARD_BACK =
-  "repeating-linear-gradient(45deg,#102d28 0 3px,#174237 3px 6px),linear-gradient(135deg,#245b49,#102b25)";
-
-function CardBack({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
+function ShoeCard({
+  className = "",
+  style,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}) {
   return (
     <div
       aria-hidden="true"
-      className={`absolute rounded-[5px] border border-[#c9a85f]/55 bg-[#122d27] shadow-[0_5px_12px_rgba(0,0,0,.55)] ${className}`}
-      style={{ background: CARD_BACK, ...style }}
+      className={`absolute h-[58px] w-[42px] overflow-hidden rounded-[5px] border border-[#c6a85e]/60 shadow-[0_10px_18px_rgba(0,0,0,0.62),inset_0_1px_1px_rgba(255,255,255,.28)] ${className}`}
+      style={{ background: CARD_BG, ...style }}
     >
-      <div className="absolute inset-[4px] rounded-[3px] border border-[#e4c77c]/45" />
-      <div className="absolute inset-[8px] rounded-[2px] border border-[#e4c77c]/25" />
-      <div className="absolute inset-0 flex items-center justify-center text-[11px] text-[#dfc47b]/80">♠</div>
-      <div className="absolute inset-x-[5px] top-[4px] h-px bg-white/20" />
+      <div className="absolute inset-[4px] rounded-[3px] border border-[#e4c879]/55" />
+      <div className="absolute inset-[8px] rounded-[2px] border border-[#e4c879]/30" />
+      <div className="absolute inset-0 flex items-center justify-center text-[15px] text-[#e4c879]/80">♠</div>
+      <div className="absolute inset-x-[5px] top-[4px] h-px bg-white/25" />
+      <div className="absolute bottom-[4px] right-[5px] text-[5px] font-black tracking-widest text-[#e4c879]/55">RA</div>
     </div>
   );
 }
@@ -42,100 +49,175 @@ export default function DealerShoe({
   status = { label: "Ready", tone: "gold" },
   dealTick = 0,
 }: DealerShoeProps) {
-  const [cycle, setCycle] = useState<"idle" | "dispense">("idle");
+  const [cycle, setCycle] = useState<"idle" | "dispense" | "refill">("idle");
   const firstTick = useRef(true);
-  const tone = STATUS_STYLES[status.tone] ?? STATUS_STYLES.gold;
+  const toneStyle = STATUS_STYLES[status.tone] ?? STATUS_STYLES.gold;
+  const isActive = status.tone === "orange" || status.label.toLowerCase() === "dealing";
 
   useEffect(() => {
     if (firstTick.current) {
       firstTick.current = false;
       return;
     }
+
     setCycle("dispense");
-    const timer = window.setTimeout(() => setCycle("idle"), 780);
-    return () => window.clearTimeout(timer);
+    const refillTimer = window.setTimeout(() => setCycle("refill"), 450);
+    const idleTimer = window.setTimeout(() => setCycle("idle"), 950);
+    return () => {
+      window.clearTimeout(refillTimer);
+      window.clearTimeout(idleTimer);
+    };
   }, [dealTick]);
 
   return (
-    <div className={`relative isolate mx-auto w-full max-w-[440px] select-none ${className}`}>
+    <div
+      id="dealer-shoe"
+      aria-hidden="true"
+      className={`pointer-events-none select-none ${className}`}
+      style={{ perspective: "1500px" }}
+    >
       <style>{`
-        @keyframes shoe-card-out {
-          0% { transform: translate3d(0,0,0) rotate(-2deg) scale(.96); opacity: 0; }
-          15% { opacity: 1; }
-          62% { transform: translate3d(0,45px,0) rotate(2deg) scale(1); opacity: 1; }
-          100% { transform: translate3d(0,78px,0) rotate(5deg) scale(.92); opacity: 0; }
+        @keyframes royal-card-dispense {
+          0% { transform: translate3d(0, 0, 8px) rotate(-1deg); opacity: 1; }
+          58% { transform: translate3d(1px, -42px, 15px) rotate(1deg); opacity: 1; }
+          100% { transform: translate3d(3px, -74px, 18px) rotate(3deg); opacity: 0; }
         }
-        @keyframes shoe-pulse { 0%,100% { opacity:.58; } 50% { opacity:1; } }
-        @keyframes shoe-shine { 0% { transform:translateX(-130%) skewX(-18deg); } 100% { transform:translateX(240%) skewX(-18deg); } }
+        @keyframes royal-stack-rise {
+          0% { transform: translate3d(0, 12px, 0) rotate(-4deg) scale(.92); opacity: 0; }
+          75% { transform: translate3d(0, -2px, 0) rotate(1deg) scale(1.015); opacity: 1; }
+          100% { transform: translate3d(0, 0, 0) rotate(0) scale(1); opacity: 1; }
+        }
+        @keyframes royal-card-enter {
+          0% { transform: translateY(-26px) rotate(-7deg); opacity: 0; }
+          100% { transform: translateY(0) rotate(0); opacity: 1; }
+        }
+        @keyframes royal-status-pulse {
+          0%, 100% { opacity: .55; transform: scale(.82); }
+          50% { opacity: 1; transform: scale(1.16); }
+        }
+        @keyframes royal-sheen {
+          0%, 58% { transform: translateX(-150%) skewX(-18deg); }
+          86%, 100% { transform: translateX(260%) skewX(-18deg); }
+        }
         @media (prefers-reduced-motion: reduce) {
-          .shoe-motion { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+          .royal-motion { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
         }
       `}</style>
 
-      <div className="relative mx-auto h-[278px] w-full max-w-[390px] [perspective:1100px]">
-        {/* Ambient table shadow */}
-        <div className="absolute bottom-[11px] left-[7%] right-[7%] h-[38px] rounded-[50%] bg-black/70 blur-2xl" />
-        <div className="absolute bottom-[19px] left-[12%] right-[12%] h-[30px] rounded-[50%] bg-amber-950/45 blur-xl" />
+      <div
+        className="relative h-[230px] w-[300px] [transform-style:preserve-3d]"
+        style={{ transform: "rotateX(54deg) rotateZ(-27deg)" }}
+      >
+        {/* Soft table contact shadow and warm reflected light */}
+        <div className="absolute left-[-8px] top-[100px] h-[170px] w-[320px] rounded-[70px] bg-black/70 blur-3xl" style={{ transform: "translateZ(-52px)" }} />
+        <div className="absolute left-[28px] top-[137px] h-[95px] w-[250px] rounded-full bg-[#d7b45b]/10 blur-2xl" style={{ transform: "translateZ(-30px)" }} />
 
-        {/* Lower chassis */}
-        <div className="absolute bottom-[17px] left-[9%] right-[9%] h-[54px] rounded-[18px] border border-[#d8bc77]/40 bg-gradient-to-b from-[#34312a] via-[#111412] to-[#050707] shadow-[0_17px_22px_rgba(0,0,0,.7),inset_0_1px_1px_rgba(255,255,255,.18)] [transform:rotateX(58deg)]" />
+        {/* Satin black lower body */}
+        <div className="absolute left-[12px] top-[67px] h-[150px] w-[276px] rounded-[30px] border border-[#b69b5a]/35 bg-gradient-to-b from-[#303631] via-[#101512] to-[#030504] shadow-[0_28px_38px_rgba(0,0,0,.68),inset_0_2px_3px_rgba(255,255,255,.18)]" style={{ transform: "translateZ(14px)" }}>
+          <div className="absolute inset-x-5 top-2 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+          <div className="absolute inset-x-8 bottom-3 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#d7b45b]/55 to-transparent" />
+          <div className="absolute bottom-[-8px] left-8 right-8 h-[16px] rounded-b-[18px] border-x border-b border-black/80 bg-gradient-to-b from-[#111513] to-black" />
+        </div>
 
-        {/* Main molded shell */}
-        <div className="absolute left-1/2 top-[43px] h-[202px] w-[72%] -translate-x-1/2 rounded-[31px] border border-[#dfc47c]/55 bg-gradient-to-br from-[#d8c184] via-[#8e7848] to-[#2a271e] p-[2px] shadow-[0_25px_32px_rgba(0,0,0,.65),inset_0_1px_2px_rgba(255,255,255,.7)] [transform:rotateX(9deg)_rotateY(-7deg)]">
-          <div className="relative h-full overflow-hidden rounded-[29px] border border-black/70 bg-[linear-gradient(145deg,#34352f_0%,#191d1b_28%,#080b0b_68%,#28251d_100%)] shadow-[inset_0_2px_9px_rgba(255,255,255,.13),inset_0_-18px_26px_rgba(0,0,0,.7)]">
-            <div className="absolute inset-x-3 top-2 h-[1px] bg-gradient-to-r from-transparent via-[#f7e7b2]/70 to-transparent" />
-            <div className="absolute -left-12 top-0 h-full w-16 bg-gradient-to-r from-transparent via-white/10 to-transparent shoe-motion" style={{ animation: "shoe-shine 5.5s ease-in-out infinite" }} />
-
-            {/* Brand plate and ready indicator */}
-            <div className="absolute left-1/2 top-[12px] flex -translate-x-1/2 flex-col items-center">
-              <div className="whitespace-nowrap text-[9px] font-black tracking-[.34em] text-[#e5cf93] drop-shadow-[0_1px_2px_#000]">ROYAL ACE</div>
-              <div className="mt-[5px] flex items-center gap-[6px] rounded-full border border-white/10 bg-black/50 px-[8px] py-[3px] shadow-[inset_0_1px_2px_rgba(0,0,0,.8)]">
-                <span className={`h-[6px] w-[6px] rounded-full ${tone.dot} ${tone.glow}`} style={{ animation: "shoe-pulse 1.8s ease-in-out infinite" }} />
-                <span className={`max-w-[102px] truncate text-[8px] font-bold uppercase tracking-[.14em] ${tone.text}`}>{status.label}</span>
-              </div>
-            </div>
-
-            {/* Recessed card window */}
-            <div className="absolute left-[12%] right-[12%] top-[61px] h-[105px] overflow-hidden rounded-[12px] border border-[#a9915b]/65 bg-[linear-gradient(180deg,#020706,#101512_45%,#050807)] shadow-[inset_0_8px_15px_rgba(0,0,0,.95),0_1px_0_rgba(255,255,255,.16)]">
-              <div className="absolute inset-x-2 top-[8px] h-[70px] overflow-hidden rounded-[8px] border border-white/5 bg-gradient-to-b from-[#23332b] to-[#0b100d]">
-                {/* Deep stack, individually edged for a physical deck impression */}
-                {Array.from({ length: 8 }, (_, i) => (
-                  <div key={i} className="absolute left-[12%] right-[8%] h-[40px] rounded-[4px] border border-[#d8d1bb]/70 bg-gradient-to-b from-[#f5f0df] to-[#c9c1ad] shadow-[0_1px_2px_rgba(0,0,0,.8)]" style={{ bottom: `${i * 2}px`, transform: `translateX(${i % 2 ? 1 : 0}px)` }} />
-                ))}
-                <div className="absolute left-[14%] right-[10%] bottom-[14px] h-[32px] overflow-hidden rounded-[4px] border border-black/35" style={{ background: CARD_BACK }}>
-                  <div className="absolute inset-[4px] rounded-[2px] border border-[#d8bd72]/50" />
-                </div>
-              </div>
-              <div className="absolute bottom-0 left-[19%] right-[19%] h-[12px] rounded-t-[9px] border-x border-t border-[#a98e4f]/55 bg-gradient-to-b from-[#5b4d2e] to-[#171610]" />
-              <div className="absolute inset-x-3 top-[4px] h-[1px] bg-white/10" />
-            </div>
-
-            {/* Chrome trim rails */}
-            <div className="absolute left-[7%] top-[63px] h-[101px] w-[3px] rounded-full bg-gradient-to-b from-[#f1dfa5] via-[#75633b] to-[#211f18] shadow-[1px_0_3px_#000]" />
-            <div className="absolute right-[7%] top-[63px] h-[101px] w-[3px] rounded-full bg-gradient-to-b from-[#f1dfa5] via-[#75633b] to-[#211f18] shadow-[-1px_0_3px_#000]" />
-
-            {/* Ejection mouth */}
-            <div className="absolute bottom-[12px] left-[18%] right-[18%] h-[21px] rounded-[7px] border border-[#b59b61]/65 bg-gradient-to-b from-[#020403] to-[#25231c] shadow-[inset_0_4px_7px_rgba(0,0,0,.95),0_1px_0_rgba(255,255,255,.16)]">
-              <div className="absolute inset-x-3 top-[3px] h-[2px] rounded-full bg-[#d9c27e]/50" />
-              <div className="absolute inset-x-2 bottom-[3px] h-[3px] rounded-full bg-black/80" />
-            </div>
-            <div className="absolute bottom-[37px] left-1/2 h-[5px] w-[34%] -translate-x-1/2 rounded-full bg-black/80 blur-[2px]" />
+        {/* Left and right cast-metal sides */}
+        <div className="absolute left-0 top-[49px] h-[161px] w-[42px] rounded-l-[26px] border border-black/80 bg-gradient-to-r from-[#050807] via-[#1c211e] to-[#090c0a] shadow-[inset_2px_0_4px_rgba(255,255,255,.08)]" style={{ transform: "rotateY(-90deg) translateZ(0px)", transformOrigin: "right center" }}>
+          <div className="absolute inset-y-6 left-[7px] w-[2px] rounded-full bg-white/10" />
+          <div className="absolute bottom-6 left-3 h-3 w-3 rounded-full border border-white/15 bg-gradient-to-b from-[#4b504b] to-[#111412] shadow-[0_2px_4px_#000]" />
+        </div>
+        <div className="absolute right-0 top-[49px] h-[161px] w-[42px] rounded-r-[26px] border border-black/80 bg-gradient-to-l from-[#050807] via-[#222824] to-[#0a0d0b] shadow-[inset_-2px_0_5px_rgba(255,255,255,.12)]" style={{ transform: "rotateY(90deg)", transformOrigin: "left center" }}>
+          <div className="absolute inset-y-5 right-[6px] w-[2px] rounded-full bg-white/20" />
+          <div className="absolute right-3 top-10 flex flex-col gap-[6px]">
+            {[0, 1, 2, 3, 4, 5].map((i) => <div key={i} className="h-[3px] w-[19px] rounded-full bg-black/90 shadow-[inset_0_1px_2px_rgba(255,255,255,.12)]" />)}
           </div>
         </div>
 
-        {/* Output card and staging tray */}
-        <div className="absolute bottom-[3px] left-1/2 z-20 h-[73px] w-[66%] -translate-x-1/2 [transform-style:preserve-3d]">
-          <div className="absolute bottom-[5px] left-1/2 h-[35px] w-[110%] -translate-x-1/2 rounded-[9px] border border-[#d7bd7a]/55 bg-gradient-to-b from-[#5a4c2e] via-[#29271f] to-[#0a0d0c] shadow-[0_12px_15px_rgba(0,0,0,.65),inset_0_2px_2px_rgba(255,255,255,.22)] [transform:rotateX(60deg)]" />
-          <div className="absolute bottom-[18px] left-[4%] right-[4%] h-[30px] rounded-[6px] border border-white/10 bg-gradient-to-b from-[#202522] to-[#090c0b] shadow-[inset_0_4px_7px_rgba(0,0,0,.8)]" />
-          <CardBack className="bottom-[23px] left-1/2 z-10 h-[47px] w-[34px] -translate-x-1/2 rotate-[-3deg]" />
-          <CardBack className="bottom-[26px] left-1/2 z-20 h-[47px] w-[34px] -translate-x-1/2 rotate-[2deg]" />
-          {cycle === "dispense" && (
-            <CardBack
-              className="shoe-motion z-30 h-[49px] w-[35px]"
-              style={{ left: "calc(50% - 17px)", bottom: "36px", animation: "shoe-card-out 760ms cubic-bezier(.2,.75,.25,1) both" }}
-            />
+        {/* Player-facing fascia */}
+        <div className="absolute left-[20px] top-[205px] h-[25px] w-[260px] rounded-b-[20px] border border-black/80 bg-gradient-to-b from-[#282d2a] to-[#050706] shadow-[0_8px_12px_rgba(0,0,0,.6)]" style={{ transform: "rotateX(-90deg)", transformOrigin: "top center" }}>
+          <div className="mx-8 mt-2 h-[2px] rounded-full bg-white/[0.08]" />
+        </div>
+
+        {/* Main polished upper shell */}
+        <div className="absolute left-[20px] top-[49px] h-[160px] w-[260px] overflow-hidden rounded-[26px] border border-[#d5c18d]/30 bg-gradient-to-br from-[#4a514d] via-[#202522] to-[#070a09] shadow-[0_55px_90px_rgba(0,0,0,.8),inset_0_1px_2px_rgba(255,255,255,.35)]" style={{ transform: "translateZ(44px)" }}>
+          <div className="absolute inset-0 opacity-[.16]" style={{ background: "repeating-linear-gradient(115deg,rgba(255,255,255,.12) 0 1px,transparent 1px 4px)" }} />
+          <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/65" />
+          <div className="royal-motion absolute -left-16 top-[-20px] h-[210px] w-[52px] bg-gradient-to-r from-transparent via-white/20 to-transparent blur-md" style={{ animation: "royal-sheen 7s ease-in-out infinite" }} />
+          <div className="absolute inset-x-5 top-[3px] h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#f3dda0] to-transparent shadow-[0_0_12px_rgba(229,199,121,.45)]" />
+          <div className="absolute inset-x-5 bottom-[3px] h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#d7b45b]/65 to-transparent" />
+
+          {/* Recessed smoked-glass deck window */}
+          <div className="absolute left-[16px] top-[15px] h-[81px] w-[228px] overflow-hidden rounded-[17px] border border-[#dfc77e]/55 bg-gradient-to-b from-[#080c0a] via-[#111713] to-[#030504] shadow-[inset_0_5px_14px_rgba(0,0,0,.95),0_1px_0_rgba(255,255,255,.18),0_0_16px_rgba(0,0,0,.6)]">
+            <div className="absolute inset-x-2 top-[6px] h-[59px] overflow-hidden rounded-[10px] border border-white/[.08] bg-gradient-to-b from-[#24382e] to-[#0b110d]">
+              {Array.from({ length: 9 }, (_, i) => (
+                <div key={i} className="absolute left-[23px] right-[13px] h-[40px] rounded-[3px] border border-[#a9a18b]/60 bg-gradient-to-b from-[#f5f0df] via-[#e7e0cf] to-[#b9b19c] shadow-[0_1px_2px_rgba(0,0,0,.65)]" style={{ bottom: `${i * 2}px`, transform: `translateX(${i % 2 ? 1 : 0}px)` }} />
+              ))}
+              <div className="absolute inset-x-[25px] bottom-[13px] h-[32px] overflow-hidden rounded-[3px] border border-black/40" style={{ background: CARD_BG }}>
+                <div className="absolute inset-[4px] rounded-[2px] border border-[#e5c779]/45" />
+                <div className="absolute inset-0 flex items-center justify-center text-[13px] text-[#e5c779]/70">♠</div>
+              </div>
+            </div>
+            <div className="absolute inset-x-[42px] bottom-0 h-[13px] rounded-t-[9px] border-x border-t border-[#a98f54]/60 bg-gradient-to-b from-[#55472c] to-[#171610]" />
+            <div className="absolute inset-x-3 top-[3px] h-px bg-white/15" />
+          </div>
+
+          {/* Status display */}
+          <div className="absolute bottom-[14px] left-[15px] h-[37px] w-[148px] rounded-[11px] border border-[#e5c779]/45 bg-[linear-gradient(150deg,#171915,#020403)] shadow-[inset_0_3px_10px_rgba(0,0,0,.95),0_0_15px_rgba(215,180,91,.13)]">
+            <div className="absolute inset-x-2 top-[5px] flex items-center justify-between">
+              <span className="text-[7px] font-black uppercase tracking-[.2em] text-[#e5c779]">ROYAL ACE</span>
+              <span className="relative flex h-[7px] w-[7px]">
+                {isActive && <span className={`absolute inset-0 rounded-full ${toneStyle}`} style={{ animation: "royal-status-pulse 1.2s ease-in-out infinite" }} />}
+                <span className={`relative h-[7px] w-[7px] rounded-full ${toneStyle}`} />
+              </span>
+            </div>
+            <div className="absolute inset-x-2 bottom-[5px] flex items-center justify-between gap-2">
+              <span className="max-w-[82px] truncate text-[7px] font-bold uppercase tracking-[.18em] text-white/75">{status.label}</span>
+              <span className="text-[6px] font-bold tabular-nums tracking-[.13em] text-white/35">6 DECKS</span>
+            </div>
+          </div>
+
+          {/* Machined gold control dial */}
+          <div className="absolute bottom-[13px] right-[18px] flex h-[37px] w-[37px] items-center justify-center rounded-full border border-[#f4dfa2]/75 bg-[linear-gradient(145deg,#fff0b5_0%,#d7b45b_42%,#71571f_100%)] shadow-[0_7px_13px_rgba(0,0,0,.72),inset_0_2px_3px_rgba(255,255,255,.65),inset_0_-3px_5px_rgba(0,0,0,.35)]">
+            <div className="absolute inset-[5px] rounded-full border border-[#624b1e]/70 bg-gradient-to-b from-[#30281a] to-[#090b09] shadow-[inset_0_2px_4px_#000]" />
+            <div className="absolute left-[9px] top-[7px] h-[3px] w-[13px] rotate-[-28deg] rounded-full bg-white/50 blur-[.3px]" />
+            <div className="relative h-[5px] w-[5px] rounded-full bg-[#d7b45b] shadow-[0_0_6px_rgba(229,199,121,.7)]" />
+          </div>
+          <div className="absolute bottom-[2px] left-1/2 -translate-x-1/2 text-[6px] font-black uppercase tracking-[.38em] text-white/30">Automatic Dealer</div>
+        </div>
+
+        {/* Integrated output ramp and eject slot */}
+        <div className="absolute left-[67px] top-[-49px] h-[111px] w-[166px]" style={{ transform: "translateZ(24px)" }}>
+          <div className="absolute inset-x-0 bottom-0 h-[36px] rounded-[12px] border border-[#c9ad68]/40 bg-gradient-to-b from-[#333a36] via-[#171c19] to-[#050807] shadow-[0_17px_27px_rgba(0,0,0,.72),inset_0_1px_2px_rgba(255,255,255,.22)]" />
+          <div className="absolute inset-x-3 bottom-[31px] h-[11px] rounded-full border border-[#c9ad68]/20 bg-black shadow-[inset_0_4px_8px_rgba(0,0,0,.98)]" />
+          <div className="absolute inset-x-4 bottom-[41px] h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#e5c779]/80 to-transparent shadow-[0_0_8px_rgba(229,199,121,.55)]" />
+          {/* Staged card stack, offset to show individual paper edges */}
+          {[0, 1, 2, 3].map((i) => {
+            const isTop = i === 3;
+            const offset = (3 - i) * 7;
+            const dispensing = isTop && cycle === "dispense";
+            const rising = cycle === "refill";
+            return (
+              <ShoeCard
+                key={i}
+                className={dispensing ? "royal-motion" : rising ? "royal-motion" : ""}
+                style={{
+                  left: `${42 + offset * 0.38}px`,
+                  bottom: `${28 + offset}px`,
+                  transform: `translateZ(${3 + i * 3}px) rotate(${(i - 1.5) * 1.35}deg)`,
+                  animation: dispensing
+                    ? "royal-card-dispense 450ms cubic-bezier(.2,.75,.3,1) both"
+                    : rising
+                      ? "royal-stack-rise 480ms cubic-bezier(.2,.8,.25,1) both"
+                      : undefined,
+                }}
+              />
+            );
+          })}
+          {cycle === "refill" && (
+            <div className="royal-motion absolute left-[43px] bottom-[27px] h-[58px] w-[42px] rounded-[5px] border border-[#c6a85e]/60 shadow-[0_10px_18px_rgba(0,0,0,.6)]" style={{ background: CARD_BG, animation: "royal-card-enter 430ms cubic-bezier(.18,.75,.25,1) both" }}>
+              <div className="absolute inset-[4px] rounded-[3px] border border-[#e4c879]/55" />
+              <div className="absolute inset-0 flex items-center justify-center text-[15px] text-[#e4c879]/80">♠</div>
+            </div>
           )}
-          <div className="absolute bottom-[4px] left-1/2 z-30 -translate-x-1/2 whitespace-nowrap text-[7px] font-bold tracking-[.28em] text-[#c9b77f]/80">PRECISION DEALER</div>
+          <div className="absolute bottom-[2px] left-1/2 z-20 -translate-x-1/2 whitespace-nowrap text-[6px] font-bold uppercase tracking-[.3em] text-[#d3bd7d]/75">Precision card delivery</div>
         </div>
       </div>
     </div>
