@@ -131,7 +131,7 @@ function SidePill({
 
         <div className={`relative overflow-hidden ${THEMES[s.settings.theme]} px-2 py-4 sm:px-9 sm:py-5`}>
           {s.celebrate > 0 && <Confetti key={s.celebrate} />}
-          <DealerShoe className="absolute -right-14 -top-8 z-0 hidden sm:block" />
+          <DealerShoe className="absolute -right-12 -top-6 z-0 hidden sm:block" />
           {s.shuffling && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/60" role="status">
               <div className="flex gap-3 text-3xl text-[#e5c779]">
