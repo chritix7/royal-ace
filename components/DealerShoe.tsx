@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+
 type ShoeStatus = {
   label: string;
   tone: "gold" | "green" | "red" | "orange" | "white";
@@ -12,12 +14,48 @@ export default function DealerShoe({
 }) {
   const label = status.label.toLowerCase();
 
+  const [cardPhase, setCardPhase] = useState<"idle" | "out" | "in">("idle");
+  const firstRender = useRef(true);
+
+  useEffect(() => {
+    // Ignore le premier montage : évite l’animation au changement de mode
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+
+    if (label === "dealing") {
+      setCardPhase("out");
+
+      const timeout = setTimeout(() => {
+        setCardPhase("in");
+      }, 950);
+
+      return () => clearTimeout(timeout);
+    }
+
+    if (label === "shuffling") {
+      setCardPhase("idle");
+      return;
+    }
+
+    if (cardPhase === "in") {
+      const timeout = setTimeout(() => {
+        setCardPhase("idle");
+      }, 750);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [label]);
+
   const cardAnimation =
-    label === "dealing"
+    cardPhase === "out"
       ? "animate-shoe-card-dispense"
-      : label === "shuffling"
-        ? "opacity-0"
-        : "animate-shoe-card-return";
+      : cardPhase === "in"
+        ? "animate-shoe-card-return"
+        : label === "shuffling"
+          ? "opacity-0"
+          : "";
 
     const toneStyles: Record<ShoeStatus["tone"], string> = {
     gold: "bg-[#e5c779] shadow-[0_0_14px_rgba(229,199,121,0.95)]",
@@ -227,9 +265,12 @@ export default function DealerShoe({
 
         {/* Carte prête à être distribuée */}
         <div
-          key={status.label}
           className={`absolute bottom-[16px] left-[42px] h-[82px] w-[56px] rounded-[5px] border border-black/60 shadow-[0_28px_52px_rgba(0,0,0,0.8)] ${cardAnimation}`}
           style={{
+            transform:
+              cardPhase === "idle"
+                ? "translateZ(38px) rotateZ(-2deg)"
+                : undefined,
             background:
               "repeating-linear-gradient(45deg, #142d27 0 5px, #1b3d33 5px 10px)",
           }}

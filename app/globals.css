@@ -354,37 +354,45 @@ body {
 
 @keyframes shoe-card-dispense {
   0% {
-    transform: translateZ(38px) rotateZ(-2deg);
     opacity: 1;
+    transform: translateZ(38px) rotateZ(-2deg);
   }
 
-  55% {
-    transform: translateZ(58px) rotateZ(-1deg);
+  35% {
+    transform: translateZ(46px) rotateZ(-1.5deg);
+  }
+
+  70% {
     opacity: 1;
+    transform: translateZ(64px) rotateZ(-0.5deg);
   }
 
   100% {
-    transform: translateZ(78px) rotateZ(0deg);
     opacity: 0;
+    transform: translateZ(84px) rotateZ(0deg);
   }
 }
 
 .animate-shoe-card-dispense {
-  animation: shoe-card-dispense 0.9s cubic-bezier(0.3, 0.75, 0.2, 1) both;
+  animation: shoe-card-dispense 0.95s cubic-bezier(0.35, 0.7, 0.25, 1) both;
 }
 
 @keyframes shoe-card-return {
   0% {
-    transform: translateZ(78px) rotateZ(0deg);
     opacity: 0;
+    transform: translateZ(84px) rotateZ(0deg);
+  }
+
+  35% {
+    opacity: 1;
+    transform: translateZ(58px) rotateZ(-1deg);
   }
 
   100% {
     transform: translateZ(38px) rotateZ(-2deg);
-    opacity: 1;
   }
 }
 
 .animate-shoe-card-return {
-  animation: shoe-card-return 0.7s cubic-bezier(0.22, 0.8, 0.24, 1) both;
+  animation: shoe-card-return 0.75s cubic-bezier(0.22, 0.8, 0.24, 1) both;
 }
