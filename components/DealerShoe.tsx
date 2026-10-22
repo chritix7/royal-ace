@@ -236,7 +236,7 @@ export default function DealerShoe({
           <div className="absolute bottom-6 left-6 h-[78px] w-[165px] rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.09] to-black/70 shadow-[inset_0_10px_28px_rgba(0,0,0,0.98)]">
             <div className="absolute inset-x-4 top-2 h-[3px] rounded-full bg-white/10" />
 
-            {/* Pile de cartes */}
+                        {/* Pile de cartes */}
             <div
               className="absolute bottom-3 left-3 h-[58px] w-[42px] rounded-[4px] border border-black/50 bg-gradient-to-b from-[#e9e2d1] to-[#cfc7b1] shadow-[0_10px_18px_rgba(0,0,0,0.55)]"
               style={{ transform: "translateZ(4px)" }}
@@ -249,6 +249,21 @@ export default function DealerShoe({
               className="absolute bottom-5 left-[31px] h-[58px] w-[42px] rounded-[4px] border border-black/50 bg-gradient-to-b from-[#f8f5ec] to-[#e7e1d1] shadow-[0_10px_18px_rgba(0,0,0,0.55)]"
               style={{ transform: "translateZ(14px)" }}
             />
+
+            {/* Carte au repos, prête à sortir */}
+            <div
+              className={`absolute bottom-[14px] left-[38px] h-[62px] w-[44px] rounded-[4px] border border-black/50 shadow-[0_10px_18px_rgba(0,0,0,0.55)] transition-opacity duration-200 ${
+                cardPhase === "idle" ? "opacity-100" : "opacity-0"
+              }`}
+              style={{
+                background:
+                  "repeating-linear-gradient(45deg, #142d27 0 5px, #1b3d33 5px 10px)",
+              }}
+            >
+              <div className="absolute inset-1.5 flex items-center justify-center rounded-[3px] border border-[#d7b45b]/45 text-[#d7b45b]">
+                ♠
+              </div>
+            </div>
           </div>
 
           {/* Bouton doré */}
@@ -257,37 +272,35 @@ export default function DealerShoe({
             <div className="absolute left-2.5 top-2 h-[4px] w-5 rounded-full bg-white/45" />
           </div>
 
-                  {/* Texte gravé */}
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[8px] font-black uppercase tracking-[0.42em] text-white/25">
-          Automatic Dealer
+          {/* Texte gravé */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[8px] font-black uppercase tracking-[0.42em] text-white/25">
+            Automatic Dealer
+          </div>
+        </div>
+      </div>
+
+      {/* Carte d’animation : sort par la fente avant */}
+      <div className="pointer-events-none absolute inset-0">
+        <div
+          className={`absolute h-[58px] w-[42px] rounded-[4px] border border-black/50 shadow-[0_16px_30px_rgba(0,0,0,0.6)] ${
+            cardPhase === "out"
+              ? "animate-shoe-card-dispense"
+              : cardPhase === "in"
+                ? "animate-shoe-card-return"
+                : "opacity-0"
+          }`}
+          style={{
+            left: "52%",
+            top: "62%",
+            background:
+              "repeating-linear-gradient(45deg, #142d27 0 5px, #1b3d33 5px 10px)",
+          }}
+        >
+          <div className="absolute inset-1.5 flex items-center justify-center rounded-[3px] border border-[#d7b45b]/45 text-[#d7b45b]">
+            ♠
+          </div>
         </div>
       </div>
     </div>
-
-    {/* Carte qui sort de la fente avant */}
-    <div className="pointer-events-none absolute inset-0">
-      <div
-        className={`absolute h-[74px] w-[52px] rounded-[5px] border border-black/60 shadow-[0_18px_36px_rgba(0,0,0,0.65)] ${cardAnimation}`}
-        style={{
-          left: "56%",
-          top: "58%",
-          transformOrigin: "center",
-          background:
-            "repeating-linear-gradient(45deg, #142d27 0 5px, #1b3d33 5px 10px)",
-        }}
-      >
-        {/* Halo de sortie */}
-        <div className="absolute -inset-2 rounded-lg bg-[#e5c779]/10 blur-md" />
-
-        <div className="absolute inset-2 flex items-center justify-center rounded-[3px] border border-[#d7b45b]/45 text-[#d7b45b]">
-          ♠
-        </div>
-
-        <div className="absolute inset-x-2 top-2 h-[4px] rounded-full bg-gradient-to-r from-white/25 to-transparent" />
-
-        <div className="absolute inset-x-2 bottom-2 h-[2px] rounded-full bg-black/40" />
-      </div>
-    </div>
-  </div>
-);
+  );
 }
