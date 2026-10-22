@@ -355,21 +355,21 @@ body {
 @keyframes shoe-card-dispense {
   0% {
     opacity: 1;
-    transform: translateZ(38px) rotateZ(-2deg);
+    transform: translate3d(0, 0, 38px) rotateZ(-2deg);
   }
 
-  35% {
-    transform: translateZ(46px) rotateZ(-1.5deg);
+  30% {
+    transform: translate3d(0, 14px, 36px) rotateZ(-1.5deg);
   }
 
   70% {
     opacity: 1;
-    transform: translateZ(64px) rotateZ(-0.5deg);
+    transform: translate3d(0, 34px, 30px) rotateZ(-0.5deg);
   }
 
   100% {
     opacity: 0;
-    transform: translateZ(84px) rotateZ(0deg);
+    transform: translate3d(0, 52px, 24px) rotateZ(0deg);
   }
 }
 
@@ -380,16 +380,16 @@ body {
 @keyframes shoe-card-return {
   0% {
     opacity: 0;
-    transform: translateZ(84px) rotateZ(0deg);
+    transform: translate3d(0, 52px, 24px) rotateZ(0deg);
   }
 
   35% {
     opacity: 1;
-    transform: translateZ(58px) rotateZ(-1deg);
+    transform: translate3d(0, 20px, 34px) rotateZ(-1deg);
   }
 
   100% {
-    transform: translateZ(38px) rotateZ(-2deg);
+    transform: translate3d(0, 0, 38px) rotateZ(-2deg);
   }
 }
 
