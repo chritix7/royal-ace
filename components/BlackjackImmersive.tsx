@@ -475,7 +475,7 @@ const playerCardStyle = (
   <Confetti key={s.celebrate} />
 )}
 
-<DealerShoe className="absolute -right-16 -top-10 z-0 hidden md:block" />
+<DealerShoe className="absolute -right-14 -top-8 z-0 hidden md:block" />
 
                 <div className="relative flex min-h-0 flex-col items-center justify-center gap-2 overflow-y-auto overflow-x-hidden px-3 py-2">
 
