@@ -257,34 +257,37 @@ export default function DealerShoe({
             <div className="absolute left-2.5 top-2 h-[4px] w-5 rounded-full bg-white/45" />
           </div>
 
-          {/* Texte gravé */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[8px] font-black uppercase tracking-[0.42em] text-white/25">
-            Automatic Dealer
-          </div>
-        </div>
-
-        {/* Carte prête à être distribuée */}
-        <div
-          className={`absolute bottom-[16px] left-[42px] h-[82px] w-[56px] rounded-[5px] border border-black/60 shadow-[0_28px_52px_rgba(0,0,0,0.8)] ${cardAnimation}`}
-          style={{
-            transform:
-              cardPhase === "idle"
-                ? "translateZ(38px) rotateZ(-2deg)"
-                : undefined,
-            background:
-              "repeating-linear-gradient(45deg, #142d27 0 5px, #1b3d33 5px 10px)",
-          }}
-        >
-          {/* Halo de sortie */}
-          <div className="absolute -inset-2 rounded-lg bg-[#e5c779]/10 blur-md" />
-
-          <div className="absolute inset-2 flex items-center justify-center rounded-[3px] border border-[#d7b45b]/45 text-[#d7b45b]">
-            ♠
-          </div>
-          <div className="absolute inset-x-2 top-2 h-[4px] rounded-full bg-gradient-to-r from-white/25 to-transparent" />
-          <div className="absolute inset-x-2 bottom-2 h-[2px] rounded-full bg-black/40" />
+                  {/* Texte gravé */}
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[8px] font-black uppercase tracking-[0.42em] text-white/25">
+          Automatic Dealer
         </div>
       </div>
     </div>
-  );
+
+    {/* Carte qui sort de la fente avant */}
+    <div className="pointer-events-none absolute inset-0">
+      <div
+        className={`absolute h-[74px] w-[52px] rounded-[5px] border border-black/60 shadow-[0_18px_36px_rgba(0,0,0,0.65)] ${cardAnimation}`}
+        style={{
+          left: "56%",
+          top: "58%",
+          transformOrigin: "center",
+          background:
+            "repeating-linear-gradient(45deg, #142d27 0 5px, #1b3d33 5px 10px)",
+        }}
+      >
+        {/* Halo de sortie */}
+        <div className="absolute -inset-2 rounded-lg bg-[#e5c779]/10 blur-md" />
+
+        <div className="absolute inset-2 flex items-center justify-center rounded-[3px] border border-[#d7b45b]/45 text-[#d7b45b]">
+          ♠
+        </div>
+
+        <div className="absolute inset-x-2 top-2 h-[4px] rounded-full bg-gradient-to-r from-white/25 to-transparent" />
+
+        <div className="absolute inset-x-2 bottom-2 h-[2px] rounded-full bg-black/40" />
+      </div>
+    </div>
+  </div>
+);
 }

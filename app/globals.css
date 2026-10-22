@@ -355,41 +355,41 @@ body {
 @keyframes shoe-card-dispense {
   0% {
     opacity: 1;
-    transform: translate3d(0, 0, 38px) rotateZ(-2deg);
+    transform: translate(-50%, -50%) rotate(-4deg);
   }
 
   30% {
-    transform: translate3d(0, 14px, 36px) rotateZ(-1.5deg);
+    transform: translate(-50%, -38%) rotate(-2deg);
   }
 
   70% {
     opacity: 1;
-    transform: translate3d(0, 34px, 30px) rotateZ(-0.5deg);
+    transform: translate(-50%, -16%) rotate(0deg);
   }
 
   100% {
     opacity: 0;
-    transform: translate3d(0, 52px, 24px) rotateZ(0deg);
+    transform: translate(-50%, 4%) rotate(2deg);
   }
 }
 
 .animate-shoe-card-dispense {
-  animation: shoe-card-dispense 0.95s cubic-bezier(0.35, 0.7, 0.25, 1) both;
+  animation: shoe-card-dispense 0.9s cubic-bezier(0.35, 0.7, 0.25, 1) both;
 }
 
 @keyframes shoe-card-return {
   0% {
     opacity: 0;
-    transform: translate3d(0, 52px, 24px) rotateZ(0deg);
+    transform: translate(-50%, 4%) rotate(2deg);
   }
 
   35% {
     opacity: 1;
-    transform: translate3d(0, 20px, 34px) rotateZ(-1deg);
+    transform: translate(-50%, -20%) rotate(0deg);
   }
 
   100% {
-    transform: translate3d(0, 0, 38px) rotateZ(-2deg);
+    transform: translate(-50%, -50%) rotate(-4deg);
   }
 }
 
