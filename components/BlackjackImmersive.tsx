@@ -18,6 +18,7 @@ import PlayingCard from "./PlayingCard";
 import Sidebar from "./Sidebar";
 import Confetti from "./Confetti";
 import { useModalFocus } from "./useModalFocus";
+import DealerShoe from "./DealerShoe";
 
 const signed = (value: number) =>
   `${value > 0 ? "+" : value < 0 ? "−" : ""}◈ ${money(Math.abs(value))}`;
@@ -474,60 +475,7 @@ const playerCardStyle = (
   <Confetti key={s.celebrate} />
 )}
 
-{/* Demi-sabot 3D dans l’angle supérieur droit */}
-<div
-  aria-hidden="true"
-  className="pointer-events-none absolute -right-12 -top-8 z-0 hidden md:block"
->
-  <div
-    className="relative h-28 w-52"
-    style={{
-      perspective: "900px",
-      transform: "rotateX(14deg) rotateY(-16deg)",
-      transformStyle: "preserve-3d",
-    }}
-  >
-    {/* Corps du sabot */}
-    <div className="absolute inset-0 rounded-l-xl border border-black/60 bg-gradient-to-br from-[#263f35] via-[#172a23] to-[#0b1512] shadow-[0_22px_44px_rgba(0,0,0,0.55)]">
-      {/* Face supérieure */}
-      <div className="absolute inset-x-2 top-2 h-3.5 rounded-t-md bg-gradient-to-b from-white/15 to-transparent" />
-
-      {/* Cartes empilées */}
-      <div className="absolute left-5 top-5 h-20 w-13 rotate-[-7deg] rounded-[3px] border border-black/50 bg-gradient-to-b from-[#f8f5ec] to-[#e7e1d1] shadow-[0_5px_12px_rgba(0,0,0,0.4)]" />
-      <div className="absolute left-7 top-4 h-20 w-13 rotate-[-3deg] rounded-[3px] border border-black/50 bg-gradient-to-b from-[#f3efe4] to-[#ded7c4] shadow-[0_5px_12px_rgba(0,0,0,0.4)]" />
-      <div className="absolute left-9 top-3.5 h-20 w-13 rounded-[3px] border border-black/50 bg-gradient-to-b from-[#f8f5ec] to-[#e7e1d1] shadow-[0_5px_12px_rgba(0,0,0,0.4)]" />
-
-      {/* Dos de carte visible */}
-      <div
-        className="absolute left-9 top-3.5 h-20 w-13 rounded-[3px] border border-[#d7b45b]/50"
-        style={{
-          background:
-            "repeating-linear-gradient(45deg, #142d27 0 5px, #1b3d33 5px 10px)",
-        }}
-      >
-        <div className="absolute inset-1.5 flex items-center justify-center rounded-[2px] border border-[#d7b45b]/40 text-[#d7b45b]">
-          ♠
-        </div>
-      </div>
-
-      {/* Fente de distribution */}
-      <div className="absolute bottom-5 left-5 h-2.5 w-28 rounded-full bg-black/70 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]" />
-      <div className="absolute bottom-[26px] left-5 h-[3px] w-28 rounded-full bg-white/10" />
-    </div>
-
-    {/* Épaisseur du sabot */}
-    <div
-      className="absolute right-0 top-3 h-[104px] w-5 rounded-r-md bg-gradient-to-b from-[#0f1f1a] to-[#050b09]"
-      style={{
-        transform: "translateX(12px) rotateY(55deg)",
-        transformOrigin: "left center",
-      }}
-    />
-
-    {/* Ombre au sol */}
-    <div className="absolute -bottom-4 left-3 h-5 w-48 rounded-full bg-black/50 blur-md" />
-  </div>
-</div>
+<DealerShoe className="absolute -right-16 -top-10 z-0 hidden sm:block" />
 
                 <div className="relative flex min-h-0 flex-col items-center justify-center gap-2 overflow-y-auto overflow-x-hidden px-3 py-2">
 

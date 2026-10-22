@@ -7,6 +7,7 @@ import { ChipStack } from "./ui";
 import PlayingCard from "./PlayingCard";
 import Confetti from "./Confetti";
 import type { Game } from "../lib/useBlackjack";
+import DealerShoe from "./DealerShoe";
 
 const RESULT_UI: Record<Result, { label: string; cls: string }> = {
   blackjack: { label: "Blackjack", cls: "border-[#e5c779] bg-[#e5c779]/20 text-[#f5d778]" },
@@ -130,60 +131,7 @@ function SidePill({
 
         <div className={`relative overflow-hidden ${THEMES[s.settings.theme]} px-2 py-4 sm:px-9 sm:py-5`}>
           {s.celebrate > 0 && <Confetti key={s.celebrate} />}
-          {/* Demi-sabot 3D dans l’angle supérieur droit */}
-<div
-  aria-hidden="true"
-  className="pointer-events-none absolute -right-10 -top-6 z-0 hidden sm:block"
->
-  <div
-    className="relative h-24 w-44"
-    style={{
-      perspective: "800px",
-      transform: "rotateX(12deg) rotateY(-14deg)",
-      transformStyle: "preserve-3d",
-    }}
-  >
-    {/* Corps du sabot */}
-    <div className="absolute inset-0 rounded-l-xl border border-black/60 bg-gradient-to-br from-[#263f35] via-[#172a23] to-[#0b1512] shadow-[0_18px_36px_rgba(0,0,0,0.55)]">
-      {/* Face supérieure */}
-      <div className="absolute inset-x-2 top-1.5 h-3 rounded-t-md bg-gradient-to-b from-white/15 to-transparent" />
-
-      {/* Cartes empilées */}
-      <div className="absolute left-4 top-4 h-16 w-11 rotate-[-6deg] rounded-[3px] border border-black/50 bg-gradient-to-b from-[#f8f5ec] to-[#e7e1d1] shadow-[0_4px_10px_rgba(0,0,0,0.35)]" />
-      <div className="absolute left-6 top-3.5 h-16 w-11 rotate-[-3deg] rounded-[3px] border border-black/50 bg-gradient-to-b from-[#f3efe4] to-[#ded7c4] shadow-[0_4px_10px_rgba(0,0,0,0.35)]" />
-      <div className="absolute left-8 top-3 h-16 w-11 rounded-[3px] border border-black/50 bg-gradient-to-b from-[#f8f5ec] to-[#e7e1d1] shadow-[0_4px_10px_rgba(0,0,0,0.35)]" />
-
-      {/* Motif du dos de carte */}
-      <div
-        className="absolute left-8 top-3 h-16 w-11 rounded-[3px] border border-[#d7b45b]/50"
-        style={{
-          background:
-            "repeating-linear-gradient(45deg, #142d27 0 5px, #1b3d33 5px 10px)",
-        }}
-      >
-        <div className="absolute inset-1 flex items-center justify-center rounded-[2px] border border-[#d7b45b]/40 text-[#d7b45b]">
-          ♠
-        </div>
-      </div>
-
-      {/* Fente de distribution */}
-      <div className="absolute bottom-4 left-4 h-2 w-24 rounded-full bg-black/70 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]" />
-      <div className="absolute bottom-[22px] left-4 h-[3px] w-24 rounded-full bg-white/10" />
-    </div>
-
-    {/* Épaisseur / côté droit du sabot */}
-    <div
-      className="absolute right-0 top-2 h-[88px] w-4 rounded-r-md bg-gradient-to-b from-[#0f1f1a] to-[#050b09]"
-      style={{
-        transform: "translateX(10px) rotateY(55deg)",
-        transformOrigin: "left center",
-      }}
-    />
-
-    {/* Ombre au sol */}
-    <div className="absolute -bottom-3 left-2 h-4 w-40 rounded-full bg-black/45 blur-md" />
-  </div>
-</div>
+          <DealerShoe className="absolute -right-16 -top-10 z-0 hidden sm:block" />
           {s.shuffling && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/60" role="status">
               <div className="flex gap-3 text-3xl text-[#e5c779]">
