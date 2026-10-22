@@ -200,11 +200,11 @@ function ResultRail({
 
   return (
     <aside
-      className="absolute right-4 top-1/2 z-30 hidden -translate-y-1/2 md:block"
+      className="absolute left-4 top-1/2 z-30 hidden -translate-y-1/2 md:block"
       aria-live="polite"
     >
       <div
-        className={`origin-right transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`origin-left transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           showResult
             ? "scale-100 opacity-100"
             : "scale-[0.94] opacity-95"
