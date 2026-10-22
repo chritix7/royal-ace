@@ -7,110 +7,123 @@ export default function DealerShoe({
     <div
       aria-hidden="true"
       className={`pointer-events-none select-none ${className}`}
-      style={{ perspective: "1400px" }}
+      style={{ perspective: "1500px" }}
     >
       <div
         className="relative"
         style={{
-          width: "200px",
-          height: "150px",
+          width: "210px",
+          height: "160px",
           transformStyle: "preserve-3d",
-          transform: "rotateX(60deg) rotateZ(-34deg)",
+          transform: "rotateX(61deg) rotateZ(-35deg)",
         }}
       >
-        {/* Ombre portée */}
+        {/* Ombre de contact au sol */}
         <div
-          className="absolute left-0 top-8 h-[130px] w-[200px] rounded-[30px] bg-black/50 blur-2xl"
-          style={{ transform: "translateZ(-30px)" }}
+          className="absolute left-1 top-10 h-[135px] w-[205px] rounded-[36px] bg-black/55 blur-2xl"
+          style={{ transform: "translateZ(-34px)" }}
         />
 
-        {/* Paroi intérieure gauche */}
+        {/* Paroi interne gauche */}
         <div
-          className="absolute left-0 top-0 h-[120px] w-[16px] rounded-l-[10px] bg-gradient-to-b from-[#0d1814] to-[#040806]"
+          className="absolute left-0 top-0 h-[128px] w-[20px] rounded-l-[14px] bg-gradient-to-b from-[#0b1512] via-[#050b08] to-black"
           style={{
             transformOrigin: "right center",
-            transform: "rotateY(-90deg) translateZ(8px)",
+            transform: "rotateY(-90deg) translateZ(10px)",
           }}
         />
 
         {/* Face avant */}
         <div
-          className="absolute left-0 top-[120px] h-[30px] w-[184px] rounded-b-[12px] border border-black/70 bg-gradient-to-b from-[#20362d] to-[#060c09]"
+          className="absolute left-0 top-[128px] h-[34px] w-[196px] rounded-b-[16px] border border-black/70 bg-gradient-to-b from-[#243c32] via-[#12211b] to-[#040806]"
           style={{
             transformOrigin: "top center",
             transform: "rotateX(-90deg)",
           }}
         >
-          <div className="mx-4 mt-2 h-[3px] rounded-full bg-white/10" />
-          <div className="mx-4 mt-1 h-[2px] rounded-full bg-black/60" />
+          {/* Moulure horizontale */}
+          <div className="mx-5 mt-2 h-[4px] rounded-full bg-gradient-to-b from-white/15 to-transparent" />
+          <div className="mx-5 mt-[3px] h-[3px] rounded-full bg-black/70" />
+          {/* Reflet bas */}
+          <div className="mx-8 mt-2 h-[2px] rounded-full bg-white/5" />
         </div>
 
         {/* Côté droit */}
         <div
-          className="absolute left-[184px] top-0 h-[120px] w-[30px] rounded-r-[12px] border border-black/70 bg-gradient-to-b from-[#16281f] to-[#040806]"
+          className="absolute left-[196px] top-0 h-[128px] w-[34px] rounded-r-[16px] border border-black/70 bg-gradient-to-b from-[#1a2c25] via-[#0d1814] to-[#030604]"
           style={{
             transformOrigin: "left center",
             transform: "rotateY(90deg)",
           }}
         >
-          <div className="absolute inset-y-2 left-1 w-[2px] rounded-full bg-white/10" />
+          {/* Fente de distribution */}
+          <div className="absolute left-1 top-8 h-[10px] w-[26px] rounded-full bg-black shadow-[inset_0_2px_6px_rgba(0,0,0,0.95)]" />
+          <div className="absolute left-1 top-[30px] h-[3px] w-[26px] rounded-full bg-white/10" />
+
+          {/* Reflet vertical */}
+          <div className="absolute inset-y-3 left-[3px] w-[3px] rounded-full bg-white/15" />
         </div>
 
         {/* Dessus du sabot */}
         <div
-          className="absolute left-0 top-0 h-[120px] w-[184px] rounded-[12px] border border-black/70 bg-gradient-to-br from-[#314e41] via-[#1b2f27] to-[#0a1310] shadow-[0_36px_70px_rgba(0,0,0,0.6)]"
-          style={{ transform: "translateZ(30px)" }}
+          className="absolute left-0 top-0 h-[128px] w-[196px] rounded-[16px] border border-black/70 bg-gradient-to-br from-[#38584a] via-[#1d332a] to-[#081210] shadow-[0_42px_80px_rgba(0,0,0,0.65)]"
+          style={{ transform: "translateZ(34px)" }}
         >
-          {/* Couvercle incliné */}
+          {/* Reflet satiné global */}
+          <div className="absolute inset-0 rounded-[16px] bg-gradient-to-br from-white/15 via-transparent to-black/30" />
+
+          {/* Couvercle articulé */}
           <div
-            className="absolute inset-x-2 top-2 h-[34px] rounded-t-lg bg-gradient-to-b from-[#3b5a4b] to-[#15251f] shadow-[0_10px_18px_rgba(0,0,0,0.45)]"
+            className="absolute inset-x-3 top-3 h-[44px] rounded-t-xl bg-gradient-to-b from-[#456a59] via-[#23392f] to-[#101d18] shadow-[0_16px_28px_rgba(0,0,0,0.55)]"
             style={{
               transformOrigin: "bottom center",
-              transform: "rotateX(-18deg)",
+              transform: "rotateX(-22deg)",
             }}
           >
-            <div className="absolute inset-x-3 top-2 h-[3px] rounded-full bg-white/20" />
-            <div className="absolute inset-x-3 bottom-2 h-[2px] rounded-full bg-black/40" />
+            <div className="absolute inset-x-4 top-3 h-[4px] rounded-full bg-gradient-to-r from-white/25 via-white/5 to-transparent" />
+            <div className="absolute inset-x-4 bottom-3 h-[3px] rounded-full bg-black/50" />
+
+            {/* Charnière */}
+            <div className="absolute -bottom-1 left-1/2 h-2 w-16 -translate-x-1/2 rounded-full bg-gradient-to-b from-[#0c1613] to-black shadow-[0_2px_5px_rgba(0,0,0,0.7)]" />
           </div>
 
-          {/* Cuvette des cartes */}
-          <div className="absolute bottom-4 left-4 h-[64px] w-[104px] rounded-lg bg-black/65 shadow-[inset_0_4px_14px_rgba(0,0,0,0.9)]" />
+          {/* Cuvette à cartes */}
+          <div className="absolute bottom-5 left-5 h-[68px] w-[116px] rounded-xl bg-black/70 shadow-[inset_0_6px_18px_rgba(0,0,0,0.95)]">
+            <div className="absolute inset-x-2 top-1 h-[3px] rounded-full bg-white/5" />
+          </div>
 
           {/* Pile de cartes */}
           <div
-            className="absolute bottom-[18px] left-[16px] h-[58px] w-[40px] rounded-[3px] border border-black/50 bg-gradient-to-b from-[#efe9da] to-[#d6cfba] shadow-[0_8px_16px_rgba(0,0,0,0.5)]"
+            className="absolute bottom-[20px] left-[18px] h-[62px] w-[44px] rounded-[4px] border border-black/50 bg-gradient-to-b from-[#e9e2d1] to-[#cfc7b1] shadow-[0_10px_18px_rgba(0,0,0,0.55)]"
             style={{ transform: "translateZ(4px)" }}
           />
           <div
-            className="absolute bottom-[21px] left-[19px] h-[58px] w-[40px] rounded-[3px] border border-black/50 bg-gradient-to-b from-[#f6f2e7] to-[#e2dbc8] shadow-[0_8px_16px_rgba(0,0,0,0.5)]"
-            style={{ transform: "translateZ(8px)" }}
+            className="absolute bottom-[24px] left-[21px] h-[62px] w-[44px] rounded-[4px] border border-black/50 bg-gradient-to-b from-[#f1ecdf] to-[#d9d2bf] shadow-[0_10px_18px_rgba(0,0,0,0.55)]"
+            style={{ transform: "translateZ(9px)" }}
           />
           <div
-            className="absolute bottom-[24px] left-[22px] h-[58px] w-[40px] rounded-[3px] border border-black/50 bg-gradient-to-b from-[#f8f5ec] to-[#e7e1d1] shadow-[0_8px_16px_rgba(0,0,0,0.5)]"
-            style={{ transform: "translateZ(12px)" }}
+            className="absolute bottom-[28px] left-[24px] h-[62px] w-[44px] rounded-[4px] border border-black/50 bg-gradient-to-b from-[#f8f5ec] to-[#e7e1d1] shadow-[0_10px_18px_rgba(0,0,0,0.55)]"
+            style={{ transform: "translateZ(14px)" }}
           />
 
-          {/* Carte du dessus */}
+          {/* Carte supérieure */}
           <div
-            className="absolute bottom-[27px] left-[25px] h-[58px] w-[40px] rounded-[3px] border border-[#d7b45b]/60 shadow-[0_10px_20px_rgba(0,0,0,0.55)]"
+            className="absolute bottom-[32px] left-[27px] h-[62px] w-[44px] rounded-[4px] border border-[#d7b45b]/60 shadow-[0_14px_26px_rgba(0,0,0,0.6)]"
             style={{
-              transform: "translateZ(17px)",
+              transform: "translateZ(20px)",
               background:
                 "repeating-linear-gradient(45deg, #142d27 0 5px, #1b3d33 5px 10px)",
             }}
           >
-            <div className="absolute inset-1.5 flex items-center justify-center rounded-[2px] border border-[#d7b45b]/40 text-[#d7b45b]">
+            <div className="absolute inset-2 flex items-center justify-center rounded-[3px] border border-[#d7b45b]/45 text-[#d7b45b]">
               ♠
             </div>
-            <div className="absolute inset-x-1 top-1 h-[3px] rounded-full bg-white/10" />
+            <div className="absolute inset-x-2 top-1.5 h-[4px] rounded-full bg-gradient-to-r from-white/20 to-transparent" />
+            <div className="absolute inset-x-2 bottom-1.5 h-[2px] rounded-full bg-black/40" />
           </div>
 
-          {/* Fente de distribution */}
-          <div className="absolute bottom-5 right-5 h-3 w-[46px] rounded-full bg-black/85 shadow-[inset_0_2px_5px_rgba(0,0,0,0.95)]" />
-          <div className="absolute bottom-[30px] right-5 h-[3px] w-[46px] rounded-full bg-white/10" />
-
-          {/* Reflet principal */}
-          <div className="absolute inset-x-4 top-9 h-5 rounded-full bg-gradient-to-b from-white/15 to-transparent blur-[1px]" />
+          {/* Reflet spéculaire sur le plastique */}
+          <div className="absolute left-6 top-[52px] h-10 w-24 rotate-[-8deg] rounded-full bg-gradient-to-r from-white/15 via-white/5 to-transparent blur-[2px]" />
         </div>
       </div>
     </div>
