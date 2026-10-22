@@ -295,6 +295,46 @@ function ResultRail({
   );
 }
 
+function getShoeStatus(g: Game): {
+  label: string;
+  tone: "gold" | "green" | "red" | "orange" | "white";
+} {
+  const { s } = g;
+
+  if (s.shuffling) {
+    return { label: "Shuffling", tone: "orange" };
+  }
+
+  if (s.phase === "betting") {
+    return { label: "Ready", tone: "gold" };
+  }
+
+  if (s.phase === "dealing") {
+    return { label: "Dealing", tone: "gold" };
+  }
+
+  if (s.phase === "insurance") {
+    return { label: "Insurance", tone: "orange" };
+  }
+
+  if (s.phase === "player") {
+    return { label: "Your turn", tone: "green" };
+  }
+
+  if (s.phase === "dealer") {
+    return { label: "Dealer", tone: "white" };
+  }
+
+  if (s.phase === "settled") {
+    const net = s.net ?? 0;
+
+    if (net > 0) return { label: "Win", tone: "green" };
+    if (net < 0) return { label: "Loss", tone: "red" };
+    return { label: "Push", tone: "white" };
+  }
+
+  return { label: "Ready", tone: "gold" };
+}
 
 export default function BlackjackImmersive({
   g,
@@ -475,7 +515,10 @@ const playerCardStyle = (
   <Confetti key={s.celebrate} />
 )}
 
-<DealerShoe className="absolute -right-12 -top-6 z-0 hidden md:block" />
+<DealerShoe
+  className="absolute -right-12 -top-6 z-0 hidden md:block"
+  status={getShoeStatus(g)}
+/>
 
                 <div className="relative flex min-h-0 flex-col items-center justify-center gap-2 overflow-y-auto overflow-x-hidden px-3 py-2">
 

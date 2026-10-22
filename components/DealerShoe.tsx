@@ -1,8 +1,27 @@
+type ShoeStatus = {
+  label: string;
+  tone: "gold" | "green" | "red" | "orange" | "white";
+};
+
 export default function DealerShoe({
   className = "",
+  status = { label: "Ready", tone: "gold" },
 }: {
   className?: string;
+  status?: ShoeStatus;
 }) {
+    const toneStyles: Record<ShoeStatus["tone"], string> = {
+    gold: "bg-[#e5c779] shadow-[0_0_14px_rgba(229,199,121,0.95)]",
+    green: "bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.9)]",
+    red: "bg-red-400 shadow-[0_0_14px_rgba(248,113,113,0.9)]",
+    orange: "bg-orange-400 shadow-[0_0_14px_rgba(251,146,60,0.9)]",
+    white: "bg-white shadow-[0_0_14px_rgba(255,255,255,0.9)]",
+  };
+
+  const pulse =
+    status.tone === "orange" || status.label.toLowerCase() === "dealing"
+      ? "animate-pulse"
+      : "";
   return (
     <div
       aria-hidden="true"
@@ -127,15 +146,22 @@ export default function DealerShoe({
               </span>
 
               <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#e5c779]/60" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#e5c779] shadow-[0_0_14px_rgba(229,199,121,1)]" />
+                <span
+                  className={`absolute inline-flex h-full w-full rounded-full opacity-60 ${toneStyles[status.tone]} ${pulse ? "animate-ping" : ""}`}
+                />
+                <span
+                  className={`relative inline-flex h-2.5 w-2.5 rounded-full ${toneStyles[status.tone]} ${pulse}`}
+                />
               </span>
             </div>
 
             <div className="absolute inset-x-3 bottom-2 flex items-center justify-between">
-              <span className="text-[8px] font-bold uppercase tracking-[0.28em] text-white/55">
-                Ready
+              <span
+                className={`text-[8px] font-bold uppercase tracking-[0.28em] text-white/70 ${pulse}`}
+              >
+                {status.label}
               </span>
+
               <span className="text-[8px] font-bold tabular-nums tracking-[0.18em] text-white/35">
                 6 DECKS
               </span>

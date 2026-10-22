@@ -82,6 +82,47 @@ function SidePill({
   );
 }
 
+function getShoeStatus(g: Game): {
+  label: string;
+  tone: "gold" | "green" | "red" | "orange" | "white";
+} {
+  const { s } = g;
+
+  if (s.shuffling) {
+    return { label: "Shuffling", tone: "orange" };
+  }
+
+  if (s.phase === "betting") {
+    return { label: "Ready", tone: "gold" };
+  }
+
+  if (s.phase === "dealing") {
+    return { label: "Dealing", tone: "gold" };
+  }
+
+  if (s.phase === "insurance") {
+    return { label: "Insurance", tone: "orange" };
+  }
+
+  if (s.phase === "player") {
+    return { label: "Your turn", tone: "green" };
+  }
+
+  if (s.phase === "dealer") {
+    return { label: "Dealer", tone: "white" };
+  }
+
+  if (s.phase === "settled") {
+    const net = s.net ?? 0;
+
+    if (net > 0) return { label: "Win", tone: "green" };
+    if (net < 0) return { label: "Loss", tone: "red" };
+    return { label: "Push", tone: "white" };
+  }
+
+  return { label: "Ready", tone: "gold" };
+}
+
   export default function Table({ g }: { g: Game }) {
   const {
   s,
@@ -131,7 +172,10 @@ function SidePill({
 
         <div className={`relative overflow-hidden ${THEMES[s.settings.theme]} px-2 py-4 sm:px-9 sm:py-5`}>
           {s.celebrate > 0 && <Confetti key={s.celebrate} />}
-          <DealerShoe className="absolute -right-12 -top-6 z-0 hidden sm:block" />
+          <DealerShoe
+            className="absolute -right-12 -top-6 z-0 hidden sm:block"
+            status={getShoeStatus(g)}
+          />
           {s.shuffling && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/60" role="status">
               <div className="flex gap-3 text-3xl text-[#e5c779]">
