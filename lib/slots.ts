@@ -233,13 +233,15 @@ export function reelTimings(
   held: boolean[] = [],
   respin = false,
 ) {
-  const first = respin ? 700 : (turbo ? 600 : 700);
+  // Durées de base (en ms). Le mode turbo divise tout par deux ;
+  // les re-spins conservent les durées normales.
+  const first = respin ? 900 : (turbo ? 450 : 900);
 
-const step = respin ? 325 : (turbo ? 230 : 325);
+  const step = respin ? 325 : (turbo ? 162.5 : 325);
 
-const suspense = turbo ? 450 : 650;
+  const suspense = turbo ? 325 : 650;
 
-const landMs = respin ? 280 : (turbo ? 240 : 280);
+  const landMs = respin ? 280 : (turbo ? 140 : 280);
 
   const stopAt: number[] = [];
   const anticipate: boolean[] = [];
