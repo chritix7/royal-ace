@@ -42,17 +42,25 @@ export const wallet = {
   },
 
   setBalanceDurable(value: number) {
-  if (!Number.isFinite(value) || value < 0) {
-    throw new Error("Invalid wallet balance.");
-  }
+    if (!Number.isFinite(value) || value < 0) {
+      throw new Error("Invalid wallet balance.");
+    }
 
-  localStorage.setItem(KEY, JSON.stringify({ balance: value }));
+    try {
+      localStorage.setItem(KEY, JSON.stringify({ balance: value }));
+    } catch (error) {
+      // Durable = l'appelant compte sur la persistance pour que le solde
+      // tienne un rafraîchissement. On loggue et on relance ; le pipeline
+      // d'erreur du blackjack (storageFailure) prend le relais.
+      console.error("Wallet durable persist failed", error);
+      throw error;
+    }
 
-  if (value === balance) return;
+    if (value === balance) return;
 
-  balance = value;
-  emit();
-},
+    balance = value;
+    emit();
+  },
 
   subscribe(listener: Listener) {
     listeners.add(listener);

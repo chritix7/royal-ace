@@ -65,7 +65,15 @@ const actions = new Set([
 ]);
 
 export function readRecovery(): RecoverySave | null {
-  const raw = localStorage.getItem(KEY);
+  let raw: string | null;
+  try {
+    raw = localStorage.getItem(KEY);
+  } catch (error) {
+    // Stockage indisponible (navigation privée, quota, etc.) :
+    // on reprend comme s'il n'y avait rien de sauvegardé.
+    console.warn("Blackjack recovery: storage unavailable", error);
+    return null;
+  }
   if (!raw) return null;
 
   const d = JSON.parse(raw) as RecoverySave;
@@ -111,7 +119,14 @@ export function readRecovery(): RecoverySave | null {
 }
 
 export function writeRecovery(save: RecoverySave) {
-  localStorage.setItem(KEY, JSON.stringify(save));
+  try {
+    localStorage.setItem(KEY, JSON.stringify(save));
+  } catch (error) {
+    // On loggue puis on relance : les callers de useBlackjack catchent déjà
+    // via storageFailure(), qui affiche un message à l'utilisateur.
+    console.error("Blackjack recovery: write failed", error);
+    throw error;
+  }
 }
 
 export function createPending(
