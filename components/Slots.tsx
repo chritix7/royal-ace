@@ -12,6 +12,7 @@ import Glyph from "./Glyph";
 import MiamiBackdrop from "./MiamiBackdrop";
 import SlotReels from "./SlotReels";
 import { Counter, machineSmall } from "./ui";
+import { money } from "../lib/game";
 import { SKINS, rankOf, type SkinId } from "../lib/skins";
 import { useSlots } from "../lib/useSlots";
 import {
@@ -30,8 +31,6 @@ import { useSession } from "../lib/sessionStore";
 import SlotsSidePanel from "./slots/SlotsSidePanel";
 import BonusResultModal from "./slots/BonusResultModal";
 import BuyBonusModal from "./slots/BuyBonusModal";
-
-const money = (n: number) => n.toLocaleString("en-US");
 
 function Led({
   label,

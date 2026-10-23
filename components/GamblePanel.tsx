@@ -2,10 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import { GAMBLE_MAX_ROUNDS, type CardColor } from "../lib/gamble";
+import { money } from "../lib/game";
 import type { GambleState } from "../lib/useSlots";
 import { useModalFocus } from "./useModalFocus";
-
-const money = (n: number) => n.toLocaleString("en-US");
 
 function Card3D({
   card,
