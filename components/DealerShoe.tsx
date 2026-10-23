@@ -78,9 +78,9 @@ export default function DealerShoe({
     >
       <style>{`
         @keyframes royal-card-dispense {
-          0% { transform: translate3d(0, 0, 8px) rotate(-1deg); opacity: 1; }
-          58% { transform: translate3d(1px, -42px, 15px) rotate(1deg); opacity: 1; }
-          100% { transform: translate3d(3px, -74px, 18px) rotate(3deg); opacity: 0; }
+          0% { transform: translate3d(0, 0, 8px) rotate(0deg); opacity: 1; }
+          58% { transform: translate3d(-25px, 22px, 15px) rotate(12deg); opacity: 1; }
+          100% { transform: translate3d(-48px, 42px, 18px) rotate(24deg); opacity: 0; }
         }
         @keyframes royal-stack-rise {
           0% { transform: translate3d(0, 12px, 0) rotate(-4deg) scale(.92); opacity: 0; }
@@ -184,7 +184,7 @@ export default function DealerShoe({
         </div>
 
         {/* Integrated output ramp and eject slot */}
-        <div className="absolute left-[67px] top-[-49px] h-[111px] w-[166px]" style={{ transform: "translateZ(24px)" }}>
+        <div className="absolute left-[70px] top-[-52px] h-[110px] w-[150px]" style={{ transform: "translateZ(24px)" }}>
           <div className="absolute inset-x-0 bottom-0 h-[36px] rounded-[12px] border border-[#c9ad68]/40 bg-gradient-to-b from-[#333a36] via-[#171c19] to-[#050807] shadow-[0_17px_27px_rgba(0,0,0,.72),inset_0_1px_2px_rgba(255,255,255,.22)]" />
           <div className="absolute inset-x-3 bottom-[31px] h-[11px] rounded-full border border-[#c9ad68]/20 bg-black shadow-[inset_0_4px_8px_rgba(0,0,0,.98)]" />
           <div className="absolute inset-x-4 bottom-[41px] h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#e5c779]/80 to-transparent shadow-[0_0_8px_rgba(229,199,121,.55)]" />
@@ -201,7 +201,7 @@ export default function DealerShoe({
                 style={{
                   left: `${42 + offset * 0.38}px`,
                   bottom: `${28 + offset}px`,
-                  transform: `translateZ(${3 + i * 3}px) rotate(${(i - 1.5) * 1.35}deg)`,
+                  transform: `translateZ(${3 + i * 3}px) rotate(${30 + (i - 1.5) * 1.35}deg)`,
                   animation: dispensing
                     ? "royal-card-dispense 450ms cubic-bezier(.2,.75,.3,1) both"
                     : rising
@@ -223,3 +223,5 @@ export default function DealerShoe({
     </div>
   );
 }
+
+
