@@ -121,11 +121,16 @@ export default function DealerShoe({
         }
         /* Scan line sweeping vertically across the hero spade */
         @keyframes bj-suit-scan {
-          0%   { transform: translateY(-24px); opacity: 0; }
+          0%   { transform: translateY(-20px); opacity: 0; }
           15%  { opacity: 1; }
-          50%  { transform: translateY(24px);  opacity: 1; }
+          50%  { transform: translateY(20px);  opacity: 1; }
           85%  { opacity: 1; }
-          100% { transform: translateY(-24px); opacity: 0; }
+          100% { transform: translateY(-20px); opacity: 0; }
+        }
+        /* PC-fan spin for the front wall vents */
+        @keyframes bj-fan-spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
         }
         /* LED pulse ring */
         @keyframes bj-led-pulse-ring {
@@ -224,6 +229,36 @@ export default function DealerShoe({
             <path d="M 50 5 C 50 5 82 28 82 55 C 82 70 73 80 63 80 C 58 80 54 77 52 73 C 52 83 54 90 60 95 L 40 95 C 46 90 48 83 48 73 C 46 77 42 80 37 80 C 27 80 18 70 18 55 C 18 28 50 5 50 5 Z"
                   fill="url(#dsg-engrave)" stroke="rgba(0,0,0,0.5)" strokeWidth="1" strokeLinejoin="round" />
           </symbol>
+
+          {/* PC-gaming-style fan vent for the front wall */}
+          <radialGradient id="dsg-fan-well" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"  stopColor="#141418" />
+            <stop offset="70%" stopColor="#0a0a0d" />
+            <stop offset="100%" stopColor="#030306" />
+          </radialGradient>
+          <symbol id="dsg-fan-casing" viewBox="0 0 40 40">
+            {/* Outer casing + gold rim */}
+            <circle cx="20" cy="20" r="18.5" fill="#060608" stroke="rgba(229, 199, 121, 0.55)" strokeWidth="0.9" />
+            {/* Recessed well */}
+            <circle cx="20" cy="20" r="16" fill="url(#dsg-fan-well)" stroke="rgba(0,0,0,0.9)" strokeWidth="0.4" />
+            {/* Grill (concentric circles over the blades) */}
+            <circle cx="20" cy="20" r="13" fill="none" stroke="rgba(229, 199, 121, 0.08)" strokeWidth="0.4" />
+            <circle cx="20" cy="20" r="9"  fill="none" stroke="rgba(229, 199, 121, 0.08)" strokeWidth="0.4" />
+          </symbol>
+          <symbol id="dsg-fan-blades" viewBox="0 0 40 40">
+            {/* 7 curved blades + central hub */}
+            <g fill="rgba(55, 55, 60, 0.95)" stroke="rgba(229, 199, 121, 0.3)" strokeWidth="0.3">
+              <path d="M 20 6 Q 26 12 23 20 Q 16 14 20 6 Z" />
+              <path d="M 20 6 Q 26 12 23 20 Q 16 14 20 6 Z" transform="rotate(51.4 20 20)" />
+              <path d="M 20 6 Q 26 12 23 20 Q 16 14 20 6 Z" transform="rotate(102.8 20 20)" />
+              <path d="M 20 6 Q 26 12 23 20 Q 16 14 20 6 Z" transform="rotate(154.2 20 20)" />
+              <path d="M 20 6 Q 26 12 23 20 Q 16 14 20 6 Z" transform="rotate(205.6 20 20)" />
+              <path d="M 20 6 Q 26 12 23 20 Q 16 14 20 6 Z" transform="rotate(257.1 20 20)" />
+              <path d="M 20 6 Q 26 12 23 20 Q 16 14 20 6 Z" transform="rotate(308.5 20 20)" />
+            </g>
+            <circle cx="20" cy="20" r="3.5" fill="#141418" stroke="rgba(229, 199, 121, 0.55)" strokeWidth="0.5" />
+            <circle cx="20" cy="20" r="1.3" fill="#f6e4a9" />
+          </symbol>
         </defs>
       </svg>
 
@@ -271,7 +306,8 @@ export default function DealerShoe({
           */}
 
           {/* Front wall — brightest visible wall, rim highlight at the top
-              where it meets the lit top face, darkens toward the base. */}
+              where it meets the lit top face, darkens toward the base.
+              Carries three PC-gaming-style fan vents in the middle. */}
           <div
             className="absolute left-0 h-[38px] w-[260px]"
             style={{
@@ -283,7 +319,47 @@ export default function DealerShoe({
               transform: "rotateX(-90deg)",
               transformOrigin: "top center",
             }}
-          />
+          >
+            {/*
+              Three fans across the center of the front wall. The casing
+              + grill are a static layer; the blade impeller spins slowly
+              on top of it, with a staggered phase per fan so they don't
+              all line up at the same angle.
+            */}
+            {[0, 1, 2].map((i) => {
+              const left = 76 + i * 46;
+              return (
+                <div
+                  key={i}
+                  className="absolute h-[28px] w-[28px]"
+                  style={{
+                    left: `${left}px`,
+                    top: "5px",
+                    filter: "drop-shadow(0 0 2px rgba(229, 199, 121, 0.25))",
+                  }}
+                >
+                  {/* Static casing + grill */}
+                  <svg
+                    className="absolute inset-0 block h-full w-full"
+                    style={{ zIndex: 1 }}
+                  >
+                    <use href="#dsg-fan-casing" />
+                  </svg>
+                  {/* Spinning blades */}
+                  <svg
+                    className="absolute inset-0 block h-full w-full"
+                    style={{
+                      zIndex: 2,
+                      animation: `bj-fan-spin ${7 + i}s linear infinite`,
+                      animationDelay: `${-i * 2}s`,
+                    }}
+                  >
+                    <use href="#dsg-fan-blades" />
+                  </svg>
+                </div>
+              );
+            })}
+          </div>
 
           {/* Right wall — slightly dimmer, light grazes it */}
           <div
@@ -366,8 +442,8 @@ export default function DealerShoe({
 
             {/* --- Hero spade crown with HUD effects --- */}
             <div
-              className="absolute left-1/2 top-0 grid h-[84px] w-[84px] place-items-center"
-              style={{ transform: "translateX(-50%) translateZ(6px)", transformStyle: "preserve-3d", pointerEvents: "none" }}
+              className="absolute left-1/2 grid h-[70px] w-[70px] place-items-center"
+              style={{ top: "6px", transform: "translateX(-50%) translateZ(6px)", transformStyle: "preserve-3d", pointerEvents: "none" }}
             >
               {/* Aura */}
               <div
@@ -384,7 +460,7 @@ export default function DealerShoe({
               <div
                 className="absolute rounded-full"
                 style={{
-                  inset: "4px",
+                  inset: "3px",
                   border: "1px solid rgba(229, 199, 121, 0.14)",
                   animation: "bj-orbit-rotate 22s linear infinite reverse",
                   zIndex: 2,
@@ -413,7 +489,7 @@ export default function DealerShoe({
               <div
                 className="absolute rounded-full"
                 style={{
-                  inset: "11px",
+                  inset: "9px",
                   border: "1px dashed rgba(229, 199, 121, 0.35)",
                   animation: "bj-orbit-rotate 14s linear infinite",
                   zIndex: 2,
@@ -431,7 +507,7 @@ export default function DealerShoe({
               </div>
               {/* Scan line */}
               <div
-                className="absolute left-[16px] right-[16px] top-1/2 h-px"
+                className="absolute left-[13px] right-[13px] top-1/2 h-px"
                 style={{
                   background: "linear-gradient(90deg, transparent, #f6e4a9 50%, transparent)",
                   boxShadow: "0 0 4px #f6e4a9",
@@ -441,7 +517,7 @@ export default function DealerShoe({
               />
               {/* The spade itself */}
               <div
-                className="relative h-[58px] w-[54px]"
+                className="relative h-[50px] w-[46px]"
                 style={{
                   filter:
                     "drop-shadow(0 2px 2px rgba(0,0,0,0.85)) drop-shadow(0 5px 8px rgba(0,0,0,0.55)) drop-shadow(0 0 6px rgba(246, 228, 169, 0.25))",
