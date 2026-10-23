@@ -14,6 +14,7 @@ import { missionsStore } from "../lib/missions";
 import { statsStore } from "../lib/statsStore";
 import { useBalance, useLocked, wallet } from "../lib/wallet";
 import AchievementToasts from "../components/AchievementToasts";
+import ErrorBoundary from "../components/ErrorBoundary";
 import { progressionStore } from "../lib/progression";
 import { weeklyStore } from "../lib/weekly";
 import WinFeed from "../components/WinFeed";
@@ -177,10 +178,14 @@ export default function Home() {
 
         {/* Les deux jeux restent montés : on ne perd pas une manche en changeant d'onglet. */}
         <div className={tab === "blackjack" ? "" : "hidden"}>
-          <Blackjack active={tab === "blackjack"} />
+          <ErrorBoundary label="Blackjack">
+            <Blackjack active={tab === "blackjack"} />
+          </ErrorBoundary>
         </div>
         <div className={tab === "slots" ? "" : "hidden"}>
-          <Slots active={tab === "slots"} />
+          <ErrorBoundary label="Slots">
+            <Slots active={tab === "slots"} />
+          </ErrorBoundary>
         </div>
       </section>
 
