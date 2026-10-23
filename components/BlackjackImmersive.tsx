@@ -684,12 +684,13 @@ const playerCardStyle = (
         : "visible",
     }}
   >
-    <PlayingCard
+      <PlayingCard
       card={card}
       faceDown={index === 1 && !s.hole}
       overlap={index > 0}
       back={back}
       fit
+      animated={false}
     />
   </span>
 ))}
@@ -834,12 +835,13 @@ const playerCardStyle = (
         : "visible",
     }}
   >
-    <PlayingCard
+      <PlayingCard
       card={card}
       overlap={cardIndex > 0}
       back={back}
       compact={compact}
       fit
+      animated={false}
     />
   </span>
 ))}

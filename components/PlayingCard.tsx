@@ -8,6 +8,7 @@ export default function PlayingCard({
   compact = false,
   fit = false,
   back = ["#142d27", "#1b3d33"],
+  animated = true,
 }: {
   card: Card;
   faceDown?: boolean;
@@ -15,6 +16,7 @@ export default function PlayingCard({
   compact?: boolean;
   fit?: boolean;
   back?: [string, string];
+  animated?: boolean;
 }) {
   const color =
     card.suit === "♥" || card.suit === "♦" ? "text-red-600" : "text-slate-900";
@@ -55,7 +57,7 @@ el.style.setProperty(
   return (
         <div
       ref={cardRef}
-      className={`animate-deal shrink-0 ${size} ${overlap ? shift : ""}`}
+      className={`shrink-0 ${animated ? "animate-deal" : ""} ${size} ${overlap ? shift : ""}`}
       style={{ perspective: "1000px" }}
       role="img"
       aria-label={faceDown ? "Face-down card" : `${card.rank} of ${card.suit}`}

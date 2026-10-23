@@ -102,16 +102,21 @@ export default function DealerShoe({
           <div className="absolute inset-x-5 top-2 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#f0daa0]/85 to-transparent" />
           <div className="absolute inset-0 rounded-[24px] bg-[linear-gradient(140deg,rgba(255,255,255,.17),transparent_26%,transparent_64%,rgba(0,0,0,.55))]" />
 
-          {/* Smoked clear window: card edges and patterned backs sit inside the case. */}
+          {/* Vitre fumée : pile visible, toutes les cartes au même design */}
           <div className="absolute left-[24px] right-[24px] top-[13px] h-[79px] overflow-hidden rounded-[13px] border border-[#cfb66f]/65 bg-gradient-to-b from-[#101613] via-[#172019] to-[#060908] shadow-[inset_0_5px_12px_rgba(0,0,0,.9),0_1px_0_rgba(255,255,255,.16)]">
             <div className="absolute inset-x-[15px] top-[8px] h-[57px] overflow-hidden rounded-[8px] border border-white/[.08] bg-gradient-to-b from-[#304036] to-[#0c110d]">
               {Array.from({ length: 10 }, (_, i) => (
-                <div key={i} className="absolute left-[14px] right-[14px] h-[38px] rounded-[3px] border border-[#b9b19c]/70 bg-gradient-to-b from-[#faf6e9] to-[#c5bdab]" style={{ bottom: `${i * 2}px` }} />
+                <div
+                  key={i}
+                  className="absolute left-[14px] right-[14px] h-[38px] rounded-[3px] border border-[#c9ac65]/45"
+                  style={{
+                    bottom: `${i * 2}px`,
+                    background: CARD_BACK,
+                  }}
+                >
+                  <div className="absolute inset-[4px] rounded-[2px] border border-[#e4c879]/40" />
+                </div>
               ))}
-              <div className="absolute inset-x-[16px] bottom-[12px] h-[31px] overflow-hidden rounded-[3px] border border-black/35" style={{ background: CARD_BACK }}>
-                <div className="absolute inset-[4px] rounded-[2px] border border-[#e4c879]/55" />
-                <div className="absolute inset-0 flex items-center justify-center text-[13px] text-[#e4c879]/75">♠</div>
-              </div>
             </div>
             <div className="absolute inset-x-3 top-[4px] h-px bg-white/15" />
           </div>
@@ -138,31 +143,49 @@ export default function DealerShoe({
           <div className="absolute bottom-[4px] left-1/2 -translate-x-1/2 whitespace-nowrap text-[6px] font-black uppercase tracking-[.34em] text-white/30">Automatic Dealer</div>
         </div>
 
-        {/* Front lip and genuine-looking card exit slot. */}
-        <div className="absolute left-[28px] top-[190px] h-[20px] w-[244px] rounded-b-[15px] border-x border-b border-[#b9a267]/45 bg-gradient-to-b from-[#272c28] to-[#060807] shadow-[0_7px_12px_rgba(0,0,0,.65)]" style={{ transform: "translateZ(20px)" }}>
-          <div data-shoe-outlet="" className={`absolute left-1/2 top-[2px] h-[8px] w-[112px] -translate-x-1/2 rounded-full border border-black/80 bg-black shadow-[inset_0_3px_6px_rgba(0,0,0,.95)] ${cycle === "dispense" ? "ring-1 ring-[#e5c779]/70" : ""}`} />
-          <div className="absolute left-1/2 top-[3px] h-[2px] w-[76px] -translate-x-1/2 rounded-full bg-[#e5c779]/65 shadow-[0_0_7px_rgba(229,199,121,.55)]" />
-        </div>
+                  {/* Sortie côté dealer : les cartes reposent sur le tapis, prêtes à être glissées */}
+        <div
+          className="absolute left-[73px] top-[-64px] h-[100px] w-[154px]"
+          style={{ transform: "translateZ(24px)" }}
+        >
+          {/* Rampe métallique */}
+          <div className="absolute left-3 right-3 bottom-[10px] h-[52px] rounded-t-[13px] border-x border-t border-[#c7aa61]/50 bg-gradient-to-b from-[#070908] via-[#171b18] to-[#2d332f] shadow-[0_12px_21px_rgba(0,0,0,.72),inset_0_1px_2px_rgba(255,255,255,.16)]" />
 
-        {/* Short front ramp; the card stack points away from the shoe toward table center. */}
-        <div className="absolute left-[73px] top-[188px] h-[94px] w-[154px]" style={{ transform: "translateZ(24px)" }}>
-          <div className="absolute left-3 right-3 top-[12px] h-[57px] rounded-b-[13px] border-x border-b border-[#c7aa61]/50 bg-gradient-to-b from-[#2d332f] via-[#171b18] to-[#070908] shadow-[0_12px_21px_rgba(0,0,0,.72),inset_0_1px_2px_rgba(255,255,255,.16)]" />
-          <div className="absolute left-[27px] right-[27px] top-[5px] h-[12px] rounded-full bg-black shadow-[inset_0_4px_8px_rgba(0,0,0,.98)]" />
-          <div className="absolute left-[34px] right-[34px] top-[6px] h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#e5c779]/80 to-transparent" />
+          {/* Fente de sortie — point de départ du vol */}
+          <div
+            data-shoe-outlet=""
+            className={`absolute left-1/2 bottom-[54px] h-[9px] w-[112px] -translate-x-1/2 rounded-full border border-black/80 bg-black shadow-[inset_0_3px_6px_rgba(0,0,0,.95)] ${
+              cycle === "dispense" ? "ring-1 ring-[#e5c779]/70" : ""
+            }`}
+          />
+          <div className="absolute left-1/2 bottom-[55px] h-[2px] w-[76px] -translate-x-1/2 rounded-full bg-[#e5c779]/65 shadow-[0_0_7px_rgba(229,199,121,.55)]" />
 
-          {[0, 1, 2].map((i) => (
-            <Card
-              key={i}
-              className={cycle === "refill" ? "shoe-motion" : ""}
-              style={{
-                left: `${53 + (2 - i) * 2}px`,
-                top: `${12 + (2 - i) * 5}px`,
-                transform: `translateZ(${3 + i * 3}px) rotate(${(i - 1) * 1.2}deg)`,
-                animation: cycle === "refill" ? "shoe-stack-settle 420ms cubic-bezier(.2,.8,.25,1) both" : undefined,
-              }}
-            />
-          ))}
+          {/* Pile qui dépasse sur le tapis — carte du haut la plus proche du dealer */}
+          {[0, 1, 2].map((i) => {
+            const isTop = i === 2;
 
+            return (
+              <Card
+                key={i}
+                className={
+                  isTop && cycle === "dispense"
+                    ? "animate-shoe-top-dispense"
+                    : cycle === "refill"
+                      ? "shoe-motion"
+                      : ""
+                }
+                style={{
+                  left: `${55 + (2 - i) * 2}px`,
+                  bottom: `${14 + (2 - i) * 6}px`,
+                  transform: `translateZ(${3 + i * 3}px)`,
+                  animation:
+                    cycle === "refill"
+                      ? "shoe-stack-settle 420ms cubic-bezier(.2,.8,.25,1) both"
+                      : undefined,
+                }}
+              />
+            );
+          })}
         </div>
       </div>
     </div>
