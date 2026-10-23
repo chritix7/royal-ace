@@ -6,15 +6,22 @@ import {
   dismissLevelToast,
   getLevelToasts,
   subscribeToLevelToasts,
+  type LevelToast,
 } from "../lib/progression";
 import { useSyncExternalStore } from "react";
+
+// Référence stable renvoyée côté serveur et à la première hydratation :
+// un `() => []` inline créerait un nouveau tableau à chaque appel et React
+// détecterait une boucle infinie dans useSyncExternalStore.
+const EMPTY_LEVEL_TOASTS: LevelToast[] = [];
+const getServerLevelToasts = () => EMPTY_LEVEL_TOASTS;
 
 export default function AchievementToasts() {
   const toasts = useAchievementToasts();
   const levelToasts = useSyncExternalStore(
     subscribeToLevelToasts,
     getLevelToasts,
-    () => [],
+    getServerLevelToasts,
   );
 
   useEffect(() => {
