@@ -42,14 +42,14 @@ export default function PlayingCard({
     const shoeRect = shoe.getBoundingClientRect();
 
     el.style.setProperty(
-      "--deal-x",
-      `${shoeRect.left + shoeRect.width * 0.5 - (cardRect.left + cardRect.width / 2)}px`
-    );
+  "--deal-x",
+  `${shoeRect.left + shoeRect.width * 0.42 - (cardRect.left + cardRect.width / 2)}px`
+);
 
-    el.style.setProperty(
-      "--deal-y",
-      `${shoeRect.top + shoeRect.height * 0.55 - (cardRect.top + cardRect.height / 2)}px`
-    );
+el.style.setProperty(
+  "--deal-y",
+  `${shoeRect.top + shoeRect.height * 0.1 - (cardRect.top + cardRect.height / 2)}px`
+);
   }, []);
 
   return (

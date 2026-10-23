@@ -162,7 +162,7 @@ export default function DealerShoe({
               style={{
                 left: `${53 + (2 - i) * 2}px`,
                 top: `${12 + (2 - i) * 5}px`,
-                transform: `translateZ(${3 + i * 3}px) rotate(${28 + (i - 1) * 1.5}deg)`,
+                transform: `translateZ(${2 + i * 4}px)`,
                 animation: cycle === "refill" ? "shoe-stack-settle 420ms cubic-bezier(.2,.8,.25,1) both" : undefined,
               }}
             />
