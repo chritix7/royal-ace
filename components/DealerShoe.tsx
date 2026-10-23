@@ -306,8 +306,7 @@ export default function DealerShoe({
           */}
 
           {/* Front wall — brightest visible wall, rim highlight at the top
-              where it meets the lit top face, darkens toward the base.
-              Carries three PC-gaming-style fan vents in the middle. */}
+              where it meets the lit top face, darkens toward the base. */}
           <div
             className="absolute left-0 h-[38px] w-[260px]"
             style={{
@@ -319,33 +318,52 @@ export default function DealerShoe({
               transform: "rotateX(-90deg)",
               transformOrigin: "top center",
             }}
+          />
+
+          {/* Right wall — same material as the front wall, carries the
+              three PC-fan vents since this is the empty face Alex
+              pointed to. The gradient runs horizontally (90deg) so the
+              bright end is at panel-local x=38 — that edge becomes the
+              top of the standing wall after rotation (meets the top face).
+              The rim highlight sits on that same edge; the dark falloff
+              is on the opposite side (= base of the standing wall). */}
+          <div
+            className="absolute top-0 h-[160px] w-[38px]"
+            style={{
+              left: "100%",
+              background:
+                "linear-gradient(90deg, #030304 0%, #080809 25%, #121214 65%, #1c1c1e 100%)",
+              boxShadow:
+                "inset -1px 0 0 rgba(246, 228, 169, 0.18), inset 8px 0 14px -6px rgba(0,0,0,0.85)",
+              transform: "rotateY(-90deg)",
+              transformOrigin: "left center",
+            }}
           >
             {/*
-              Three fans across the center of the front wall. The casing
-              + grill are a static layer; the blade impeller spins slowly
-              on top of it, with a staggered phase per fan so they don't
-              all line up at the same angle.
+              Three fans arranged in a column along the body's Y axis
+              (the long dimension of the right wall). Static casing +
+              grill with a slowly spinning blade impeller on top. Each
+              fan ticks at a slightly different speed with a staggered
+              phase so they never align.
             */}
             {[0, 1, 2].map((i) => {
-              const left = 76 + i * 46;
+              const top = 18 + i * 48;
               return (
                 <div
                   key={i}
                   className="absolute h-[28px] w-[28px]"
                   style={{
-                    left: `${left}px`,
-                    top: "5px",
+                    left: "5px",
+                    top: `${top}px`,
                     filter: "drop-shadow(0 0 2px rgba(229, 199, 121, 0.25))",
                   }}
                 >
-                  {/* Static casing + grill */}
                   <svg
                     className="absolute inset-0 block h-full w-full"
                     style={{ zIndex: 1 }}
                   >
                     <use href="#dsg-fan-casing" />
                   </svg>
-                  {/* Spinning blades */}
                   <svg
                     className="absolute inset-0 block h-full w-full"
                     style={{
@@ -360,20 +378,6 @@ export default function DealerShoe({
               );
             })}
           </div>
-
-          {/* Right wall — slightly dimmer, light grazes it */}
-          <div
-            className="absolute top-0 h-[160px] w-[38px]"
-            style={{
-              left: "100%",
-              background:
-                "linear-gradient(180deg, #16161a 0%, #0e0e10 40%, #060608 80%, #020203 100%)",
-              boxShadow:
-                "inset 1px 0 0 rgba(246, 228, 169, 0.12), inset -8px 0 14px -6px rgba(0,0,0,0.9)",
-              transform: "rotateY(-90deg)",
-              transformOrigin: "left center",
-            }}
-          />
 
           {/* Left wall (dim fill, mostly hidden by the rotateZ tilt) */}
           <div
