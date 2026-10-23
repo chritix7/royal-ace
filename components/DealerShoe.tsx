@@ -263,77 +263,67 @@ export default function DealerShoe({
             at Z=0 and the opposite edge swings up to Z=38, forming a wall.
           */}
 
-          {/* Front wall: at the bottom edge of the body (facing the dealer) */}
+          {/*
+            Four side walls dropping from the lit top face down to the base.
+            Each is parked just outside the body on the side it belongs to,
+            then stood up by a 90° rotation around the edge that touches the
+            top face. All faces share the same matte-black material; the
+            lighting difference comes from a one-direction gradient per face
+            (brighter near the top where it meets the lit surface, blacker
+            at the base) plus a slight ambient-occlusion shadow at the join.
+            No visible borders on the joins so the body reads as one solid
+            volume rather than four separate panels.
+          */}
+
+          {/* Front wall */}
           <div
-            className="absolute left-0 h-[38px] w-[260px] overflow-hidden rounded-b-[10px]"
+            className="absolute left-0 h-[38px] w-[260px]"
             style={{
               top: "100%",
               background:
-                "linear-gradient(180deg, rgba(255,255,255,0.07) 0%, transparent 30%), linear-gradient(180deg, #141418 0%, #060608 100%)",
-              borderTop: "1px solid rgba(229, 199, 121, 0.4)",
-              borderLeft: "1px solid rgba(0,0,0,0.6)",
-              borderRight: "1px solid rgba(0,0,0,0.6)",
-              boxShadow: "inset 0 1px 0 rgba(240, 229, 199, 0.08)",
+                "linear-gradient(180deg, #121214 0%, #0a0a0c 55%, #040405 100%)",
+              boxShadow:
+                "inset 0 6px 10px -4px rgba(0,0,0,0.9), inset 0 1px 0 rgba(240, 229, 199, 0.04)",
               transform: "rotateX(-90deg)",
               transformOrigin: "top center",
             }}
-          >
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0 1px, transparent 1px 4px)",
-              }}
-            />
-            <div
-              className="absolute left-[20px] right-[20px] top-[18px] h-px"
-              style={{
-                background:
-                  "linear-gradient(90deg, transparent, rgba(229, 199, 121, 0.35) 20%, rgba(229, 199, 121, 0.35) 80%, transparent)",
-              }}
-            />
-          </div>
+          />
 
-          {/* Right wall */}
+          {/* Right wall (dimmer, farther from the light) */}
           <div
-            className="absolute top-0 h-[160px] w-[38px] overflow-hidden rounded-r-[10px]"
+            className="absolute top-0 h-[160px] w-[38px]"
             style={{
               left: "100%",
               background:
-                "linear-gradient(90deg, rgba(255,255,255,0.04) 0%, transparent 20%), linear-gradient(180deg, #121214 0%, #090909 100%)",
-              borderTop: "1px solid rgba(0,0,0,0.6)",
-              borderBottom: "1px solid rgba(0,0,0,0.6)",
-              borderLeft: "1px solid rgba(229, 199, 121, 0.3)",
+                "linear-gradient(180deg, #0e0e10 0%, #080809 60%, #030304 100%)",
+              boxShadow:
+                "inset 6px 0 10px -4px rgba(0,0,0,0.9), inset 1px 0 0 rgba(240, 229, 199, 0.03)",
               transform: "rotateY(-90deg)",
               transformOrigin: "left center",
             }}
-          >
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 4px)",
-              }}
-            />
-          </div>
+          />
 
-          {/* Left wall (dim fill, visible from narrow angles) */}
+          {/* Left wall (visible from narrow angles, deeper shadow) */}
           <div
-            className="absolute top-0 h-[160px] w-[38px] rounded-l-[10px]"
+            className="absolute top-0 h-[160px] w-[38px]"
             style={{
               right: "100%",
-              background: "linear-gradient(180deg, #0a0a0c 0%, #050506 100%)",
+              background:
+                "linear-gradient(180deg, #0a0a0c 0%, #050506 100%)",
+              boxShadow: "inset -6px 0 10px -4px rgba(0,0,0,0.9)",
               transform: "rotateY(90deg)",
               transformOrigin: "right center",
             }}
           />
 
-          {/* Back wall (dim fill, mostly hidden by the tilt) */}
+          {/* Back wall (mostly hidden behind the tilt) */}
           <div
-            className="absolute left-0 h-[38px] w-[260px] rounded-t-[10px]"
+            className="absolute left-0 h-[38px] w-[260px]"
             style={{
               bottom: "100%",
-              background: "linear-gradient(180deg, #0a0a0c 0%, #050506 100%)",
+              background:
+                "linear-gradient(180deg, #050506 0%, #0a0a0c 100%)",
+              boxShadow: "inset 0 -6px 10px -4px rgba(0,0,0,0.9)",
               transform: "rotateX(90deg)",
               transformOrigin: "bottom center",
             }}
@@ -381,7 +371,7 @@ export default function DealerShoe({
 
             {/* --- Hero spade crown with HUD effects --- */}
             <div
-              className="absolute left-1/2 top-0 grid h-[84px] w-[84px] -translate-x-1/2 place-items-center"
+              className="absolute left-1/2 top-0 grid h-[84px] w-[84px] place-items-center"
               style={{ transform: "translateX(-50%) translateZ(6px)", transformStyle: "preserve-3d", pointerEvents: "none" }}
             >
               {/* Aura */}
