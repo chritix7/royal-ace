@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { type Advice, type Card, type Hand, type Result, advise, canSplitCards, handValue, hiLo, isBlackjack, makeShoe } from "./blackjack";
 import { perfectPairs, twentyOnePlusThree } from "./sidebets";
 import { ACHIEVEMENTS } from "./achievements";
@@ -22,6 +22,14 @@ import {
   type Snapshot,
 } from "./blackjackRecovery";
 
+export type DealFlightEvent = {
+  id: number;
+  card: Card;
+  target: "dealer" | `hand-${number}`;
+  cardIndex: number;
+  faceDown: boolean;
+};
+
 export function useBlackjack(active = true) {
   const activeRef = useRef(active);
   activeRef.current = active;
@@ -40,6 +48,13 @@ export function useBlackjack(active = true) {
   useState<RoundBreakdown | null>(null);
 
 const breakdownRef = useRef<RoundBreakdown | null>(null);
+
+const [dealEvents, setDealEvents] = useState<DealFlightEvent[]>([]);
+const nextDealEventId = useRef(0);
+const dealSequence = useRef(0);
+const consumeDealEvent = useCallback((id: number) => {
+  setDealEvents((events) => events.filter((event) => event.id !== id));
+}, []);
 
 function setRoundBreakdown(value: RoundBreakdown | null) {
   breakdownRef.current = value;
@@ -434,21 +449,51 @@ useEffect(() => {
     set({ shoe: shoe.slice(0, -1) });
     return card;
   }
-  function bumpDeal() {
+  function bumpDeal(
+  card: Card,
+  target: DealFlightEvent["target"],
+  cardIndex: number,
+  faceDown = false
+) {
+  setDealEvents((events) => [
+    ...events,
+    {
+      id: ++dealSequence.current,
+      card,
+      target,
+      cardIndex,
+      faceDown,
+    },
+  ]);
+
   set({ dealTick: ref.current.dealTick + 1 });
-  }
-  function giveCard(i: number) {
-    const card = draw();
-    sfx.deal();
-    setHand(i, { cards: [...ref.current.hands[i].cards, card] });
-    bumpDeal();
-  }
-  function giveDealer() {
-    const card = draw();
-    sfx.deal();
-    set({ dealer: [...ref.current.dealer, card] });
-    bumpDeal();
-  }
+}
+
+function giveCard(i: number) {
+  const card = draw();
+  sfx.deal();
+
+  const cardIndex = ref.current.hands[i].cards.length;
+  setHand(i, { cards: [...ref.current.hands[i].cards, card] });
+
+  bumpDeal(card, `hand-${i}`, cardIndex);
+}
+
+function giveDealer() {
+  const card = draw();
+  sfx.deal();
+
+  const cardIndex = ref.current.dealer.length;
+  set({ dealer: [...ref.current.dealer, card] });
+
+  bumpDeal(
+    card,
+    "dealer",
+    cardIndex,
+    cardIndex === 1 && !ref.current.hole
+  );
+}
+
   function reveal() {
     if (!ref.current.hole) {
       set({ hole: true });
@@ -1103,6 +1148,8 @@ const winRate = resolvedHands
   return {
     s,
     roundBreakdown,
+    dealEvents,
+    consumeDealEvent,
     showHint,
     setShowHint,
     showCount,

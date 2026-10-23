@@ -69,16 +69,6 @@ export default function DealerShoe({
       style={{ perspective: "1700px" }}
     >
       <style>{`
-        @keyframes shoe-card-deal {
-          0% { transform: translate3d(0,0,8px) rotate(0deg); opacity: 1; }
-          58% { transform: translate3d(-24px,25px,12px) rotate(9deg); opacity: 1; }
-          100% { transform: translate3d(-48px,48px,14px) rotate(18deg); opacity: 0; }
-        }
-        @keyframes shoe-card-load {
-          0% { transform: translateY(-28px) rotate(-8deg); opacity: 0; }
-          75% { transform: translateY(2px) rotate(1deg); opacity: 1; }
-          100% { transform: translateY(0) rotate(0); opacity: 1; }
-        }
         @keyframes shoe-stack-settle {
           0% { transform: translateY(-8px); }
           65% { transform: translateY(2px); }
@@ -104,8 +94,13 @@ export default function DealerShoe({
         {/* Compact Vegas-style shoe body: one clear shell with a visible deck well. */}
         <div className="absolute left-[20px] top-[48px] h-[160px] w-[260px] rounded-[25px] border border-[#d7c184]/55 bg-gradient-to-br from-[#555a52] via-[#222722] to-[#080b09] shadow-[0_26px_45px_rgba(0,0,0,.78),inset_0_2px_3px_rgba(255,255,255,.25)]" style={{ transform: "translateZ(28px)" }}>
           <div className="absolute inset-[5px] rounded-[20px] border border-white/[.07]" />
+          <div className="absolute inset-x-7 top-[4px] h-px bg-white/20" />
+          <div className="absolute left-[9px] top-[12px] h-[5px] w-[5px] rounded-full border border-white/20 bg-gradient-to-br from-[#76796e] to-[#111410] shadow-[0_1px_2px_#000]" />
+          <div className="absolute right-[9px] top-[12px] h-[5px] w-[5px] rounded-full border border-white/20 bg-gradient-to-br from-[#76796e] to-[#111410] shadow-[0_1px_2px_#000]" />
+          <div className="absolute bottom-[10px] left-[9px] h-[5px] w-[5px] rounded-full border border-white/20 bg-gradient-to-br from-[#76796e] to-[#111410] shadow-[0_1px_2px_#000]" />
+          <div className="absolute bottom-[10px] right-[9px] h-[5px] w-[5px] rounded-full border border-white/20 bg-gradient-to-br from-[#76796e] to-[#111410] shadow-[0_1px_2px_#000]" />
           <div className="absolute inset-x-5 top-2 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#f0daa0]/85 to-transparent" />
-          <div className="absolute inset-0 rounded-[24px] bg-gradient-to-br from-white/10 via-transparent to-black/45" />
+          <div className="absolute inset-0 rounded-[24px] bg-[linear-gradient(140deg,rgba(255,255,255,.17),transparent_26%,transparent_64%,rgba(0,0,0,.55))]" />
 
           {/* Smoked clear window: card edges and patterned backs sit inside the case. */}
           <div className="absolute left-[24px] right-[24px] top-[13px] h-[79px] overflow-hidden rounded-[13px] border border-[#cfb66f]/65 bg-gradient-to-b from-[#101613] via-[#172019] to-[#060908] shadow-[inset_0_5px_12px_rgba(0,0,0,.9),0_1px_0_rgba(255,255,255,.16)]">
@@ -145,7 +140,7 @@ export default function DealerShoe({
 
         {/* Front lip and genuine-looking card exit slot. */}
         <div className="absolute left-[28px] top-[190px] h-[20px] w-[244px] rounded-b-[15px] border-x border-b border-[#b9a267]/45 bg-gradient-to-b from-[#272c28] to-[#060807] shadow-[0_7px_12px_rgba(0,0,0,.65)]" style={{ transform: "translateZ(20px)" }}>
-          <div className="absolute left-1/2 top-[2px] h-[8px] w-[112px] -translate-x-1/2 rounded-full border border-black/80 bg-black shadow-[inset_0_3px_6px_rgba(0,0,0,.95)]" />
+          <div data-shoe-outlet="" className={`absolute left-1/2 top-[2px] h-[8px] w-[112px] -translate-x-1/2 rounded-full border border-black/80 bg-black shadow-[inset_0_3px_6px_rgba(0,0,0,.95)] ${cycle === "dispense" ? "ring-1 ring-[#e5c779]/70" : ""}`} />
           <div className="absolute left-1/2 top-[3px] h-[2px] w-[76px] -translate-x-1/2 rounded-full bg-[#e5c779]/65 shadow-[0_0_7px_rgba(229,199,121,.55)]" />
         </div>
 
@@ -162,26 +157,18 @@ export default function DealerShoe({
               style={{
                 left: `${53 + (2 - i) * 2}px`,
                 top: `${12 + (2 - i) * 5}px`,
-                transform: `translateZ(${2 + i * 4}px)`,
+                transform: `translateZ(${3 + i * 3}px) rotate(${(i - 1) * 1.2}deg)`,
                 animation: cycle === "refill" ? "shoe-stack-settle 420ms cubic-bezier(.2,.8,.25,1) both" : undefined,
               }}
             />
           ))}
 
-          {cycle === "dispense" && (
-            <Card
-              className="shoe-motion z-20"
-              style={{ left: "56px", top: "10px", transform: "translateZ(12px) rotate(28deg)", animation: "shoe-card-deal 440ms cubic-bezier(.2,.75,.3,1) both" }}
-            />
-          )}
-          {cycle === "refill" && (
-            <div className="shoe-motion absolute left-[56px] top-[8px] z-20 h-[58px] w-[42px] rounded-[4px] border border-[#c9ac65]/65 shadow-[0_7px_13px_rgba(0,0,0,.6)]" style={{ background: CARD_BACK, animation: "shoe-card-load 440ms cubic-bezier(.18,.75,.25,1) both" }}>
-              <div className="absolute inset-[4px] rounded-[2px] border border-[#e4c879]/55" />
-              <div className="absolute inset-0 flex items-center justify-center text-[15px] text-[#e4c879]/80">♠</div>
-            </div>
-          )}
         </div>
       </div>
     </div>
   );
 }
+
+
+
+

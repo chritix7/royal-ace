@@ -11,7 +11,7 @@ import {
   THEMES,
   money,
 } from "../lib/game";
-import type { Game } from "../lib/useBlackjack";
+import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import { useSession } from "../lib/sessionStore";
 import { Counter, SideBet } from "./ui";
 import PlayingCard from "./PlayingCard";
@@ -359,6 +359,8 @@ export default function BlackjackImmersive({
     sides,
     back,
     outOfChips,
+    dealEvents,
+    consumeDealEvent,
     addChip,
     setBetTo,
     adjustSide,
@@ -376,6 +378,95 @@ export default function BlackjackImmersive({
   const [menuOpen, setMenuOpen] = useState(false);
   const [editBet, setEditBet] = useState(s.phase === "betting");
   const [resultOpen, setResultOpen] = useState(false);
+
+  type ActiveFlight = {
+  event: DealFlightEvent;
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+  cardHeight: string;
+  started: boolean;
+};
+
+const [activeFlight, setActiveFlight] =
+  useState<ActiveFlight | null>(null);
+const flightLock = useRef<number | null>(null);
+
+useEffect(() => {
+  if (
+    activeFlight !== null ||
+    flightLock.current !== null ||
+    dealEvents.length === 0
+  ) {
+    return;
+  }
+
+  const event = dealEvents[0];
+  const outlet = document.querySelector<HTMLElement>("[data-shoe-outlet]");
+  const target = document.querySelector<HTMLElement>(
+    `[data-deal-target="${event.target}"]`
+  );
+
+  // Le sabot est masqué sur mobile : pas de vol, la carte apparaît dans la main.
+  if (!outlet || !target || outlet.getClientRects().length === 0) {
+    consumeDealEvent(event.id);
+    return;
+  }
+
+  const from = outlet.getBoundingClientRect();
+  const slot = target.querySelector<HTMLElement>(
+    `[data-deal-card-index="${event.cardIndex}"]`
+  );
+  const to =
+    (slot?.firstElementChild as HTMLElement | null)?.getBoundingClientRect() ??
+    target.getBoundingClientRect();
+
+  flightLock.current = event.id;
+  setActiveFlight({
+    event,
+    fromX: from.left + from.width / 2,
+    fromY: from.top + from.height / 2,
+    toX: to.left + to.width / 2,
+    toY: to.top + to.height / 2,
+    cardHeight:
+      getComputedStyle(target).getPropertyValue("--bj-card-h").trim() ||
+      "76px",
+    started: false,
+  });
+}, [dealEvents, activeFlight, consumeDealEvent]);
+
+useEffect(() => {
+  if (activeFlight === null || activeFlight.started) return;
+
+  const id = activeFlight.event.id;
+  const frame = requestAnimationFrame(() => {
+    setActiveFlight((current) => {
+      if (current === null || current.event.id !== id) {
+        return current;
+      }
+
+      return { ...current, started: true };
+    });
+  });
+
+  return () => cancelAnimationFrame(frame);
+}, [activeFlight]);
+
+useEffect(() => {
+  if (activeFlight === null || !activeFlight.started) return;
+
+  const id = activeFlight.event.id;
+  const timer = window.setTimeout(() => {
+    if (flightLock.current !== id) return;
+
+    flightLock.current = null;
+    setActiveFlight(null);
+    consumeDealEvent(id);
+  }, 580);
+
+  return () => window.clearTimeout(timer);
+}, [activeFlight, consumeDealEvent]);
 
   const bettingOpen =
     canBet && (editBet || s.phase === "betting");
@@ -521,6 +612,36 @@ const playerCardStyle = (
   dealTick={s.dealTick}
 />
 
+
+
+{activeFlight && createPortal(
+  <div
+    aria-hidden="true"
+    className="pointer-events-none fixed z-[120]"
+    style={{
+      left: activeFlight.fromX,
+      top: activeFlight.fromY,
+      height: "var(--bj-card-h)",
+      aspectRatio: "5 / 7",
+      transformOrigin: "center",
+      transition: "transform 520ms cubic-bezier(.18,.78,.2,1)",
+      transform: activeFlight.started
+        ? `translate3d(${activeFlight.toX - activeFlight.fromX}px, ${activeFlight.toY - activeFlight.fromY}px, 0) translate(-50%, -50%) rotate(0deg)`
+        : "translate(-50%, -50%) rotate(-28deg) scale(.72)",
+      "--bj-card-h": activeFlight.cardHeight,
+    } as CSSProperties}
+  >
+    <PlayingCard
+      card={activeFlight.event.card}
+      faceDown={activeFlight.event.faceDown}
+      back={back}
+      compact={activeFlight.event.target !== "dealer" && compact}
+      fit
+    />
+  </div>,
+  document.body
+)}
+
                 <div className="relative flex min-h-0 flex-col items-center justify-center gap-2 overflow-y-auto overflow-x-hidden px-3 py-2">
 
           {/* Score du croupier */}
@@ -538,7 +659,10 @@ const playerCardStyle = (
           )}
 
           {/* Cartes du croupier */}
-<div className="relative z-10 flex shrink-0 justify-center">
+<div
+  data-deal-target="dealer"
+  className="relative z-10 flex shrink-0 justify-center"
+>
   <p
     aria-hidden="true"
     className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pl-[0.45em] text-[10px] font-bold uppercase tracking-[0.45em] text-white/[0.10] sm:text-xs"
@@ -547,14 +671,27 @@ const playerCardStyle = (
   </p>
 
   {s.dealer.map((card, index) => (
-  <PlayingCard
-    key={`dealer-${index}-${card.rank}${card.suit}`}
-    card={card}
-    faceDown={index === 1 && !s.hole}
-    overlap={index > 0}
-    back={back}
-    fit
-  />
+  <span
+    key={`dealer-flight-${index}-${card.rank}${card.suit}`}
+    className="contents"
+    data-deal-card-index={index}
+    style={{
+      visibility: dealEvents.some(
+        (event: DealFlightEvent) =>
+          event.target === "dealer" && event.cardIndex === index
+      )
+        ? "hidden"
+        : "visible",
+    }}
+  >
+    <PlayingCard
+      card={card}
+      faceDown={index === 1 && !s.hole}
+      overlap={index > 0}
+      back={back}
+      fit
+    />
+  </span>
 ))}
 </div>
         </div>
@@ -678,17 +815,34 @@ const playerCardStyle = (
                     )}
                   </div>
 
-                  <div className="flex justify-center">
+                  <div
+  data-deal-target={`hand-${index}`}
+  className="flex justify-center"
+>
                     {hand.cards.map((card, cardIndex) => (
-                      <PlayingCard
-                        key={`${index}-${cardIndex}-${card.rank}${card.suit}`}
-                        card={card}
-                        overlap={cardIndex > 0}
-                        back={back}
-                        compact={compact}
-                        fit
-                      />
-                    ))}
+  <span
+    key={`hand-${index}-flight-${cardIndex}-${card.rank}${card.suit}`}
+    className="contents"
+    data-deal-card-index={cardIndex}
+    style={{
+      visibility: dealEvents.some(
+        (event: DealFlightEvent) =>
+          event.target === `hand-${index}` &&
+          event.cardIndex === cardIndex
+      )
+        ? "hidden"
+        : "visible",
+    }}
+  >
+    <PlayingCard
+      card={card}
+      overlap={cardIndex > 0}
+      back={back}
+      compact={compact}
+      fit
+    />
+  </span>
+))}
                   </div>
                 </div>
               );
