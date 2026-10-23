@@ -676,10 +676,10 @@ function giveDealer() {
     for (let round = 0; round < 2; round++) {
       for (let i = 0; i < spots; i++) {
         giveCard(i);
-        await sleep(380);
+        await sleep(620);
       }
       giveDealer();
-      await sleep(380);
+      await sleep(620);
     }
     await sleep(100);
     resolveSide();
@@ -738,7 +738,7 @@ function giveDealer() {
     grade("Hit");
     set({ busy: true });
     giveCard(i);
-    await sleep(500);
+    await sleep(620);
     if (handValue(ref.current.hands[i].cards).total >= 21) {
       setHand(i, { done: true });
       await advance();
