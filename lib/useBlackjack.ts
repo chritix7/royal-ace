@@ -788,8 +788,8 @@ function giveDealer() {
     set({ hands, message: "Split!" });
     await sleep(350);
 
-    giveCard(i); await sleep(450);
-    giveCard(i + 1); await sleep(450);
+    giveCard(i); await sleep(620);
+    giveCard(i + 1); await sleep(620);
 
     // As splittés : une seule carte chacun. 21 : main terminée.
     set({
