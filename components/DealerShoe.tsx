@@ -119,11 +119,6 @@ export default function DealerShoe({
           from { transform: rotate(0deg); }
           to   { transform: rotate(360deg); }
         }
-        /* Reticle brackets breathing */
-        @keyframes bj-reticle-breath {
-          0%, 100% { opacity: 0.6; }
-          50%      { opacity: 1; }
-        }
         /* Scan line sweeping vertically across the hero spade */
         @keyframes bj-suit-scan {
           0%   { transform: translateY(-24px); opacity: 0; }
@@ -275,76 +270,76 @@ export default function DealerShoe({
             volume rather than four separate panels.
           */}
 
-          {/* Front wall */}
+          {/* Front wall — brightest visible wall, rim highlight at the top
+              where it meets the lit top face, darkens toward the base. */}
           <div
             className="absolute left-0 h-[38px] w-[260px]"
             style={{
               top: "100%",
               background:
-                "linear-gradient(180deg, #121214 0%, #0a0a0c 55%, #040405 100%)",
+                "linear-gradient(180deg, #1c1c1e 0%, #121214 35%, #080809 75%, #030304 100%)",
               boxShadow:
-                "inset 0 6px 10px -4px rgba(0,0,0,0.9), inset 0 1px 0 rgba(240, 229, 199, 0.04)",
+                "inset 0 1px 0 rgba(246, 228, 169, 0.18), inset 0 -8px 14px -6px rgba(0,0,0,0.85)",
               transform: "rotateX(-90deg)",
               transformOrigin: "top center",
             }}
           />
 
-          {/* Right wall (dimmer, farther from the light) */}
+          {/* Right wall — slightly dimmer, light grazes it */}
           <div
             className="absolute top-0 h-[160px] w-[38px]"
             style={{
               left: "100%",
               background:
-                "linear-gradient(180deg, #0e0e10 0%, #080809 60%, #030304 100%)",
+                "linear-gradient(180deg, #16161a 0%, #0e0e10 40%, #060608 80%, #020203 100%)",
               boxShadow:
-                "inset 6px 0 10px -4px rgba(0,0,0,0.9), inset 1px 0 0 rgba(240, 229, 199, 0.03)",
+                "inset 1px 0 0 rgba(246, 228, 169, 0.12), inset -8px 0 14px -6px rgba(0,0,0,0.9)",
               transform: "rotateY(-90deg)",
               transformOrigin: "left center",
             }}
           />
 
-          {/* Left wall (visible from narrow angles, deeper shadow) */}
+          {/* Left wall (dim fill, mostly hidden by the rotateZ tilt) */}
           <div
             className="absolute top-0 h-[160px] w-[38px]"
             style={{
               right: "100%",
               background:
-                "linear-gradient(180deg, #0a0a0c 0%, #050506 100%)",
-              boxShadow: "inset -6px 0 10px -4px rgba(0,0,0,0.9)",
+                "linear-gradient(180deg, #0a0a0c 0%, #050506 60%, #020203 100%)",
               transform: "rotateY(90deg)",
               transformOrigin: "right center",
             }}
           />
 
-          {/* Back wall (mostly hidden behind the tilt) */}
+          {/* Back wall (dim fill, hidden by the rotateX tilt) */}
           <div
             className="absolute left-0 h-[38px] w-[260px]"
             style={{
               bottom: "100%",
               background:
-                "linear-gradient(180deg, #050506 0%, #0a0a0c 100%)",
-              boxShadow: "inset 0 -6px 10px -4px rgba(0,0,0,0.9)",
+                "linear-gradient(180deg, #060608 0%, #0a0a0c 100%)",
               transform: "rotateX(90deg)",
               transformOrigin: "bottom center",
             }}
           />
 
-          {/* Top face (lit, carries the decoration) */}
+          {/* Top face (lit, carries the decoration) — sharp 4px chamfer
+              so the four side walls meet it along a straight line and the
+              body reads as one solid block instead of four taped panels. */}
           <div
-            className="absolute inset-0 rounded-[18px]"
+            className="absolute inset-0 rounded-[4px]"
             style={{
               background:
-                "linear-gradient(140deg, rgba(255,255,255,0.08) 0%, transparent 20%, transparent 70%, rgba(0,0,0,0.6) 100%), linear-gradient(180deg, #1b1b1d 0%, #0e0e10 55%, #050506 100%)",
-              border: "1px solid #000",
+                "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 25%, transparent 55%, rgba(0,0,0,0.3) 100%), linear-gradient(180deg, #1e1e20 0%, #121214 55%, #060608 100%)",
               boxShadow:
-                "0 32px 55px rgba(0,0,0,0.9), inset 0 2px 2px rgba(240, 229, 199, 0.12), inset 0 -2px 2px rgba(0,0,0,0.75)",
+                "0 32px 55px rgba(0,0,0,0.9), inset 0 1px 0 rgba(240, 229, 199, 0.14), inset 0 -1px 0 rgba(0,0,0,0.6)",
               transform: "translateZ(38px)",
               transformStyle: "preserve-3d",
             }}
           >
             {/* Brushed grain overlay */}
             <div
-              className="pointer-events-none absolute inset-0 rounded-[18px]"
+              className="pointer-events-none absolute inset-0 rounded-[4px]"
               style={{
                 background:
                   "repeating-linear-gradient(90deg, rgba(255,255,255,0.013) 0 1px, transparent 1px 3px)",
@@ -352,7 +347,7 @@ export default function DealerShoe({
             />
             {/* Inner gold bezel */}
             <div
-              className="pointer-events-none absolute inset-[6px] rounded-[13px]"
+              className="pointer-events-none absolute inset-[6px] rounded-[2px]"
               style={{
                 border: "1px solid rgba(229, 199, 121, 0.28)",
                 boxShadow: "inset 0 1px 0 rgba(229, 199, 121, 0.1)",
@@ -431,41 +426,6 @@ export default function DealerShoe({
                     left: "calc(50% - 1.25px)",
                     background: "#f6e4a9",
                     boxShadow: "0 0 5px #f6e4a9, 0 0 2px #f6e4a9",
-                  }}
-                />
-              </div>
-              {/* Reticle brackets */}
-              <div className="absolute inset-[8px]" style={{ zIndex: 2 }}>
-                <span
-                  className="absolute left-0 top-0 h-[9px] w-[9px]"
-                  style={{
-                    borderTop: "1px solid rgba(229, 199, 121, 0.65)",
-                    borderLeft: "1px solid rgba(229, 199, 121, 0.65)",
-                    animation: "bj-reticle-breath 3.6s ease-in-out infinite",
-                  }}
-                />
-                <span
-                  className="absolute right-0 top-0 h-[9px] w-[9px]"
-                  style={{
-                    borderTop: "1px solid rgba(229, 199, 121, 0.65)",
-                    borderRight: "1px solid rgba(229, 199, 121, 0.65)",
-                    animation: "bj-reticle-breath 3.6s ease-in-out infinite",
-                  }}
-                />
-                <span
-                  className="absolute bottom-0 left-0 h-[9px] w-[9px]"
-                  style={{
-                    borderBottom: "1px solid rgba(229, 199, 121, 0.65)",
-                    borderLeft: "1px solid rgba(229, 199, 121, 0.65)",
-                    animation: "bj-reticle-breath 3.6s ease-in-out infinite",
-                  }}
-                />
-                <span
-                  className="absolute bottom-0 right-0 h-[9px] w-[9px]"
-                  style={{
-                    borderBottom: "1px solid rgba(229, 199, 121, 0.65)",
-                    borderRight: "1px solid rgba(229, 199, 121, 0.65)",
-                    animation: "bj-reticle-breath 3.6s ease-in-out infinite",
                   }}
                 />
               </div>
