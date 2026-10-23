@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, UnifrakturMaguntia, Share_Tech_Mono } from "next/font/google";
 import "./globals.css";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 
@@ -10,6 +10,23 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+// Fallback blackletter for the dealer shoe's "ROYAL ACE" wordmark.
+// Drop a Cloister Black .woff2 into /public/fonts/ and add an @font-face
+// in globals.css if you want the real Cloister Black — the component's
+// font stack lists it first and falls back to this one.
+const unifrakturMaguntia = UnifrakturMaguntia({
+  variable: "--font-blackletter",
+  weight: "400",
+  subsets: ["latin"],
+});
+
+// Futuristic console face for the "READY" status line on the shoe LCD.
+const shareTechMono = Share_Tech_Mono({
+  variable: "--font-tech-mono",
+  weight: "400",
   subsets: ["latin"],
 });
 
@@ -40,7 +57,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${unifrakturMaguntia.variable} ${shareTechMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {children}
