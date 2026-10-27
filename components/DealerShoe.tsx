@@ -812,7 +812,7 @@ export default function DealerShoe({
                   "0 2px 3px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(229, 199, 121, 0.12)",
                 backdropFilter: "blur(2px)",
                 transform:
-                  "translate(-50%, -50%) rotate(-90deg) translateZ(4px)",
+                  "translate(-50%, -50%) rotate(90deg) translateZ(4px)",
                 transformOrigin: "center center",
               }}
             >
