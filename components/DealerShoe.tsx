@@ -804,7 +804,7 @@ export default function DealerShoe({
               className="absolute flex items-center gap-[6px] whitespace-nowrap rounded-full px-[9px]"
               style={{
                 top: "80px",
-                left: "14px",
+                left: "22px",
                 height: "18px",
                 background: "rgba(5, 5, 6, 0.8)",
                 border: "1px solid rgba(229, 199, 121, 0.5)",
