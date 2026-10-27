@@ -324,7 +324,15 @@ export default function DealerShoe({
                 "linear-gradient(180deg, #1c1c1e 0%, #141418 25%, #0a0a0c 65%, #030304 100%)",
               boxShadow:
                 "inset 0 1px 0 rgba(246, 228, 169, 0.18), inset 0 -10px 18px -6px rgba(0,0,0,0.85)",
-              transform: "rotateX(-90deg)",
+              /*
+                translateZ(80) first lifts the panel to the height of the
+                top face; rotateX(-90) around its top edge then swings it
+                down to z=0. The result: its upper edge glues to the lit
+                top face (z=80) and its lower edge sits on the base (z=0),
+                exactly in front of the body (not behind, which was the
+                bug when depth jumped from 38 to 80).
+              */
+              transform: "translateZ(80px) rotateX(-90deg)",
               transformOrigin: "top center",
             }}
           >
