@@ -499,14 +499,19 @@ export default function DealerShoe({
             />
           </div>
 
-          {/* Back wall (dim fill, hidden by the rotateX tilt) */}
+          {/* Back wall — same fix as the front wall: translateZ(60) first
+              lifts the panel to the top-face height, then rotateX(90)
+              around its bottom edge swings it down to z=0 at the base.
+              Without the lift, this panel was swinging to z=-60 (BEHIND
+              the body) and poking out as a visible triangle on the left
+              after the perspective — the artifact Alex outlined in green. */}
           <div
             className="absolute left-0 h-[60px] w-[260px]"
             style={{
               bottom: "100%",
               background:
                 "linear-gradient(180deg, #060608 0%, #0a0a0c 100%)",
-              transform: "rotateX(90deg)",
+              transform: "translateZ(60px) rotateX(90deg)",
               transformOrigin: "bottom center",
             }}
           />
