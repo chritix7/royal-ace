@@ -132,6 +132,13 @@ export default function DealerShoe({
           from { transform: rotate(0deg); }
           to   { transform: rotate(360deg); }
         }
+        /* Vertical scan light sweeping down the right-wall hex vent */
+        @keyframes bj-vent-scan {
+          0%   { top: -14px; opacity: 0; }
+          15%  { opacity: 1; }
+          85%  { opacity: 1; }
+          100% { top: 100%; opacity: 0; }
+        }
         /* LED pulse ring */
         @keyframes bj-led-pulse-ring {
           0%   { opacity: 0.9; transform: scale(1); }
@@ -305,32 +312,47 @@ export default function DealerShoe({
             volume rather than four separate panels.
           */}
 
-          {/* Front wall — brightest visible wall, rim highlight at the top
-              where it meets the lit top face, darkens toward the base.
-              Carries three PC-gaming fan vents hugging the top of the
-              wall (where it meets the lit top face). */}
+          {/* Front wall — now 80px tall (shoe depth bumped from 38 to 80)
+              so it reads as a proper chunky block face. Carries a 2x3
+              grid of PC-fan vents covering the whole surface, with
+              gaming-RGB-style gold uplights between the two rows. */}
           <div
-            className="absolute left-0 h-[38px] w-[260px]"
+            className="absolute left-0 h-[80px] w-[260px]"
             style={{
               top: "100%",
               background:
-                "linear-gradient(180deg, #1c1c1e 0%, #121214 35%, #080809 75%, #030304 100%)",
+                "linear-gradient(180deg, #1c1c1e 0%, #141418 25%, #0a0a0c 65%, #030304 100%)",
               boxShadow:
-                "inset 0 1px 0 rgba(246, 228, 169, 0.18), inset 0 -8px 14px -6px rgba(0,0,0,0.85)",
+                "inset 0 1px 0 rgba(246, 228, 169, 0.18), inset 0 -10px 18px -6px rgba(0,0,0,0.85)",
               transform: "rotateX(-90deg)",
               transformOrigin: "top center",
             }}
           >
-            {[0, 1, 2].map((i) => {
-              const left = 76 + i * 46;
+            {/* Thin gold accent line running horizontally through the center,
+                behind the fans — reads as an interior LED strip. */}
+            <div
+              className="absolute left-[22px] right-[22px] top-1/2 h-px"
+              style={{
+                background:
+                  "linear-gradient(90deg, transparent, rgba(246, 228, 169, 0.5) 20%, rgba(246, 228, 169, 0.5) 80%, transparent)",
+                boxShadow: "0 0 4px rgba(246, 228, 169, 0.4)",
+                animation: "bj-glint-drift 3.4s ease-in-out infinite",
+              }}
+            />
+            {/* 2 rows × 3 columns of fans */}
+            {[0, 1, 2, 3, 4, 5].map((idx) => {
+              const col = idx % 3;
+              const row = Math.floor(idx / 3);
+              const left = 46 + col * 60;
+              const top = 8 + row * 38;
               return (
                 <div
-                  key={i}
-                  className="absolute h-[28px] w-[28px]"
+                  key={idx}
+                  className="absolute h-[32px] w-[32px]"
                   style={{
                     left: `${left}px`,
-                    top: "2px",
-                    filter: "drop-shadow(0 0 2px rgba(229, 199, 121, 0.25))",
+                    top: `${top}px`,
+                    filter: "drop-shadow(0 0 3px rgba(229, 199, 121, 0.3))",
                   }}
                 >
                   <svg
@@ -343,8 +365,8 @@ export default function DealerShoe({
                     className="absolute inset-0 block h-full w-full"
                     style={{
                       zIndex: 2,
-                      animation: `bj-fan-spin ${7 + i}s linear infinite`,
-                      animationDelay: `${-i * 2}s`,
+                      animation: `bj-fan-spin ${6 + (idx % 3)}s linear infinite`,
+                      animationDelay: `${-idx * 1.3}s`,
                     }}
                   >
                     <use href="#dsg-fan-blades" />
@@ -354,12 +376,12 @@ export default function DealerShoe({
             })}
           </div>
 
-          {/* Right wall — slightly dimmer, light grazes it. Carries two
-              smaller PC-fan vents stacked vertically along the long axis
-              of the wall, mirroring the three on the front wall so the
-              whole body reads as actively cooled. */}
+          {/* Right wall — 80px tall now (depth bumped). Alex wanted a
+              DIFFERENT cooling design here: a hex-grid honeycomb mesh
+              exhaust vent, backlit in warm gold — reads as a passive
+              radiator complementing the active fans on the front. */}
           <div
-            className="absolute top-0 h-[160px] w-[38px]"
+            className="absolute top-0 h-[160px] w-[80px]"
             style={{
               left: "100%",
               background:
@@ -370,42 +392,61 @@ export default function DealerShoe({
               transformOrigin: "left center",
             }}
           >
-            {[0, 1, 2].map((i) => {
-              const top = 18 + i * 48;
-              return (
-                <div
-                  key={i}
-                  className="absolute h-[24px] w-[24px]"
-                  style={{
-                    left: "7px",
-                    top: `${top}px`,
-                    filter: "drop-shadow(0 0 2px rgba(229, 199, 121, 0.22))",
-                  }}
-                >
-                  <svg
-                    className="absolute inset-0 block h-full w-full"
-                    style={{ zIndex: 1 }}
+            {/* Recessed hex-mesh vent panel */}
+            <div
+              className="absolute left-[14px] right-[14px] top-[18px] bottom-[18px] overflow-hidden rounded-[4px]"
+              style={{
+                background:
+                  "radial-gradient(ellipse at 50% 50%, rgba(229, 199, 121, 0.16) 0%, rgba(229, 199, 121, 0.04) 55%, transparent 90%), linear-gradient(180deg, #050506 0%, #010102 100%)",
+                border: "1px solid rgba(229, 199, 121, 0.35)",
+                boxShadow:
+                  "inset 0 2px 4px rgba(0,0,0,0.95), inset 0 0 10px rgba(229, 199, 121, 0.08)",
+              }}
+            >
+              {/* Honeycomb mesh (SVG pattern mask over gold glow) */}
+              <svg
+                className="absolute inset-0 block h-full w-full"
+                xmlns="http://www.w3.org/2000/svg"
+                preserveAspectRatio="xMidYMid slice"
+                viewBox="0 0 52 124"
+              >
+                <defs>
+                  <pattern
+                    id="dsg-hex"
+                    x="0"
+                    y="0"
+                    width="10"
+                    height="11.55"
+                    patternUnits="userSpaceOnUse"
                   >
-                    <use href="#dsg-fan-casing" />
-                  </svg>
-                  <svg
-                    className="absolute inset-0 block h-full w-full"
-                    style={{
-                      zIndex: 2,
-                      animation: `bj-fan-spin ${8 + i}s linear infinite`,
-                      animationDelay: `${-i * 1.5}s`,
-                    }}
-                  >
-                    <use href="#dsg-fan-blades" />
-                  </svg>
-                </div>
-              );
-            })}
+                    {/* Two offset hexagons per pattern tile */}
+                    <polygon
+                      points="5,0.5 9.5,3 9.5,8.5 5,11 0.5,8.5 0.5,3"
+                      fill="rgba(5, 5, 6, 0.75)"
+                      stroke="rgba(0, 0, 0, 0.9)"
+                      strokeWidth="0.6"
+                    />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#dsg-hex)" />
+              </svg>
+              {/* Slow vertical scan light over the mesh */}
+              <div
+                className="absolute left-0 right-0 h-[14px]"
+                style={{
+                  top: "-14px",
+                  background:
+                    "linear-gradient(180deg, transparent 0%, rgba(246, 228, 169, 0.35) 50%, transparent 100%)",
+                  filter: "blur(2px)",
+                  animation: "bj-vent-scan 5s ease-in-out infinite",
+                }}
+              />
+            </div>
           </div>
 
           {/* Left wall (dim fill, mostly hidden by the rotateZ tilt) */}
           <div
-            className="absolute top-0 h-[160px] w-[38px]"
+            className="absolute top-0 h-[160px] w-[80px]"
             style={{
               right: "100%",
               background:
@@ -417,7 +458,7 @@ export default function DealerShoe({
 
           {/* Back wall (dim fill, hidden by the rotateX tilt) */}
           <div
-            className="absolute left-0 h-[38px] w-[260px]"
+            className="absolute left-0 h-[80px] w-[260px]"
             style={{
               bottom: "100%",
               background:
@@ -437,7 +478,7 @@ export default function DealerShoe({
                 "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 25%, transparent 55%, rgba(0,0,0,0.3) 100%), linear-gradient(180deg, #1e1e20 0%, #121214 55%, #060608 100%)",
               boxShadow:
                 "0 32px 55px rgba(0,0,0,0.9), inset 0 1px 0 rgba(240, 229, 199, 0.14), inset 0 -1px 0 rgba(0,0,0,0.6)",
-              transform: "translateZ(38px)",
+              transform: "translateZ(80px)",
               transformStyle: "preserve-3d",
             }}
           >
