@@ -317,7 +317,7 @@ export default function DealerShoe({
               grid of PC-fan vents covering the whole surface, with
               gaming-RGB-style gold uplights between the two rows. */}
           <div
-            className="absolute left-0 h-[80px] w-[260px]"
+            className="absolute left-0 h-[60px] w-[260px]"
             style={{
               top: "100%",
               background:
@@ -332,34 +332,22 @@ export default function DealerShoe({
                 exactly in front of the body (not behind, which was the
                 bug when depth jumped from 38 to 80).
               */
-              transform: "translateZ(80px) rotateX(-90deg)",
+              transform: "translateZ(60px) rotateX(-90deg)",
               transformOrigin: "top center",
             }}
           >
-            {/* Thin gold accent line running horizontally through the center,
-                behind the fans — reads as an interior LED strip. */}
-            <div
-              className="absolute left-[22px] right-[22px] top-1/2 h-px"
-              style={{
-                background:
-                  "linear-gradient(90deg, transparent, rgba(246, 228, 169, 0.5) 20%, rgba(246, 228, 169, 0.5) 80%, transparent)",
-                boxShadow: "0 0 4px rgba(246, 228, 169, 0.4)",
-                animation: "bj-glint-drift 3.4s ease-in-out infinite",
-              }}
-            />
-            {/* 2 rows × 3 columns of fans */}
-            {[0, 1, 2, 3, 4, 5].map((idx) => {
-              const col = idx % 3;
-              const row = Math.floor(idx / 3);
-              const left = 46 + col * 60;
-              const top = 8 + row * 38;
+            {/* Single row of 4 fans across the front wall (depth is 60
+                now, so only one row fits comfortably — a 1×4 reads as
+                a proper radiator anyway). */}
+            {[0, 1, 2, 3].map((idx) => {
+              const left = 30 + idx * 50;
               return (
                 <div
                   key={idx}
-                  className="absolute h-[32px] w-[32px]"
+                  className="absolute h-[42px] w-[42px]"
                   style={{
                     left: `${left}px`,
-                    top: `${top}px`,
+                    top: "9px",
                     filter: "drop-shadow(0 0 3px rgba(229, 199, 121, 0.3))",
                   }}
                 >
@@ -389,7 +377,7 @@ export default function DealerShoe({
               exhaust vent, backlit in warm gold — reads as a passive
               radiator complementing the active fans on the front. */}
           <div
-            className="absolute top-0 h-[160px] w-[80px]"
+            className="absolute top-0 h-[160px] w-[60px]"
             style={{
               left: "100%",
               background:
@@ -457,7 +445,7 @@ export default function DealerShoe({
               front wall's fan grid and the right wall's hex mesh — so
               each visible face of the shoe has its own cooling language. */}
           <div
-            className="absolute top-0 h-[160px] w-[80px] overflow-hidden"
+            className="absolute top-0 h-[160px] w-[60px] overflow-hidden"
             style={{
               right: "100%",
               background:
@@ -513,7 +501,7 @@ export default function DealerShoe({
 
           {/* Back wall (dim fill, hidden by the rotateX tilt) */}
           <div
-            className="absolute left-0 h-[80px] w-[260px]"
+            className="absolute left-0 h-[60px] w-[260px]"
             style={{
               bottom: "100%",
               background:
@@ -533,7 +521,7 @@ export default function DealerShoe({
                 "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 25%, transparent 55%, rgba(0,0,0,0.3) 100%), linear-gradient(180deg, #1e1e20 0%, #121214 55%, #060608 100%)",
               boxShadow:
                 "0 32px 55px rgba(0,0,0,0.9), inset 0 1px 0 rgba(240, 229, 199, 0.14), inset 0 -1px 0 rgba(0,0,0,0.6)",
-              transform: "translateZ(80px)",
+              transform: "translateZ(60px)",
               transformStyle: "preserve-3d",
             }}
           >
