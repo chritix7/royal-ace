@@ -139,6 +139,12 @@ export default function DealerShoe({
           85%  { opacity: 1; }
           100% { top: 100%; opacity: 0; }
         }
+        /* Sequential 3-dot activity indicator (status LED trio) */
+        @keyframes bj-activity-pulse {
+          0%, 100% { opacity: 0.25; box-shadow: 0 0 2px rgba(229, 199, 121, 0.3); }
+          20%      { opacity: 1;    box-shadow: 0 0 6px rgba(246, 228, 169, 0.9), 0 0 2px rgba(246, 228, 169, 1); }
+          40%      { opacity: 0.25; box-shadow: 0 0 2px rgba(229, 199, 121, 0.3); }
+        }
         /* LED pulse ring */
         @keyframes bj-led-pulse-ring {
           0%   { opacity: 0.9; transform: scale(1); }
@@ -338,16 +344,17 @@ export default function DealerShoe({
           >
             {/* Single row of 4 fans across the front wall (depth is 60
                 now, so only one row fits comfortably — a 1×4 reads as
-                a proper radiator anyway). */}
+                a proper radiator anyway). Pushed up to leave room for
+                the micro status strip at the bottom. */}
             {[0, 1, 2, 3].map((idx) => {
               const left = 30 + idx * 50;
               return (
                 <div
                   key={idx}
-                  className="absolute h-[42px] w-[42px]"
+                  className="absolute h-[38px] w-[38px]"
                   style={{
-                    left: `${left}px`,
-                    top: "9px",
+                    left: `${left + 2}px`,
+                    top: "4px",
                     filter: "drop-shadow(0 0 3px rgba(229, 199, 121, 0.3))",
                   }}
                 >
@@ -370,6 +377,53 @@ export default function DealerShoe({
                 </div>
               );
             })}
+
+            {/* Micro model/serial plate — bottom-right of the front wall */}
+            <div
+              className="absolute flex items-center justify-center rounded-[1px] border border-[#e5c779]/30 px-[3px] py-[1px]"
+              style={{
+                right: "6px",
+                bottom: "2px",
+                height: "6px",
+                background: "linear-gradient(180deg, #0a0a0d 0%, #050506 100%)",
+                boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.9)",
+              }}
+            >
+              <span
+                style={{
+                  fontFamily:
+                    "var(--font-tech-mono), 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', Menlo, monospace",
+                  fontSize: "4px",
+                  color: "rgba(229, 199, 121, 0.75)",
+                  letterSpacing: "0.1em",
+                  lineHeight: 1,
+                  textTransform: "uppercase",
+                }}
+              >
+                RA-01 · 6D
+              </span>
+            </div>
+
+            {/* 3-dot sequential activity indicator — bottom-left of front wall */}
+            <div
+              className="absolute flex items-center gap-[3px]"
+              style={{ left: "6px", bottom: "3px" }}
+            >
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className="rounded-full"
+                  style={{
+                    width: "3px",
+                    height: "3px",
+                    background: "#e5c779",
+                    animation: `bj-activity-pulse 1.4s linear infinite`,
+                    animationDelay: `${i * 0.22}s`,
+                  }}
+                />
+              ))}
+            </div>
+
           </div>
 
           {/* Right wall — 80px tall now (depth bumped). Alex wanted a
@@ -437,6 +491,23 @@ export default function DealerShoe({
                   animation: "bj-vent-scan 5s ease-in-out infinite",
                 }}
               />
+            </div>
+            {/* Tiny engraved AIRFLOW label at the top of the vent frame */}
+            <div
+              className="absolute whitespace-nowrap text-center uppercase"
+              style={{
+                left: "4px",
+                right: "4px",
+                top: "6px",
+                fontFamily:
+                  "var(--font-tech-mono), 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', Menlo, monospace",
+                fontSize: "4px",
+                color: "rgba(229, 199, 121, 0.5)",
+                letterSpacing: "0.25em",
+                lineHeight: 1,
+              }}
+            >
+              Airflow ↑
             </div>
           </div>
 
