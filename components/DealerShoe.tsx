@@ -354,7 +354,10 @@ export default function DealerShoe({
             })}
           </div>
 
-          {/* Right wall — slightly dimmer, light grazes it */}
+          {/* Right wall — slightly dimmer, light grazes it. Carries two
+              smaller PC-fan vents stacked vertically along the long axis
+              of the wall, mirroring the three on the front wall so the
+              whole body reads as actively cooled. */}
           <div
             className="absolute top-0 h-[160px] w-[38px]"
             style={{
@@ -366,7 +369,39 @@ export default function DealerShoe({
               transform: "rotateY(-90deg)",
               transformOrigin: "left center",
             }}
-          />
+          >
+            {[0, 1, 2].map((i) => {
+              const top = 18 + i * 48;
+              return (
+                <div
+                  key={i}
+                  className="absolute h-[24px] w-[24px]"
+                  style={{
+                    left: "7px",
+                    top: `${top}px`,
+                    filter: "drop-shadow(0 0 2px rgba(229, 199, 121, 0.22))",
+                  }}
+                >
+                  <svg
+                    className="absolute inset-0 block h-full w-full"
+                    style={{ zIndex: 1 }}
+                  >
+                    <use href="#dsg-fan-casing" />
+                  </svg>
+                  <svg
+                    className="absolute inset-0 block h-full w-full"
+                    style={{
+                      zIndex: 2,
+                      animation: `bj-fan-spin ${8 + i}s linear infinite`,
+                      animationDelay: `${-i * 1.5}s`,
+                    }}
+                  >
+                    <use href="#dsg-fan-blades" />
+                  </svg>
+                </div>
+              );
+            })}
+          </div>
 
           {/* Left wall (dim fill, mostly hidden by the rotateZ tilt) */}
           <div
