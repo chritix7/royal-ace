@@ -173,7 +173,7 @@ function getShoeStatus(g: Game): {
         <div className={`relative overflow-hidden ${THEMES[s.settings.theme]} px-2 py-4 sm:px-9 sm:py-5`}>
           {s.celebrate > 0 && <Confetti key={s.celebrate} />}
           <DealerShoe
-            className="absolute -right-12 -top-6 z-0 hidden sm:block"
+            className="absolute -right-[43px] -top-[19px] z-0 hidden sm:block"
             status={getShoeStatus(g)}
           />
           {s.shuffling && (
