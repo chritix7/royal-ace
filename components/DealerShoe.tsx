@@ -452,17 +452,64 @@ export default function DealerShoe({
             </div>
           </div>
 
-          {/* Left wall (dim fill, mostly hidden by the rotateZ tilt) */}
+          {/* Left wall — now carries a column of backlit horizontal
+              exhaust slots (sports-car-hood style). Different from the
+              front wall's fan grid and the right wall's hex mesh — so
+              each visible face of the shoe has its own cooling language. */}
           <div
-            className="absolute top-0 h-[160px] w-[80px]"
+            className="absolute top-0 h-[160px] w-[80px] overflow-hidden"
             style={{
               right: "100%",
               background:
-                "linear-gradient(180deg, #0a0a0c 0%, #050506 60%, #020203 100%)",
+                "linear-gradient(180deg, #141418 0%, #0a0a0c 50%, #050506 100%)",
+              boxShadow:
+                "inset -1px 0 0 rgba(246, 228, 169, 0.12), inset 8px 0 14px -6px rgba(0,0,0,0.9)",
               transform: "rotateY(90deg)",
               transformOrigin: "right center",
             }}
-          />
+          >
+            {/* Six horizontal slit vents, backlit in warm gold.
+                Each slit is a dark recessed slot with an amber-gold
+                glow bleeding through — reads as exhaust / airflow. */}
+            {[0, 1, 2, 3, 4, 5].map((i) => {
+              const top = 16 + i * 22;
+              return (
+                <div
+                  key={i}
+                  className="absolute left-[14px] right-[14px] h-[10px] overflow-hidden rounded-[2px]"
+                  style={{
+                    top: `${top}px`,
+                    background:
+                      "linear-gradient(180deg, #000 0%, #0a0a0d 50%, #000 100%)",
+                    border: "1px solid rgba(229, 199, 121, 0.35)",
+                    boxShadow:
+                      "inset 0 2px 3px rgba(0,0,0,0.98), 0 0 4px rgba(229, 199, 121, 0.15)",
+                  }}
+                >
+                  {/* Inner backlight bar */}
+                  <div
+                    className="absolute left-[4px] right-[4px] top-1/2 h-px -translate-y-1/2"
+                    style={{
+                      background:
+                        "linear-gradient(90deg, transparent, rgba(246, 228, 169, 0.6) 20%, rgba(246, 228, 169, 0.6) 80%, transparent)",
+                      boxShadow: "0 0 4px rgba(246, 228, 169, 0.5)",
+                      animation: `bj-glint-drift ${2.4 + (i % 3) * 0.4}s ease-in-out infinite`,
+                      animationDelay: `${-i * 0.3}s`,
+                    }}
+                  />
+                </div>
+              );
+            })}
+            {/* Thin gold accent at the top (seam between top face and this wall) */}
+            <div
+              className="absolute left-[8px] right-[8px] top-[4px] h-px"
+              style={{
+                background:
+                  "linear-gradient(90deg, transparent, rgba(246, 228, 169, 0.5) 25%, rgba(246, 228, 169, 0.5) 75%, transparent)",
+                boxShadow: "0 0 3px rgba(246, 228, 169, 0.35)",
+              }}
+            />
+          </div>
 
           {/* Back wall (dim fill, hidden by the rotateX tilt) */}
           <div
