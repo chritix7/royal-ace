@@ -810,72 +810,55 @@ export default function DealerShoe({
               ))}
             </div>
 
-            {/* --- Status LCD (bottom-left): ROYAL ACE + READY --- */}
+            {/* --- Status pill, top-left of the top face next to the hero
+                spade. Minimal pill-shape with just a status LED dot
+                and the current status label in Share Tech Mono. */}
             <div
-              className="absolute bottom-[14px] left-[16px] flex h-[40px] w-[138px] flex-col justify-between rounded-[7px] px-[9px] py-[6px]"
+              className="absolute flex items-center gap-[5px] whitespace-nowrap rounded-full px-[7px]"
               style={{
-                background: "linear-gradient(180deg, #0a0a0b 0%, #040405 100%)",
-                border: "1px solid rgba(229, 199, 121, 0.6)",
+                top: "32px",
+                left: "12px",
+                height: "14px",
+                background: "rgba(5, 5, 6, 0.78)",
+                border: "1px solid rgba(229, 199, 121, 0.45)",
                 boxShadow:
-                  "inset 0 4px 10px rgba(0, 0, 0, 0.98), inset 0 -1px 0 rgba(229, 199, 121, 0.12), 0 0 10px rgba(229, 199, 121, 0.12)",
+                  "0 1px 2px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(229, 199, 121, 0.1)",
+                backdropFilter: "blur(2px)",
                 transform: "translateZ(4px)",
               }}
             >
-              {/* Top scan line */}
-              <div
-                className="absolute left-[4px] right-[4px] top-[2px] h-px"
+              <span
+                className="relative shrink-0 rounded-full"
                 style={{
-                  background:
-                    "linear-gradient(90deg, transparent, rgba(229, 199, 121, 0.5), transparent)",
-                }}
-              />
-              {/* ROYAL ACE in Cloister Black (blackletter fallback) */}
-              <div
-                className="whitespace-nowrap uppercase leading-none"
-                style={{
-                  fontFamily:
-                    "'Cloister Black', var(--font-blackletter), 'UnifrakturMaguntia', 'Luminari', serif",
-                  fontSize: "15px",
-                  color: "#e5c779",
-                  letterSpacing: "-0.005em",
-                  textShadow:
-                    "0 0 6px rgba(229, 199, 121, 0.55), 0 0 2px rgba(246, 228, 169, 0.85), 0 1px 0 rgba(0, 0, 0, 0.6)",
+                  width: "5px",
+                  height: "5px",
+                  background: led.base,
+                  boxShadow: `0 0 6px ${led.pale}, 0 0 2px ${led.pale}`,
                 }}
               >
-                Royal Ace
-              </div>
-              {/* READY + LED */}
-              <div className="flex items-center justify-between gap-1 leading-none">
-                <span
-                  className="truncate uppercase"
-                  style={{
-                    fontFamily:
-                      "var(--font-tech-mono), 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', Menlo, monospace",
-                    fontSize: "8px",
-                    color: "rgba(229, 199, 121, 0.55)",
-                    letterSpacing: "0.3em",
-                    textShadow: "0 0 3px rgba(229, 199, 121, 0.2)",
-                  }}
-                >
-                  {status.label}
-                </span>
-                <span className="relative h-[6px] w-[6px] shrink-0 rounded-full"
-                  style={{
-                    background: led.base,
-                    boxShadow: `0 0 8px ${led.pale}, 0 0 2px ${led.pale}`,
-                  }}
-                >
-                  {active && (
-                    <span
-                      className="absolute inset-[-2px] rounded-full"
-                      style={{
-                        background: led.base,
-                        animation: "bj-led-pulse-ring 1.6s ease-out infinite",
-                      }}
-                    />
-                  )}
-                </span>
-              </div>
+                {active && (
+                  <span
+                    className="absolute inset-[-2px] rounded-full"
+                    style={{
+                      background: led.base,
+                      animation: "bj-led-pulse-ring 1.6s ease-out infinite",
+                    }}
+                  />
+                )}
+              </span>
+              <span
+                className="uppercase leading-none"
+                style={{
+                  fontFamily:
+                    "var(--font-tech-mono), 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', Menlo, monospace",
+                  fontSize: "7px",
+                  color: "rgba(246, 228, 169, 0.88)",
+                  letterSpacing: "0.26em",
+                  textShadow: "0 0 3px rgba(229, 199, 121, 0.4)",
+                }}
+              >
+                {status.label}
+              </span>
             </div>
 
             {/* --- Gold medallion with engraved spade --- */}
