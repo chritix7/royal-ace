@@ -735,9 +735,10 @@ export default function DealerShoe({
             >
               <svg className="block h-full w-full"><use href="#dsg-diamond-silver" /></svg>
             </div>
-            {/* Bottom-left ♣ (lifted above the LCD so it stays visible) */}
+            {/* Bottom-left ♣ — moved back down to the real corner now that
+                the heavy LCD is gone. */}
             <div
-              className="absolute bottom-[62px] left-[12px] h-[14px] w-[14px]"
+              className="absolute bottom-[12px] left-[12px] h-[14px] w-[14px]"
               style={{ transform: "translateZ(3px)", filter: "drop-shadow(0 1px 1.5px rgba(0,0,0,0.9))" }}
             >
               <svg className="block h-full w-full"><use href="#dsg-club-silver" /></svg>
@@ -793,36 +794,20 @@ export default function DealerShoe({
               />
             </div>
 
-            {/* --- Small gold studs flourish --- */}
-            <div
-              className="absolute bottom-[56px] left-[26px] flex h-[6px] w-[48px] items-center justify-between"
-              style={{ transform: "translateZ(2px)" }}
-            >
-              {[0, 1, 2, 3, 4].map((i) => (
-                <i
-                  key={i}
-                  className="h-[3px] w-[3px] rounded-full"
-                  style={{
-                    background: "radial-gradient(circle at 30% 30%, #f6e4a9, #8c6b23)",
-                    boxShadow: "0 0 2px rgba(229, 199, 121, 0.5)",
-                  }}
-                />
-              ))}
-            </div>
 
             {/* --- Status pill, top-left of the top face next to the hero
                 spade. Minimal pill-shape with just a status LED dot
                 and the current status label in Share Tech Mono. */}
             <div
-              className="absolute flex items-center gap-[5px] whitespace-nowrap rounded-full px-[7px]"
+              className="absolute flex items-center gap-[6px] whitespace-nowrap rounded-full px-[9px]"
               style={{
-                top: "32px",
-                left: "12px",
-                height: "14px",
-                background: "rgba(5, 5, 6, 0.78)",
-                border: "1px solid rgba(229, 199, 121, 0.45)",
+                top: "28px",
+                left: "10px",
+                height: "18px",
+                background: "rgba(5, 5, 6, 0.8)",
+                border: "1px solid rgba(229, 199, 121, 0.5)",
                 boxShadow:
-                  "0 1px 2px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(229, 199, 121, 0.1)",
+                  "0 2px 3px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(229, 199, 121, 0.12)",
                 backdropFilter: "blur(2px)",
                 transform: "translateZ(4px)",
               }}
@@ -830,10 +815,10 @@ export default function DealerShoe({
               <span
                 className="relative shrink-0 rounded-full"
                 style={{
-                  width: "5px",
-                  height: "5px",
+                  width: "6px",
+                  height: "6px",
                   background: led.base,
-                  boxShadow: `0 0 6px ${led.pale}, 0 0 2px ${led.pale}`,
+                  boxShadow: `0 0 7px ${led.pale}, 0 0 2px ${led.pale}`,
                 }}
               >
                 {active && (
@@ -851,9 +836,9 @@ export default function DealerShoe({
                 style={{
                   fontFamily:
                     "var(--font-tech-mono), 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', Menlo, monospace",
-                  fontSize: "7px",
-                  color: "rgba(246, 228, 169, 0.88)",
-                  letterSpacing: "0.26em",
+                  fontSize: "9px",
+                  color: "rgba(246, 228, 169, 0.9)",
+                  letterSpacing: "0.24em",
                   textShadow: "0 0 3px rgba(229, 199, 121, 0.4)",
                 }}
               >
