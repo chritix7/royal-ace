@@ -795,21 +795,25 @@ export default function DealerShoe({
             </div>
 
 
-            {/* --- Status pill, top-left of the top face next to the hero
-                spade. Minimal pill-shape with just a status LED dot
-                and the current status label in Share Tech Mono. */}
+            {/* --- Status pill: centered on the LEFT edge of the top face
+                between the ♠ (top-left corner) and ♣ (bottom-left
+                corner) suits. Rotated -90deg so the text reads bottom
+                -to-top along the edge, like a side-mounted equipment
+                label. */}
             <div
               className="absolute flex items-center gap-[6px] whitespace-nowrap rounded-full px-[9px]"
               style={{
-                top: "28px",
-                left: "10px",
+                top: "80px",
+                left: "14px",
                 height: "18px",
                 background: "rgba(5, 5, 6, 0.8)",
                 border: "1px solid rgba(229, 199, 121, 0.5)",
                 boxShadow:
                   "0 2px 3px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(229, 199, 121, 0.12)",
                 backdropFilter: "blur(2px)",
-                transform: "translateZ(4px)",
+                transform:
+                  "translate(-50%, -50%) rotate(-90deg) translateZ(4px)",
+                transformOrigin: "center center",
               }}
             >
               <span
