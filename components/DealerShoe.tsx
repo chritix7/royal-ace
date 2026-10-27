@@ -426,12 +426,12 @@ export default function DealerShoe({
 
           </div>
 
-          {/* Right wall — 80px tall now (depth bumped). Alex wanted a
-              DIFFERENT cooling design here: a hex-grid honeycomb mesh
-              exhaust vent, backlit in warm gold — reads as a passive
-              radiator complementing the active fans on the front. */}
+          {/* Right wall — carries the stacked exhaust slits (previously
+              on the left wall). Those are the simpler decoration; the
+              right wall is mostly hidden by the rotateZ tilt so this
+              detail saves attention for the visible face. */}
           <div
-            className="absolute top-0 h-[160px] w-[60px]"
+            className="absolute top-0 h-[160px] w-[60px] overflow-hidden"
             style={{
               left: "100%",
               background:
@@ -440,6 +440,62 @@ export default function DealerShoe({
                 "inset 1px 0 0 rgba(246, 228, 169, 0.12), inset -8px 0 14px -6px rgba(0,0,0,0.9)",
               transform: "rotateY(-90deg)",
               transformOrigin: "left center",
+            }}
+          >
+            {/* Six horizontal slit vents, backlit in warm gold. */}
+            {[0, 1, 2, 3, 4, 5].map((i) => {
+              const top = 16 + i * 22;
+              return (
+                <div
+                  key={i}
+                  className="absolute left-[14px] right-[14px] h-[10px] overflow-hidden rounded-[2px]"
+                  style={{
+                    top: `${top}px`,
+                    background:
+                      "linear-gradient(180deg, #000 0%, #0a0a0d 50%, #000 100%)",
+                    border: "1px solid rgba(229, 199, 121, 0.35)",
+                    boxShadow:
+                      "inset 0 2px 3px rgba(0,0,0,0.98), 0 0 4px rgba(229, 199, 121, 0.15)",
+                  }}
+                >
+                  <div
+                    className="absolute left-[4px] right-[4px] top-1/2 h-px -translate-y-1/2"
+                    style={{
+                      background:
+                        "linear-gradient(90deg, transparent, rgba(246, 228, 169, 0.6) 20%, rgba(246, 228, 169, 0.6) 80%, transparent)",
+                      boxShadow: "0 0 4px rgba(246, 228, 169, 0.5)",
+                      animation: `bj-glint-drift ${2.4 + (i % 3) * 0.4}s ease-in-out infinite`,
+                      animationDelay: `${-i * 0.3}s`,
+                    }}
+                  />
+                </div>
+              );
+            })}
+            {/* Thin gold accent at the top seam */}
+            <div
+              className="absolute left-[8px] right-[8px] top-[4px] h-px"
+              style={{
+                background:
+                  "linear-gradient(90deg, transparent, rgba(246, 228, 169, 0.5) 25%, rgba(246, 228, 169, 0.5) 75%, transparent)",
+                boxShadow: "0 0 3px rgba(246, 228, 169, 0.35)",
+              }}
+            />
+          </div>
+
+          {/* Left wall — now carries the premium hex-mesh honeycomb vent
+              (previously on the right wall). Alex wanted the richer
+              design on the visible face, since rotateZ(-28) swings the
+              left side forward into view and hides the right side. */}
+          <div
+            className="absolute top-0 h-[160px] w-[60px]"
+            style={{
+              right: "100%",
+              background:
+                "linear-gradient(180deg, #141418 0%, #0a0a0c 50%, #050506 100%)",
+              boxShadow:
+                "inset -1px 0 0 rgba(246, 228, 169, 0.12), inset 8px 0 14px -6px rgba(0,0,0,0.9)",
+              transform: "rotateY(90deg)",
+              transformOrigin: "right center",
             }}
           >
             {/* Recessed hex-mesh vent panel */}
@@ -453,7 +509,7 @@ export default function DealerShoe({
                   "inset 0 2px 4px rgba(0,0,0,0.95), inset 0 0 10px rgba(229, 199, 121, 0.08)",
               }}
             >
-              {/* Honeycomb mesh (SVG pattern mask over gold glow) */}
+              {/* Honeycomb mesh */}
               <svg
                 className="absolute inset-0 block h-full w-full"
                 xmlns="http://www.w3.org/2000/svg"
@@ -469,7 +525,6 @@ export default function DealerShoe({
                     height="11.55"
                     patternUnits="userSpaceOnUse"
                   >
-                    {/* Two offset hexagons per pattern tile */}
                     <polygon
                       points="5,0.5 9.5,3 9.5,8.5 5,11 0.5,8.5 0.5,3"
                       fill="rgba(5, 5, 6, 0.75)"
@@ -509,65 +564,6 @@ export default function DealerShoe({
             >
               Airflow ↑
             </div>
-          </div>
-
-          {/* Left wall — now carries a column of backlit horizontal
-              exhaust slots (sports-car-hood style). Different from the
-              front wall's fan grid and the right wall's hex mesh — so
-              each visible face of the shoe has its own cooling language. */}
-          <div
-            className="absolute top-0 h-[160px] w-[60px] overflow-hidden"
-            style={{
-              right: "100%",
-              background:
-                "linear-gradient(180deg, #141418 0%, #0a0a0c 50%, #050506 100%)",
-              boxShadow:
-                "inset -1px 0 0 rgba(246, 228, 169, 0.12), inset 8px 0 14px -6px rgba(0,0,0,0.9)",
-              transform: "rotateY(90deg)",
-              transformOrigin: "right center",
-            }}
-          >
-            {/* Six horizontal slit vents, backlit in warm gold.
-                Each slit is a dark recessed slot with an amber-gold
-                glow bleeding through — reads as exhaust / airflow. */}
-            {[0, 1, 2, 3, 4, 5].map((i) => {
-              const top = 16 + i * 22;
-              return (
-                <div
-                  key={i}
-                  className="absolute left-[14px] right-[14px] h-[10px] overflow-hidden rounded-[2px]"
-                  style={{
-                    top: `${top}px`,
-                    background:
-                      "linear-gradient(180deg, #000 0%, #0a0a0d 50%, #000 100%)",
-                    border: "1px solid rgba(229, 199, 121, 0.35)",
-                    boxShadow:
-                      "inset 0 2px 3px rgba(0,0,0,0.98), 0 0 4px rgba(229, 199, 121, 0.15)",
-                  }}
-                >
-                  {/* Inner backlight bar */}
-                  <div
-                    className="absolute left-[4px] right-[4px] top-1/2 h-px -translate-y-1/2"
-                    style={{
-                      background:
-                        "linear-gradient(90deg, transparent, rgba(246, 228, 169, 0.6) 20%, rgba(246, 228, 169, 0.6) 80%, transparent)",
-                      boxShadow: "0 0 4px rgba(246, 228, 169, 0.5)",
-                      animation: `bj-glint-drift ${2.4 + (i % 3) * 0.4}s ease-in-out infinite`,
-                      animationDelay: `${-i * 0.3}s`,
-                    }}
-                  />
-                </div>
-              );
-            })}
-            {/* Thin gold accent at the top (seam between top face and this wall) */}
-            <div
-              className="absolute left-[8px] right-[8px] top-[4px] h-px"
-              style={{
-                background:
-                  "linear-gradient(90deg, transparent, rgba(246, 228, 169, 0.5) 25%, rgba(246, 228, 169, 0.5) 75%, transparent)",
-                boxShadow: "0 0 3px rgba(246, 228, 169, 0.35)",
-              }}
-            />
           </div>
 
           {/* Back wall — same fix as the front wall: translateZ(60) first
