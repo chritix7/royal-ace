@@ -329,7 +329,7 @@ export default function DealerShoe({
               background:
                 "linear-gradient(180deg, #1c1c1e 0%, #141418 25%, #0a0a0c 65%, #030304 100%)",
               boxShadow:
-                "inset 0 1px 0 rgba(246, 228, 169, 0.18), inset 0 -10px 18px -6px rgba(0,0,0,0.85)",
+                "inset 0 1px 0 rgba(246, 228, 169, 0.18), inset 0 -1px 0 rgba(246, 228, 169, 0.3), inset 0 -10px 18px -6px rgba(0,0,0,0.85)",
               /*
                 translateZ(80) first lifts the panel to the height of the
                 top face; rotateX(-90) around its top edge then swings it
@@ -493,7 +493,7 @@ export default function DealerShoe({
               background:
                 "linear-gradient(180deg, #141418 0%, #0a0a0c 50%, #050506 100%)",
               boxShadow:
-                "inset -1px 0 0 rgba(246, 228, 169, 0.12), inset 8px 0 14px -6px rgba(0,0,0,0.9)",
+                "inset -1px 0 0 rgba(246, 228, 169, 0.3), inset 8px 0 14px -6px rgba(0,0,0,0.9)",
               transform: "rotateY(90deg)",
               transformOrigin: "right center",
             }}
@@ -886,7 +886,7 @@ export default function DealerShoe({
         >
           {/* Ramp track */}
           <div
-            className="absolute bottom-[10px] left-3 right-3 h-[52px] rounded-t-[13px]"
+            className="absolute bottom-[10px] left-3 right-3 h-[52px] overflow-hidden rounded-t-[13px]"
             style={{
               background:
                 "linear-gradient(180deg, #050506 0%, #15151a 50%, #26262c 100%)",
@@ -894,7 +894,49 @@ export default function DealerShoe({
               boxShadow:
                 "0 12px 21px rgba(0,0,0,0.72), inset 0 1px 2px rgba(229, 199, 121, 0.16)",
             }}
-          />
+          >
+            {/* Left-side micro ventilation grill */}
+            <div className="absolute left-[4px] top-[8px] flex flex-col gap-[2px]">
+              {[0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-[1px] w-[6px] rounded-full"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, transparent, rgba(229, 199, 121, 0.4), transparent)",
+                  }}
+                />
+              ))}
+            </div>
+            {/* Right-side micro ventilation grill (mirror) */}
+            <div className="absolute right-[4px] top-[8px] flex flex-col gap-[2px]">
+              {[0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-[1px] w-[6px] rounded-full"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, transparent, rgba(229, 199, 121, 0.4), transparent)",
+                  }}
+                />
+              ))}
+            </div>
+            {/* Engraved ROYAL ACE brand plate centered on the track */}
+            <div
+              className="absolute left-1/2 top-[6px] -translate-x-1/2 whitespace-nowrap text-center uppercase"
+              style={{
+                fontFamily:
+                  "'Cloister Black', var(--font-blackletter), 'UnifrakturMaguntia', 'Luminari', serif",
+                fontSize: "7px",
+                color: "rgba(246, 228, 169, 0.75)",
+                letterSpacing: "0.04em",
+                lineHeight: 1,
+                textShadow: "0 0 3px rgba(229, 199, 121, 0.4), 0 1px 0 rgba(0,0,0,0.9)",
+              }}
+            >
+              Royal Ace
+            </div>
+          </div>
           {/* Exit slit — the card flight animation starts here */}
           <div
             data-shoe-outlet=""
@@ -911,6 +953,24 @@ export default function DealerShoe({
               boxShadow: "0 0 7px rgba(246, 228, 169, 0.55)",
             }}
           />
+          {/* IR sensor pip next to the exit slit */}
+          <div
+            className="absolute bottom-[48px] right-[22px] grid h-[6px] w-[6px] place-items-center rounded-full"
+            style={{
+              background: "radial-gradient(circle at 35% 30%, #1a1a1d 0%, #050506 70%, #000 100%)",
+              border: "1px solid rgba(229, 199, 121, 0.35)",
+              boxShadow: "inset 0 1px 1px rgba(0,0,0,0.9), 0 0 2px rgba(229, 199, 121, 0.2)",
+            }}
+          >
+            <span
+              className="h-[2px] w-[2px] rounded-full"
+              style={{
+                background: cycle === "dispense" ? "#f6e4a9" : "rgba(246, 228, 169, 0.35)",
+                boxShadow: cycle === "dispense" ? "0 0 4px #f6e4a9" : "none",
+                transition: "background 180ms linear, box-shadow 180ms linear",
+              }}
+            />
+          </div>
           {/* Three cards sticking out, top one animates during dispense */}
           {[0, 1, 2].map((i) => {
             const isTop = i === 2;
