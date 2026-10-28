@@ -39,21 +39,40 @@ function SidePill({
   onIncrease,
   onDecrease,
 }: SidePillProps) {
+  const active = !disabled && amount > 0;
   return (
     <div
-  className={`flex w-full min-w-0 items-center justify-between gap-2 rounded-full border px-2.5 py-1.5 lg:w-36 ${
-    disabled
-      ? "border-white/15 bg-black/25 opacity-70"
-      : amount > 0
-      ? "border-[#e5c779]/60 bg-[#e5c779]/12"
-      : "border-white/15 bg-black/25"
-  }`}
->
+      className="relative flex w-full min-w-0 items-center justify-between gap-2 rounded-full px-3 py-1.5 lg:w-36"
+      style={{
+        background: active
+          ? "radial-gradient(ellipse at 50% 20%, rgba(229, 199, 121, 0.18) 0%, rgba(5, 10, 7, 0.6) 60%, rgba(5, 10, 7, 0.75) 100%)"
+          : "radial-gradient(ellipse at 50% 20%, rgba(255, 255, 255, 0.03) 0%, rgba(5, 10, 7, 0.6) 70%, rgba(5, 10, 7, 0.75) 100%)",
+        // Recessed look: 1px gold outer ring + inner dark shadow (engraved into the felt)
+        boxShadow: active
+          ? "inset 0 0 0 1px rgba(229, 199, 121, 0.55), inset 0 2px 5px rgba(0, 0, 0, 0.75), 0 0 14px rgba(229, 199, 121, 0.15), 0 1px 0 rgba(229, 199, 121, 0.1)"
+          : "inset 0 0 0 1px rgba(229, 199, 121, 0.25), inset 0 2px 5px rgba(0, 0, 0, 0.75), 0 1px 0 rgba(229, 199, 121, 0.06)",
+        opacity: disabled ? 0.7 : 1,
+      }}
+    >
       <div className="min-w-0">
-        <p className="text-[9px] font-black uppercase tracking-wide text-[#e5c779] sm:text-[10px]">
+        <p
+          className="text-[9px] font-black uppercase tracking-[0.18em] sm:text-[10px]"
+          style={{
+            color: "#e5c779",
+            textShadow: active
+              ? "0 0 4px rgba(229, 199, 121, 0.6), 0 1px 0 rgba(0, 0, 0, 0.85)"
+              : "0 1px 0 rgba(0, 0, 0, 0.85)",
+          }}
+        >
           {label}
         </p>
-        <p className="text-[10px] font-bold text-white sm:text-xs">
+        <p
+          className="text-[10px] font-bold tabular-nums sm:text-xs"
+          style={{
+            color: active ? "#f0e5c7" : "rgba(255, 255, 255, 0.6)",
+            textShadow: "0 1px 0 rgba(0, 0, 0, 0.85)",
+          }}
+        >
           {amount > 0 ? `◈ ${money(amount)}` : "Off"}
         </p>
       </div>
@@ -64,7 +83,11 @@ function SidePill({
           onClick={onDecrease}
           disabled={disabled || amount === 0}
           aria-label={`Decrease ${label} side bet`}
-          className="flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black/30 text-xs font-bold text-white/80 transition hover:border-[#e5c779]/60 hover:text-[#e5c779] disabled:opacity-30"
+          className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white/80 transition enabled:hover:text-[#e5c779] disabled:opacity-30"
+          style={{
+            background: "radial-gradient(circle at 35% 25%, #2a2a2d 0%, #0a0a0b 70%, #000 100%)",
+            boxShadow: "inset 0 0 0 1px rgba(229, 199, 121, 0.35), inset 0 1px 2px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(229, 199, 121, 0.08)",
+          }}
         >
           −
         </button>
@@ -73,7 +96,11 @@ function SidePill({
           onClick={onIncrease}
           disabled={disabled}
           aria-label={`Increase ${label} side bet`}
-          className="flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black/30 text-xs font-bold text-white/80 transition hover:border-[#e5c779]/60 hover:text-[#e5c779] disabled:opacity-30"
+          className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white/80 transition enabled:hover:text-[#e5c779] disabled:opacity-30"
+          style={{
+            background: "radial-gradient(circle at 35% 25%, #2a2a2d 0%, #0a0a0b 70%, #000 100%)",
+            boxShadow: "inset 0 0 0 1px rgba(229, 199, 121, 0.35), inset 0 1px 2px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(229, 199, 121, 0.08)",
+          }}
         >
           +
         </button>
@@ -317,28 +344,71 @@ function getShoeStatus(g: Game): {
 
           {/* Zone de mise */}
 <div className="relative mt-3 flex flex-col items-center gap-2.5 sm:mt-4 lg:flex-row lg:items-center lg:justify-center lg:gap-4">
+  {/* Outer betting-area arc engraved in the felt */}
   <div
     aria-hidden="true"
-    className="pointer-events-none absolute -bottom-10 left-1/2 h-40 w-[min(94%,680px)] -translate-x-1/2 rounded-[50%] border border-white/[0.07]"
+    className="pointer-events-none absolute -bottom-10 left-1/2 h-40 w-[min(94%,680px)] -translate-x-1/2 rounded-[50%]"
+    style={{
+      boxShadow:
+        "inset 0 0 0 1px rgba(229, 199, 121, 0.14), inset 0 1px 0 rgba(0, 0, 0, 0.5)",
+    }}
+  />
+  {/* Inner concentric arc */}
+  <div
+    aria-hidden="true"
+    className="pointer-events-none absolute -bottom-7 left-1/2 h-28 w-[min(78%,520px)] -translate-x-1/2 rounded-[50%]"
+    style={{
+      boxShadow:
+        "inset 0 0 0 1px rgba(229, 199, 121, 0.1), inset 0 1px 0 rgba(0, 0, 0, 0.4)",
+    }}
   />
 
-  <div
-    aria-hidden="true"
-    className="pointer-events-none absolute -bottom-7 left-1/2 h-28 w-[min(78%,520px)] -translate-x-1/2 rounded-[50%] border border-white/[0.05]"
-  />
   <div className="order-1 lg:order-2">
+    {/* BET circle — recessed into the felt with a double gold ring and
+        a center bowl where the chips land. */}
     <div
-      className={`relative flex h-16 w-16 items-center justify-center rounded-full border-2 text-center sm:h-20 sm:w-20 ${
-        canBet
-          ? "border-[#e5c779]/80 bg-[#e5c779]/12 shadow-[0_0_28px_rgba(229,199,121,0.20)]"
-          : "border-white/20 bg-black/25"
-      }`}
+      className="relative flex h-16 w-16 items-center justify-center rounded-full text-center sm:h-20 sm:w-20"
+      style={{
+        background: canBet
+          ? "radial-gradient(circle at 50% 30%, rgba(229, 199, 121, 0.22) 0%, rgba(5, 10, 7, 0.75) 55%, rgba(5, 10, 7, 0.9) 100%)"
+          : "radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.04) 0%, rgba(5, 10, 7, 0.75) 60%, rgba(5, 10, 7, 0.9) 100%)",
+        // Double gold ring: inner 1px gold then outer 1px gold with gap
+        // via inset shadows + a drop halo when active.
+        boxShadow: canBet
+          ? [
+              "inset 0 0 0 1px rgba(229, 199, 121, 0.85)",
+              "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
+              "inset 0 0 0 4px rgba(229, 199, 121, 0.35)",
+              "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
+              "0 0 24px rgba(229, 199, 121, 0.25)",
+              "0 1px 0 rgba(229, 199, 121, 0.15)",
+            ].join(", ")
+          : [
+              "inset 0 0 0 1px rgba(229, 199, 121, 0.4)",
+              "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
+              "inset 0 0 0 4px rgba(229, 199, 121, 0.15)",
+              "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
+              "0 1px 0 rgba(229, 199, 121, 0.08)",
+            ].join(", "),
+      }}
     >
       <div className="px-2">
-        <p className="text-[9px] font-black uppercase tracking-widest text-[#e5c779] sm:text-[10px]">
+        <p
+          className="text-[9px] font-black uppercase tracking-[0.22em] sm:text-[10px]"
+          style={{
+            color: "#e5c779",
+            textShadow: "0 0 4px rgba(229, 199, 121, 0.6), 0 1px 0 rgba(0, 0, 0, 0.9)",
+          }}
+        >
           Bet
         </p>
-        <p className="mt-1 text-sm font-black text-white sm:text-base">
+        <p
+          className="mt-1 text-sm font-black tabular-nums sm:text-base"
+          style={{
+            color: "#f0e5c7",
+            textShadow: "0 1px 0 rgba(0, 0, 0, 0.9)",
+          }}
+        >
           ◈ {money(s.bet)}
         </p>
         {s.settings.spots > 1 && (
