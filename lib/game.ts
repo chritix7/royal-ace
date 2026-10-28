@@ -88,15 +88,17 @@ export const THEMES: Record<Theme, string> = {
   green: "bg-[radial-gradient(ellipse_at_center,#20543c_0%,#103524_60%,#09170f_100%)]",
   blue: "bg-[radial-gradient(ellipse_at_center,#1f3f6b_0%,#10264a_60%,#09142a_100%)]",
   burgundy: "bg-[radial-gradient(ellipse_at_center,#6b2038_0%,#451325_60%,#240a14_100%)]",
-  // Vegas: deep bordeaux felt with a hot gold spot — the overlay component
-  // adds the damask pattern + concentric arcs + sparkles on top.
-  vegas: "bg-[radial-gradient(ellipse_at_center,#7a1f3b_0%,#4a0f22_55%,#1f0510_100%)]",
+  // Vegas: Chrome Hearts dark-luxury — warm charcoal felt that stays
+  // slightly lighter than the pure-black dealer shoe at the center, so
+  // the shoe sits clearly on top with a subtle gold halo around it.
+  // The overlay component layers the baroque gold pattern.
+  vegas: "bg-[radial-gradient(ellipse_at_30%_30%,#262026_0%,#15121a_45%,#070608_100%)]",
 };
 export const BACKS: Record<Theme, [string, string]> = {
   green: ["#142d27", "#1b3d33"],
   blue: ["#10264a", "#1a3a6b"],
   burgundy: ["#3a0f1e", "#561a2e"],
-  vegas: ["#3a0a1b", "#5a1130"],
+  vegas: ["#1a1419", "#2a2029"],
 };
 
 export const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
