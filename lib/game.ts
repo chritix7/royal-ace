@@ -88,11 +88,10 @@ export const THEMES: Record<Theme, string> = {
   green: "bg-[radial-gradient(ellipse_at_center,#20543c_0%,#103524_60%,#09170f_100%)]",
   blue: "bg-[radial-gradient(ellipse_at_center,#1f3f6b_0%,#10264a_60%,#09142a_100%)]",
   burgundy: "bg-[radial-gradient(ellipse_at_center,#6b2038_0%,#451325_60%,#240a14_100%)]",
-  // Vegas: deep near-black with a strong warm gold spot anchored under
-  // the dealer shoe (top-right). The overlay adds the HUD frame +
-  // sticker-style graphics on top.
-  vegas:
-    "bg-[radial-gradient(ellipse_at_82%_18%,#352c38_0%,#1a1620_28%,#0a0810_70%,#040308_100%)]",
+  // Vegas: classic French-casino BJ felt — deep near-black base. The
+  // overlay layers a dense damask-acanthus pattern in muted grey plus
+  // the title arc with the house rules, and a soft spot under the shoe.
+  vegas: "bg-[#060608]",
 };
 export const BACKS: Record<Theme, [string, string]> = {
   green: ["#142d27", "#1b3d33"],
