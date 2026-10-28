@@ -329,7 +329,7 @@ export default function DealerShoe({
               background:
                 "linear-gradient(180deg, #1c1c1e 0%, #141418 25%, #0a0a0c 65%, #030304 100%)",
               boxShadow:
-                "inset 0 1px 0 rgba(246, 228, 169, 0.18), inset 0 -1px 0 rgba(246, 228, 169, 0.3), inset 0 -10px 18px -6px rgba(0,0,0,0.85)",
+                "inset 0 1px 0 rgba(246, 228, 169, 0.18), inset 0 -1px 0 rgba(246, 228, 169, 0.45), inset 0 -10px 18px -6px rgba(0,0,0,0.85)",
               /*
                 translateZ(80) first lifts the panel to the height of the
                 top face; rotateX(-90) around its top edge then swings it
@@ -493,7 +493,7 @@ export default function DealerShoe({
               background:
                 "linear-gradient(180deg, #141418 0%, #0a0a0c 50%, #050506 100%)",
               boxShadow:
-                "inset -1px 0 0 rgba(246, 228, 169, 0.3), inset 8px 0 14px -6px rgba(0,0,0,0.9)",
+                "inset -1px 0 0 rgba(246, 228, 169, 0.45), inset 8px 0 14px -6px rgba(0,0,0,0.9)",
               transform: "rotateY(90deg)",
               transformOrigin: "right center",
             }}

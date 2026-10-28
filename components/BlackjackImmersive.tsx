@@ -295,7 +295,7 @@ const playerCardStyle = (
 )}
 
 <DealerShoe
-  className="absolute -right-[43px] -top-[19px] z-0 hidden md:block"
+  className="absolute -right-[38px] -top-[14px] z-0 hidden md:block"
   status={getShoeStatus(g)}
   dealTick={s.dealTick}
 />
