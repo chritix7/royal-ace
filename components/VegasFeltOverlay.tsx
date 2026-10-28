@@ -1,35 +1,25 @@
 "use client";
 
 /**
- * Chrome Hearts "House Edition" overlay — dark-luxury charcoal felt
- * with motifs engraved at specific anchor points (not tiled all over
- * like a wallpaper). Reads as a real high-end pit-boss table where
- * the house marks are placed deliberately.
+ * Vegas "Prime" — futuristic premium felt layered on the vegas base
+ * gradient. Dark charcoal + gold with HUD-style framing and
+ * sticker-style graphics placed at specific anchor points.
  *
- * Anchored motifs:
- *   • Bottom-center: large "ROYAL ACE" blackletter wordmark engraved
- *     under the betting arc (the house signature).
- *   • Bottom-left + bottom-right: ornate corner medallions flanking
- *     the player area.
- *   • Top-left + top-right: two Chrome Hearts crosses on the dealer
- *     half, flanking the shoe area.
- *   • Center: a single horizontal gold flourish on the mid-line.
- *
- * The dealer shoe (at top-right) gets a strong gold spotlight +
- * tight halo behind it, so it stays legible against the dark felt.
+ * No tiled patterns, no sparkles. Instead:
+ *   • A strong gold spotlight under the dealer shoe so it stays
+ *     visually dominant.
+ *   • A HUD-style gold frame with corner brackets around the whole
+ *     table.
+ *   • Three large "sticker" graphics placed at anchor spots:
+ *       - Royal Ace crest (hexagonal badge with wordmark + spade)
+ *         on the mid-left.
+ *       - A single gold spade outline on the top-left as a signature.
+ *       - A "HOUSE EDITION" tech plate on the bottom-right.
+ *   • Thin geometric gold hairlines connecting the elements.
+ *   • A faint CRT-style scan line sweeping down very slowly.
  */
 
-const SPARKLE_POINTS: ReadonlyArray<{
-  x: number; y: number; size: number; delay: number; dur: number;
-}> = [
-  { x: 14, y: 18, size: 1.8, delay: 0.0, dur: 4.4 },
-  { x: 44, y: 10, size: 1.5, delay: 1.4, dur: 4.6 },
-  { x: 90, y: 24, size: 2.0, delay: 2.3, dur: 4.0 },
-  { x: 96, y: 58, size: 1.6, delay: 0.6, dur: 4.4 },
-  { x: 8,  y: 60, size: 1.8, delay: 1.9, dur: 4.2 },
-  { x: 24, y: 86, size: 1.7, delay: 2.8, dur: 4.0 },
-  { x: 72, y: 88, size: 1.8, delay: 1.1, dur: 4.4 },
-];
+type MotifProps = { className?: string; style?: React.CSSProperties };
 
 export default function VegasFeltOverlay() {
   return (
@@ -39,246 +29,369 @@ export default function VegasFeltOverlay() {
       style={{ zIndex: 1 }}
     >
       <style>{`
-        @keyframes vegas-halo-pulse {
-          0%, 100% { opacity: 0.9;  transform: scale(1); }
-          50%      { opacity: 1;    transform: scale(1.04); }
+        @keyframes vegas-spot-pulse {
+          0%, 100% { opacity: 0.9; transform: translate(0, 0) scale(1); }
+          50%      { opacity: 1;   transform: translate(0, 0) scale(1.03); }
         }
-        @keyframes vegas-sparkle {
-          0%, 100% { opacity: 0; transform: scale(0.5); }
-          45%      { opacity: 0.85; transform: scale(1.15); }
-          60%      { opacity: 0.55; transform: scale(1); }
+        @keyframes vegas-scan-sweep {
+          0%   { transform: translateY(-20%); opacity: 0; }
+          15%  { opacity: 0.35; }
+          85%  { opacity: 0.35; }
+          100% { transform: translateY(120%); opacity: 0; }
+        }
+        @keyframes vegas-corner-breath {
+          0%, 100% { opacity: 0.55; }
+          50%      { opacity: 0.85; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .vegas-anim { animation: none !important; opacity: 0.9 !important; transform: none !important; }
+          .vegas-anim { animation: none !important; opacity: 0.85 !important; transform: none !important; }
         }
       `}</style>
 
-      {/* 1. Fine velvet grain over the whole felt */}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: [
-            "repeating-linear-gradient(45deg, rgba(246, 228, 169, 0.015) 0 1px, transparent 1px 3px)",
-            "repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.1) 0 1px, transparent 1px 3px)",
-          ].join(", "),
-          mixBlendMode: "overlay",
-        }}
-      />
-
-      {/*
-        2. STRONG shoe spotlight — a tight, hot gold cone of light
-        anchored exactly where the dealer shoe sits. The shoe becomes
-        the brightest region of the felt instead of a dark object on
-        dark felt.
-      */}
+      {/* ====== 1. Strong gold spotlight anchored under the dealer shoe ====== */}
       <div
         className="vegas-anim absolute rounded-full"
         style={{
-          top: "-120px",
-          right: "-80px",
-          width: "520px",
-          height: "520px",
+          top: "-180px",
+          right: "-120px",
+          width: "620px",
+          height: "620px",
           background:
-            "radial-gradient(circle at center, rgba(246, 228, 169, 0.38) 0%, rgba(229, 199, 121, 0.22) 25%, rgba(229, 199, 121, 0.1) 50%, transparent 75%)",
-          filter: "blur(28px)",
-          animation: "vegas-halo-pulse 6s ease-in-out infinite",
+            "radial-gradient(circle at center, rgba(246, 228, 169, 0.42) 0%, rgba(229, 199, 121, 0.24) 22%, rgba(229, 199, 121, 0.1) 45%, transparent 72%)",
+          filter: "blur(32px)",
+          animation: "vegas-spot-pulse 6s ease-in-out infinite",
         }}
       />
-      {/* Hard-edge gold rim right behind the shoe for a crisp silhouette */}
+      {/* Hard-edge inner rim just behind the shoe for a crisp outline */}
       <div
         className="absolute rounded-full"
         style={{
-          top: "-40px",
-          right: "0px",
-          width: "320px",
-          height: "320px",
+          top: "-60px",
+          right: "-20px",
+          width: "340px",
+          height: "340px",
           background:
-            "radial-gradient(circle at center, rgba(255, 240, 190, 0.22) 0%, rgba(229, 199, 121, 0.12) 40%, transparent 75%)",
-          filter: "blur(12px)",
+            "radial-gradient(circle at center, rgba(255, 240, 190, 0.3) 0%, rgba(229, 199, 121, 0.14) 42%, transparent 72%)",
+          filter: "blur(14px)",
         }}
       />
 
-      {/*
-        3. ANCHORED MOTIFS — placed at specific spots instead of tiled.
-      */}
-
-      {/* 3a. Top-left Chrome Hearts cross (dealer half, flanking shoe) */}
-      <HeartsCross
-        className="absolute"
+      {/* ====== 2. HUD frame around the whole felt ====== */}
+      {/* Thin outer gold border */}
+      <div
+        className="absolute inset-3"
         style={{
-          top: "16%",
-          left: "8%",
-          width: "88px",
-          height: "88px",
-          opacity: 0.12,
-          transform: "rotate(-8deg)",
+          border: "1px solid rgba(229, 199, 121, 0.22)",
+          boxShadow: "inset 0 0 24px rgba(0, 0, 0, 0.5)",
         }}
       />
+      {/* Even thinner second line for the "double rule" look */}
+      <div
+        className="absolute inset-5"
+        style={{ border: "1px solid rgba(229, 199, 121, 0.08)" }}
+      />
+      {/* Four corner brackets */}
+      <HudCorner className="vegas-anim absolute left-4 top-4" rotation={0} />
+      <HudCorner className="vegas-anim absolute right-4 top-4" rotation={90} />
+      <HudCorner
+        className="vegas-anim absolute right-4 bottom-4"
+        rotation={180}
+      />
+      <HudCorner
+        className="vegas-anim absolute left-4 bottom-4"
+        rotation={270}
+      />
 
-      {/* 3b. Mid-left ornate baroque medallion flanking the betting area */}
-      <BaroqueMedallion
+      {/* ====== 3. Sticker graphics at anchor spots ====== */}
+
+      {/* 3a. Royal Ace hexagonal crest — mid-left, flanks the betting area */}
+      <RoyalAceCrest
         className="absolute"
         style={{
-          top: "58%",
+          top: "50%",
           left: "4%",
           width: "150px",
           height: "150px",
-          opacity: 0.11,
-          transform: "translateY(-50%) rotate(-6deg)",
+          transform: "translateY(-50%)",
+          opacity: 0.85,
         }}
       />
 
-      {/* 3c. Mid-right ornate baroque medallion flanking the betting area */}
-      <BaroqueMedallion
+      {/* 3b. Large faint spade watermark — top-left of the dealer half */}
+      <SpadeWatermark
         className="absolute"
         style={{
-          top: "58%",
-          right: "4%",
-          width: "150px",
-          height: "150px",
-          opacity: 0.11,
-          transform: "translateY(-50%) scaleX(-1) rotate(-6deg)",
+          top: "6%",
+          left: "4%",
+          width: "140px",
+          height: "160px",
+          opacity: 0.17,
         }}
       />
 
-      {/* 3d. Bottom-center ROYAL ACE blackletter engraving (house mark) */}
-      <div
-        className="absolute whitespace-nowrap uppercase"
+      {/* 3c. HOUSE EDITION tech plate — bottom-right */}
+      <HouseEditionPlate
+        className="absolute"
         style={{
-          left: "50%",
           bottom: "6%",
-          transform: "translateX(-50%)",
-          fontFamily:
-            "'Cloister Black', var(--font-blackletter), 'UnifrakturMaguntia', 'Luminari', serif",
-          fontSize: "clamp(32px, 5vw, 64px)",
-          lineHeight: 1,
-          color: "rgba(229, 199, 121, 0.14)",
-          textShadow:
-            "0 0 10px rgba(229, 199, 121, 0.18), 0 1px 0 rgba(0, 0, 0, 0.5)",
-          letterSpacing: "0.01em",
+          right: "4%",
+          width: "180px",
+          height: "40px",
+          opacity: 0.85,
         }}
-      >
-        Royal Ace
-      </div>
+      />
 
-      {/* 3e. A single horizontal gold flourish on the mid-line */}
+      {/* ====== 4. Geometric gold hairlines connecting the anchor points ====== */}
       <svg
-        className="absolute left-1/2 top-1/2 h-[14px] w-[min(72%,560px)] -translate-x-1/2 -translate-y-1/2"
-        viewBox="0 0 560 14"
-        preserveAspectRatio="xMidYMid meet"
+        className="absolute inset-0 h-full w-full"
         xmlns="http://www.w3.org/2000/svg"
-        style={{ opacity: 0.14 }}
+        preserveAspectRatio="none"
+        style={{ opacity: 0.3 }}
       >
-        <g stroke="rgba(229, 199, 121, 1)" fill="none" strokeLinecap="round">
-          {/* Center diamond */}
-          <path d="M 275 2 L 280 7 L 275 12 L 270 7 Z" strokeWidth="0.9" />
-          {/* Right scrolls */}
-          <path d="M 285 7 Q 320 7 350 4" strokeWidth="0.7" />
-          <path d="M 285 7 Q 320 7 350 10" strokeWidth="0.7" />
-          <path d="M 360 4 Q 400 4 440 7" strokeWidth="0.5" />
-          <path d="M 360 10 Q 400 10 440 7" strokeWidth="0.5" />
-          <circle cx="450" cy="7" r="1.6" fill="rgba(246, 228, 169, 0.9)" stroke="none" />
-          <path d="M 460 7 L 540 7" strokeWidth="0.4" />
-          {/* Left scrolls (mirror) */}
-          <path d="M 265 7 Q 230 7 200 4" strokeWidth="0.7" />
-          <path d="M 265 7 Q 230 7 200 10" strokeWidth="0.7" />
-          <path d="M 190 4 Q 150 4 110 7" strokeWidth="0.5" />
-          <path d="M 190 10 Q 150 10 110 7" strokeWidth="0.5" />
-          <circle cx="100" cy="7" r="1.6" fill="rgba(246, 228, 169, 0.9)" stroke="none" />
-          <path d="M 90 7 L 10 7" strokeWidth="0.4" />
-        </g>
+        {/* Horizontal mid-line from the crest, dashed */}
+        <line
+          x1="18%"
+          y1="50%"
+          x2="46%"
+          y2="50%"
+          stroke="rgba(229, 199, 121, 1)"
+          strokeWidth="0.5"
+          strokeDasharray="4 4"
+        />
+        <line
+          x1="54%"
+          y1="50%"
+          x2="82%"
+          y2="50%"
+          stroke="rgba(229, 199, 121, 1)"
+          strokeWidth="0.5"
+          strokeDasharray="4 4"
+        />
+        {/* Vertical dashed on the right, connecting shoe area to plate */}
+        <line
+          x1="92%"
+          y1="22%"
+          x2="92%"
+          y2="78%"
+          stroke="rgba(229, 199, 121, 1)"
+          strokeWidth="0.4"
+          strokeDasharray="3 5"
+        />
+        {/* Two "fiducial" cross-hairs on the right-edge */}
+        <Fiducial cx="92%" cy="42%" />
+        <Fiducial cx="92%" cy="62%" />
       </svg>
 
-      {/* 4. Concentric gold arcs radiating from the betting area */}
+      {/* ====== 5. Very slow CRT-style scan line sweeping down ====== */}
       <div
-        className="absolute left-1/2 top-full h-[900px] w-[900px] -translate-x-1/2 -translate-y-[60%] rounded-full"
-        style={{ border: "1px solid rgba(229, 199, 121, 0.11)" }}
-      />
-      <div
-        className="absolute left-1/2 top-full h-[1200px] w-[1200px] -translate-x-1/2 -translate-y-[55%] rounded-full"
-        style={{ border: "1px solid rgba(229, 199, 121, 0.07)" }}
-      />
-      <div
-        className="absolute left-1/2 top-full h-[1550px] w-[1550px] -translate-x-1/2 -translate-y-[52%] rounded-full"
-        style={{ border: "1px solid rgba(229, 199, 121, 0.045)" }}
+        className="vegas-anim absolute left-0 right-0 h-[120px]"
+        style={{
+          top: 0,
+          background:
+            "linear-gradient(180deg, transparent 0%, rgba(246, 228, 169, 0.08) 50%, transparent 100%)",
+          filter: "blur(8px)",
+          animation: "vegas-scan-sweep 14s ease-in-out infinite",
+        }}
       />
 
-      {/* 5. Edge vignette so motifs settle into the frame */}
+      {/* ====== 6. Edge vignette (final layer) ====== */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0, 0, 0, 0.55) 100%)",
+            "radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.5) 100%)",
         }}
       />
-
-      {/* 6. Champagne sparkles — a few, on the perimeter */}
-      {SPARKLE_POINTS.map((p, i) => (
-        <span
-          key={i}
-          className="vegas-anim absolute block rounded-full"
-          style={{
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            width: `${p.size}px`,
-            height: `${p.size}px`,
-            background: "#fff2b8",
-            boxShadow: `0 0 ${p.size * 2}px rgba(246, 228, 169, 0.9), 0 0 ${p.size}px rgba(255, 255, 255, 0.75)`,
-            animation: `vegas-sparkle ${p.dur}s ease-in-out infinite`,
-            animationDelay: `${p.delay}s`,
-            opacity: 0,
-          }}
-        />
-      ))}
     </div>
   );
 }
 
-/* ---------- Reusable motif components ---------- */
+/* ========= Reusable graphic parts ========= */
 
-type MotifProps = {
+/** HUD corner bracket, 24px square with 2 gold lines like a camera viewfinder. */
+function HudCorner({
+  className,
+  rotation,
+}: {
   className?: string;
-  style?: React.CSSProperties;
-};
-
-/** Chrome Hearts cross — gold filigree, filled silhouette. */
-function HeartsCross({ className, style }: MotifProps) {
+  rotation: number;
+}) {
   return (
     <svg
       aria-hidden="true"
-      viewBox="0 0 100 100"
+      viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      style={style}
+      style={{
+        width: "24px",
+        height: "24px",
+        transform: `rotate(${rotation}deg)`,
+        animation: "vegas-corner-breath 4s ease-in-out infinite",
+      }}
     >
-      <g fill="rgba(246, 228, 169, 0.95)" stroke="rgba(229, 199, 121, 1)" strokeWidth="0.4" strokeLinejoin="round">
-        {/* Vertical arm */}
-        <path d="M 45 8 L 55 8 L 55 42 L 55 58 L 55 92 L 45 92 L 45 58 L 45 42 Z" />
-        {/* Horizontal arm */}
-        <path d="M 8 45 L 42 45 L 58 45 L 92 45 L 92 55 L 58 55 L 42 55 L 8 55 Z" />
-        {/* Center orb */}
-        <circle cx="50" cy="50" r="4.5" />
-        {/* Four fleur-tips */}
-        <circle cx="50" cy="4" r="2.5" />
-        <circle cx="50" cy="96" r="2.5" />
-        <circle cx="4"  cy="50" r="2.5" />
-        <circle cx="96" cy="50" r="2.5" />
-        {/* Mini-flares at arm bases */}
-        <circle cx="45" cy="12" r="1.3" />
-        <circle cx="55" cy="12" r="1.3" />
-        <circle cx="45" cy="88" r="1.3" />
-        <circle cx="55" cy="88" r="1.3" />
-        <circle cx="12" cy="45" r="1.3" />
-        <circle cx="12" cy="55" r="1.3" />
-        <circle cx="88" cy="45" r="1.3" />
-        <circle cx="88" cy="55" r="1.3" />
-      </g>
+      <path
+        d="M 2 10 L 2 2 L 10 2"
+        fill="none"
+        stroke="rgba(246, 228, 169, 0.85)"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+      />
+      <path
+        d="M 4 6 L 6 6 M 6 4 L 6 6"
+        fill="none"
+        stroke="rgba(246, 228, 169, 0.5)"
+        strokeWidth="0.7"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
-/** Ornate baroque medallion — crown of scrolls around a star of suits. */
-function BaroqueMedallion({ className, style }: MotifProps) {
+/** A fiducial cross-hair — small HUD cross used as "waypoint" marker */
+function Fiducial({ cx, cy }: { cx: string; cy: string }) {
+  return (
+    <g>
+      <circle
+        cx={cx}
+        cy={cy}
+        r="4"
+        fill="none"
+        stroke="rgba(246, 228, 169, 0.6)"
+        strokeWidth="0.5"
+      />
+      <line
+        x1={cx}
+        y1={`calc(${cy} - 8px)`}
+        x2={cx}
+        y2={`calc(${cy} - 2px)`}
+        stroke="rgba(246, 228, 169, 0.6)"
+        strokeWidth="0.5"
+      />
+      <line
+        x1={cx}
+        y1={`calc(${cy} + 2px)`}
+        x2={cx}
+        y2={`calc(${cy} + 8px)`}
+        stroke="rgba(246, 228, 169, 0.6)"
+        strokeWidth="0.5"
+      />
+      <line
+        x1={`calc(${cx} - 8px)`}
+        y1={cy}
+        x2={`calc(${cx} - 2px)`}
+        y2={cy}
+        stroke="rgba(246, 228, 169, 0.6)"
+        strokeWidth="0.5"
+      />
+      <line
+        x1={`calc(${cx} + 2px)`}
+        y1={cy}
+        x2={`calc(${cx} + 8px)`}
+        y2={cy}
+        stroke="rgba(246, 228, 169, 0.6)"
+        strokeWidth="0.5"
+      />
+    </g>
+  );
+}
+
+/** Royal Ace hexagonal crest — the "signature badge" of the house. */
+function RoyalAceCrest({ className, style }: MotifProps) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 120 120"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={style}
+    >
+      <defs>
+        <linearGradient id="rac-gold" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgba(246, 228, 169, 0.9)" />
+          <stop offset="50%" stopColor="rgba(229, 199, 121, 0.7)" />
+          <stop offset="100%" stopColor="rgba(140, 107, 35, 0.55)" />
+        </linearGradient>
+      </defs>
+      {/* Outer hexagon */}
+      <polygon
+        points="60,6 108,33 108,87 60,114 12,87 12,33"
+        fill="none"
+        stroke="url(#rac-gold)"
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
+      {/* Inner hexagon */}
+      <polygon
+        points="60,18 97,39 97,81 60,102 23,81 23,39"
+        fill="none"
+        stroke="rgba(229, 199, 121, 0.5)"
+        strokeWidth="0.6"
+        strokeLinejoin="round"
+      />
+      {/* 6 fiducial dots at the hex corners */}
+      {[
+        [60, 6],
+        [108, 33],
+        [108, 87],
+        [60, 114],
+        [12, 87],
+        [12, 33],
+      ].map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r="2.2" fill="rgba(246, 228, 169, 0.9)" />
+      ))}
+      {/* Center spade */}
+      <path
+        d="M 60 36 C 60 36 78 50 78 63 C 78 70 73 75 68 75 C 65 75 63 73 62 71 C 62 76 63 80 66 83 L 54 83 C 57 80 58 76 58 71 C 57 73 55 75 52 75 C 47 75 42 70 42 63 C 42 50 60 36 60 36 Z"
+        fill="rgba(246, 228, 169, 0.95)"
+        stroke="rgba(140, 107, 35, 0.7)"
+        strokeWidth="0.5"
+      />
+      {/* "ROYAL ACE" wordmark around the top arc of the crest */}
+      <text
+        x="60"
+        y="27"
+        textAnchor="middle"
+        style={{
+          fontFamily:
+            "'JetBrains Mono', var(--font-tech-mono), 'Share Tech Mono', monospace",
+          fontSize: "7px",
+          fill: "rgba(246, 228, 169, 0.9)",
+          letterSpacing: "0.22em",
+          textTransform: "uppercase",
+        }}
+      >
+        ROYAL ACE
+      </text>
+      {/* Tech line under spade */}
+      <line
+        x1="46"
+        y1="90"
+        x2="74"
+        y2="90"
+        stroke="rgba(229, 199, 121, 0.55)"
+        strokeWidth="0.4"
+      />
+      <text
+        x="60"
+        y="100"
+        textAnchor="middle"
+        style={{
+          fontFamily:
+            "'JetBrains Mono', var(--font-tech-mono), 'Share Tech Mono', monospace",
+          fontSize: "5.5px",
+          fill: "rgba(246, 228, 169, 0.7)",
+          letterSpacing: "0.3em",
+          textTransform: "uppercase",
+        }}
+      >
+        · HOUSE ·
+      </text>
+    </svg>
+  );
+}
+
+/** Large spade watermark — outlined signature on the dealer half */
+function SpadeWatermark({ className, style }: MotifProps) {
   return (
     <svg
       aria-hidden="true"
@@ -287,52 +400,75 @@ function BaroqueMedallion({ className, style }: MotifProps) {
       className={className}
       style={style}
     >
-      <g stroke="rgba(229, 199, 121, 1)" fill="none" strokeLinecap="round">
-        {/* Outer ring */}
-        <circle cx="50" cy="50" r="46" strokeWidth="0.6" />
-        <circle cx="50" cy="50" r="42" strokeWidth="0.35" />
-        {/* Inner ring */}
-        <circle cx="50" cy="50" r="28" strokeWidth="0.5" />
-        {/* 8 radial scrolls spraying out between the rings */}
-        {Array.from({ length: 8 }).map((_, i) => {
-          const angle = (i * 45 * Math.PI) / 180;
-          const x1 = 50 + Math.cos(angle) * 28;
-          const y1 = 50 + Math.sin(angle) * 28;
-          const x2 = 50 + Math.cos(angle) * 42;
-          const y2 = 50 + Math.sin(angle) * 42;
-          const cx = 50 + Math.cos(angle + 0.25) * 36;
-          const cy = 50 + Math.sin(angle + 0.25) * 36;
-          return (
-            <path
-              key={i}
-              d={`M ${x1.toFixed(1)} ${y1.toFixed(1)} Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`}
-              strokeWidth="0.5"
-            />
-          );
-        })}
-        {/* Center fleur */}
-        <path d="M 50 36 Q 44 42 46 50 Q 50 46 50 44" strokeWidth="0.5" />
-        <path d="M 50 36 Q 56 42 54 50 Q 50 46 50 44" strokeWidth="0.5" />
-        <path d="M 50 44 L 50 64" strokeWidth="0.5" />
-        <path d="M 44 56 L 56 56" strokeWidth="0.5" />
-      </g>
-      {/* Central dot jewel */}
-      <circle cx="50" cy="50" r="1.8" fill="rgba(246, 228, 169, 0.95)" />
-      {/* Four cardinal pips just outside the outer ring */}
-      {[0, 1, 2, 3].map((i) => {
-        const a = (i * 90 * Math.PI) / 180;
-        const x = 50 + Math.cos(a) * 48;
-        const y = 50 + Math.sin(a) * 48;
-        return (
-          <circle
-            key={i}
-            cx={x.toFixed(1)}
-            cy={y.toFixed(1)}
-            r="1.6"
-            fill="rgba(229, 199, 121, 0.9)"
-          />
-        );
-      })}
+      {/* Big spade outline with concentric inner lines (like a target) */}
+      <path
+        d="M 50 8 C 50 8 85 32 85 60 C 85 72 78 80 70 80 C 65 80 61 77 58 73 C 58 84 60 92 65 95 L 35 95 C 40 92 42 84 42 73 C 39 77 35 80 30 80 C 22 80 15 72 15 60 C 15 32 50 8 50 8 Z"
+        fill="none"
+        stroke="rgba(246, 228, 169, 1)"
+        strokeWidth="0.8"
+      />
+      <path
+        d="M 50 16 C 50 16 78 36 78 58 C 78 68 72 74 66 74 C 62 74 59 72 57 69 C 57 78 59 85 62 88 L 38 88 C 41 85 43 78 43 69 C 41 72 38 74 34 74 C 28 74 22 68 22 58 C 22 36 50 16 50 16 Z"
+        fill="none"
+        stroke="rgba(229, 199, 121, 0.6)"
+        strokeWidth="0.4"
+      />
+      {/* Center dot */}
+      <circle cx="50" cy="52" r="1.6" fill="rgba(246, 228, 169, 0.9)" />
     </svg>
+  );
+}
+
+/** Tech-plate style HOUSE EDITION label with model number */
+function HouseEditionPlate({ className, style }: MotifProps) {
+  return (
+    <div
+      className={className}
+      style={{
+        ...style,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        gap: "2px",
+        padding: "4px 10px",
+        background:
+          "linear-gradient(180deg, rgba(10, 8, 12, 0.75) 0%, rgba(4, 3, 8, 0.75) 100%)",
+        border: "1px solid rgba(229, 199, 121, 0.4)",
+        borderRadius: "4px",
+        boxShadow:
+          "inset 0 0 10px rgba(229, 199, 121, 0.08), 0 1px 2px rgba(0, 0, 0, 0.6)",
+      }}
+    >
+      <div
+        style={{
+          fontFamily:
+            "'JetBrains Mono', var(--font-tech-mono), 'Share Tech Mono', monospace",
+          fontSize: "9px",
+          color: "rgba(246, 228, 169, 0.9)",
+          letterSpacing: "0.3em",
+          textTransform: "uppercase",
+          lineHeight: 1,
+          textShadow: "0 0 4px rgba(229, 199, 121, 0.4)",
+        }}
+      >
+        House Edition
+      </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          fontFamily:
+            "'JetBrains Mono', var(--font-tech-mono), 'Share Tech Mono', monospace",
+          fontSize: "6px",
+          color: "rgba(246, 228, 169, 0.55)",
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          lineHeight: 1,
+        }}
+      >
+        <span>RA · S-17 · 6D</span>
+        <span>v01</span>
+      </div>
+    </div>
   );
 }
