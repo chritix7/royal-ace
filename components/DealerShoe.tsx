@@ -282,13 +282,36 @@ export default function DealerShoe({
         className="relative h-[230px] w-[300px] [transform-style:preserve-3d]"
         style={{ transform: "rotateX(56deg) rotateZ(-28deg)" }}
       >
-        {/* Floor shadow + warm glow */}
+        {/*
+          Floor shadows — three layers for proper grounding:
+          1. Wide ambient — large soft shadow spilling out around the base.
+          2. Mid contact — tighter, darker, follows the body footprint
+             more closely so the shoe reads as sitting ON the table
+             instead of floating above it.
+          3. Hard contact — a very tight, high-opacity shadow directly
+             under the body for the sharp dark line at the point of
+             contact (anchors it visually).
+          4. Warm bounce glow — kept, slightly brighter, for the ambient
+             gold reflection the body's gilt trim throws onto the felt.
+        */}
+        {/* 1. Wide ambient */}
         <div
-          className="absolute left-[2px] top-[90px] h-[160px] w-[290px] rounded-[70px] bg-black/75 blur-3xl"
+          className="absolute left-[-10px] top-[100px] h-[180px] w-[320px] rounded-[80px] bg-black/80 blur-3xl"
           style={{ transform: "translateZ(-55px)" }}
         />
+        {/* 2. Mid contact */}
         <div
-          className="absolute left-[30px] top-[118px] h-[110px] w-[240px] rounded-full bg-[#e5c779]/10 blur-2xl"
+          className="absolute left-[10px] top-[130px] h-[120px] w-[280px] rounded-[60px] bg-black/90 blur-xl"
+          style={{ transform: "translateZ(-50px)" }}
+        />
+        {/* 3. Hard contact (anchors the base) */}
+        <div
+          className="absolute left-[22px] top-[172px] h-[42px] w-[260px] rounded-[22px] bg-black blur-md"
+          style={{ transform: "translateZ(-45px)", opacity: 0.9 }}
+        />
+        {/* 4. Warm bounce glow (gilt reflection) */}
+        <div
+          className="absolute left-[30px] top-[128px] h-[110px] w-[240px] rounded-full bg-[#e5c779]/15 blur-2xl"
           style={{ transform: "translateZ(-35px)" }}
         />
 
