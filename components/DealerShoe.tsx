@@ -283,36 +283,39 @@ export default function DealerShoe({
         style={{ transform: "rotateX(56deg) rotateZ(-28deg)" }}
       >
         {/*
-          Floor shadows — three layers for proper grounding:
-          1. Wide ambient — large soft shadow spilling out around the base.
-          2. Mid contact — tighter, darker, follows the body footprint
-             more closely so the shoe reads as sitting ON the table
-             instead of floating above it.
-          3. Hard contact — a very tight, high-opacity shadow directly
-             under the body for the sharp dark line at the point of
-             contact (anchors it visually).
-          4. Warm bounce glow — kept, slightly brighter, for the ambient
-             gold reflection the body's gilt trim throws onto the felt.
+          Floor shadows — placed on the "table plane" (z near 0) rather
+          than deep in negative Z, so they rotate with the body and
+          actually land under the full footprint (not just under the
+          side closest to the camera).
+
+          Layers:
+          1. Wide ambient — large diffuse shadow that spills around.
+          2. Oriented drop — slightly offset in the body's local Y
+             direction so the shadow pools on the "far" side like a
+             real overhead light coming from the front.
+          3. Hard contact ring — very tight, high-opacity, directly
+             under the base to anchor the point of contact.
+          4. Warm bounce — ambient gold reflection from the gilt trim.
         */}
-        {/* 1. Wide ambient */}
+        {/* 1. Wide ambient — well around every side */}
         <div
-          className="absolute left-[-10px] top-[100px] h-[180px] w-[320px] rounded-[80px] bg-black/80 blur-3xl"
-          style={{ transform: "translateZ(-55px)" }}
+          className="absolute left-[-20px] top-[-20px] h-[200px] w-[300px] rounded-[70px] bg-black/70 blur-3xl"
+          style={{ transform: "translateZ(-6px)" }}
         />
-        {/* 2. Mid contact */}
+        {/* 2. Oriented drop — pooled toward body-local -Y (back) and +X (right) */}
         <div
-          className="absolute left-[10px] top-[130px] h-[120px] w-[280px] rounded-[60px] bg-black/90 blur-xl"
-          style={{ transform: "translateZ(-50px)" }}
+          className="absolute left-[6px] top-[-10px] h-[180px] w-[280px] rounded-[60px] bg-black/85 blur-2xl"
+          style={{ transform: "translateZ(-4px)" }}
         />
-        {/* 3. Hard contact (anchors the base) */}
+        {/* 3. Hard contact — exact body footprint, under the base */}
         <div
-          className="absolute left-[22px] top-[172px] h-[42px] w-[260px] rounded-[22px] bg-black blur-md"
-          style={{ transform: "translateZ(-45px)", opacity: 0.9 }}
+          className="absolute left-[20px] top-[0px] h-[160px] w-[260px] rounded-[12px] bg-black blur-sm"
+          style={{ transform: "translateZ(-2px)", opacity: 0.85 }}
         />
-        {/* 4. Warm bounce glow (gilt reflection) */}
+        {/* 4. Warm bounce glow (gilt reflection on the felt) */}
         <div
-          className="absolute left-[30px] top-[128px] h-[110px] w-[240px] rounded-full bg-[#e5c779]/15 blur-2xl"
-          style={{ transform: "translateZ(-35px)" }}
+          className="absolute left-[10px] top-[40px] h-[120px] w-[280px] rounded-full bg-[#e5c779]/20 blur-2xl"
+          style={{ transform: "translateZ(-1px)" }}
         />
 
         {/* ============== 3D body (260×160) ============== */}
@@ -608,14 +611,25 @@ export default function DealerShoe({
 
           {/* Top face (lit, carries the decoration) — sharp 4px chamfer
               so the four side walls meet it along a straight line and the
-              body reads as one solid block instead of four taped panels. */}
+              body reads as one solid block instead of four taped panels.
+              Stronger directional lighting now: bright at top-left,
+              progressively darker toward bottom-right, with explicit
+              corner shading (fake ambient occlusion) at every corner. */}
           <div
             className="absolute inset-0 rounded-[4px]"
             style={{
               background:
-                "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 25%, transparent 55%, rgba(0,0,0,0.3) 100%), linear-gradient(180deg, #1e1e20 0%, #121214 55%, #060608 100%)",
+                /* Corner AO vignettes — soft dark pools in each corner */
+                "radial-gradient(ellipse 55% 55% at 100% 100%, rgba(0,0,0,0.55), transparent 60%), " +
+                "radial-gradient(ellipse 45% 45% at 0% 100%, rgba(0,0,0,0.35), transparent 60%), " +
+                "radial-gradient(ellipse 45% 45% at 100% 0%, rgba(0,0,0,0.35), transparent 60%), " +
+                /* Directional specular highlight at top-left */
+                "radial-gradient(ellipse 60% 60% at 15% 10%, rgba(255,255,255,0.14), transparent 50%), " +
+                /* Base diagonal gradient to carry the light fall-off */
+                "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 20%, transparent 50%, rgba(0,0,0,0.4) 100%), " +
+                "linear-gradient(180deg, #1e1e20 0%, #121214 55%, #060608 100%)",
               boxShadow:
-                "0 32px 55px rgba(0,0,0,0.9), inset 0 1px 0 rgba(240, 229, 199, 0.14), inset 0 -1px 0 rgba(0,0,0,0.6)",
+                "0 32px 55px rgba(0,0,0,0.9), inset 0 1px 0 rgba(240, 229, 199, 0.14), inset 0 -1px 0 rgba(0,0,0,0.7)",
               transform: "translateZ(60px)",
               transformStyle: "preserve-3d",
             }}
