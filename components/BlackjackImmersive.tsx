@@ -17,6 +17,7 @@ import { Counter, SideBet } from "./ui";
 import PlayingCard from "./PlayingCard";
 import Confetti from "./Confetti";
 import DealerShoe from "./DealerShoe";
+import VegasFeltOverlay from "./VegasFeltOverlay";
 import InfoPanel from "./blackjack-immersive/InfoPanel";
 import ImmersiveSidePill from "./blackjack-immersive/ImmersiveSidePill";
 import ResultRail from "./blackjack-immersive/ResultRail";
@@ -290,6 +291,7 @@ const playerCardStyle = (
         style={tableStyle}
         className={`relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${THEMES[s.settings.theme]}`}
       >
+        {s.settings.theme === "vegas" && <VegasFeltOverlay />}
         {s.celebrate > 0 && (
   <Confetti key={s.celebrate} />
 )}

@@ -107,17 +107,17 @@ export default function Sidebar({ g }: { g: Game }) {
               </button>
             ))}
           </div>
-          <div className="mt-3 flex gap-2" role="group" aria-label="Table theme">
-            {(["green", "blue", "burgundy"] as Theme[]).map((th) => (
+          <div className="mt-3 grid grid-cols-2 gap-2" role="group" aria-label="Table theme">
+            {(["green", "blue", "burgundy", "vegas"] as Theme[]).map((th) => (
               <button
                 key={th}
                 onClick={() => updateSettings({ theme: th })}
                 aria-pressed={s.settings.theme === th}
-                className={`flex-1 rounded-full border py-2 text-xs capitalize outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] ${
+                className={`rounded-full border py-2 text-xs capitalize outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] ${
                   s.settings.theme === th ? "border-[#d7b45b] bg-[#d7b45b]/10 text-[#e5c779]" : "border-white/10 text-white/60"
                 }`}
               >
-                {th}
+                {th === "vegas" ? "✦ Vegas" : th}
               </button>
             ))}
           </div>

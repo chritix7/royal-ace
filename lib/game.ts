@@ -3,7 +3,7 @@ import type { Card, Hand } from "./blackjack";
 export type Phase = "betting" | "dealing" | "insurance" | "player" | "dealer" | "settled";
 export type Stats = { played: number; won: number; lost: number; pushed: number; blackjacks: number; profit: number; decisions: number; correct: number; dealerBJs: number; dealerPlayed: number; dealerBusts: number };
 export type Records = { biggestWin: number; bestStreak: number; peakBalance: number };
-export type Theme = "green" | "blue" | "burgundy";
+export type Theme = "green" | "blue" | "burgundy" | "vegas";
 export type Settings = { decks: number; h17: boolean; bj65: boolean; muted: boolean; spots: number; theme: Theme };
 export type Round = { net: number; bj: boolean };
 export type S = {
@@ -88,11 +88,15 @@ export const THEMES: Record<Theme, string> = {
   green: "bg-[radial-gradient(ellipse_at_center,#20543c_0%,#103524_60%,#09170f_100%)]",
   blue: "bg-[radial-gradient(ellipse_at_center,#1f3f6b_0%,#10264a_60%,#09142a_100%)]",
   burgundy: "bg-[radial-gradient(ellipse_at_center,#6b2038_0%,#451325_60%,#240a14_100%)]",
+  // Vegas: deep bordeaux felt with a hot gold spot — the overlay component
+  // adds the damask pattern + concentric arcs + sparkles on top.
+  vegas: "bg-[radial-gradient(ellipse_at_center,#7a1f3b_0%,#4a0f22_55%,#1f0510_100%)]",
 };
 export const BACKS: Record<Theme, [string, string]> = {
   green: ["#142d27", "#1b3d33"],
   blue: ["#10264a", "#1a3a6b"],
   burgundy: ["#3a0f1e", "#561a2e"],
+  vegas: ["#3a0a1b", "#5a1130"],
 };
 
 export const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
