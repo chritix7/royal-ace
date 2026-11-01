@@ -6,7 +6,7 @@ import { track as sendTrack } from "./events";
 import { sfx } from "./sound";
 import { music } from "./music";
 import { wallet } from "./wallet";
-import { CHIPS, MIN_BET, REFILL, EMPTY_STATS, EMPTY_RECORDS, DEFAULT_SETTINGS, INITIAL, BACKS, sleep as delay, floor10 } from "./game";
+import { CHIPS, MIN_BET, REFILL, EMPTY_STATS, EMPTY_RECORDS, DEFAULT_SETTINGS, INITIAL, tableBacks, sleep as delay, floor10 } from "./game";
 import type { S, Settings, Records } from "./game";
 import { winHistory } from "./winHistory";
 import { sessionStore } from "./sessionStore";
@@ -1135,7 +1135,7 @@ const winRate = resolvedHands
   const spots = s.settings.spots;
   const sides = s.ppBet + s.t3Bet;
   const stake = s.bet * spots + sides;
-  const back = BACKS[s.settings.theme];
+  const back = tableBacks(s.settings);
   const pileAmount = canBet ? s.bet * spots : s.hands.reduce((sum, h) => sum + h.bet, 0);
 
   // Comptage Hi-Lo : le sabot est équilibré, donc compte courant = -(somme du sabot restant),

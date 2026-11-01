@@ -1,7 +1,9 @@
 "use client";
 
-import type { Theme } from "../lib/game";
-import { CHIPS, CHIP_BG, money } from "../lib/game";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import type { Theme, VegasVariant } from "../lib/game";
+import { CHIPS, CHIP_BG, VEGAS_VARIANTS, money } from "../lib/game";
 import { Counter, Spark, Toggle, SideBet, small } from "./ui";
 import { ACHIEVEMENTS } from "../lib/achievements";
 import { audio, useAudioSettings } from "../lib/audio";
@@ -21,6 +23,25 @@ export default function Sidebar({ g }: { g: Game }) {
   const sound = useAudioSettings();
   const { s, showHint, setShowHint, showCount, setShowCount, canBet, winRate, spots, sides, stake, running, trueCount, decksLeft, addChip, setBetTo, adjustSide, updateSettings, resetAll } = g;
   const session = useSession();
+
+  // Vegas color-variant picker: opens when the user clicks the Vegas
+  // theme button. Rendered via a portal so it floats above everything.
+  const [vegasPickerOpen, setVegasPickerOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const activeVariant: VegasVariant = s.settings.vegasVariant ?? "anthracite";
+
+  // Close picker on Escape.
+  useEffect(() => {
+    if (!vegasPickerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setVegasPickerOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [vegasPickerOpen]);
+
+  const vegasKeys = Object.keys(VEGAS_VARIANTS) as VegasVariant[];
 
   return (
       <aside className="flex flex-col gap-5">
@@ -111,8 +132,19 @@ export default function Sidebar({ g }: { g: Game }) {
             {(["green", "blue", "burgundy", "vegas"] as Theme[]).map((th) => (
               <button
                 key={th}
-                onClick={() => updateSettings({ theme: th })}
+                onClick={() => {
+                  if (th === "vegas") {
+                    // Always open the color picker when Vegas is tapped,
+                    // and switch the theme in the same gesture so the user
+                    // can see the current color behind the overlay.
+                    updateSettings({ theme: "vegas" });
+                    setVegasPickerOpen(true);
+                  } else {
+                    updateSettings({ theme: th });
+                  }
+                }}
                 aria-pressed={s.settings.theme === th}
+                aria-haspopup={th === "vegas" ? "dialog" : undefined}
                 className={`rounded-full border py-2 text-xs capitalize outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] ${
                   s.settings.theme === th ? "border-[#d7b45b] bg-[#d7b45b]/10 text-[#e5c779]" : "border-white/10 text-white/60"
                 }`}
@@ -373,6 +405,148 @@ export default function Sidebar({ g }: { g: Game }) {
         <p className="px-3 text-center text-[11px] leading-5 text-white/25">
           Virtual chips only. No real money, deposits or cash-outs.
         </p>
+
+        {mounted && vegasPickerOpen && createPortal(
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-vegas-fade"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Choose a Vegas color"
+          >
+            {/* backdrop */}
+            <button
+              type="button"
+              aria-label="Close color picker"
+              onClick={() => setVegasPickerOpen(false)}
+              className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-sm"
+            />
+
+            {/* dialog card */}
+            <div
+              className="relative w-full max-w-md overflow-hidden rounded-3xl border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a1512] via-[#120e0b] to-[#070504] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.9)] animate-vegas-pop"
+              style={{
+                backgroundImage:
+                  "radial-gradient(120% 60% at 50% 0%, rgba(215,180,91,0.14) 0%, transparent 60%), linear-gradient(180deg, #1a1512 0%, #120e0b 60%, #070504 100%)",
+              }}
+            >
+              {/* gold hairline frame */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-[6px] rounded-[22px] border border-[#d7b45b]/15"
+              />
+
+              {/* top ornament */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-[#d7b45b]">✦</span>
+                  <h3 className="text-sm font-black uppercase tracking-[0.22em] text-[#e5c779]">
+                    Vegas · Color
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setVegasPickerOpen(false)}
+                  aria-label="Close"
+                  className="flex h-7 w-7 items-center justify-center rounded-full border border-white/15 text-white/60 outline-none transition hover:border-[#d7b45b]/50 hover:text-[#e5c779] focus-visible:ring-2 focus-visible:ring-[#e5c779]"
+                >
+                  ×
+                </button>
+              </div>
+
+              <p className="mt-2 text-[11px] leading-5 text-white/45">
+                Pick one of six smoked, low-light felts. Changes apply to the table instantly.
+              </p>
+
+              {/* gold divider */}
+              <div
+                aria-hidden
+                className="mt-4 h-px w-full bg-gradient-to-r from-transparent via-[#d7b45b]/40 to-transparent"
+              />
+
+              {/* swatches */}
+              <div
+                className="mt-5 grid grid-cols-2 gap-3"
+                role="radiogroup"
+                aria-label="Vegas color variants"
+              >
+                {vegasKeys.map((k) => {
+                  const v = VEGAS_VARIANTS[k];
+                  const active = activeVariant === k;
+                  return (
+                    <button
+                      key={k}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      onClick={() => {
+                        updateSettings({ theme: "vegas", vegasVariant: k });
+                        setVegasPickerOpen(false);
+                      }}
+                      className={`group relative flex flex-col items-start gap-2 overflow-hidden rounded-2xl border p-3 text-left outline-none transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#e5c779] ${
+                        active
+                          ? "border-[#e5c779] shadow-[0_0_0_1px_rgba(215,180,91,0.35),0_18px_40px_rgba(0,0,0,0.6)]"
+                          : "border-white/10 hover:border-[#d7b45b]/40"
+                      }`}
+                    >
+                      {/* swatch disk */}
+                      <div className="relative h-14 w-full overflow-hidden rounded-xl ring-1 ring-black/60">
+                        <div
+                          aria-hidden
+                          className="absolute inset-0"
+                          style={{
+                            background: `radial-gradient(ellipse at center, ${v.swatch} 0%, ${v.swatch}CC 55%, #000 100%)`,
+                          }}
+                        />
+                        {/* subtle gold sheen */}
+                        <div
+                          aria-hidden
+                          className="absolute inset-0 opacity-40 mix-blend-overlay"
+                          style={{
+                            background:
+                              "linear-gradient(130deg, rgba(229,199,121,0.0) 20%, rgba(229,199,121,0.35) 50%, rgba(229,199,121,0.0) 80%)",
+                          }}
+                        />
+                        {/* active check */}
+                        {active && (
+                          <span
+                            aria-hidden
+                            className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full border border-[#e5c779] bg-black/70 text-[10px] font-black text-[#e5c779]"
+                          >
+                            ✓
+                          </span>
+                        )}
+                      </div>
+
+                      {/* label row */}
+                      <div className="flex w-full items-center justify-between">
+                        <span
+                          className={`text-xs font-semibold tracking-wide ${
+                            active ? "text-[#e5c779]" : "text-white/80 group-hover:text-white"
+                          }`}
+                        >
+                          {v.label}
+                        </span>
+                        <span className="text-[10px] font-mono tabular-nums text-white/35">
+                          {v.swatch.toUpperCase()}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* footer */}
+              <div
+                aria-hidden
+                className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-[#d7b45b]/25 to-transparent"
+              />
+              <p className="mt-3 text-center text-[10px] uppercase tracking-[0.3em] text-white/35">
+                Royal Ace · Vegas Edition
+              </p>
+            </div>
+          </div>,
+          document.body
+        )}
       </aside>
   );
 }

@@ -2,7 +2,7 @@
 
 import { handValue, isBlackjack } from "../lib/blackjack";
 import type { Result } from "../lib/blackjack";
-import { MIN_BET, REFILL, THEMES, money } from "../lib/game";
+import { MIN_BET, REFILL, money, tableBg } from "../lib/game";
 import { ChipStack } from "./ui";
 import PlayingCard from "./PlayingCard";
 import Confetti from "./Confetti";
@@ -198,7 +198,7 @@ function getShoeStatus(g: Game): {
           </div>
         </div>
 
-        <div className={`relative overflow-hidden ${THEMES[s.settings.theme]} px-2 py-4 sm:px-9 sm:py-5`}>
+        <div className={`relative overflow-hidden ${tableBg(s.settings)} px-2 py-4 sm:px-9 sm:py-5`}>
           {s.settings.theme === "vegas" && <VegasFeltOverlay />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} />}
           <DealerShoe

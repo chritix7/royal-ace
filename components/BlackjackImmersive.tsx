@@ -8,7 +8,7 @@ import {
   CHIP_BG,
   MIN_BET,
   REFILL,
-  THEMES,
+  tableBg,
   money,
 } from "../lib/game";
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
@@ -289,7 +289,7 @@ const playerCardStyle = (
 
       <main
         style={tableStyle}
-        className={`relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${THEMES[s.settings.theme]}`}
+        className={`relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${tableBg(s.settings)}`}
       >
         {s.settings.theme === "vegas" && <VegasFeltOverlay />}
         {s.celebrate > 0 && (
