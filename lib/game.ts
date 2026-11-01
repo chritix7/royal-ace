@@ -88,12 +88,11 @@ export const THEMES: Record<Theme, string> = {
   green: "bg-[radial-gradient(ellipse_at_center,#20543c_0%,#103524_60%,#09170f_100%)]",
   blue: "bg-[radial-gradient(ellipse_at_center,#1f3f6b_0%,#10264a_60%,#09142a_100%)]",
   burgundy: "bg-[radial-gradient(ellipse_at_center,#6b2038_0%,#451325_60%,#240a14_100%)]",
-  // Vegas: dark slate base — brighter than pure black so the whole
-  // felt reads richer. Overlay adds the holographic hex emblems + a
-  // focused rim-light that outlines the dealer shoe without washing
-  // out its surroundings.
+  // Vegas: brighter dark slate across the whole felt. Base is a wider,
+  // more generous radial so the whole surface reads richer, not just
+  // the dealer corner. Overlay keeps a tight rim-light on the shoe.
   vegas:
-    "bg-[radial-gradient(ellipse_at_75%_25%,#28222e_0%,#1a1620_30%,#0e0c14_75%,#07060a_100%)]",
+    "bg-[radial-gradient(ellipse_at_55%_45%,#3d343f_0%,#2c252f_30%,#1e1a24_70%,#141017_100%)]",
 };
 export const BACKS: Record<Theme, [string, string]> = {
   green: ["#142d27", "#1b3d33"],
