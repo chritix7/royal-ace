@@ -75,16 +75,7 @@ export default function VegasFeltOverlay() {
         }}
       />
 
-      {/* 3. Single thin gold frame around the whole table */}
-      <div
-        className="absolute inset-4"
-        style={{
-          border: "1px solid rgba(229, 199, 121, 0.3)",
-          boxShadow: "0 0 10px rgba(229, 199, 121, 0.08)",
-        }}
-      />
-
-      {/* 4. Slow candlelight shimmer sweep across the table */}
+      {/* 3. Slow candlelight shimmer sweep across the table */}
       <div
         className="vegas-anim absolute inset-y-0 w-[260px]"
         style={{
