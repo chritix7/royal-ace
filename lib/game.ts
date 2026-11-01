@@ -88,11 +88,12 @@ export const THEMES: Record<Theme, string> = {
   green: "bg-[radial-gradient(ellipse_at_center,#20543c_0%,#103524_60%,#09170f_100%)]",
   blue: "bg-[radial-gradient(ellipse_at_center,#1f3f6b_0%,#10264a_60%,#09142a_100%)]",
   burgundy: "bg-[radial-gradient(ellipse_at_center,#6b2038_0%,#451325_60%,#240a14_100%)]",
-  // Vegas: brighter dark slate across the whole felt. Base is a wider,
-  // more generous radial so the whole surface reads richer, not just
-  // the dealer corner. Overlay keeps a tight rim-light on the shoe.
+  // Vegas: black marble base — brighter at the center than the edges
+  // so the whole table reads lit. The overlay layers the marble veins,
+  // the gold frame + corner flourishes, the big centered spade crest,
+  // and the ROYAL ACE wordmark.
   vegas:
-    "bg-[radial-gradient(ellipse_at_55%_45%,#3d343f_0%,#2c252f_30%,#1e1a24_70%,#141017_100%)]",
+    "bg-[radial-gradient(ellipse_at_55%_45%,#2a252e_0%,#1c1820_35%,#120f16_70%,#09070c_100%)]",
 };
 export const BACKS: Record<Theme, [string, string]> = {
   green: ["#142d27", "#1b3d33"],

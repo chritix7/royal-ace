@@ -1,18 +1,23 @@
 "use client";
 
 /**
- * Vegas felt — premium Blackjack table. Stays firmly in the casino
- * vocabulary (no HUD / radar / tech-grid): just the brighter slate
- * ground, a soft gold spotlight under the dealer shoe, and two
- * mirrored golden spade emblems placed on either side of the center.
+ * Vegas felt — fusion of three design directions:
+ *   • E (Royal Spade Insignia): big centered spade watermark + ROYAL
+ *     ACE wordmark + gold frame around the whole table.
+ *   • A (Monte Carlo Noir): fine gold corner flourishes + slow
+ *     candle-light shimmer passing across the gold.
+ *   • B (Marble Royal): black-marble surface with real gold veins
+ *     running through it.
  *
- * Each GoldSpade is a large iconic card suit drawn with a rich 22k
- * gold gradient, soft specular highlight, a thin raised bevel, and
- * a very subtle breathing animation. No tiled background, no
- * scanner, no circuit traces — reads as a classic high-end BJ felt.
+ * Composition (bottom → top):
+ *   1. Black-marble base (SVG turbulence-free "veins" + fine grain).
+ *   2. Soft rim-light under the dealer shoe (kept).
+ *   3. Rectangular inlay gold frame around the whole table.
+ *   4. Four corner flourishes (Monte Carlo-style scrollwork).
+ *   5. Big centered spade watermark with a slow moving specular.
+ *   6. "ROYAL ACE" blackletter wordmark under the spade.
+ *   7. Slow gold shimmer sweep across the whole table.
  */
-
-type MotifProps = { className?: string; style?: React.CSSProperties };
 
 export default function VegasFeltOverlay() {
   return (
@@ -26,16 +31,73 @@ export default function VegasFeltOverlay() {
           0%, 100% { opacity: 0.85; }
           50%      { opacity: 1; }
         }
-        @keyframes vegas-spade-breath {
-          0%, 100% { opacity: 0.88; transform: scale(1); }
-          50%      { opacity: 1;    transform: scale(1.025); }
+        /* Specular highlight slowly drifting over the center spade */
+        @keyframes vegas-spade-sheen {
+          0%   { transform: translateX(-80%) rotate(-15deg); opacity: 0; }
+          20%  { opacity: 1; }
+          80%  { opacity: 1; }
+          100% { transform: translateX(80%) rotate(-15deg);  opacity: 0; }
+        }
+        /* Candlelight shimmer passing across the gold accents */
+        @keyframes vegas-shimmer {
+          0%   { transform: translateX(-100%); opacity: 0; }
+          20%  { opacity: 0.5; }
+          80%  { opacity: 0.5; }
+          100% { transform: translateX(100%);  opacity: 0; }
+        }
+        /* Frame pulse — very subtle breathing on the gold trim */
+        @keyframes vegas-frame-breath {
+          0%, 100% { opacity: 0.82; }
+          50%      { opacity: 1; }
         }
         @media (prefers-reduced-motion: reduce) {
           .vegas-anim { animation: none !important; opacity: 0.9 !important; transform: none !important; }
         }
       `}</style>
 
-      {/* Fine grain so the slate isn't dead flat */}
+      {/* ========== 1. BLACK MARBLE VEINS ========== */}
+      <svg
+        className="absolute inset-0 h-full w-full"
+        xmlns="http://www.w3.org/2000/svg"
+        preserveAspectRatio="xMidYMid slice"
+        viewBox="0 0 1600 900"
+      >
+        <defs>
+          <linearGradient id="vein-gold" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="rgba(246, 228, 169, 0)" />
+            <stop offset="30%" stopColor="rgba(246, 228, 169, 0.9)" />
+            <stop offset="55%" stopColor="rgba(229, 199, 121, 0.7)" />
+            <stop offset="100%" stopColor="rgba(246, 228, 169, 0)" />
+          </linearGradient>
+        </defs>
+        <g
+          fill="none"
+          stroke="url(#vein-gold)"
+          strokeLinecap="round"
+          style={{ opacity: 0.55 }}
+        >
+          {/* Primary veins — large diagonal arteries */}
+          <path d="M -40 180 Q 300 240 540 160 Q 820 60 1120 180 Q 1380 270 1680 150" strokeWidth="1.6" />
+          <path d="M -20 720 Q 260 640 540 760 Q 820 860 1120 720 Q 1380 620 1680 740" strokeWidth="1.4" />
+          <path d="M 100 -20 Q 180 220 320 420 Q 440 640 540 920" strokeWidth="1.1" />
+          <path d="M 1280 -20 Q 1340 220 1420 440 Q 1500 680 1540 920" strokeWidth="1.1" />
+          {/* Secondary veins — thinner branches */}
+          <path d="M 280 80 Q 420 220 540 300 Q 700 400 820 280" strokeWidth="0.6" opacity="0.7" />
+          <path d="M 920 820 Q 1060 700 1200 760 Q 1340 820 1440 700" strokeWidth="0.6" opacity="0.7" />
+          <path d="M -20 420 Q 180 460 360 420 Q 540 380 720 440" strokeWidth="0.5" opacity="0.55" />
+          <path d="M 880 460 Q 1060 420 1240 440 Q 1420 460 1620 420" strokeWidth="0.5" opacity="0.55" />
+          <path d="M 500 40 Q 580 180 540 320" strokeWidth="0.5" opacity="0.6" />
+          <path d="M 1140 820 Q 1080 680 1120 540" strokeWidth="0.5" opacity="0.6" />
+          {/* Hairline tertiary veins — crackles */}
+          <path d="M 360 300 Q 420 320 480 300" strokeWidth="0.3" opacity="0.4" />
+          <path d="M 1180 580 Q 1240 600 1300 580" strokeWidth="0.3" opacity="0.4" />
+          <path d="M 220 540 Q 300 560 380 540" strokeWidth="0.3" opacity="0.4" />
+          <path d="M 740 220 Q 780 240 820 220" strokeWidth="0.3" opacity="0.4" />
+          <path d="M 1020 680 Q 1080 700 1140 680" strokeWidth="0.3" opacity="0.4" />
+        </g>
+      </svg>
+
+      {/* Fine grain overlay — gives the marble its micro-texture */}
       <div
         className="absolute inset-0"
         style={{
@@ -45,7 +107,7 @@ export default function VegasFeltOverlay() {
         }}
       />
 
-      {/* Soft rim-light outlining the shoe silhouette (top-right) */}
+      {/* ========== 2. SOFT RIM-LIGHT under the dealer shoe ========== */}
       <div
         className="vegas-anim absolute rounded-full"
         style={{
@@ -59,7 +121,6 @@ export default function VegasFeltOverlay() {
           animation: "vegas-rim-pulse 5s ease-in-out infinite",
         }}
       />
-      {/* Ambient warmth behind the rim-light */}
       <div
         className="absolute rounded-full"
         style={{
@@ -68,43 +129,140 @@ export default function VegasFeltOverlay() {
           width: "460px",
           height: "460px",
           background:
-            "radial-gradient(circle at center, rgba(229, 199, 121, 0.13) 0%, transparent 65%)",
+            "radial-gradient(circle at center, rgba(229, 199, 121, 0.12) 0%, transparent 65%)",
           filter: "blur(28px)",
         }}
       />
 
-      {/* ============ Two mirrored golden spades ============ */}
-
-      {/* Right spade */}
-      <GoldSpade
-        className="absolute"
+      {/* ========== 3. INLAY GOLD FRAME ========== */}
+      {/* Outer thin gold rule */}
+      <div
+        className="vegas-anim absolute inset-3"
         style={{
-          top: "48%",
-          right: "6%",
-          width: "160px",
-          height: "180px",
-          transform: "translateY(calc(-50% - 12px))",
+          border: "1px solid rgba(229, 199, 121, 0.4)",
+          boxShadow:
+            "inset 0 0 1px rgba(246, 228, 169, 0.3), 0 0 10px rgba(229, 199, 121, 0.08)",
+          animation: "vegas-frame-breath 7s ease-in-out infinite",
+        }}
+      />
+      {/* Inner hairline rule — the double-rule inlay look */}
+      <div
+        className="absolute inset-5"
+        style={{
+          border: "1px solid rgba(229, 199, 121, 0.14)",
         }}
       />
 
-      {/* Left spade */}
-      <GoldSpade
-        className="absolute"
+      {/* ========== 4. CORNER FLOURISHES (Monte Carlo scrollwork) ========== */}
+      <CornerFlourish className="absolute left-3 top-3" />
+      <CornerFlourish
+        className="absolute right-3 top-3"
+        style={{ transform: "scaleX(-1)" }}
+      />
+      <CornerFlourish
+        className="absolute left-3 bottom-3"
+        style={{ transform: "scaleY(-1)" }}
+      />
+      <CornerFlourish
+        className="absolute right-3 bottom-3"
+        style={{ transform: "scale(-1, -1)" }}
+      />
+
+      {/* ========== 5. BIG CENTERED SPADE WATERMARK ========== */}
+      <div
+        className="absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2 overflow-hidden"
         style={{
-          top: "48%",
-          left: "6%",
-          width: "160px",
-          height: "180px",
-          transform: "translateY(calc(-50% - 12px))",
+          width: "clamp(220px, 24vw, 320px)",
+          height: "clamp(260px, 28vw, 380px)",
+        }}
+      >
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 100 112"
+          xmlns="http://www.w3.org/2000/svg"
+          className="relative block h-full w-full"
+          style={{ opacity: 0.14 }}
+        >
+          <defs>
+            <linearGradient id="spade-mark-gold" x1="0.3" y1="0" x2="0.7" y2="1">
+              <stop offset="0%" stopColor="#fff7d4" />
+              <stop offset="40%" stopColor="#e5c779" />
+              <stop offset="100%" stopColor="#8c6b23" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M 50 6
+               C 50 6 84 32 84 58
+               C 84 72 75 82 65 82
+               C 60 82 55 79 53 75
+               C 53 86 55 94 61 100
+               L 39 100
+               C 45 94 47 86 47 75
+               C 45 79 40 82 35 82
+               C 25 82 16 72 16 58
+               C 16 32 50 6 50 6 Z"
+            fill="url(#spade-mark-gold)"
+            stroke="rgba(246, 228, 169, 0.6)"
+            strokeWidth="0.5"
+          />
+          {/* Thin center groove */}
+          <path
+            d="M 50 10 L 50 72"
+            stroke="rgba(0, 0, 0, 0.3)"
+            strokeWidth="0.4"
+            fill="none"
+          />
+        </svg>
+        {/* Specular highlight that drifts slowly across the spade (E) */}
+        <div
+          className="vegas-anim absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(100deg, transparent 35%, rgba(255, 250, 220, 0.28) 48%, rgba(255, 250, 220, 0.5) 50%, rgba(255, 250, 220, 0.28) 52%, transparent 65%)",
+            animation: "vegas-spade-sheen 11s ease-in-out infinite",
+            mixBlendMode: "overlay",
+          }}
+        />
+      </div>
+
+      {/* ========== 6. ROYAL ACE blackletter wordmark under the spade ========== */}
+      <div
+        className="absolute left-1/2 whitespace-nowrap uppercase"
+        style={{
+          top: "72%",
+          transform: "translateX(-50%)",
+          fontFamily:
+            "'Cloister Black', var(--font-blackletter), 'UnifrakturMaguntia', 'Luminari', serif",
+          fontSize: "clamp(18px, 2.2vw, 28px)",
+          color: "rgba(246, 228, 169, 0.22)",
+          letterSpacing: "0.08em",
+          lineHeight: 1,
+          textShadow:
+            "0 1px 2px rgba(0, 0, 0, 0.85), 0 0 10px rgba(229, 199, 121, 0.12)",
+        }}
+      >
+        Royal Ace
+      </div>
+
+      {/* ========== 7. CANDLELIGHT SHIMMER sweep across the whole table ========== */}
+      <div
+        className="vegas-anim absolute inset-y-0 w-[260px]"
+        style={{
+          left: "0",
+          background:
+            "linear-gradient(100deg, transparent 20%, rgba(246, 228, 169, 0.08) 50%, transparent 80%)",
+          filter: "blur(32px)",
+          mixBlendMode: "overlay",
+          animation: "vegas-shimmer 16s ease-in-out infinite",
         }}
       />
 
-      {/* Very soft edge vignette (keep brightness) */}
+      {/* ========== Soft edge vignette (keep brightness) ========== */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 55%, transparent 60%, rgba(0, 0, 0, 0.3) 100%)",
+            "radial-gradient(ellipse at 50% 55%, transparent 55%, rgba(0, 0, 0, 0.35) 100%)",
         }}
       />
     </div>
@@ -112,161 +270,58 @@ export default function VegasFeltOverlay() {
 }
 
 /* ============================================================
-   GoldSpade — large iconic card suit, premium gold render
+   Corner flourish — Monte Carlo scrollwork, 60x60
    ============================================================ */
 
-function GoldSpade({ className, style }: MotifProps) {
-  const uid = Math.random().toString(36).slice(2, 7);
+function CornerFlourish({
+  className,
+  style,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}) {
   return (
     <svg
       aria-hidden="true"
-      viewBox="0 0 100 112"
+      viewBox="0 0 60 60"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       style={{
+        width: "54px",
+        height: "54px",
         ...style,
-        animation: "vegas-spade-breath 6s ease-in-out infinite",
-        filter:
-          "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 14px rgba(229, 199, 121, 0.35))",
       }}
     >
-      <defs>
-        {/* Rich 22k gold gradient — matches the dealer shoe's gilt accents */}
-        <linearGradient id={`gs-gold-${uid}`} x1="0.3" y1="0" x2="0.7" y2="1">
-          <stop offset="0%" stopColor="#fff7d4" />
-          <stop offset="12%" stopColor="#f6e4a9" />
-          <stop offset="38%" stopColor="#e5c779" />
-          <stop offset="62%" stopColor="#c9a344" />
-          <stop offset="82%" stopColor="#8c6b23" />
-          <stop offset="100%" stopColor="#4a3608" />
-        </linearGradient>
-        {/* Glossy sheen overlay for the top third */}
-        <linearGradient id={`gs-gloss-${uid}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(255, 250, 220, 0.85)" />
-          <stop offset="45%" stopColor="rgba(255, 250, 220, 0.25)" />
-          <stop offset="100%" stopColor="rgba(255, 250, 220, 0)" />
-        </linearGradient>
-        {/* Rim darken */}
-        <radialGradient id={`gs-rim-${uid}`} cx="50%" cy="50%" r="52%">
-          <stop offset="70%" stopColor="rgba(0, 0, 0, 0)" />
-          <stop offset="95%" stopColor="rgba(0, 0, 0, 0.55)" />
-        </radialGradient>
-        <clipPath id={`gs-clip-${uid}`}>
-          <path d="M 50 6
-                   C 50 6 84 32 84 58
-                   C 84 72 75 82 65 82
-                   C 60 82 55 79 53 75
-                   C 53 86 55 94 61 100
-                   L 39 100
-                   C 45 94 47 86 47 75
-                   C 45 79 40 82 35 82
-                   C 25 82 16 72 16 58
-                   C 16 32 50 6 50 6 Z" />
-        </clipPath>
-      </defs>
-
-      {/* Drop shadow behind the spade */}
-      <path
-        d="M 50 6
-           C 50 6 84 32 84 58
-           C 84 72 75 82 65 82
-           C 60 82 55 79 53 75
-           C 53 86 55 94 61 100
-           L 39 100
-           C 45 94 47 86 47 75
-           C 45 79 40 82 35 82
-           C 25 82 16 72 16 58
-           C 16 32 50 6 50 6 Z"
-        fill="rgba(0, 0, 0, 0.4)"
-        transform="translate(1 3)"
-        style={{ filter: "blur(1.2px)" }}
-      />
-
-      {/* Main spade body with rich gold gradient */}
-      <path
-        d="M 50 6
-           C 50 6 84 32 84 58
-           C 84 72 75 82 65 82
-           C 60 82 55 79 53 75
-           C 53 86 55 94 61 100
-           L 39 100
-           C 45 94 47 86 47 75
-           C 45 79 40 82 35 82
-           C 25 82 16 72 16 58
-           C 16 32 50 6 50 6 Z"
-        fill={`url(#gs-gold-${uid})`}
-        stroke="#2a1f08"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-
-      {/* Rim darken vignette inside the spade */}
-      <rect
-        x="0"
-        y="0"
-        width="100"
-        height="112"
-        fill={`url(#gs-rim-${uid})`}
-        clipPath={`url(#gs-clip-${uid})`}
-      />
-
-      {/* Glossy top-third sheen */}
-      <path
-        d="M 50 8
-           C 50 8 78 28 82 48
-           C 70 42 60 40 50 40
-           C 40 40 30 42 18 48
-           C 22 28 50 8 50 8 Z"
-        fill={`url(#gs-gloss-${uid})`}
-        clipPath={`url(#gs-clip-${uid})`}
-      />
-
-      {/* Bright specular on the upper-left shoulder */}
-      <path
-        d="M 44 14
-           C 34 24 26 36 23 50
-           C 22 54 23 58 25 61"
+      <g
+        stroke="rgba(229, 199, 121, 0.65)"
         fill="none"
-        stroke="rgba(255, 250, 220, 0.9)"
-        strokeWidth="2.2"
         strokeLinecap="round"
-      />
-
-      {/* Small polished specks */}
-      <ellipse
-        cx="38"
-        cy="22"
-        rx="5"
-        ry="3"
-        fill="rgba(255, 255, 240, 0.9)"
-        transform="rotate(-20 38 22)"
-        clipPath={`url(#gs-clip-${uid})`}
-      />
-      <ellipse
-        cx="62"
-        cy="44"
-        rx="2"
-        ry="1.2"
-        fill="rgba(255, 255, 240, 0.55)"
-        transform="rotate(30 62 44)"
-        clipPath={`url(#gs-clip-${uid})`}
-      />
-
-      {/* Center groove (very subtle vertical crease) */}
-      <path
-        d="M 50 8 L 50 70"
-        stroke="rgba(0, 0, 0, 0.16)"
-        strokeWidth="0.7"
-        fill="none"
-      />
-
-      {/* Stem notch */}
-      <path
-        d="M 44 76 Q 50 79 56 76"
-        fill="none"
-        stroke="rgba(0, 0, 0, 0.4)"
-        strokeWidth="1.2"
-      />
+        strokeLinejoin="round"
+      >
+        {/* Main curve */}
+        <path
+          d="M 4 4 L 24 4 Q 32 4 32 12 Q 32 20 24 20 L 20 20 Q 12 20 12 28 L 12 44"
+          strokeWidth="0.9"
+        />
+        {/* Secondary curve (inner) */}
+        <path
+          d="M 4 10 L 20 10 Q 26 10 26 16 Q 26 22 20 22 L 18 22 Q 14 22 14 26"
+          strokeWidth="0.6"
+          opacity="0.75"
+        />
+        {/* Small scroll at the end */}
+        <path
+          d="M 32 12 Q 36 8 40 10 Q 42 12 40 14 Q 38 16 36 14"
+          strokeWidth="0.6"
+          opacity="0.9"
+        />
+        {/* Terminal dot */}
+        <circle cx="40" cy="12" r="1.4" fill="rgba(246, 228, 169, 0.9)" stroke="none" />
+        {/* Small jewel in the inside angle */}
+        <circle cx="20" cy="20" r="1.6" fill="rgba(246, 228, 169, 0.75)" stroke="none" />
+        {/* Short decorative tick */}
+        <path d="M 32 32 Q 36 36 32 40" strokeWidth="0.5" opacity="0.6" />
+      </g>
     </svg>
   );
 }
