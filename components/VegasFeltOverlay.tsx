@@ -1,20 +1,24 @@
 "use client";
 
 /**
- * Vegas felt — minimal: deep near-black ground, soft gold spotlight
- * at the dealer area, and two mirrored heraldic emblems placed to
- * the left and right flanking the center of play. No text, no tiled
- * damask — just two "stickers" that read as premium royal insignia.
+ * Vegas felt — futuristic premium: dark slate base + a soft rim-light
+ * outlining (not washing out) the dealer shoe, plus two mirrored
+ * holographic hex emblems placed at anchor points on either side of
+ * the play area.
  *
- * Each emblem is a full armorial crest: outer rope circle, inner
- * laurel wreath, central crowned spade on a gold field, and a
- * ribbon banner under reading "ROYAL ACE" in blackletter.
+ * Each HexEmblem is a layered sci-fi "data core":
+ *   - Outer hexagonal frame with glowing corner studs.
+ *   - Three concentric inner hexagons at decreasing scale.
+ *   - Central spade reimagined with angular/digital cuts and a
+ *     spectral gold core.
+ *   - Six radial gold circuit traces fanning outward.
+ *   - A slow rotating ring under the frame.
+ *   - Micro-text ring: 'ROYAL ACE · HOUSE EDITION' spelled around
+ *     the outer frame.
+ *   - Subtle pulse animation.
  */
 
-type MotifProps = {
-  className?: string;
-  style?: React.CSSProperties;
-};
+type MotifProps = { className?: string; style?: React.CSSProperties };
 
 export default function VegasFeltOverlay() {
   return (
@@ -24,73 +28,104 @@ export default function VegasFeltOverlay() {
       style={{ zIndex: 1 }}
     >
       <style>{`
-        @keyframes vegas-spot-pulse {
-          0%, 100% { opacity: 0.9;  transform: scale(1); }
-          50%      { opacity: 1;    transform: scale(1.03); }
+        @keyframes vegas-rim-pulse {
+          0%, 100% { opacity: 0.85; }
+          50%      { opacity: 1; }
+        }
+        @keyframes vegas-hex-breath {
+          0%, 100% { opacity: 0.78; transform: scale(1); }
+          50%      { opacity: 0.9;  transform: scale(1.02); }
+        }
+        @keyframes vegas-ring-spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+        @keyframes vegas-core-pulse {
+          0%, 100% { opacity: 0.7; }
+          50%      { opacity: 1; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .vegas-anim { animation: none !important; opacity: 0.9 !important; transform: none !important; }
+          .vegas-anim { animation: none !important; opacity: 0.85 !important; transform: none !important; }
         }
       `}</style>
 
-      {/* Subtle fine grain so the ground isn't dead flat */}
+      {/* Fine grain overlay */}
       <div
         className="absolute inset-0"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(45deg, rgba(246, 228, 169, 0.012) 0 1px, transparent 1px 3px), repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.1) 0 1px, transparent 1px 3px)",
+            "repeating-linear-gradient(45deg, rgba(246, 228, 169, 0.012) 0 1px, transparent 1px 3px), repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.08) 0 1px, transparent 1px 3px)",
           mixBlendMode: "overlay",
         }}
       />
 
-      {/* Soft gold spotlight anchored under the dealer shoe (top-right) */}
+      {/*
+        Rim-light under the shoe — tighter, directional, outlines the
+        shoe silhouette instead of washing it out. The previous
+        spotlight was so wide and strong that it bled over the whole
+        corner and the shoe got lost in it. This one is a focused ring
+        of light that follows the shoe's edge.
+      */}
       <div
         className="vegas-anim absolute rounded-full"
         style={{
-          top: "-160px",
-          right: "-100px",
-          width: "580px",
-          height: "580px",
+          top: "-80px",
+          right: "-30px",
+          width: "320px",
+          height: "320px",
           background:
-            "radial-gradient(circle at center, rgba(246, 228, 169, 0.32) 0%, rgba(229, 199, 121, 0.14) 32%, transparent 72%)",
-          filter: "blur(32px)",
-          animation: "vegas-spot-pulse 6s ease-in-out infinite",
+            "radial-gradient(circle at center, transparent 42%, rgba(246, 228, 169, 0.22) 55%, rgba(229, 199, 121, 0.08) 72%, transparent 90%)",
+          filter: "blur(14px)",
+          animation: "vegas-rim-pulse 5s ease-in-out infinite",
+        }}
+      />
+      {/* Soft ambient warmth behind the rim-light so the corner reads lit */}
+      <div
+        className="absolute rounded-full"
+        style={{
+          top: "-120px",
+          right: "-80px",
+          width: "440px",
+          height: "440px",
+          background:
+            "radial-gradient(circle at center, rgba(229, 199, 121, 0.1) 0%, transparent 65%)",
+          filter: "blur(28px)",
         }}
       />
 
-      {/* ====== Two mirrored heraldic crests ====== */}
+      {/* ============ Two mirrored hex emblems ============ */}
 
-      {/* Right crest — under the shoe area */}
-      <RoyalCrest
+      {/* Right emblem — mid-right, below shoe area */}
+      <HexEmblem
         className="absolute"
         style={{
-          top: "32%",
-          right: "6%",
-          width: "180px",
-          height: "220px",
-          opacity: 0.78,
+          top: "48%",
+          right: "4%",
+          width: "190px",
+          height: "190px",
+          transform: "translateY(-50%)",
         }}
+        reverseRing
       />
 
-      {/* Left crest — mirror position */}
-      <RoyalCrest
+      {/* Left emblem — mirror position */}
+      <HexEmblem
         className="absolute"
         style={{
-          top: "32%",
-          left: "6%",
-          width: "180px",
-          height: "220px",
-          opacity: 0.78,
-          transform: "scaleX(-1)",
+          top: "48%",
+          left: "4%",
+          width: "190px",
+          height: "190px",
+          transform: "translateY(-50%)",
         }}
       />
 
-      {/* Edge vignette */}
+      {/* Edge vignette (soft, since the base is already brighter) */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 55%, transparent 40%, rgba(0, 0, 0, 0.55) 95%)",
+            "radial-gradient(ellipse at 50% 55%, transparent 50%, rgba(0, 0, 0, 0.4) 95%)",
         }}
       />
     </div>
@@ -98,259 +133,221 @@ export default function VegasFeltOverlay() {
 }
 
 /* ============================================================
-   Royal Ace armorial crest — the premium "sticker"
+   Holographic hex emblem
    ============================================================ */
 
-function RoyalCrest({ className, style }: MotifProps) {
+function HexEmblem({
+  className,
+  style,
+  reverseRing = false,
+}: MotifProps & { reverseRing?: boolean }) {
+  const uid = reverseRing ? "r" : "l";
   return (
     <svg
       aria-hidden="true"
-      viewBox="0 0 180 220"
+      viewBox="0 0 200 200"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      style={style}
+      style={{
+        ...style,
+        animation: "vegas-hex-breath 5s ease-in-out infinite",
+        filter: "drop-shadow(0 0 12px rgba(229, 199, 121, 0.25))",
+      }}
     >
       <defs>
-        {/* Rich 22k gold gradient */}
-        <linearGradient id="rc-gold" x1="0.3" y1="0" x2="0.7" y2="1">
+        {/* Spectral gold gradient for the spade core */}
+        <radialGradient id={`he-core-${uid}`} cx="50%" cy="40%" r="60%">
           <stop offset="0%" stopColor="#fff2b8" />
-          <stop offset="20%" stopColor="#f6e4a9" />
-          <stop offset="55%" stopColor="#e5c779" />
-          <stop offset="85%" stopColor="#8c6b23" />
-          <stop offset="100%" stopColor="#4a3608" />
+          <stop offset="40%" stopColor="#e5c779" />
+          <stop offset="100%" stopColor="#5c440f" />
+        </radialGradient>
+        {/* Gold line gradient */}
+        <linearGradient id={`he-line-${uid}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="rgba(246, 228, 169, 1)" />
+          <stop offset="50%" stopColor="rgba(229, 199, 121, 1)" />
+          <stop offset="100%" stopColor="rgba(140, 107, 35, 0.8)" />
         </linearGradient>
-        {/* Softer gold (background shield) */}
-        <linearGradient id="rc-field" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#2a2320" />
-          <stop offset="100%" stopColor="#0e0c0a" />
-        </linearGradient>
-        {/* Ribbon gradient */}
-        <linearGradient id="rc-ribbon" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#c9a344" />
-          <stop offset="50%" stopColor="#8c6b23" />
-          <stop offset="100%" stopColor="#4a3608" />
-        </linearGradient>
+        {/* Micro-text path around the outer hex */}
+        <path
+          id={`he-text-${uid}`}
+          d="M 100 20 L 169 60 L 169 140 L 100 180 L 31 140 L 31 60 Z"
+          fill="none"
+        />
       </defs>
 
-      {/* ====== Crown on top ====== */}
-      <g transform="translate(90, 32)">
-        {/* Base band */}
-        <rect
-          x="-26"
-          y="-4"
-          width="52"
-          height="8"
-          rx="1.5"
-          fill="url(#rc-gold)"
-          stroke="#5c440f"
-          strokeWidth="0.7"
-        />
-        {/* Three points with jewels */}
-        {/* Left arch */}
-        <path
-          d="M -24 -4 Q -22 -16 -14 -12 Q -8 -8 -6 -4 Z"
-          fill="url(#rc-gold)"
-          stroke="#5c440f"
-          strokeWidth="0.7"
-        />
-        <circle cx="-18" cy="-14" r="2.2" fill="#e63946" stroke="#5c440f" strokeWidth="0.4" />
-        {/* Center arch (tallest) */}
-        <path
-          d="M -8 -4 Q -4 -22 0 -22 Q 4 -22 8 -4 Z"
-          fill="url(#rc-gold)"
-          stroke="#5c440f"
-          strokeWidth="0.7"
-        />
-        <circle cx="0" cy="-18" r="2.6" fill="#4a9eff" stroke="#5c440f" strokeWidth="0.4" />
-        {/* Right arch */}
-        <path
-          d="M 6 -4 Q 8 -8 14 -12 Q 22 -16 24 -4 Z"
-          fill="url(#rc-gold)"
-          stroke="#5c440f"
-          strokeWidth="0.7"
-        />
-        <circle cx="18" cy="-14" r="2.2" fill="#e63946" stroke="#5c440f" strokeWidth="0.4" />
-        {/* Cross on top of center arch */}
-        <path
-          d="M -1.4 -26 L 1.4 -26 L 1.4 -23 L 4 -23 L 4 -20.5 L 1.4 -20.5 L 1.4 -17 L -1.4 -17 L -1.4 -20.5 L -4 -20.5 L -4 -23 L -1.4 -23 Z"
-          fill="url(#rc-gold)"
-          stroke="#5c440f"
-          strokeWidth="0.5"
-        />
-        {/* Band pearls */}
-        {[-20, -10, 0, 10, 20].map((x, i) => (
-          <circle key={i} cx={x} cy="0" r="1.2" fill="#f6e4a9" stroke="#5c440f" strokeWidth="0.3" />
-        ))}
-      </g>
-
-      {/* ====== Shield outline ====== */}
-      <path
-        d="M 90 48
-           L 150 54
-           L 148 110
-           Q 145 140 125 160
-           Q 108 175 90 182
-           Q 72 175 55 160
-           Q 35 140 32 110
-           L 30 54
-           Z"
-        fill="url(#rc-field)"
-        stroke="url(#rc-gold)"
-        strokeWidth="2.2"
-        strokeLinejoin="round"
-      />
-      {/* Inner shield rule (thin gold line following shield shape) */}
-      <path
-        d="M 90 54
-           L 144 59
-           L 142 108
-           Q 140 136 122 154
-           Q 106 168 90 175
-           Q 74 168 58 154
-           Q 40 136 38 108
-           L 36 59
-           Z"
+      {/* Outer rotating ring (slow) — dashed, under everything else */}
+      <circle
+        cx="100"
+        cy="100"
+        r="92"
         fill="none"
-        stroke="rgba(229, 199, 121, 0.6)"
+        stroke="rgba(229, 199, 121, 0.22)"
         strokeWidth="0.6"
+        strokeDasharray="2 6"
+        style={{
+          transformOrigin: "100px 100px",
+          animation: `vegas-ring-spin ${reverseRing ? "60s" : "80s"} linear infinite ${
+            reverseRing ? "reverse" : ""
+          }`,
+        }}
       />
 
-      {/* ====== Laurel wreath wrapping the shield sides ====== */}
-      {/* Left side laurel */}
-      <g transform="translate(32, 110)">
-        {Array.from({ length: 5 }).map((_, i) => {
-          const t = i / 4;
-          const y = -40 + t * 65;
-          const angle = -20 + t * 18;
+      {/* Six radial gold circuit traces fanning outward */}
+      <g stroke={`url(#he-line-${uid})`} strokeWidth="0.6" fill="none" opacity="0.7">
+        {Array.from({ length: 6 }).map((_, i) => {
+          const angle = (i * 60 - 30) * (Math.PI / 180);
+          const x1 = 100 + Math.cos(angle) * 72;
+          const y1 = 100 + Math.sin(angle) * 72;
+          const x2 = 100 + Math.cos(angle) * 92;
+          const y2 = 100 + Math.sin(angle) * 92;
+          const xk = 100 + Math.cos(angle) * 82;
+          const yk = 100 + Math.sin(angle) * 82;
           return (
-            <ellipse
-              key={i}
-              cx="-6"
-              cy={y}
-              rx="7"
-              ry="3.5"
-              fill="url(#rc-gold)"
-              stroke="#5c440f"
-              strokeWidth="0.4"
-              transform={`rotate(${angle} -6 ${y})`}
-              opacity="0.85"
-            />
-          );
-        })}
-      </g>
-      {/* Right side laurel (mirror) */}
-      <g transform="translate(148, 110)">
-        {Array.from({ length: 5 }).map((_, i) => {
-          const t = i / 4;
-          const y = -40 + t * 65;
-          const angle = 20 - t * 18;
-          return (
-            <ellipse
-              key={i}
-              cx="6"
-              cy={y}
-              rx="7"
-              ry="3.5"
-              fill="url(#rc-gold)"
-              stroke="#5c440f"
-              strokeWidth="0.4"
-              transform={`rotate(${angle} 6 ${y})`}
-              opacity="0.85"
-            />
+            <g key={i}>
+              <line x1={x1} y1={y1} x2={xk} y2={yk} />
+              <circle cx={xk} cy={yk} r="1.6" fill="rgba(246, 228, 169, 0.95)" stroke="none" />
+              <line x1={xk} y1={yk} x2={x2} y2={y2} />
+            </g>
           );
         })}
       </g>
 
-      {/* ====== Central spade on gold field ====== */}
-      <path
-        d="M 90 76
-           C 90 76 118 96 118 118
-           C 118 128 112 134 104 134
-           C 100 134 96 132 94 128
-           C 94 138 96 144 100 148
-           L 80 148
-           C 84 144 86 138 86 128
-           C 84 132 80 134 76 134
-           C 68 134 62 128 62 118
-           C 62 96 90 76 90 76 Z"
-        fill="url(#rc-gold)"
-        stroke="#2a1f08"
-        strokeWidth="1.3"
+      {/* Outer hexagonal frame */}
+      <polygon
+        points="100,22 167,61 167,139 100,178 33,139 33,61"
+        fill="rgba(10, 8, 14, 0.42)"
+        stroke={`url(#he-line-${uid})`}
+        strokeWidth="1.6"
         strokeLinejoin="round"
       />
-      {/* Highlight on spade upper-left */}
-      <path
-        d="M 86 84
-           C 78 92 72 102 70 112"
+
+      {/* Glowing stud at each hex vertex */}
+      {[
+        [100, 22],
+        [167, 61],
+        [167, 139],
+        [100, 178],
+        [33, 139],
+        [33, 61],
+      ].map(([x, y], i) => (
+        <g key={i}>
+          <circle cx={x} cy={y} r="4.5" fill="rgba(246, 228, 169, 0.2)" />
+          <circle cx={x} cy={y} r="2.4" fill="rgba(246, 228, 169, 1)" stroke="#5c440f" strokeWidth="0.4" />
+        </g>
+      ))}
+
+      {/* Second hexagon (inner frame rule) */}
+      <polygon
+        points="100,34 156,66 156,134 100,166 44,134 44,66"
         fill="none"
-        stroke="rgba(255, 250, 220, 0.75)"
-        strokeWidth="1.4"
-        strokeLinecap="round"
+        stroke="rgba(229, 199, 121, 0.55)"
+        strokeWidth="0.7"
+        strokeLinejoin="round"
       />
 
-      {/* ====== Ribbon banner at bottom with ROYAL ACE ====== */}
-      <g transform="translate(90, 188)">
-        {/* Left tail */}
+      {/* Third hexagon (deepest inner rule) */}
+      <polygon
+        points="100,52 140,74 140,126 100,148 60,126 60,74"
+        fill="none"
+        stroke="rgba(229, 199, 121, 0.28)"
+        strokeWidth="0.5"
+        strokeDasharray="3 3"
+        strokeLinejoin="round"
+      />
+
+      {/* Micro-text around the outer hex */}
+      <text
+        style={{
+          fontFamily:
+            "'JetBrains Mono', var(--font-tech-mono), 'Share Tech Mono', monospace",
+          fontSize: "6px",
+          fill: "rgba(246, 228, 169, 0.65)",
+          letterSpacing: "0.42em",
+          textTransform: "uppercase",
+        }}
+      >
+        <textPath href={`#he-text-${uid}`} startOffset="0%">
+          ROYAL ACE · HOUSE EDITION · ROYAL ACE · HOUSE EDITION ·
+        </textPath>
+      </text>
+
+      {/* Digital spade centerpiece — angular, holographic */}
+      <g
+        style={{
+          transformOrigin: "100px 100px",
+          animation: "vegas-core-pulse 3.6s ease-in-out infinite",
+        }}
+      >
+        {/* Spade body with angular cuts */}
         <path
-          d="M -58 0
-             L -36 -4
-             L -32 2
-             L -52 10
-             L -58 6 Z"
-          fill="url(#rc-ribbon)"
+          d="M 100 68
+             L 112 80
+             L 122 94
+             L 126 108
+             L 122 118
+             L 112 122
+             L 104 118
+             L 104 124
+             L 108 130
+             L 92 130
+             L 96 124
+             L 96 118
+             L 88 122
+             L 78 118
+             L 74 108
+             L 78 94
+             L 88 80
+             Z"
+          fill={`url(#he-core-${uid})`}
+          stroke="#2a1f08"
+          strokeWidth="1.1"
+          strokeLinejoin="round"
+        />
+        {/* Horizontal cut line across the spade (digital look) */}
+        <line
+          x1="78"
+          y1="106"
+          x2="122"
+          y2="106"
           stroke="#2a1f08"
           strokeWidth="0.5"
-          strokeLinejoin="round"
+          opacity="0.5"
         />
-        {/* Right tail */}
-        <path
-          d="M 58 0
-             L 36 -4
-             L 32 2
-             L 52 10
-             L 58 6 Z"
-          fill="url(#rc-ribbon)"
-          stroke="#2a1f08"
-          strokeWidth="0.5"
-          strokeLinejoin="round"
-        />
-        {/* Main banner */}
-        <path
-          d="M -40 -6
-             Q 0 -2 40 -6
-             L 40 10
-             Q 0 14 -40 10 Z"
-          fill="url(#rc-gold)"
-          stroke="#2a1f08"
-          strokeWidth="0.7"
-          strokeLinejoin="round"
-        />
-        {/* Inner banner rule */}
-        <path
-          d="M -36 -3
-             Q 0 1 36 -3
-             L 36 7
-             Q 0 11 -36 7 Z"
-          fill="none"
-          stroke="rgba(90, 60, 15, 0.6)"
+        {/* Vertical cut line */}
+        <line
+          x1="100"
+          y1="72"
+          x2="100"
+          y2="128"
+          stroke="rgba(255, 255, 240, 0.5)"
           strokeWidth="0.4"
         />
-        {/* ROYAL ACE text */}
-        <text
-          x="0"
-          y="4"
-          textAnchor="middle"
-          style={{
-            fontFamily:
-              "'Cloister Black', var(--font-blackletter), 'UnifrakturMaguntia', 'Luminari', serif",
-            fontSize: "10px",
-            fill: "#2a1f08",
-            letterSpacing: "0.04em",
-          }}
-        >
-          Royal Ace
-        </text>
+        {/* Specular highlight blob on upper left */}
+        <path
+          d="M 90 82
+             L 88 92
+             L 86 100
+             L 88 108"
+          fill="none"
+          stroke="rgba(255, 250, 220, 0.85)"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+        />
+        {/* Tiny digital bits around the spade */}
+        <circle cx="100" cy="68" r="1.6" fill="#fff2b8" />
+        <circle cx="78" cy="118" r="1" fill="rgba(246, 228, 169, 0.9)" />
+        <circle cx="122" cy="118" r="1" fill="rgba(246, 228, 169, 0.9)" />
       </g>
+
+      {/* Four cardinal fiducials inside the frame (compass marks) */}
+      {[
+        [100, 44],
+        [150, 100],
+        [100, 156],
+        [50, 100],
+      ].map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r="1.2" fill="rgba(246, 228, 169, 0.75)" />
+      ))}
     </svg>
   );
 }
