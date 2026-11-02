@@ -6,6 +6,7 @@ import Sidebar from "./Sidebar";
 import Table from "./Table";
 import BlackjackImmersive from "./BlackjackImmersive";
 import AchievementToast from "./AchievementToast";
+import InsuranceModal from "./InsuranceModal";
 
 export default function Blackjack({
   active = true,
@@ -22,6 +23,14 @@ export default function Blackjack({
   return (
     <>
       {active && <AchievementToast toast={g.s.toast} onDismiss={g.clearToast} />}
+      {active && (
+        <InsuranceModal
+          open={g.s.phase === "insurance"}
+          cost={g.s.hands.reduce((sum, h) => sum + h.bet, 0) / 2}
+          busy={g.s.busy}
+          onDecide={g.takeInsurance}
+        />
+      )}
       {immersive && active ? (
         <BlackjackImmersive
           g={g}

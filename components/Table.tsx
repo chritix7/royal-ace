@@ -174,7 +174,6 @@ function getShoeStatus(g: Game): {
   dealEvents,
   consumeDealEvent,
   deal,
-  takeInsurance,
   hit,
   stand,
   double,
@@ -567,14 +566,9 @@ function getShoeStatus(g: Game): {
 )}
         <div className="sticky bottom-0 z-20 border-t border-white/10 bg-[#101713]/95 px-2 py-2 backdrop-blur sm:px-7 sm:py-4 lg:static lg:border-0 lg:bg-transparent">
           {s.phase === "insurance" ? (
-            <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:justify-center sm:gap-3">
-              <button onClick={() => takeInsurance(true)} disabled={s.busy} className={`${mobileAction} border-transparent bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c]  sm:w-auto sm:px-4 sm:text-base`}>
-                Insurance (◈ {money(s.hands.reduce((a, h) => a + h.bet, 0) / 2)})
-              </button>
-              <button onClick={() => takeInsurance(false)} disabled={s.busy} className={`${mobileAction} border-white/20 text-white hover:border-[#d7b45b] hover:text-[#e5c779]  sm:w-auto sm:px-4 sm:text-base`}>
-                No thanks
-              </button>
-            </div>
+            // The InsuranceModal (mounted at the Blackjack parent) owns
+            // this decision now — keep the slot visually empty here.
+            <div aria-hidden="true" className="h-10 sm:h-11" />
           ) : canBet ? (
             <div className="flex flex-col items-center gap-2">
               {outOfChips ? (

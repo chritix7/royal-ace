@@ -62,7 +62,6 @@ export default function BlackjackImmersive({
     double,
     split,
     surrender,
-    takeInsurance,
     refill,
   } = g;
 
@@ -667,28 +666,13 @@ const playerCardStyle = (
         )}
 
         {s.phase === "insurance" ? (
-          <div className="mx-auto grid max-w-xl grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => takeInsurance(true)}
-              disabled={s.busy}
-              className={`${control} ${gold}`}
-            >
-              Insurance · ◈{" "}
-              {money(
-                s.hands.reduce((sum, hand) => sum + hand.bet, 0) / 2
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => takeInsurance(false)}
-              disabled={s.busy}
-              className={`${control} ${neutral}`}
-            >
-              No thanks
-            </button>
-          </div>
+          // The InsuranceModal (mounted at the Blackjack parent) owns
+          // this decision now. Keep an empty slot so the footer stays
+          // the same height while the player decides.
+          <div
+            aria-hidden="true"
+            className="mx-auto h-10 max-w-xl sm:h-11"
+          />
         ) : canBet ? (
           <div className="mx-auto flex max-w-xl justify-center gap-2">
             {outOfChips ? (
