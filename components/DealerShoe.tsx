@@ -825,11 +825,16 @@ export default function DealerShoe({
                   const shown = i < visibleLayers;
                   // The topmost shown layer gets a hair-brighter rim to
                   // sell the "freshly-cut deck" look. The bottom layers
-                  // are dimmer, like older cards.
+                  // are dimmer, like older cards. The top card also
+                  // carries the `data-shoe-pile-top` hook so the card-
+                  // flight layer can take OFF from the actual pile
+                  // instead of from the outlet slit — makes the deal
+                  // read as "the top of the deck leaves the shoe".
                   const isTop = i === visibleLayers - 1;
                   return (
                     <div
                       key={i}
+                      {...(isTop ? { "data-shoe-pile-top": "" } : {})}
                       className="absolute inset-x-[14px] h-[32px] rounded-[3px] border border-[#c9ac65]/40"
                       style={{
                         bottom: `${2 + i * 2}px`,

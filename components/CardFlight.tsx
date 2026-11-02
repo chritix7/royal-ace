@@ -15,7 +15,11 @@ import type { DealFlightEvent } from "../lib/useBlackjack";
  * so there is never a CSS deal-in running on top of this portal.
  *
  * Hooks it relies on in the surrounding DOM:
- *   • [data-shoe-outlet]                   — source
+ *   • [data-shoe-pile-top]                 — preferred source: the
+ *       top card inside the lucite window. Makes the deal read as
+ *       the top of the deck leaving the shoe. Falls back to the
+ *       outlet slit if the pile is empty / not visible.
+ *   • [data-shoe-outlet]                   — fallback source
  *   • [data-deal-target="dealer"]          — destination for dealer cards
  *   • [data-deal-target="hand-${i}"]       — destination for hand `i`
  *   • [data-deal-card-index="${k}"] inside the destination for the k-th
@@ -70,18 +74,25 @@ export default function CardFlight({
     }
 
     const event = dealEvents[0];
+    // Prefer the top of the pile (the card physically sitting at the
+    // top of the lucite stack) so the flight reads as "the top of the
+    // deck leaving". Fall back to the outlet slit if the pile is
+    // empty or offscreen.
+    const pileTop = document.querySelector<HTMLElement>("[data-shoe-pile-top]");
     const outlet = document.querySelector<HTMLElement>("[data-shoe-outlet]");
+    const source =
+      pileTop && pileTop.getClientRects().length > 0 ? pileTop : outlet;
     const target = document.querySelector<HTMLElement>(
       `[data-deal-target="${event.target}"]`
     );
 
     // Shoe hidden (mobile): no flight — the card just appears.
-    if (!outlet || !target || outlet.getClientRects().length === 0) {
+    if (!source || !target || source.getClientRects().length === 0) {
       consumeDealEvent(event.id);
       return;
     }
 
-    const from = outlet.getBoundingClientRect();
+    const from = source.getBoundingClientRect();
     const slot = target.querySelector<HTMLElement>(
       `[data-deal-card-index="${event.cardIndex}"]`
     );

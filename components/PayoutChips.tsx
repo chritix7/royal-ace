@@ -8,20 +8,25 @@ import type { Phase } from "../lib/game";
 /**
  * Dealer-pays animation.
  *
- * When a round settles, a small chip stack is spawned at the dealer's
- * card area for each winning hand and flies out to that hand's spot.
- * Purely visual — the wallet update already happened in the hook when
- * the phase moved to "settled". The animation just makes the moment
- * feel earned instead of a number silently jumping on the balance tile.
+ * When a round settles, a tall chip stack is spawned at the dealer's
+ * card area for each winning hand and tossed over to that hand with
+ * a casino-feeling arc: rises, rotates, scales up mid-air (feels like
+ * it's "coming at you"), then falls, settles into the player's spot
+ * with a tiny bounce. A soft floor shadow stays grounded on the
+ * destination to sell the vertical throw. Blackjack stacks are gold
+ * with a brief landing sparkle.
  *
- * Blackjack and plain wins get a different chip look so the premium
- * payout reads at a glance.
+ * Purely visual — the wallet update already happened in the hook
+ * when the phase moved to "settled". The animation just makes the
+ * moment feel earned instead of a number silently jumping on the
+ * balance tile.
  *
- * This component relies on the existing hooks already placed in the
- * table markup:
+ * Hooks it reads in the surrounding DOM:
  *   • [data-deal-target="dealer"]      — source
  *   • [data-deal-target="hand-${i}"]   — destination for hand i
  */
+
+type Phase1 = "pre" | "mid" | "end" | "settle";
 
 type Flight = {
   id: number;
@@ -29,12 +34,17 @@ type Flight = {
   fromY: number;
   toX: number;
   toY: number;
-  started: boolean;
+  phase: Phase1;
   bj: boolean;
+  spinDeg: number;
 };
 
-const FLIGHT_DURATION_MS = 720;
 const SPAWN_DELAY_MS = 180; // let the dealer reveal land first
+const RISE_MS = 240; // dealer → midair peak
+const FALL_MS = 300; // midair peak → player spot
+const SETTLE_MS = 180; // tiny bounce after landing
+const ARC_HEIGHT = 110; // peak height in px above the straight line
+const CLEANUP_BUFFER_MS = 180;
 
 export default function PayoutChips({
   hands,
@@ -52,9 +62,6 @@ export default function PayoutChips({
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    // On very first mount, record the current phase and bail — we only
-    // want to react to real transitions INTO "settled", not to a
-    // restored saved state that was already "settled" when the app opened.
     if (firstMount.current) {
       firstMount.current = false;
       prevPhase.current = phase;
@@ -87,8 +94,11 @@ export default function PayoutChips({
         fromY,
         toX: r.left + r.width / 2,
         toY: r.top + r.height / 2,
-        started: false,
+        phase: "pre",
         bj: h.result === "blackjack",
+        // A random spin direction keeps consecutive stacks from
+        // looking identical when the player splits.
+        spinDeg: Math.random() > 0.5 ? 24 : -24,
       });
     });
 
@@ -96,24 +106,40 @@ export default function PayoutChips({
     const ids = spawned.map((f) => f.id);
     setFlights((f) => [...f, ...spawned]);
 
-    // Let the DOM paint one frame with the chips at the dealer, then
-    // flip `started` so the CSS transition takes them to the hand.
-    const raf = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setFlights((f) =>
-          f.map((fl) => (ids.includes(fl.id) ? { ...fl, started: true } : fl))
-        );
-      });
-    });
+    // Phase progression:
+    //   pre     (spawn, invisible/scale-0 at the dealer)
+    //   mid     (rise to peak, scale up, start rotating)        RISE_MS
+    //   end     (fall to the target, finish rotation, scale 1)  FALL_MS
+    //   settle  (bounce, shadow grows, blackjack sparkle)       SETTLE_MS
+    const totalDelay = SPAWN_DELAY_MS;
 
-    // Clean up after the flight finishes (plus a small overshoot buffer).
-    const cleanup = window.setTimeout(() => {
+    const t0 = window.setTimeout(() => {
+      setFlights((f) =>
+        f.map((fl) => (ids.includes(fl.id) ? { ...fl, phase: "mid" } : fl))
+      );
+    }, totalDelay);
+
+    const t1 = window.setTimeout(() => {
+      setFlights((f) =>
+        f.map((fl) => (ids.includes(fl.id) ? { ...fl, phase: "end" } : fl))
+      );
+    }, totalDelay + RISE_MS);
+
+    const t2 = window.setTimeout(() => {
+      setFlights((f) =>
+        f.map((fl) => (ids.includes(fl.id) ? { ...fl, phase: "settle" } : fl))
+      );
+    }, totalDelay + RISE_MS + FALL_MS);
+
+    const tCleanup = window.setTimeout(() => {
       setFlights((f) => f.filter((fl) => !ids.includes(fl.id)));
-    }, SPAWN_DELAY_MS + FLIGHT_DURATION_MS + 160);
+    }, totalDelay + RISE_MS + FALL_MS + SETTLE_MS + CLEANUP_BUFFER_MS);
 
     return () => {
-      cancelAnimationFrame(raf);
-      window.clearTimeout(cleanup);
+      window.clearTimeout(t0);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.clearTimeout(tCleanup);
     };
   }, [phase, hands]);
 
@@ -124,6 +150,37 @@ export default function PayoutChips({
       {flights.map((f) => {
         const dx = f.toX - f.fromX;
         const dy = f.toY - f.fromY;
+
+        // Each phase has its own target transform and timing.
+        let transform: string;
+        let transitionDuration: string;
+        let transitionTiming: string;
+        let opacity = 1;
+
+        if (f.phase === "pre") {
+          // Hidden at the dealer, slightly tucked, no spin yet.
+          transform = "translate(-50%, -50%) scale(0.55) rotate(0deg)";
+          transitionDuration = "0ms";
+          transitionTiming = "ease";
+          opacity = 0;
+        } else if (f.phase === "mid") {
+          // Peak of the arc: halfway in x, dy/2 - ARC_HEIGHT in y.
+          // Slightly larger (feels closer), half the spin applied.
+          transform = `translate3d(${dx / 2}px, ${dy / 2 - ARC_HEIGHT}px, 0) translate(-50%, -50%) scale(1.1) rotate(${f.spinDeg / 2}deg)`;
+          transitionDuration = `${RISE_MS}ms`;
+          transitionTiming = "cubic-bezier(0.22, 0.9, 0.5, 1)";
+        } else if (f.phase === "end") {
+          // Lands at the destination at scale 1 with full spin.
+          transform = `translate3d(${dx}px, ${dy}px, 0) translate(-50%, -50%) scale(1) rotate(${f.spinDeg}deg)`;
+          transitionDuration = `${FALL_MS}ms`;
+          transitionTiming = "cubic-bezier(0.45, 0.05, 0.4, 1)";
+        } else {
+          // Settle bounce: tiny vertical squash then relax.
+          transform = `translate3d(${dx}px, ${dy}px, 0) translate(-50%, -50%) scale(1) rotate(${f.spinDeg}deg)`;
+          transitionDuration = `${SETTLE_MS}ms`;
+          transitionTiming = "ease-out";
+        }
+
         return (
           <div
             key={f.id}
@@ -132,19 +189,15 @@ export default function PayoutChips({
             style={{
               left: f.fromX,
               top: f.fromY,
-              transform: f.started
-                ? `translate3d(${dx}px, ${dy}px, 0) translate(-50%, -50%) scale(1)`
-                : "translate(-50%, -50%) scale(0.6)",
-              opacity: f.started ? 1 : 0.5,
+              transform,
+              opacity,
               transitionProperty: "transform, opacity",
-              transitionDuration: `${FLIGHT_DURATION_MS}ms, 240ms`,
-              transitionTimingFunction:
-                "cubic-bezier(0.22, 0.75, 0.18, 1), ease-out",
-              transitionDelay: `${SPAWN_DELAY_MS}ms, ${SPAWN_DELAY_MS}ms`,
+              transitionDuration: `${transitionDuration}, 180ms`,
+              transitionTimingFunction: `${transitionTiming}, ease-out`,
               willChange: "transform, opacity",
             }}
           >
-            <ChipStack bj={f.bj} />
+            <ChipStack bj={f.bj} phase={f.phase} />
           </div>
         );
       })}
@@ -155,57 +208,107 @@ export default function PayoutChips({
 
 /* ─── chip stack visual ──────────────────────────────────────────── */
 
-function ChipStack({ bj }: { bj: boolean }) {
-  // Three overlapping chips. Blackjack = gold stack with warm glow;
-  // regular win = a classic multi-color casino stack.
-  const stack = bj
-    ? [
-        { bg: "#d7b45b", edge: "#1a1612" },
-        { bg: "#e5c779", edge: "#1a1612" },
-        { bg: "#f0d38b", edge: "#1a1612" },
-      ]
-    : [
-        { bg: "#0f172a", edge: "#ffffff" }, // slate
-        { bg: "#991b1b", edge: "#ffffff" }, // red
-        { bg: "#1d4ed8", edge: "#ffffff" }, // blue
-      ];
+const WIN_COLORS = [
+  { bg: "#0f172a", edge: "#ffffff" }, // slate
+  { bg: "#166534", edge: "#ffffff" }, // emerald
+  { bg: "#991b1b", edge: "#ffffff" }, // red
+  { bg: "#1d4ed8", edge: "#ffffff" }, // blue
+  { bg: "#7c3aed", edge: "#ffffff" }, // purple
+];
+const BJ_COLORS = [
+  { bg: "#b8902f", edge: "#1a1612" },
+  { bg: "#c89f3d", edge: "#1a1612" },
+  { bg: "#d7b45b", edge: "#1a1612" },
+  { bg: "#e5c779", edge: "#1a1612" },
+  { bg: "#f0d38b", edge: "#1a1612" },
+  { bg: "#f6e4a9", edge: "#1a1612" },
+  { bg: "#faecb8", edge: "#1a1612" },
+];
+
+function ChipStack({ bj, phase }: { bj: boolean; phase: Phase1 }) {
+  const chips = bj ? BJ_COLORS : WIN_COLORS;
+  const stackHeight = chips.length * 5 + 36;
+  // The floor shadow grows as the stack falls, so the stack feels
+  // like it's dropping onto a real surface.
+  const shadowOpacity =
+    phase === "pre" ? 0 : phase === "mid" ? 0.08 : phase === "end" ? 0.3 : 0.35;
+  const shadowScale =
+    phase === "pre" ? 0.4 : phase === "mid" ? 0.5 : phase === "end" ? 1 : 1.05;
 
   return (
     <div
       className="relative"
       style={{
-        width: 36,
-        height: 44,
+        width: 44,
+        height: stackHeight,
         filter: bj
-          ? "drop-shadow(0 0 10px rgba(229,199,121,0.55))"
-          : "drop-shadow(0 4px 6px rgba(0,0,0,0.5))",
+          ? "drop-shadow(0 0 12px rgba(229,199,121,0.55))"
+          : "drop-shadow(0 4px 8px rgba(0,0,0,0.5))",
       }}
     >
-      {stack.map((c, i) => (
-        <span
-          key={i}
-          className="absolute left-1/2 h-9 w-9 -translate-x-1/2 rounded-full border-[3px] border-dashed shadow-md"
-          style={{
-            bottom: i * 4,
-            background: `radial-gradient(ellipse at 50% 30%, ${c.bg} 0%, ${c.bg} 65%, rgba(0,0,0,0.4) 100%)`,
-            borderColor: c.edge,
-            boxShadow: bj
-              ? "inset 0 1px 2px rgba(255,255,255,0.35), 0 2px 4px rgba(0,0,0,0.5)"
-              : "inset 0 1px 2px rgba(255,255,255,0.25), 0 2px 4px rgba(0,0,0,0.5)",
-          }}
-        >
-          {/* chip inner ring */}
+      {/* Floor shadow — stays below the stack and grows as it lands. */}
+      <span
+        aria-hidden
+        className="absolute left-1/2 h-[6px] rounded-[50%] bg-black"
+        style={{
+          bottom: -3,
+          width: 36,
+          transform: `translateX(-50%) scaleX(${shadowScale})`,
+          opacity: shadowOpacity,
+          filter: "blur(3px)",
+          transition: "opacity 220ms ease-out, transform 220ms ease-out",
+        }}
+      />
+
+      {chips.map((c, i) => {
+        // Stack from the bottom up — chip 0 at the floor, chip N on top.
+        const bottom = i * 5;
+        // On the final "settle" phase, apply a tiny vertical squash to
+        // each chip progressively (top chip squashes a hair more).
+        const settleSquash =
+          phase === "settle" ? 1 - (i / chips.length) * 0.06 : 1;
+        return (
           <span
-            aria-hidden
-            className="absolute inset-[5px] rounded-full border"
+            key={i}
+            className="absolute left-1/2 h-9 w-9 rounded-full border-[3px] border-dashed shadow-md"
             style={{
-              borderColor: bj
-                ? "rgba(26,22,18,0.5)"
-                : "rgba(255,255,255,0.35)",
+              bottom,
+              transform: `translateX(-50%) scaleY(${settleSquash})`,
+              background: `radial-gradient(ellipse at 50% 30%, ${c.bg} 0%, ${c.bg} 65%, rgba(0,0,0,0.45) 100%)`,
+              borderColor: c.edge,
+              boxShadow: bj
+                ? "inset 0 1px 2px rgba(255,255,255,0.4), inset 0 -1px 1px rgba(0,0,0,0.35), 0 2px 3px rgba(0,0,0,0.5)"
+                : "inset 0 1px 2px rgba(255,255,255,0.28), inset 0 -1px 1px rgba(0,0,0,0.35), 0 2px 3px rgba(0,0,0,0.5)",
+              transition: "transform 160ms ease-out",
             }}
-          />
-        </span>
-      ))}
+          >
+            {/* chip inner ring */}
+            <span
+              aria-hidden
+              className="absolute inset-[5px] rounded-full border"
+              style={{
+                borderColor: bj
+                  ? "rgba(26,22,18,0.55)"
+                  : "rgba(255,255,255,0.4)",
+              }}
+            />
+          </span>
+        );
+      })}
+
+      {/* Blackjack landing sparkle — brief golden flash on settle. */}
+      {bj && phase === "settle" && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 h-10 w-10 -translate-x-1/2 rounded-full"
+          style={{
+            bottom: -4,
+            background:
+              "radial-gradient(circle, rgba(246,228,169,0.75) 0%, rgba(246,228,169,0) 65%)",
+            animation: "chip-sparkle 500ms ease-out both",
+          }}
+        />
+      )}
     </div>
   );
 }
