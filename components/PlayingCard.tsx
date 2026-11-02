@@ -5,17 +5,17 @@ import type { Card } from "../lib/blackjack";
  * A playing card for Royal Ace Blackjack.
  *
  * Design notes:
- * - Face cards (A, J, Q, K) render their rank in blackletter
- *   (--font-blackletter) to echo the "ROYAL ACE" wordmark on the shoe.
- * - Number cards (2–10) use a classical serif stack.
+ * - All ranks use a classical serif stack — crisp and readable at every
+ *   size (number cards and face cards alike).
  * - Suit colors are warmed up: wine red for ♥/♦, warm charcoal for ♠/♣,
  *   so they sit comfortably on the gold-on-dark game palette instead of
  *   reading as default web colors.
  * - The card paper has a subtle warm gradient and a thin inset gold
  *   hairline, matching the premium ornamental frame used on the Vegas
  *   color picker.
- * - Face cards get a thin gold ornament ring around the center suit so
- *   they read as "royal" without breaking the uniform rank/suit layout.
+ * - Face cards (A/J/Q/K) get a thin double gold ring + soft halo around
+ *   the center suit — they read as "royal" without a louder typeface,
+ *   and the uniform rank/suit corner layout stays identical.
  */
 
 const FACE_RANKS = new Set(["A", "J", "Q", "K"]);
@@ -59,10 +59,8 @@ export default function PlayingCard({
       ? "-ml-6 sm:-ml-8"
       : "-ml-8 sm:-ml-10";
 
-  // Rank typography: blackletter on face cards, serif on numerics.
-  const rankFontClass = isFace
-    ? "font-[family-name:var(--font-blackletter)]"
-    : "font-serif";
+  // Rank typography: classical serif for every rank — readable at all sizes.
+  const rankFontClass = "font-serif";
 
   // Corner-rank size scales with layout mode.
   const cornerRankSize = fit
@@ -154,7 +152,7 @@ export default function PlayingCard({
             className={`absolute left-1.5 top-1 text-center leading-none ${cornerRankSize} ${rankFontClass}`}
             style={{ color: inkColor }}
           >
-            <div className={isFace ? "" : "font-bold"}>{card.rank}</div>
+            <div className="font-bold">{card.rank}</div>
             <div className={`mt-0.5 ${cornerSuitSize} font-sans`} style={{ color: inkColor }}>
               {card.suit}
             </div>
@@ -213,7 +211,7 @@ export default function PlayingCard({
             className={`absolute bottom-1 right-1.5 rotate-180 text-center leading-none ${cornerRankSize} ${rankFontClass}`}
             style={{ color: inkColor }}
           >
-            <div className={isFace ? "" : "font-bold"}>{card.rank}</div>
+            <div className="font-bold">{card.rank}</div>
             <div className={`mt-0.5 ${cornerSuitSize} font-sans`} style={{ color: inkColor }}>
               {card.suit}
             </div>
