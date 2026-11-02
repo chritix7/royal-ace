@@ -18,6 +18,7 @@ import PlayingCard from "./PlayingCard";
 import CardFlight from "./CardFlight";
 import Confetti from "./Confetti";
 import DealerShoe from "./DealerShoe";
+import ShuffleAnimation from "./ShuffleAnimation";
 import VegasFeltOverlay from "./VegasFeltOverlay";
 import InfoPanel from "./blackjack-immersive/InfoPanel";
 import ImmersiveSidePill from "./blackjack-immersive/ImmersiveSidePill";
@@ -545,16 +546,7 @@ const playerCardStyle = (
           className="pointer-events-none absolute -bottom-20 left-1/2 z-0 h-32 w-[min(82%,760px)] -translate-x-1/2 rounded-[50%] border border-white/[0.04]"
         />
 
-        {s.shuffling && (
-          <div
-            role="status"
-            className="absolute inset-0 z-20 flex items-center justify-center bg-black/65 backdrop-blur-sm"
-          >
-            <p className="animate-pulse text-lg font-bold text-[#e5c779]">
-              Shuffling the shoe…
-            </p>
-          </div>
-        )}
+        {s.shuffling && <ShuffleAnimation />}
                 <ResultRail g={g} onNewRound={deal} />
       </main>
 

@@ -9,6 +9,7 @@ import Confetti from "./Confetti";
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import DealerShoe from "./DealerShoe";
 import CardFlight from "./CardFlight";
+import ShuffleAnimation from "./ShuffleAnimation";
 import VegasFeltOverlay from "./VegasFeltOverlay";
 
 const RESULT_UI: Record<Result, { label: string; cls: string }> = {
@@ -229,16 +230,7 @@ function getShoeStatus(g: Game): {
             back={back}
             compact={compact}
           />
-          {s.shuffling && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/60" role="status">
-              <div className="flex gap-3 text-3xl text-[#e5c779]">
-                {["♠", "♥", "♦", "♣"].map((g, i) => (
-                  <span key={g} className="animate-bounce" style={{ animationDelay: `${i * 120}ms` }}>{g}</span>
-                ))}
-              </div>
-              <p className="text-sm text-white/80">Shuffling the shoe…</p>
-            </div>
-          )}
+          {s.shuffling && <ShuffleAnimation />}
           {/* Croupier — zone gravée dans le tapis */}
 <div className="relative mt-1.5 flex min-h-[76px] items-center justify-center sm:min-h-28">
 
