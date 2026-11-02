@@ -13,7 +13,7 @@ import {
 } from "../lib/game";
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import { useSession } from "../lib/sessionStore";
-import { Counter, SideBet } from "./ui";
+import { Counter, SideBet, sideBetStep } from "./ui";
 import PlayingCard from "./PlayingCard";
 import CardFlight from "./CardFlight";
 import Confetti from "./Confetti";
@@ -109,8 +109,8 @@ export default function BlackjackImmersive({
 
   const tableStyle = {
   "--bj-card-h": compact
-    ? "clamp(54px, 11dvh, 96px)"
-    : "clamp(60px, 14dvh, 124px)",
+    ? "clamp(46px, 9.5dvh, 96px)"
+    : "clamp(52px, 12dvh, 124px)",
 } as CSSProperties;
 
   const handCount = Math.max(1, s.hands.length);
@@ -223,7 +223,7 @@ const playerCardStyle = (
     visible source on phones and the ramp animation still plays. */}
 <div
   aria-hidden="true"
-  className="pointer-events-none absolute right-1 top-2 z-0 origin-top-right scale-[0.45] md:hidden"
+  className="pointer-events-none absolute right-[-3px] top-2 z-0 origin-top-right scale-[0.45] md:hidden"
 >
   <DealerShoe
     status={getShoeStatus(g)}
@@ -572,10 +572,10 @@ const playerCardStyle = (
     label="PP"
     amount={s.ppBet}
     disabled={!canBet}
-    onIncrease={() => adjustSide("ppBet", 10)}
-    onDecrease={() => adjustSide("ppBet", -10)}
+    onIncrease={() => adjustSide("ppBet", sideBetStep(s.ppBet))}
+    onDecrease={() => adjustSide("ppBet", -sideBetStep(Math.max(0, s.ppBet - 1)))}
     plusDisabled={
-      !canBet || s.ppBet >= 100 || stake + 10 > s.balance
+      !canBet || s.ppBet >= 1000 || stake + sideBetStep(s.ppBet) > s.balance
     }
   />
 
@@ -583,10 +583,10 @@ const playerCardStyle = (
     label="21+3"
     amount={s.t3Bet}
     disabled={!canBet}
-    onIncrease={() => adjustSide("t3Bet", 10)}
-    onDecrease={() => adjustSide("t3Bet", -10)}
+    onIncrease={() => adjustSide("t3Bet", sideBetStep(s.t3Bet))}
+    onDecrease={() => adjustSide("t3Bet", -sideBetStep(Math.max(0, s.t3Bet - 1)))}
     plusDisabled={
-      !canBet || s.t3Bet >= 100 || stake + 10 > s.balance
+      !canBet || s.t3Bet >= 1000 || stake + sideBetStep(s.t3Bet) > s.balance
     }
   />
 </div>

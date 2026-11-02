@@ -144,13 +144,13 @@ export default function Sidebar({ g }: { g: Game }) {
               label="Perfect Pairs" hint="Your first 2 cards pair · up to 25:1" amount={s.ppBet}
               onChange={(d) => adjustSide("ppBet", d)}
               minusDisabled={!canBet || s.ppBet <= 0}
-              plusDisabled={!canBet || s.ppBet >= 100 || stake + 10 > s.balance}
+              plusDisabled={!canBet || s.ppBet >= 1000 || stake + 10 > s.balance}
             />
             <SideBet
               label="21+3" hint="Your 2 cards + dealer's card · up to 100:1" amount={s.t3Bet}
               onChange={(d) => adjustSide("t3Bet", d)}
               minusDisabled={!canBet || s.t3Bet <= 0}
-              plusDisabled={!canBet || s.t3Bet >= 100 || stake + 10 > s.balance}
+              plusDisabled={!canBet || s.t3Bet >= 1000 || stake + 10 > s.balance}
             />
           </div>
         </div>

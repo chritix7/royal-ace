@@ -114,6 +114,17 @@ export function Toggle({ label, checked, onChange, disabled }: { label: string; 
   );
 }
 
+/**
+ * Adaptive step for the side-bet +/− buttons. Small bets step by 10
+ * for fine control; past 100 the step grows so a player can climb to
+ * the 1000 cap without a hundred taps. Symmetric both ways.
+ */
+export function sideBetStep(amount: number) {
+  if (amount < 100) return 10;
+  if (amount < 500) return 50;
+  return 100;
+}
+
 export function SideBet({
   label,
   hint,
@@ -131,6 +142,10 @@ export function SideBet({
   plusDisabled: boolean;
   roomy?: boolean;
 }) {
+  const stepUp = sideBetStep(amount);
+  // Step down from the amount we'll land on — keeps the cadence
+  // symmetric so going + then − returns to the same value.
+  const stepDown = sideBetStep(Math.max(0, amount - 1));
     const b = `${
     roomy ? "h-9 w-9 text-base" : "h-7 w-7 text-sm"
   } flex shrink-0 items-center justify-center rounded-full border border-white/15 text-white/70 outline-none transition hover:border-[#d7b45b] focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-30`;
@@ -162,22 +177,22 @@ export function SideBet({
       >
         <button
           type="button"
-          aria-label={`Decrease ${label}`}
-          onClick={() => onChange(-10)}
+          aria-label={`Decrease ${label} by ${stepDown}`}
+          onClick={() => onChange(-stepDown)}
           disabled={minusDisabled}
           className={b}
         >
           −
         </button>
 
-        <span className="w-8 shrink-0 text-center text-xs font-bold tabular-nums text-[#e5c779]">
+        <span className="w-10 shrink-0 text-center text-xs font-bold tabular-nums text-[#e5c779]">
           {amount}
         </span>
 
         <button
           type="button"
-          aria-label={`Increase ${label}`}
-          onClick={() => onChange(10)}
+          aria-label={`Increase ${label} by ${stepUp}`}
+          onClick={() => onChange(stepUp)}
           disabled={plusDisabled}
           className={b}
         >

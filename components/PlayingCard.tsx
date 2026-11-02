@@ -56,14 +56,14 @@ export default function PlayingCard({
   const size = fit
     ? "h-[var(--bj-card-h)] w-[calc(var(--bj-card-h)*0.72)]"
     : compact
-      ? "h-[72px] w-[51px] sm:h-24 sm:w-[68px]"
-      : "h-24 w-[68px] sm:h-28 sm:w-20";
+      ? "h-[60px] w-[42px] sm:h-24 sm:w-[68px]"
+      : "h-20 w-[56px] sm:h-28 sm:w-20";
 
   const shift = fit
     ? "-ml-[calc(var(--bj-card-h)*0.28)]"
     : compact
-      ? "-ml-6 sm:-ml-8"
-      : "-ml-8 sm:-ml-10";
+      ? "-ml-5 sm:-ml-8"
+      : "-ml-6 sm:-ml-10";
 
   // Rank typography: classical serif for every rank — readable at all sizes.
   const rankFontClass = "font-serif";

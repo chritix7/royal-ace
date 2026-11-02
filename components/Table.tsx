@@ -215,7 +215,7 @@ function getShoeStatus(g: Game): {
               visible source on phones and the ramp animation still plays. */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute right-1 top-1 z-0 origin-top-right scale-[0.45] sm:hidden"
+            className="pointer-events-none absolute right-[-3px] top-1 z-0 origin-top-right scale-[0.45] sm:hidden"
           >
             <DealerShoe
               status={getShoeStatus(g)}
@@ -240,7 +240,7 @@ function getShoeStatus(g: Game): {
             </div>
           )}
           {/* Croupier — zone gravée dans le tapis */}
-<div className="relative mt-1.5 flex min-h-[92px] items-center justify-center sm:min-h-28">
+<div className="relative mt-1.5 flex min-h-[76px] items-center justify-center sm:min-h-28">
 
   {/* Score du croupier — ne prend aucune hauteur */}
 {s.dealer.length > 0 && (
@@ -325,7 +325,7 @@ function getShoeStatus(g: Game): {
   {s.hands.length === 0 && (
     <div
       aria-hidden="true"
-      className="min-h-24 w-full sm:min-h-28"
+      className="min-h-20 w-full sm:min-h-28"
     />
   )}
 
@@ -354,7 +354,7 @@ function getShoeStatus(g: Game): {
                       </span>
                     )}
                   </div>
-                  <div className={`flex justify-center ${compact ? "min-h-[72px] sm:min-h-24" : "min-h-24 sm:min-h-28"}`}>
+                  <div className={`flex justify-center ${compact ? "min-h-[60px] sm:min-h-24" : "min-h-20 sm:min-h-28"}`}>
                     {h.cards.map((card, k) => (
                       <span
                         key={`p${i}-${k}-${card.rank}${card.suit}`}
