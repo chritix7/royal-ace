@@ -8,7 +8,6 @@ import { music } from "./music";
 import { wallet } from "./wallet";
 import { CHIPS, MIN_BET, REFILL, EMPTY_STATS, EMPTY_RECORDS, DEFAULT_SETTINGS, INITIAL, tableBacks, sleep as delay, floor10 } from "./game";
 import type { S, Settings, Records } from "./game";
-import { pickDaily, todayStamp, type Mission, type MissionType } from "./missions";
 import { winHistory } from "./winHistory";
 import { sessionStore } from "./sessionStore";
 import {
@@ -230,25 +229,11 @@ const track: typeof sendTrack = (...args) => {
     const raw = localStorage.getItem("royalace:blackjack");
     const d = raw ? JSON.parse(raw) : {};
 
-    // Daily missions: reuse yesterday's if the stamp still matches
-    // today, otherwise roll a fresh set and reset the day's profit.
-    const today = todayStamp();
-    const savedMissions: Mission[] = Array.isArray(d.missions) ? d.missions : [];
-    const missionDate = typeof d.missionDate === "string" ? d.missionDate : "";
-    const missionProfit = typeof d.missionProfit === "number" ? d.missionProfit : 0;
-    const freshMissions =
-      missionDate === today && savedMissions.length === 3
-        ? savedMissions
-        : pickDaily(today);
-
     set({
       stats: { ...EMPTY_STATS, ...d.stats },
       settings: { ...DEFAULT_SETTINGS, ...d.settings },
       unlocked: Array.isArray(d.unlocked) ? d.unlocked : [],
       records: { ...EMPTY_RECORDS, ...d.records },
-      missions: freshMissions,
-      missionDate: today,
-      missionProfit: missionDate === today ? missionProfit : 0,
     });
   } catch (error) {
     console.warn("Could not read legacy Blackjack settings:", error);
@@ -343,46 +328,10 @@ const track: typeof sendTrack = (...args) => {
     try {
       localStorage.setItem(
         "royalace:blackjack",
-        JSON.stringify({
-          balance: s.balance,
-          stats: s.stats,
-          settings: s.settings,
-          unlocked: s.unlocked,
-          records: s.records,
-          missions: s.missions,
-          missionDate: s.missionDate,
-          missionProfit: s.missionProfit,
-        })
+        JSON.stringify({ balance: s.balance, stats: s.stats, settings: s.settings, unlocked: s.unlocked, records: s.records })
       );
     } catch {}
-  }, [
-    hydrated,
-    s.balance,
-    s.stats,
-    s.settings,
-    s.unlocked,
-    s.records,
-    s.missions,
-    s.missionDate,
-    s.missionProfit,
-  ]);
-
-  // Daily reset: if the local day flips while the tab is open, roll a
-  // new set of missions.
-  useEffect(() => {
-    if (!hydrated) return;
-    const t = window.setInterval(() => {
-      const today = todayStamp();
-      if (ref.current.missionDate !== today) {
-        set({
-          missions: pickDaily(today),
-          missionDate: today,
-          missionProfit: 0,
-        });
-      }
-    }, 60_000);
-    return () => window.clearInterval(t);
-  }, [hydrated]);
+  }, [hydrated, s.balance, s.stats, s.settings, s.unlocked, s.records]);
 
   async function runAction(
   name: ActionName,
@@ -611,40 +560,6 @@ function giveDealer() {
   sfx.win();
 }
 
-/**
- * Advance any daily mission of a given type. For most types `amount`
- * is an increment (progress += amount, capped at target); for
- * "streak" and "profit" it is a VALUE (progress = max(current, amount)).
- * On a target cross, mark complete and surface a toast through the
- * existing achievement toast channel (same visual, different label).
- */
-function tickMission(type: MissionType, amount: number) {
-  const c = ref.current;
-  if (!c.missions.length || amount <= 0) return;
-  const valueBased = type === "streak" || type === "profit";
-  let changed = false;
-  const toastQueue: string[] = [];
-  const next = c.missions.map((m) => {
-    if (m.type !== type || m.completed) return m;
-    const nextProgress = valueBased
-      ? Math.min(m.target, Math.max(m.progress, amount))
-      : Math.min(m.target, m.progress + amount);
-    if (nextProgress === m.progress) return m;
-    changed = true;
-    const nowComplete = nextProgress >= m.target;
-    if (nowComplete && !m.completed) {
-      toastQueue.push(`mission-${m.id}|Mission complete|${m.label}`);
-    }
-    return { ...m, progress: nextProgress, completed: nowComplete };
-  });
-  if (!changed) return;
-  set({
-    missions: next,
-    // Queue only the last completion toast if multiple fire the same
-    // tick — toast state is a single slot.
-    ...(toastQueue.length ? { toast: toastQueue[toastQueue.length - 1] } : {}),
-  });
-}
 
   /** Note ta décision avant qu'elle ne s'exécute et la compare à la stratégie de base. */
   function grade(action: Advice) {
@@ -661,10 +576,7 @@ function tickMission(type: MissionType, amount: number) {
       goodStreak: ok ? c.goodStreak + 1 : 0,
       coach: ok ? `✓ ${action} was the right play.` : `✗ You chose ${action}. Basic strategy says ${best}.`,
     });
-    if (ok) {
-      track("bjCorrect");
-      tickMission("correct", 1);
-    }
+    if (ok) track("bjCorrect");
     if (ok && c.goodStreak + 1 >= 10) unlock("sharp");
   }
 
@@ -689,7 +601,6 @@ function tickMission(type: MissionType, amount: number) {
       notes.push(`${w.label} +${c.ppBet * w.odds}`);
       unlock("pair");
       track("pairWin");
-      tickMission("pp", 1);
 
       if (w.odds >= 25) big = true;
     }
@@ -703,7 +614,6 @@ function tickMission(type: MissionType, amount: number) {
       notes.push(`${w.label} +${c.t3Bet * w.odds}`);
       unlock("suited");
       track("suitedWin");
-      tickMission("t3", 1);
 
       if (w.odds >= 40) big = true;
     }
@@ -1102,21 +1012,6 @@ if (!settlementId) {
     if (doubledWin) unlock("double");
     if (splitWin) unlock("split");
     if (balance >= 10000) unlock("rich");
-
-    // Daily-mission progress — unlock() already fires a toast for
-    // achievements; tickMission fires its own toast for mission
-    // completions. Streak is passed as a VALUE (not an increment).
-    tickMission("rounds", 1);
-    if (won > 0) tickMission("win", won);
-    if (gotBJ) tickMission("blackjack", 1);
-    if (doubledWins > 0) tickMission("double", doubledWins);
-    if (splitWins > 0) tickMission("split", splitWins);
-    if (streak > 0) tickMission("streak", streak);
-
-    // Running daily profit (used by the "profit" mission type).
-    const nextProfit = ref.current.missionProfit + net;
-    set({ missionProfit: nextProfit });
-    if (nextProfit > 0) tickMission("profit", nextProfit);
   }
 
   function refill() {
