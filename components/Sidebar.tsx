@@ -27,21 +27,71 @@ export default function Sidebar({ g }: { g: Game }) {
   // Vegas color-variant picker: opens when the user clicks the Vegas
   // theme button. Rendered via a portal so it floats above everything.
   const [vegasPickerOpen, setVegasPickerOpen] = useState(false);
+  // Session recap modal: intercepts the reset button so the player sees
+  // what they did before the slate is wiped.
+  const [recapOpen, setRecapOpen] = useState(false);
+  const [shareState, setShareState] = useState<"idle" | "copied">("idle");
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const activeVariant: VegasVariant = s.settings.vegasVariant ?? "anthracite";
 
-  // Close picker on Escape.
+  // Close whichever modal is open on Escape.
   useEffect(() => {
-    if (!vegasPickerOpen) return;
+    if (!vegasPickerOpen && !recapOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setVegasPickerOpen(false);
+      if (e.key !== "Escape") return;
+      setVegasPickerOpen(false);
+      setRecapOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [vegasPickerOpen]);
+  }, [vegasPickerOpen, recapOpen]);
 
   const vegasKeys = Object.keys(VEGAS_VARIANTS) as VegasVariant[];
+
+  // Derived recap figures.
+  const resolved = s.stats.won + s.stats.lost + s.stats.pushed;
+  const winRateNum = resolved > 0 ? Math.round((100 * s.stats.won) / resolved) : 0;
+  const coachPct = s.stats.decisions > 0
+    ? Math.round((100 * s.stats.correct) / s.stats.decisions)
+    : 0;
+
+  const buildShareText = () => {
+    const sign = s.stats.profit >= 0 ? "+" : "−";
+    const abs = Math.abs(s.stats.profit);
+    const lines = [
+      "♠ Royal Ace · Session summary",
+      `Net: ${sign}◈ ${money(abs)} · ${s.stats.played} rounds`,
+      `W / L / P: ${s.stats.won} / ${s.stats.lost} / ${s.stats.pushed} (${winRateNum}% win)`,
+      `Biggest win: ◈ ${money(s.records.biggestWin)} · ${s.stats.blackjacks} blackjack${s.stats.blackjacks === 1 ? "" : "s"}`,
+      `Best streak: ${s.records.bestStreak} · Coach ${coachPct}%`,
+    ];
+    return lines.join("\n");
+  };
+
+  const handleShare = async () => {
+    const text = buildShareText();
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({ title: "Royal Ace · Session", text });
+      } else if (
+        typeof navigator !== "undefined" &&
+        navigator.clipboard &&
+        navigator.clipboard.writeText
+      ) {
+        await navigator.clipboard.writeText(text);
+        setShareState("copied");
+        window.setTimeout(() => setShareState("idle"), 1800);
+      }
+    } catch {
+      /* share cancelled or clipboard denied — silent */
+    }
+  };
+
+  const handleConfirmReset = () => {
+    setRecapOpen(false);
+    resetAll();
+  };
 
   return (
       <aside className="flex flex-col gap-5">
@@ -260,8 +310,12 @@ export default function Sidebar({ g }: { g: Game }) {
 
           <button
   type="button"
-  onClick={resetAll}
+  onClick={() => {
+    setShareState("idle");
+    setRecapOpen(true);
+  }}
   disabled={!canBet}
+  aria-haspopup="dialog"
   className={`${small} mt-5 w-full`}
 >
   Reset wallet & Blackjack stats
@@ -452,6 +506,177 @@ export default function Sidebar({ g }: { g: Game }) {
         <p className="px-3 text-center text-[11px] leading-5 text-white/25">
           Virtual chips only. No real money, deposits or cash-outs.
         </p>
+
+        {mounted && recapOpen && createPortal(
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-vegas-fade"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Session summary before reset"
+          >
+            {/* backdrop */}
+            <button
+              type="button"
+              aria-label="Close session summary"
+              onClick={() => setRecapOpen(false)}
+              className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-sm"
+            />
+
+            {/* dialog card */}
+            <div
+              className="relative w-full max-w-md overflow-hidden rounded-3xl border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a1512] via-[#120e0b] to-[#070504] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.9)] animate-vegas-pop"
+              style={{
+                backgroundImage:
+                  "radial-gradient(120% 60% at 50% 0%, rgba(215,180,91,0.14) 0%, transparent 60%), linear-gradient(180deg, #1a1512 0%, #120e0b 60%, #070504 100%)",
+              }}
+            >
+              {/* gold hairline frame */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-[6px] rounded-[22px] border border-[#d7b45b]/15"
+              />
+
+              {/* header */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-[#d7b45b]">♠</span>
+                  <h3 className="text-sm font-black uppercase tracking-[0.22em] text-[#e5c779]">
+                    Session · Summary
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRecapOpen(false)}
+                  aria-label="Close"
+                  className="flex h-7 w-7 items-center justify-center rounded-full border border-white/15 text-white/60 outline-none transition hover:border-[#d7b45b]/50 hover:text-[#e5c779] focus-visible:ring-2 focus-visible:ring-[#e5c779]"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* big net */}
+              <div className="mt-5 text-center">
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">
+                  Net profit
+                </p>
+                <p
+                  className={`mt-1 font-black tabular-nums text-4xl ${
+                    s.stats.profit > 0
+                      ? "text-[#f5d778]"
+                      : s.stats.profit < 0
+                        ? "text-red-300"
+                        : "text-white/70"
+                  }`}
+                >
+                  {s.stats.profit >= 0 ? "+" : "−"}◈ {money(Math.abs(s.stats.profit))}
+                </p>
+                <p className="mt-1 text-[11px] text-white/40">
+                  across {s.stats.played} round{s.stats.played === 1 ? "" : "s"}
+                </p>
+              </div>
+
+              {/* gold divider */}
+              <div
+                aria-hidden
+                className="mt-5 h-px w-full bg-gradient-to-r from-transparent via-[#d7b45b]/40 to-transparent"
+              />
+
+              {/* stat grid */}
+              <dl className="mt-5 grid grid-cols-2 gap-x-5 gap-y-3 text-xs">
+                <div>
+                  <dt className="text-[10px] uppercase tracking-wider text-white/40">
+                    Win rate
+                  </dt>
+                  <dd className="mt-0.5 font-bold tabular-nums text-white">
+                    {winRateNum}%
+                    <span className="ml-1.5 text-[10px] font-normal text-white/40">
+                      {s.stats.won} / {s.stats.lost} / {s.stats.pushed}
+                    </span>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] uppercase tracking-wider text-white/40">
+                    Biggest win
+                  </dt>
+                  <dd className="mt-0.5 font-bold tabular-nums text-white">
+                    ◈ {money(s.records.biggestWin)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] uppercase tracking-wider text-white/40">
+                    Blackjacks
+                  </dt>
+                  <dd className="mt-0.5 font-bold tabular-nums text-white">
+                    {s.stats.blackjacks}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] uppercase tracking-wider text-white/40">
+                    Best streak
+                  </dt>
+                  <dd className="mt-0.5 font-bold tabular-nums text-white">
+                    {s.records.bestStreak}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] uppercase tracking-wider text-white/40">
+                    Peak balance
+                  </dt>
+                  <dd className="mt-0.5 font-bold tabular-nums text-white">
+                    ◈ {money(s.records.peakBalance)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] uppercase tracking-wider text-white/40">
+                    Coach
+                  </dt>
+                  <dd className="mt-0.5 font-bold tabular-nums text-white">
+                    {coachPct}%
+                    <span className="ml-1.5 text-[10px] font-normal text-white/40">
+                      {s.stats.correct} / {s.stats.decisions}
+                    </span>
+                  </dd>
+                </div>
+              </dl>
+
+              {/* gold divider */}
+              <div
+                aria-hidden
+                className="mt-5 h-px w-full bg-gradient-to-r from-transparent via-[#d7b45b]/25 to-transparent"
+              />
+
+              {/* actions */}
+              <div className="mt-5 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="flex-1 rounded-full border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 outline-none transition hover:border-[#d7b45b]/40 hover:text-white focus-visible:ring-2 focus-visible:ring-[#e5c779]"
+                >
+                  {shareState === "copied" ? "✓ Copied" : "Share"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRecapOpen(false)}
+                  className="rounded-full border border-white/10 px-3 py-2 text-xs font-semibold text-white/60 outline-none transition hover:border-white/30 hover:text-white/80 focus-visible:ring-2 focus-visible:ring-[#e5c779]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmReset}
+                  className="flex-1 rounded-full border border-red-500/40 bg-red-500/15 px-3 py-2 text-xs font-bold text-red-200 outline-none transition hover:border-red-400/60 hover:bg-red-500/25 hover:text-red-100 focus-visible:ring-2 focus-visible:ring-red-400"
+                >
+                  Reset
+                </button>
+              </div>
+
+              <p className="mt-3 text-center text-[10px] uppercase tracking-[0.3em] text-white/35">
+                Shared wallet · Today & records kept
+              </p>
+            </div>
+          </div>,
+          document.body
+        )}
 
         {mounted && vegasPickerOpen && createPortal(
           <div
