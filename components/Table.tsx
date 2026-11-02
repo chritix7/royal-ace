@@ -8,8 +8,10 @@ import PlayingCard from "./PlayingCard";
 import Confetti from "./Confetti";
 import type { Game } from "../lib/useBlackjack";
 import DealerShoe from "./DealerShoe";
+import CardFlight from "./CardFlight";
 import PayoutChips from "./PayoutChips";
 import VegasFeltOverlay from "./VegasFeltOverlay";
+import type { DealFlightEvent } from "../lib/useBlackjack";
 
 const RESULT_UI: Record<Result, { label: string; cls: string }> = {
   blackjack: { label: "Blackjack", cls: "border-[#e5c779] bg-[#e5c779]/20 text-[#f5d778]" },
@@ -170,6 +172,8 @@ function getShoeStatus(g: Game): {
   stake,
   back,
   pileAmount,
+  dealEvents,
+  consumeDealEvent,
   deal,
   takeInsurance,
   hit,
@@ -208,6 +212,12 @@ function getShoeStatus(g: Game): {
             fillPct={shoePct}
           />
           <PayoutChips hands={s.hands} phase={s.phase} />
+          <CardFlight
+            dealEvents={dealEvents}
+            consumeDealEvent={consumeDealEvent}
+            back={back}
+            compact={compact}
+          />
           {s.shuffling && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/60" role="status">
               <div className="flex gap-3 text-3xl text-[#e5c779]">
@@ -248,14 +258,28 @@ function getShoeStatus(g: Game): {
   </p>
 
   {s.dealer.map((card, i) => (
-  <PlayingCard
-    key={`d${i}-${card.rank}${card.suit}`}
-    card={card}
-    faceDown={i === 1 && !s.hole}
-    overlap={i > 0}
-    back={back}
-  />
-))}
+    <span
+      key={`d${i}-${card.rank}${card.suit}`}
+      className="contents"
+      data-deal-card-index={i}
+      style={{
+        visibility: dealEvents.some(
+          (event: DealFlightEvent) =>
+            event.target === "dealer" && event.cardIndex === i
+        )
+          ? "hidden"
+          : "visible",
+      }}
+    >
+      <PlayingCard
+        card={card}
+        faceDown={i === 1 && !s.hole}
+        overlap={i > 0}
+        back={back}
+        animated={false}
+      />
+    </span>
+  ))}
 </div>
 </div>
 
@@ -321,7 +345,27 @@ function getShoeStatus(g: Game): {
                   </div>
                   <div className={`flex justify-center ${compact ? "min-h-[72px] sm:min-h-24" : "min-h-24 sm:min-h-28"}`}>
                     {h.cards.map((card, k) => (
-                      <PlayingCard key={`p${i}-${k}-${card.rank}${card.suit}`} card={card} overlap={k > 0} compact={compact} back={back} />
+                      <span
+                        key={`p${i}-${k}-${card.rank}${card.suit}`}
+                        className="contents"
+                        data-deal-card-index={k}
+                        style={{
+                          visibility: dealEvents.some(
+                            (event: DealFlightEvent) =>
+                              event.target === `hand-${i}` && event.cardIndex === k
+                          )
+                            ? "hidden"
+                            : "visible",
+                        }}
+                      >
+                        <PlayingCard
+                          card={card}
+                          overlap={k > 0}
+                          compact={compact}
+                          back={back}
+                          animated={false}
+                        />
+                      </span>
                     ))}
                   </div>
                 </div>

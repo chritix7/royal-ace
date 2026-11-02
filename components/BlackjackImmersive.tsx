@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { handValue, isBlackjack } from "../lib/blackjack";
 import {
@@ -15,6 +15,7 @@ import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import { useSession } from "../lib/sessionStore";
 import { Counter, SideBet } from "./ui";
 import PlayingCard from "./PlayingCard";
+import CardFlight from "./CardFlight";
 import Confetti from "./Confetti";
 import DealerShoe from "./DealerShoe";
 import PayoutChips from "./PayoutChips";
@@ -69,94 +70,9 @@ export default function BlackjackImmersive({
   const [editBet, setEditBet] = useState(s.phase === "betting");
   const [resultOpen, setResultOpen] = useState(false);
 
-  type ActiveFlight = {
-  event: DealFlightEvent;
-  fromX: number;
-  fromY: number;
-  toX: number;
-  toY: number;
-  cardHeight: string;
-  started: boolean;
-};
-
-const [activeFlight, setActiveFlight] =
-  useState<ActiveFlight | null>(null);
-const flightLock = useRef<number | null>(null);
-
-useEffect(() => {
-  if (
-    activeFlight !== null ||
-    flightLock.current !== null ||
-    dealEvents.length === 0
-  ) {
-    return;
-  }
-
-  const event = dealEvents[0];
-  const outlet = document.querySelector<HTMLElement>("[data-shoe-outlet]");
-  const target = document.querySelector<HTMLElement>(
-    `[data-deal-target="${event.target}"]`
-  );
-
-  // Le sabot est masqué sur mobile : pas de vol, la carte apparaît dans la main.
-  if (!outlet || !target || outlet.getClientRects().length === 0) {
-    consumeDealEvent(event.id);
-    return;
-  }
-
-  const from = outlet.getBoundingClientRect();
-  const slot = target.querySelector<HTMLElement>(
-    `[data-deal-card-index="${event.cardIndex}"]`
-  );
-  const to =
-    (slot?.firstElementChild as HTMLElement | null)?.getBoundingClientRect() ??
-    target.getBoundingClientRect();
-
-  flightLock.current = event.id;
-  setActiveFlight({
-    event,
-    fromX: from.left + from.width / 2,
-    fromY: from.top + from.height / 2,
-    toX: to.left + to.width / 2,
-    toY: to.top + to.height / 2,
-    cardHeight:
-      getComputedStyle(target).getPropertyValue("--bj-card-h").trim() ||
-      "76px",
-    started: false,
-  });
-}, [dealEvents, activeFlight, consumeDealEvent]);
-
-useEffect(() => {
-  if (activeFlight === null || activeFlight.started) return;
-
-  const id = activeFlight.event.id;
-  const frame = requestAnimationFrame(() => {
-    setActiveFlight((current) => {
-      if (current === null || current.event.id !== id) {
-        return current;
-      }
-
-      return { ...current, started: true };
-    });
-  });
-
-  return () => cancelAnimationFrame(frame);
-}, [activeFlight]);
-
-useEffect(() => {
-  if (activeFlight === null || !activeFlight.started) return;
-
-  const id = activeFlight.event.id;
-  const timer = window.setTimeout(() => {
-    if (flightLock.current !== id) return;
-
-    flightLock.current = null;
-    setActiveFlight(null);
-    consumeDealEvent(id);
-  }, 580);
-
-  return () => window.clearTimeout(timer);
-}, [activeFlight, consumeDealEvent]);
+  // Card-flight motion is handled by the dedicated CardFlight layer
+  // (see <CardFlight /> below). Keeping the state out of this component
+  // makes sure the classic Table view can share the exact same system.
 
   const bettingOpen =
     canBet && (editBet || s.phase === "betting");
@@ -308,39 +224,13 @@ const playerCardStyle = (
 
 
 
-{activeFlight && createPortal(
-  <div
-    aria-hidden="true"
-    className="pointer-events-none fixed z-[120]"
-    style={{
-      left: activeFlight.fromX,
-      top: activeFlight.fromY,
-      height: "var(--bj-card-h)",
-      aspectRatio: "5 / 7",
-      transformOrigin: "center",
-      transition: "transform 520ms cubic-bezier(.18,.78,.2,1)",
-      transform: activeFlight.started
-        ? `translate3d(${activeFlight.toX - activeFlight.fromX}px, ${activeFlight.toY - activeFlight.fromY}px, 0) translate(-50%, -50%) rotate(0deg)`
-        : "translate(-50%, -50%) rotate(-28deg) scale(.72)",
-      "--bj-card-h": activeFlight.cardHeight,
-    } as CSSProperties}
-  >
-    <PlayingCard
-      card={activeFlight.event.card}
-      faceDown={activeFlight.event.faceDown}
-      back={back}
-      compact={activeFlight.event.target !== "dealer" && compact}
-      fit
-      /* The outer portal wrapper owns the motion (translate +
-         rotate + scale from the shoe outlet to the target slot).
-         The inner card must NOT run its own CSS deal-in on top of
-         that or two animations fight — that was the stutter / "the
-         card looks like it's dealing twice" bug. Static card. */
-      animated={false}
-    />
-  </div>,
-  document.body
-)}
+<CardFlight
+  dealEvents={dealEvents}
+  consumeDealEvent={consumeDealEvent}
+  back={back}
+  compact={compact}
+  fit
+/>
 
                 <div className="relative flex min-h-0 flex-col items-center justify-center gap-2 overflow-y-auto overflow-x-hidden px-3 py-2">
 
