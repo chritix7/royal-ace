@@ -104,11 +104,6 @@ export default function Sidebar({ g }: { g: Game }) {
 
   return (
       <aside className="flex flex-col gap-5">
-        {s.toast && (
-          <div role="status" className="animate-pop fixed right-4 top-4 z-50 rounded-2xl border border-[#e5c779]/60 bg-[#151b15] px-5 py-3 text-sm font-semibold text-[#f5d778] shadow-2xl">
-            ★ {s.toast}
-          </div>
-        )}
         <div className="rounded-3xl border border-[#c8a65b]/30 bg-[#151b15] p-6">
           <p className="text-xs text-white/50">Your chips</p>
           <p className="mt-1 text-3xl font-black text-[#e5c779]">

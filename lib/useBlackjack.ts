@@ -549,7 +549,14 @@ function giveDealer() {
   function unlock(id: string) {
   const c = ref.current;
   if (c.unlocked.includes(id)) return;
-  set({ unlocked: [...c.unlocked, id] });
+  const ach = ACHIEVEMENTS.find((a) => a.id === id);
+  set({
+    unlocked: [...c.unlocked, id],
+    // Format: "<id>|<title>|<desc>" so the AchievementToast component
+    // can parse it. Keeps the state shape (string|null) unchanged while
+    // carrying the full achievement payload for the toast.
+    toast: ach ? `${ach.id}|${ach.title}|${ach.desc}` : id,
+  });
   sfx.win();
 }
 
@@ -1199,6 +1206,7 @@ const winRate = resolvedHands
     updateSettings,
     refill,
     resetAll,
+    clearToast: () => set({ toast: null }),
   };
 }
 

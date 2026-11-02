@@ -5,6 +5,7 @@ import { useBlackjack } from "../lib/useBlackjack";
 import Sidebar from "./Sidebar";
 import Table from "./Table";
 import BlackjackImmersive from "./BlackjackImmersive";
+import AchievementToast from "./AchievementToast";
 
 export default function Blackjack({
   active = true,
@@ -20,6 +21,7 @@ export default function Blackjack({
 
   return (
     <>
+      {active && <AchievementToast toast={g.s.toast} onDismiss={g.clearToast} />}
       {immersive && active ? (
         <BlackjackImmersive
           g={g}
