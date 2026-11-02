@@ -208,30 +208,179 @@ export default function PayoutChips({
 
 /* ─── chip stack visual ──────────────────────────────────────────── */
 
-const WIN_COLORS = [
-  { bg: "#0f172a", edge: "#ffffff" }, // slate
-  { bg: "#166534", edge: "#ffffff" }, // emerald
-  { bg: "#991b1b", edge: "#ffffff" }, // red
-  { bg: "#1d4ed8", edge: "#ffffff" }, // blue
-  { bg: "#7c3aed", edge: "#ffffff" }, // purple
+/**
+ * A single denomination definition. `body` is the main chip color,
+ * `edge` is the smaller contrasting pip color on the rim (how real
+ * casino chips are identified), and `label` is the number painted on
+ * the cream center medallion.
+ */
+type ChipDef = { body: string; edge: string; label: string };
+
+// Mixed denominations for a plain win — a real pile of chips is almost
+// never all one color. Bottom-to-top (low → high denomination).
+const WIN_PILE: ChipDef[] = [
+  { body: "#1e293b", edge: "#f1f5f9", label: "100" }, // slate
+  { body: "#166534", edge: "#f1f5f9", label: "25" },  // green
+  { body: "#1d4ed8", edge: "#f1f5f9", label: "10" },  // blue
+  { body: "#991b1b", edge: "#f1f5f9", label: "5" },   // red
+  { body: "#1e293b", edge: "#f1f5f9", label: "100" }, // slate
+  { body: "#166534", edge: "#f1f5f9", label: "25" },  // green
 ];
-const BJ_COLORS = [
-  { bg: "#b8902f", edge: "#1a1612" },
-  { bg: "#c89f3d", edge: "#1a1612" },
-  { bg: "#d7b45b", edge: "#1a1612" },
-  { bg: "#e5c779", edge: "#1a1612" },
-  { bg: "#f0d38b", edge: "#1a1612" },
-  { bg: "#f6e4a9", edge: "#1a1612" },
-  { bg: "#faecb8", edge: "#1a1612" },
-];
+// Blackjack: all-gold pile, slightly taller.
+const BJ_PILE: ChipDef[] = Array.from({ length: 8 }, (_, i) => ({
+  body: ["#b8902f", "#c89f3d", "#d7b45b", "#e5c779"][i % 4],
+  edge: "#f6e4a9",
+  label: "BJ",
+}));
+
+/**
+ * One chip face — SVG with: outer colored body, 6 edge pips (the
+ * contrasting little rectangles that identify a real casino chip),
+ * an inner ring, a cream medallion in the middle, and the
+ * denomination label on top. Looks like a real chip, not a bingo
+ * token.
+ */
+function ChipFace({
+  body,
+  edge,
+  label,
+  size,
+}: ChipDef & { size: number }) {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      width={size}
+      height={size}
+      aria-hidden="true"
+    >
+      <defs>
+        <radialGradient id={`sheen-${body}`} cx="50%" cy="38%" r="60%">
+          <stop offset="0%" stopColor="rgba(255,255,255,0.35)" />
+          <stop offset="60%" stopColor="rgba(255,255,255,0)" />
+        </radialGradient>
+      </defs>
+      {/* body */}
+      <circle cx="50" cy="50" r="48" fill={body} />
+      {/* 6 edge pips around the rim */}
+      {[0, 60, 120, 180, 240, 300].map((angle) => (
+        <rect
+          key={angle}
+          x="43"
+          y="1"
+          width="14"
+          height="16"
+          rx="2"
+          fill={edge}
+          transform={`rotate(${angle} 50 50)`}
+        />
+      ))}
+      {/* dark hairline ring between the body and the medallion */}
+      <circle
+        cx="50"
+        cy="50"
+        r="34"
+        fill="none"
+        stroke="rgba(0,0,0,0.35)"
+        strokeWidth="1"
+      />
+      {/* cream center medallion */}
+      <circle cx="50" cy="50" r="30" fill="#f5efdf" />
+      {/* gold hairline inside the medallion */}
+      <circle
+        cx="50"
+        cy="50"
+        r="27"
+        fill="none"
+        stroke="rgba(200,166,91,0.55)"
+        strokeWidth="1"
+      />
+      {/* denomination */}
+      <text
+        x="50"
+        y="59"
+        textAnchor="middle"
+        fontFamily="ui-serif, Georgia, serif"
+        fontWeight="700"
+        fontSize={label.length >= 3 ? 20 : 24}
+        fill={body}
+      >
+        {label}
+      </text>
+      {/* soft top-side sheen */}
+      <circle cx="50" cy="50" r="48" fill={`url(#sheen-${body})`} />
+    </svg>
+  );
+}
+
+/**
+ * One chip in the stack: the SVG face sits on top of a visible edge
+ * strip. Stacked, those edges form the characteristic striped
+ * sidewall of a real chip pile.
+ */
+function Chip({
+  def,
+  showFace,
+  faceSize,
+  edgeHeight,
+}: {
+  def: ChipDef;
+  showFace: boolean;
+  faceSize: number;
+  edgeHeight: number;
+}) {
+  return (
+    <div
+      className="relative"
+      style={{ width: faceSize, height: faceSize + edgeHeight }}
+    >
+      {/* The chip's visible side wall (color of the body, slightly
+          darker). Repeating-linear-gradient for the little chip-edge
+          ticks you see on real casino chips. */}
+      <span
+        className="absolute left-0 right-0 rounded-b-[6px]"
+        style={{
+          bottom: 0,
+          height: edgeHeight,
+          background: `linear-gradient(180deg, ${def.body} 0%, ${def.body} 50%, rgba(0,0,0,0.55) 100%)`,
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.5)",
+        }}
+      />
+      {/* The alternating tick pattern on the edge — subtle but iconic. */}
+      <span
+        aria-hidden
+        className="absolute left-0 right-0 rounded-b-[6px]"
+        style={{
+          bottom: 0,
+          height: edgeHeight,
+          backgroundImage: `repeating-linear-gradient(90deg, transparent 0 4px, ${def.edge}33 4px 6px)`,
+          mixBlendMode: "overlay",
+        }}
+      />
+      {/* The chip's top face, only drawn on the top of the stack
+          since it is what the player sees. Edges below are enough
+          to tell the chips apart. */}
+      {showFace && (
+        <div className="absolute left-0 top-0">
+          <ChipFace {...def} size={faceSize} />
+        </div>
+      )}
+    </div>
+  );
+}
 
 function ChipStack({ bj, phase }: { bj: boolean; phase: Phase1 }) {
-  const chips = bj ? BJ_COLORS : WIN_COLORS;
-  const stackHeight = chips.length * 5 + 36;
-  // The floor shadow grows as the stack falls, so the stack feels
-  // like it's dropping onto a real surface.
+  const pile = bj ? BJ_PILE : WIN_PILE;
+  const faceSize = 40;
+  const edgeHeight = 5;
+  // Chips overlap by `faceSize - edgeHeight` so only each chip's
+  // edge is visible under the one above.
+  const overlap = faceSize - edgeHeight;
+  const stackHeight = faceSize + overlap * (pile.length - 1) + edgeHeight;
+
+  // Floor shadow grows as the stack lands.
   const shadowOpacity =
-    phase === "pre" ? 0 : phase === "mid" ? 0.08 : phase === "end" ? 0.3 : 0.35;
+    phase === "pre" ? 0 : phase === "mid" ? 0.08 : phase === "end" ? 0.32 : 0.4;
   const shadowScale =
     phase === "pre" ? 0.4 : phase === "mid" ? 0.5 : phase === "end" ? 1 : 1.05;
 
@@ -239,70 +388,61 @@ function ChipStack({ bj, phase }: { bj: boolean; phase: Phase1 }) {
     <div
       className="relative"
       style={{
-        width: 44,
+        width: faceSize + 2,
         height: stackHeight,
         filter: bj
-          ? "drop-shadow(0 0 12px rgba(229,199,121,0.55))"
-          : "drop-shadow(0 4px 8px rgba(0,0,0,0.5))",
+          ? "drop-shadow(0 0 14px rgba(229,199,121,0.55)) drop-shadow(0 6px 10px rgba(0,0,0,0.55))"
+          : "drop-shadow(0 6px 10px rgba(0,0,0,0.55))",
       }}
     >
-      {/* Floor shadow — stays below the stack and grows as it lands. */}
+      {/* Floor shadow */}
       <span
         aria-hidden
-        className="absolute left-1/2 h-[6px] rounded-[50%] bg-black"
+        className="absolute left-1/2 rounded-[50%] bg-black"
         style={{
-          bottom: -3,
-          width: 36,
+          bottom: -4,
+          width: faceSize - 2,
+          height: 7,
           transform: `translateX(-50%) scaleX(${shadowScale})`,
           opacity: shadowOpacity,
-          filter: "blur(3px)",
+          filter: "blur(4px)",
           transition: "opacity 220ms ease-out, transform 220ms ease-out",
         }}
       />
 
-      {chips.map((c, i) => {
-        // Stack from the bottom up — chip 0 at the floor, chip N on top.
-        const bottom = i * 5;
-        // On the final "settle" phase, apply a tiny vertical squash to
-        // each chip progressively (top chip squashes a hair more).
+      {pile.map((def, i) => {
+        const isTop = i === pile.length - 1;
+        // settle squash: each chip's SVG face compresses slightly,
+        // top-most compresses a hair more
         const settleSquash =
-          phase === "settle" ? 1 - (i / chips.length) * 0.06 : 1;
+          phase === "settle" ? 1 - (i / pile.length) * 0.05 : 1;
         return (
-          <span
+          <div
             key={i}
-            className="absolute left-1/2 h-9 w-9 rounded-full border-[3px] border-dashed shadow-md"
+            className="absolute left-1/2"
             style={{
-              bottom,
+              bottom: i * overlap,
               transform: `translateX(-50%) scaleY(${settleSquash})`,
-              background: `radial-gradient(ellipse at 50% 30%, ${c.bg} 0%, ${c.bg} 65%, rgba(0,0,0,0.45) 100%)`,
-              borderColor: c.edge,
-              boxShadow: bj
-                ? "inset 0 1px 2px rgba(255,255,255,0.4), inset 0 -1px 1px rgba(0,0,0,0.35), 0 2px 3px rgba(0,0,0,0.5)"
-                : "inset 0 1px 2px rgba(255,255,255,0.28), inset 0 -1px 1px rgba(0,0,0,0.35), 0 2px 3px rgba(0,0,0,0.5)",
               transition: "transform 160ms ease-out",
             }}
           >
-            {/* chip inner ring */}
-            <span
-              aria-hidden
-              className="absolute inset-[5px] rounded-full border"
-              style={{
-                borderColor: bj
-                  ? "rgba(26,22,18,0.55)"
-                  : "rgba(255,255,255,0.4)",
-              }}
+            <Chip
+              def={def}
+              showFace={isTop}
+              faceSize={faceSize}
+              edgeHeight={edgeHeight}
             />
-          </span>
+          </div>
         );
       })}
 
-      {/* Blackjack landing sparkle — brief golden flash on settle. */}
+      {/* Blackjack landing sparkle — brief gold flash on settle. */}
       {bj && phase === "settle" && (
         <span
           aria-hidden
-          className="pointer-events-none absolute left-1/2 h-10 w-10 -translate-x-1/2 rounded-full"
+          className="pointer-events-none absolute left-1/2 h-12 w-12 -translate-x-1/2 rounded-full"
           style={{
-            bottom: -4,
+            bottom: -6,
             background:
               "radial-gradient(circle, rgba(246,228,169,0.75) 0%, rgba(246,228,169,0) 65%)",
             animation: "chip-sparkle 500ms ease-out both",

@@ -15,10 +15,11 @@ import type { DealFlightEvent } from "../lib/useBlackjack";
  * so there is never a CSS deal-in running on top of this portal.
  *
  * Hooks it relies on in the surrounding DOM:
- *   • [data-shoe-pile-top]                 — preferred source: the
- *       top card inside the lucite window. Makes the deal read as
- *       the top of the deck leaving the shoe. Falls back to the
- *       outlet slit if the pile is empty / not visible.
+ *   • [data-shoe-top-card]                 — preferred source: the
+ *       top card physically sticking out of the dispenser slit.
+ *       Makes the deal read as "the dealer pulls the top card off
+ *       the ramp". Falls back to the outlet slit if the ramp isn't
+ *       visible.
  *   • [data-shoe-outlet]                   — fallback source
  *   • [data-deal-target="dealer"]          — destination for dealer cards
  *   • [data-deal-target="hand-${i}"]       — destination for hand `i`
@@ -74,14 +75,14 @@ export default function CardFlight({
     }
 
     const event = dealEvents[0];
-    // Prefer the top of the pile (the card physically sitting at the
-    // top of the lucite stack) so the flight reads as "the top of the
-    // deck leaving". Fall back to the outlet slit if the pile is
-    // empty or offscreen.
-    const pileTop = document.querySelector<HTMLElement>("[data-shoe-pile-top]");
+    // Prefer the top ramp card (the one physically sticking out of
+    // the dispenser slit) so the flight reads as "the dealer pulls
+    // the top card off the ramp". Fall back to the slit itself when
+    // the ramp isn't visible.
+    const topCard = document.querySelector<HTMLElement>("[data-shoe-top-card]");
     const outlet = document.querySelector<HTMLElement>("[data-shoe-outlet]");
     const source =
-      pileTop && pileTop.getClientRects().length > 0 ? pileTop : outlet;
+      topCard && topCard.getClientRects().length > 0 ? topCard : outlet;
     const target = document.querySelector<HTMLElement>(
       `[data-deal-target="${event.target}"]`
     );

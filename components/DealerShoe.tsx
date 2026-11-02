@@ -47,16 +47,22 @@ const LED_COLOR: Record<ShoeStatus["tone"], { base: string; pale: string }> = {
 };
 
 // Shared ramp card (the ones sticking out of the dispenser slit).
+// The caller may add `top` to mark the one on top of the stack —
+// that's the one the card-flight layer picks up as the source, so
+// the deal reads as "the dealer pulls the top card off the slit".
 function RampCard({
   className = "",
   style,
+  top = false,
 }: {
   className?: string;
   style?: CSSProperties;
+  top?: boolean;
 }) {
   return (
     <div
       aria-hidden="true"
+      {...(top ? { "data-shoe-top-card": "" } : {})}
       className={`absolute h-[58px] w-[42px] overflow-hidden rounded-[4px] border border-[#c9ac65]/60 shadow-[0_7px_13px_rgba(0,0,0,0.65)] ${className}`}
       style={{ background: CARD_BACK, ...style }}
     >
@@ -823,18 +829,14 @@ export default function DealerShoe({
               >
                 {[0, 1, 2, 3, 4].map((i) => {
                   const shown = i < visibleLayers;
-                  // The topmost shown layer gets a hair-brighter rim to
-                  // sell the "freshly-cut deck" look. The bottom layers
-                  // are dimmer, like older cards. The top card also
-                  // carries the `data-shoe-pile-top` hook so the card-
-                  // flight layer can take OFF from the actual pile
-                  // instead of from the outlet slit — makes the deal
-                  // read as "the top of the deck leaves the shoe".
+                  // Topmost shown layer rims slightly brighter — the
+                  // "freshly-cut top of the deck" look. The flight
+                  // takes off from the top ramp card at the slit, not
+                  // from behind this smoked window.
                   const isTop = i === visibleLayers - 1;
                   return (
                     <div
                       key={i}
-                      {...(isTop ? { "data-shoe-pile-top": "" } : {})}
                       className="absolute inset-x-[14px] h-[32px] rounded-[3px] border border-[#c9ac65]/40"
                       style={{
                         bottom: `${2 + i * 2}px`,
@@ -1052,12 +1054,16 @@ export default function DealerShoe({
               }}
             />
           </div>
-          {/* Three cards sticking out, top one animates during dispense */}
+          {/* Three cards sticking out, top one animates during dispense
+              and carries the data-shoe-top-card hook so the card-flight
+              layer can take OFF from it — the dealer pulling the top
+              card off the ramp. */}
           {[0, 1, 2].map((i) => {
             const isTop = i === 2;
             return (
               <RampCard
                 key={i}
+                top={isTop}
                 className={
                   isTop && cycle === "dispense"
                     ? "animate-shoe-top-dispense"
