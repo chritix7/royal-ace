@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { Theme, VegasVariant } from "../lib/game";
 import { CHIPS, CHIP_BG, THEME_LABELS, THEME_SWATCHES, VEGAS_VARIANTS, money } from "../lib/game";
@@ -9,6 +9,15 @@ import { ACHIEVEMENTS } from "../lib/achievements";
 import { audio, useAudioSettings } from "../lib/audio";
 import type { Game } from "../lib/useBlackjack";
 import { useSession } from "../lib/sessionStore";
+
+/** Keyboard-cap pill used by the shortcuts cheat sheet. */
+function Kbd({ children }: { children: ReactNode }) {
+  return (
+    <kbd className="inline-flex min-w-[1.4rem] items-center justify-center rounded-md border border-white/15 bg-white/[0.06] px-1.5 py-0.5 font-mono text-[10px] font-semibold text-[#e5c779] shadow-[inset_0_-1px_0_rgba(0,0,0,0.4)]">
+      {children}
+    </kbd>
+  );
+}
 
 /** Pourcentage lisible. */
 const rate = (hits: number, n: number) => (n > 0 ? `${((100 * hits) / n).toFixed(1)}%` : "–");
@@ -257,6 +266,38 @@ export default function Sidebar({ g }: { g: Game }) {
             <Toggle label="Strategy hints" checked={showHint} onChange={setShowHint} />
             <Toggle label="Card counting trainer" checked={showCount} onChange={setShowCount} />
           </div>
+
+          {/* Keyboard shortcuts cheat sheet — collapsed by default so it
+              stays out of the way, visible to anyone who wants it. */}
+          <details className="group mt-4 rounded-2xl border border-white/[0.07] bg-black/20">
+            <summary className="flex cursor-pointer list-none items-center justify-between px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55 outline-none transition hover:text-white/80 focus-visible:ring-2 focus-visible:ring-[#e5c779]">
+              <span className="flex items-center gap-2">
+                <span aria-hidden className="text-[#d7b45b]">⌨</span>
+                Keyboard shortcuts
+              </span>
+              <span
+                aria-hidden
+                className="text-white/40 transition-transform group-open:rotate-180"
+              >
+                ▾
+              </span>
+            </summary>
+            <div className="border-t border-white/[0.06] px-3 py-3">
+              <dl className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2 text-[11px] text-white/70">
+                <dt><Kbd>H</Kbd></dt><dd>Hit</dd>
+                <dt><Kbd>S</Kbd></dt><dd>Stand</dd>
+                <dt><Kbd>D</Kbd></dt><dd>Double</dd>
+                <dt><Kbd>P</Kbd></dt><dd>Split</dd>
+                <dt><Kbd>R</Kbd></dt><dd>Surrender</dd>
+                <dt><Kbd>Space</Kbd></dt><dd>Deal / Deal again</dd>
+                <dt className="flex gap-1">
+                  <Kbd>1</Kbd><Kbd>…</Kbd><Kbd>5</Kbd>
+                </dt>
+                <dd>Add a chip (10 / 20 / 50 / 100 / 500)</dd>
+                <dt><Kbd>Esc</Kbd></dt><dd>Close an open popup</dd>
+              </dl>
+            </div>
+          </details>
         </div>
 
         <div className="rounded-3xl border border-white/[0.07] bg-[#101713] p-6">

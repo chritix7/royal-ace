@@ -1079,13 +1079,17 @@ if (!settlementId) {
 
   const target = e.target;
 
+  // Never fire while the user is typing in a real text field, or
+  // while any modal dialog is open. We deliberately do NOT exclude
+  // focused buttons/links here — otherwise pressing H right after
+  // clicking "Deal" would be swallowed because the button still has
+  // focus. For Space/Enter we re-apply that exclusion a few lines
+  // down, since those keys would also activate the focused button.
   if (
     target instanceof HTMLElement &&
     (
       target.isContentEditable ||
-      target.closest(
-        "input, textarea, select, button, summary, a, [role='dialog']"
-      )
+      target.closest("input, textarea, select, [role='dialog']")
     )
   ) {
     return;
@@ -1100,6 +1104,14 @@ if (!settlementId) {
       else if (k === "r") a.surrender();
       else if (k >= "1" && k <= "5") a.addChip(CHIPS[Number(k) - 1]);
       else if (k === " " || k === "enter") {
+        // If a button/link has focus, Space/Enter already activates
+        // it — don't double-fire by also dealing here.
+        if (
+          target instanceof HTMLElement &&
+          target.closest("button, a, summary")
+        ) {
+          return;
+        }
         const ph = ref.current.phase;
         if (ph === "betting" || ph === "settled") {
           e.preventDefault();
