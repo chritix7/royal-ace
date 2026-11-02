@@ -109,6 +109,26 @@ export const BACKS: Record<Theme, [string, string]> = {
 };
 
 /**
+ * Representative center color for each base theme. Used by the sidebar
+ * picker swatches so each button previews its actual felt color.
+ * (Vegas resolves to the active variant's swatch via `themeSwatch`.)
+ */
+export const THEME_SWATCHES: Record<Theme, string> = {
+  green: "#20543c",
+  blue: "#1f3f6b",
+  burgundy: "#6b2038",
+  vegas: "#2d2832", // overridden by the active vegas variant
+};
+
+/** Human-readable name for the theme picker. */
+export const THEME_LABELS: Record<Theme, string> = {
+  green: "Classic Green",
+  blue: "Royal Blue",
+  burgundy: "Burgundy",
+  vegas: "Vegas",
+};
+
+/**
  * Vegas color variants — the Vegas theme opens a secondary color picker
  * so the user can swap the base color within the Vegas family.
  * Keep each entry in the exact same radial-gradient format as the
@@ -177,6 +197,14 @@ export function tableBacks(s: Settings): [string, string] {
     return v.backs;
   }
   return BACKS[s.theme];
+}
+
+/** Resolve the swatch color (hex) for the theme picker. */
+export function themeSwatch(s: Settings): string {
+  if (s.theme === "vegas") {
+    return VEGAS_VARIANTS[s.vegasVariant ?? "anthracite"].swatch;
+  }
+  return THEME_SWATCHES[s.theme];
 }
 
 export const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));

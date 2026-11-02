@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Theme, VegasVariant } from "../lib/game";
-import { CHIPS, CHIP_BG, VEGAS_VARIANTS, money } from "../lib/game";
+import { CHIPS, CHIP_BG, THEME_LABELS, THEME_SWATCHES, VEGAS_VARIANTS, money } from "../lib/game";
 import { Counter, Spark, Toggle, SideBet, small } from "./ui";
 import { ACHIEVEMENTS } from "../lib/achievements";
 import { audio, useAudioSettings } from "../lib/audio";
@@ -128,30 +128,77 @@ export default function Sidebar({ g }: { g: Game }) {
               </button>
             ))}
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2" role="group" aria-label="Table theme">
-            {(["green", "blue", "burgundy", "vegas"] as Theme[]).map((th) => (
-              <button
-                key={th}
-                onClick={() => {
-                  if (th === "vegas") {
-                    // Always open the color picker when Vegas is tapped,
-                    // and switch the theme in the same gesture so the user
-                    // can see the current color behind the overlay.
-                    updateSettings({ theme: "vegas" });
-                    setVegasPickerOpen(true);
-                  } else {
-                    updateSettings({ theme: th });
-                  }
-                }}
-                aria-pressed={s.settings.theme === th}
-                aria-haspopup={th === "vegas" ? "dialog" : undefined}
-                className={`rounded-full border py-2 text-xs capitalize outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] ${
-                  s.settings.theme === th ? "border-[#d7b45b] bg-[#d7b45b]/10 text-[#e5c779]" : "border-white/10 text-white/60"
-                }`}
-              >
-                {th === "vegas" ? "✦ Vegas" : th}
-              </button>
-            ))}
+          <div className="mt-3 grid grid-cols-2 gap-2" role="radiogroup" aria-label="Table theme">
+            {(["green", "blue", "burgundy", "vegas"] as Theme[]).map((th) => {
+              const active = s.settings.theme === th;
+              // Vegas swatch mirrors the active variant so the preview is
+              // always in sync with the current felt.
+              const swatchColor =
+                th === "vegas"
+                  ? VEGAS_VARIANTS[activeVariant].swatch
+                  : THEME_SWATCHES[th];
+              return (
+                <button
+                  key={th}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  aria-haspopup={th === "vegas" ? "dialog" : undefined}
+                  onClick={() => {
+                    if (th === "vegas") {
+                      updateSettings({ theme: "vegas" });
+                      setVegasPickerOpen(true);
+                    } else {
+                      updateSettings({ theme: th });
+                    }
+                  }}
+                  className={`group relative flex items-center gap-2.5 overflow-hidden rounded-2xl border p-2 pr-3 text-left outline-none transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#e5c779] ${
+                    active
+                      ? "border-[#e5c779] shadow-[0_0_0_1px_rgba(215,180,91,0.3),0_12px_28px_rgba(0,0,0,0.5)]"
+                      : "border-white/10 hover:border-[#d7b45b]/40"
+                  }`}
+                >
+                  {/* swatch disk */}
+                  <span
+                    aria-hidden
+                    className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full ring-1 ring-black/70"
+                  >
+                    <span
+                      className="absolute inset-0"
+                      style={{
+                        background: `radial-gradient(ellipse at center, ${swatchColor} 0%, ${swatchColor}CC 55%, #000 100%)`,
+                      }}
+                    />
+                    {/* gold sheen */}
+                    <span
+                      className="absolute inset-0 opacity-40 mix-blend-overlay"
+                      style={{
+                        background:
+                          "linear-gradient(130deg, rgba(229,199,121,0) 20%, rgba(229,199,121,0.35) 50%, rgba(229,199,121,0) 80%)",
+                      }}
+                    />
+                  </span>
+                  {/* label + chevron on vegas */}
+                  <span className="flex min-w-0 flex-1 items-center justify-between">
+                    <span
+                      className={`truncate text-[11px] font-semibold tracking-wide ${
+                        active ? "text-[#e5c779]" : "text-white/75 group-hover:text-white"
+                      }`}
+                    >
+                      {th === "vegas" ? "✦ " + THEME_LABELS[th] : THEME_LABELS[th]}
+                    </span>
+                    {th === "vegas" && (
+                      <span
+                        aria-hidden
+                        className={`ml-1 text-[10px] ${active ? "text-[#e5c779]" : "text-white/40 group-hover:text-white/70"}`}
+                      >
+                        ▸
+                      </span>
+                    )}
+                  </span>
+                </button>
+              );
+            })}
           </div>
           <div className="mt-4 space-y-3">
             <Toggle label="Dealer hits soft 17" checked={s.settings.h17} disabled={!canBet} onChange={(v) => updateSettings({ h17: v })} />
