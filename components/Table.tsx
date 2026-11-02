@@ -208,6 +208,7 @@ function getShoeStatus(g: Game): {
           <DealerShoe
             className="absolute -right-[38px] -top-[14px] z-0 hidden sm:block"
             status={getShoeStatus(g)}
+            dealTick={s.dealTick}
             fillPct={shoePct}
           />
           <PayoutChips hands={s.hands} phase={s.phase} />
