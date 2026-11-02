@@ -397,7 +397,12 @@ function getShoeStatus(g: Game): {
       textShadow: "0 1px 0 rgba(0,0,0,0.9)",
     }}
   >
-    Blackjack pays {s.settings.bj65 ? "6 to 5" : "3 to 2"}
+    <span className="sm:hidden">
+      BJ {s.settings.bj65 ? "6:5" : "3:2"}
+    </span>
+    <span className="hidden sm:inline">
+      Blackjack pays {s.settings.bj65 ? "6 to 5" : "3 to 2"}
+    </span>
   </p>
 
   <span
@@ -415,7 +420,8 @@ function getShoeStatus(g: Game): {
       textShadow: "0 1px 0 rgba(0,0,0,0.9)",
     }}
   >
-    Insurance pays 2 to 1
+    <span className="sm:hidden">Insurance 2:1</span>
+    <span className="hidden sm:inline">Insurance pays 2 to 1</span>
   </p>
 
   <span
@@ -433,7 +439,10 @@ function getShoeStatus(g: Game): {
       textShadow: "0 1px 0 rgba(0,0,0,0.9)",
     }}
   >
-    Dealer {s.settings.h17 ? "hits" : "stands on"} soft 17
+    <span className="sm:hidden">{s.settings.h17 ? "H17" : "S17"}</span>
+    <span className="hidden sm:inline">
+      Dealer {s.settings.h17 ? "hits" : "stands on"} soft 17
+    </span>
   </p>
 </div>
 
