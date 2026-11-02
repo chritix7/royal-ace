@@ -16,6 +16,7 @@ import { useSession } from "../lib/sessionStore";
 import { ChipStack, Counter, SideBet, sideBetStep } from "./ui";
 import PlayingCard from "./PlayingCard";
 import CardFlight from "./CardFlight";
+import HandSpotBadge from "./HandSpotBadge";
 import Confetti from "./Confetti";
 import DealerShoe from "./DealerShoe";
 import ShuffleAnimation from "./ShuffleAnimation";
@@ -372,6 +373,7 @@ const playerCardStyle = (
                 s.phase === "player" &&
                 index === s.active &&
                 s.hands.length > 1;
+              const multi = s.hands.length > 1;
 
               return (
                 <div
@@ -382,6 +384,17 @@ const playerCardStyle = (
                       : "border-transparent"
                   }`}
                 >
+                  {/* Engraved per-hand spot badge — only on multi-hand
+                      play, since the central BET puck covers single hand. */}
+                  {multi && (
+                    <div className="mb-1 flex justify-center">
+                      <HandSpotBadge
+                        index={index}
+                        active={selected}
+                      />
+                    </div>
+                  )}
+
                   <div className="mb-2 flex min-h-8 flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-[9px] sm:text-xs">
                     {s.hands.length > 1 && (
                       <span className="text-white/40">
@@ -512,27 +525,55 @@ const playerCardStyle = (
                 </div>
               )}
 
-              {/* Marquages du tapis — fixes au bas de la table */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-2 z-10 flex items-center justify-center gap-2 sm:gap-3"
-        >
-          <p className="whitespace-nowrap text-[8px] font-bold uppercase tracking-[0.18em] text-white/20 sm:text-[9px]">
-            BJ {s.settings.bj65 ? "6:5" : "3:2"}
-          </p>
-
-          <span className="h-2 w-px bg-white/10" />
-
-          <p className="whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.18em] text-white/15 sm:text-[9px]">
-            Insurance 2:1
-          </p>
-
-          <span className="h-2 w-px bg-white/10" />
-
-          <p className="whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.18em] text-white/15 sm:text-[9px]">
-            {s.settings.h17 ? "H17" : "S17"}
-          </p>
-        </div>
+              {/* Table markings — engraved ornament along the bottom
+                   edge of the felt. Serif typography, gold diamond
+                   separators, same wording a real pit sign would use. */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 bottom-2 z-10 flex items-center justify-center gap-2 px-3 sm:gap-3"
+              >
+                <p
+                  className="whitespace-nowrap font-serif text-[9px] font-bold uppercase tracking-[0.22em] sm:text-[10px]"
+                  style={{
+                    color: "rgba(229,199,121,0.42)",
+                    textShadow: "0 1px 0 rgba(0,0,0,0.9)",
+                  }}
+                >
+                  Blackjack pays {s.settings.bj65 ? "6 to 5" : "3 to 2"}
+                </p>
+                <span
+                  aria-hidden
+                  className="text-[8px] leading-none sm:text-[9px]"
+                  style={{ color: "rgba(229,199,121,0.5)" }}
+                >
+                  ❖
+                </span>
+                <p
+                  className="whitespace-nowrap font-serif text-[9px] font-bold uppercase tracking-[0.22em] sm:text-[10px]"
+                  style={{
+                    color: "rgba(229,199,121,0.36)",
+                    textShadow: "0 1px 0 rgba(0,0,0,0.9)",
+                  }}
+                >
+                  Insurance pays 2 to 1
+                </p>
+                <span
+                  aria-hidden
+                  className="text-[8px] leading-none sm:text-[9px]"
+                  style={{ color: "rgba(229,199,121,0.5)" }}
+                >
+                  ❖
+                </span>
+                <p
+                  className="whitespace-nowrap font-serif text-[9px] font-bold uppercase tracking-[0.22em] sm:text-[10px]"
+                  style={{
+                    color: "rgba(229,199,121,0.36)",
+                    textShadow: "0 1px 0 rgba(0,0,0,0.9)",
+                  }}
+                >
+                  Dealer {s.settings.h17 ? "hits" : "stands on"} soft 17
+                </p>
+              </div>
 
         {/* Arc de mise imprimé au bord du tapis */}
         <div

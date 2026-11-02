@@ -9,6 +9,7 @@ import Confetti from "./Confetti";
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import DealerShoe from "./DealerShoe";
 import CardFlight from "./CardFlight";
+import HandSpotBadge from "./HandSpotBadge";
 import ShuffleAnimation from "./ShuffleAnimation";
 import VegasFeltOverlay from "./VegasFeltOverlay";
 
@@ -323,6 +324,7 @@ function getShoeStatus(g: Game): {
   {s.hands.map((h, i) => {
               const v = handValue(h.cards);
               const isActive = s.phase === "player" && i === s.active && s.hands.length > 1;
+              const multi = s.hands.length > 1;
               return (
                 <div
                   key={i}
@@ -331,6 +333,13 @@ function getShoeStatus(g: Game): {
                     isActive ? "border-[#e5c779]/70 bg-[#e5c779]/10" : "border-transparent"
                   } ${compact && !isActive && s.phase === "player" ? "opacity-75" : ""}`}
                 >
+                  {/* Engraved per-hand spot badge — only in multi-hand play. */}
+                  {multi && (
+                    <div className="mb-1 flex justify-center">
+                      <HandSpotBadge index={i} active={isActive} />
+                    </div>
+                  )}
+
                   <div className="mb-2 flex flex-wrap items-center justify-center gap-2 text-[11px] sm:mb-3 sm:text-xs">
                     <span className="rounded-full bg-black/30 px-2.5 py-0.5 font-bold text-white">
                       {v.soft && v.total < 21 ? `${v.total - 10}/${v.total}` : v.total}
@@ -375,25 +384,55 @@ function getShoeStatus(g: Game): {
             })}
           </div>
 
-          {/* Marquages du tapis */}
+          {/* Table markings — engraved ornament text, matches immersive. */}
 <div
   aria-hidden="true"
-  className="pointer-events-none mt-1.5 flex translate-y-[3px] items-center justify-center gap-2 text-center sm:gap-3"
+  className="pointer-events-none mt-1.5 flex translate-y-[3px] flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center sm:gap-x-3"
 >
-  <p className="whitespace-nowrap text-[8px] font-bold uppercase tracking-[0.18em] text-white/20 sm:text-[9px]">
-    BJ {s.settings.bj65 ? "6:5" : "3:2"}
+  <p
+    className="whitespace-nowrap font-serif text-[9px] font-bold uppercase tracking-[0.22em] sm:text-[10px]"
+    style={{
+      color: "rgba(229,199,121,0.42)",
+      textShadow: "0 1px 0 rgba(0,0,0,0.9)",
+    }}
+  >
+    Blackjack pays {s.settings.bj65 ? "6 to 5" : "3 to 2"}
   </p>
 
-  <span className="h-2 w-px bg-white/10" />
+  <span
+    aria-hidden
+    className="text-[8px] leading-none sm:text-[9px]"
+    style={{ color: "rgba(229,199,121,0.5)" }}
+  >
+    ❖
+  </span>
 
-  <p className="whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.18em] text-white/15 sm:text-[9px]">
-    Insurance 2:1
+  <p
+    className="whitespace-nowrap font-serif text-[9px] font-bold uppercase tracking-[0.22em] sm:text-[10px]"
+    style={{
+      color: "rgba(229,199,121,0.36)",
+      textShadow: "0 1px 0 rgba(0,0,0,0.9)",
+    }}
+  >
+    Insurance pays 2 to 1
   </p>
 
-  <span className="h-2 w-px bg-white/10" />
+  <span
+    aria-hidden
+    className="text-[8px] leading-none sm:text-[9px]"
+    style={{ color: "rgba(229,199,121,0.5)" }}
+  >
+    ❖
+  </span>
 
-  <p className="whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.18em] text-white/15 sm:text-[9px]">
-    {s.settings.h17 ? "H17" : "S17"}
+  <p
+    className="whitespace-nowrap font-serif text-[9px] font-bold uppercase tracking-[0.22em] sm:text-[10px]"
+    style={{
+      color: "rgba(229,199,121,0.36)",
+      textShadow: "0 1px 0 rgba(0,0,0,0.9)",
+    }}
+  >
+    Dealer {s.settings.h17 ? "hits" : "stands on"} soft 17
   </p>
 </div>
 
