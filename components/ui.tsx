@@ -87,15 +87,146 @@ export function ChipStack({ amount }: { amount: number }) {
 }
 
 export function Spark({ data }: { data: number[] }) {
-  if (data.length < 2) return <p className="text-xs text-white/30">Play a few hands to see your trend.</p>;
-  const w = 240, h = 48;
-  const min = Math.min(...data), max = Math.max(...data);
-  const r = max - min || 1;
-  const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - 4 - ((v - min) / r) * (h - 8)}`).join(" ");
+  if (data.length < 2) {
+    return (
+      <p className="text-xs text-white/30">
+        Play a few hands to see your trend.
+      </p>
+    );
+  }
+
+  const W = 240;
+  const H = 84;
+  const PAD_T = 10;
+  const PAD_B = 16;
+  const PAD_L = 4;
+  const PAD_R = 4;
+  const chartW = W - PAD_L - PAD_R;
+  const chartH = H - PAD_T - PAD_B;
+
+  const start = data[0];
+  const current = data[data.length - 1];
+  const diff = current - start;
+  const min = Math.min(...data, start);
+  const max = Math.max(...data, start);
+  const range = max - min || 1;
+
+  // Map a value to the y pixel.
+  const y = (v: number) =>
+    PAD_T + chartH - ((v - min) / range) * chartH;
+  const x = (i: number) =>
+    PAD_L + (i / (data.length - 1)) * chartW;
+
+  // Peak + trough indices (ignore the very first baseline point).
+  let peakI = 0;
+  let troughI = 0;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] > data[peakI]) peakI = i;
+    if (data[i] < data[troughI]) troughI = i;
+  }
+
+  const linePts = data.map((v, i) => `${x(i)},${y(v)}`).join(" ");
+  // Area polygon: line + close to the bottom.
+  const areaPts =
+    linePts +
+    ` ${x(data.length - 1)},${PAD_T + chartH}` +
+    ` ${x(0)},${PAD_T + chartH}`;
+
+  const baselineY = y(start);
+  const diffColor =
+    diff > 0 ? "#f5d778" : diff < 0 ? "#f87171" : "rgba(255,255,255,0.5)";
+
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full" role="img" aria-label="Chip balance over this session">
-      <polyline points={pts} fill="none" stroke="#d7b45b" strokeWidth="2" strokeLinejoin="round" />
-    </svg>
+    <div
+      className="w-full"
+      role="img"
+      aria-label={`Chip balance over this session: ${current} (${diff >= 0 ? "+" : "−"}${Math.abs(diff)} from start)`}
+    >
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="block w-full"
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#d7b45b" stopOpacity="0.35" />
+            <stop offset="60%" stopColor="#d7b45b" stopOpacity="0.08" />
+            <stop offset="100%" stopColor="#d7b45b" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        {/* Reference baseline at starting balance */}
+        <line
+          x1={PAD_L}
+          x2={W - PAD_R}
+          y1={baselineY}
+          y2={baselineY}
+          stroke="rgba(255,255,255,0.14)"
+          strokeWidth="1"
+          strokeDasharray="2 3"
+        />
+
+        {/* Area under the curve */}
+        <polygon points={areaPts} fill="url(#spark-fill)" />
+
+        {/* Main line */}
+        <polyline
+          points={linePts}
+          fill="none"
+          stroke="#e5c779"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+
+        {/* Trough marker (only if below start and distinct from peak) */}
+        {data[troughI] < start && troughI !== peakI && (
+          <circle
+            cx={x(troughI)}
+            cy={y(data[troughI])}
+            r="2.2"
+            fill="#f87171"
+            stroke="#1a1612"
+            strokeWidth="0.5"
+          />
+        )}
+
+        {/* Peak marker (only if above start) */}
+        {data[peakI] > start && (
+          <circle
+            cx={x(peakI)}
+            cy={y(data[peakI])}
+            r="2.5"
+            fill="#f5d778"
+            stroke="#1a1612"
+            strokeWidth="0.6"
+          />
+        )}
+
+        {/* Current-value pulse at the right */}
+        <circle
+          cx={x(data.length - 1)}
+          cy={y(current)}
+          r="3"
+          fill="#e5c779"
+          stroke="#1a1612"
+          strokeWidth="0.6"
+        />
+      </svg>
+
+      {/* Below-chart labels: start | current + delta */}
+      <div className="mt-1 flex items-center justify-between text-[10px]">
+        <span className="text-white/35">
+          Start · ◈ {start.toLocaleString("en-US")}
+        </span>
+        <span className="font-bold tabular-nums" style={{ color: diffColor }}>
+          {diff >= 0 ? "+" : "−"}◈ {Math.abs(diff).toLocaleString("en-US")}
+        </span>
+        <span className="font-bold tabular-nums text-[#e5c779]">
+          ◈ {current.toLocaleString("en-US")}
+        </span>
+      </div>
+    </div>
   );
 }
 
