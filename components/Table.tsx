@@ -428,37 +428,38 @@ function getShoeStatus(g: Game): {
   />
 
   <div className="order-1 lg:order-2">
-    {/* BET circle — recessed into the felt with a double gold ring and
-        a center bowl where the chips land. */}
-    <div
-      className="relative flex h-16 w-16 items-center justify-center rounded-full text-center sm:h-20 sm:w-20"
-      style={{
-        background: canBet
-          ? "radial-gradient(circle at 50% 30%, rgba(229, 199, 121, 0.22) 0%, rgba(5, 10, 7, 0.75) 55%, rgba(5, 10, 7, 0.9) 100%)"
-          : "radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.04) 0%, rgba(5, 10, 7, 0.75) 60%, rgba(5, 10, 7, 0.9) 100%)",
-        // Double gold ring: inner 1px gold then outer 1px gold with gap
-        // via inset shadows + a drop halo when active.
-        boxShadow: canBet
-          ? [
-              "inset 0 0 0 1px rgba(229, 199, 121, 0.85)",
-              "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
-              "inset 0 0 0 4px rgba(229, 199, 121, 0.35)",
-              "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
-              "0 0 24px rgba(229, 199, 121, 0.25)",
-              "0 1px 0 rgba(229, 199, 121, 0.15)",
-            ].join(", ")
-          : [
-              "inset 0 0 0 1px rgba(229, 199, 121, 0.4)",
-              "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
-              "inset 0 0 0 4px rgba(229, 199, 121, 0.15)",
-              "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
-              "0 1px 0 rgba(229, 199, 121, 0.08)",
-            ].join(", "),
-      }}
-    >
-      <div className="px-2">
+    {/* BET circle — recessed into the felt with a double gold ring.
+        When there are chips on the table, the pile IS the content of
+        the circle, growing taller as the bet grows. The amount sits
+        below as a small gold label. */}
+    <div className="flex flex-col items-center">
+      <div
+        className="relative flex h-20 w-20 items-end justify-center overflow-visible rounded-full text-center sm:h-24 sm:w-24"
+        style={{
+          background: canBet
+            ? "radial-gradient(circle at 50% 30%, rgba(229, 199, 121, 0.22) 0%, rgba(5, 10, 7, 0.75) 55%, rgba(5, 10, 7, 0.9) 100%)"
+            : "radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.04) 0%, rgba(5, 10, 7, 0.75) 60%, rgba(5, 10, 7, 0.9) 100%)",
+          boxShadow: canBet
+            ? [
+                "inset 0 0 0 1px rgba(229, 199, 121, 0.85)",
+                "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
+                "inset 0 0 0 4px rgba(229, 199, 121, 0.35)",
+                "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
+                "0 0 24px rgba(229, 199, 121, 0.25)",
+                "0 1px 0 rgba(229, 199, 121, 0.15)",
+              ].join(", ")
+            : [
+                "inset 0 0 0 1px rgba(229, 199, 121, 0.4)",
+                "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
+                "inset 0 0 0 4px rgba(229, 199, 121, 0.15)",
+                "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
+                "0 1px 0 rgba(229, 199, 121, 0.08)",
+              ].join(", "),
+        }}
+      >
+        {/* BET label at the top of the circle */}
         <p
-          className="text-[9px] font-black uppercase tracking-[0.22em] sm:text-[10px]"
+          className="pointer-events-none absolute left-1/2 top-2 -translate-x-1/2 text-[9px] font-black uppercase tracking-[0.22em] sm:top-2.5 sm:text-[10px]"
           style={{
             color: "#e5c779",
             textShadow: "0 0 4px rgba(229, 199, 121, 0.6), 0 1px 0 rgba(0, 0, 0, 0.9)",
@@ -466,8 +467,27 @@ function getShoeStatus(g: Game): {
         >
           Bet
         </p>
+
+        {/* The chip pile fills the circle; when empty, show the amount
+            as a placeholder so the circle isn't visually dead. */}
+        {pileAmount > 0 ? (
+          <div className="pointer-events-none mb-2 flex items-end justify-center sm:mb-2.5">
+            <ChipStack amount={pileAmount} />
+          </div>
+        ) : (
+          <p
+            className="pointer-events-none mb-3 text-sm font-black tabular-nums text-white/50 sm:mb-4 sm:text-base"
+            style={{ textShadow: "0 1px 0 rgba(0, 0, 0, 0.9)" }}
+          >
+            ◈ 0
+          </p>
+        )}
+      </div>
+
+      {/* Amount label under the circle (also shows spot count). */}
+      <div className="mt-1.5 text-center">
         <p
-          className="mt-1 text-sm font-black tabular-nums sm:text-base"
+          className="text-xs font-black tabular-nums sm:text-sm"
           style={{
             color: "#f0e5c7",
             textShadow: "0 1px 0 rgba(0, 0, 0, 0.9)",
@@ -476,17 +496,9 @@ function getShoeStatus(g: Game): {
           ◈ {money(s.bet)}
         </p>
         {s.settings.spots > 1 && (
-          <p className="mt-0.5 text-[9px] text-white/50">
-            × {s.settings.spots} spots
-          </p>
+          <p className="text-[9px] text-white/50">× {s.settings.spots} spots</p>
         )}
       </div>
-
-      {pileAmount > 0 && (
-        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
-          <ChipStack amount={pileAmount} />
-        </div>
-      )}
     </div>
   </div>
 

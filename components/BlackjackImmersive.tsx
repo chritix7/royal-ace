@@ -13,7 +13,7 @@ import {
 } from "../lib/game";
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import { useSession } from "../lib/sessionStore";
-import { Counter, SideBet, sideBetStep } from "./ui";
+import { ChipStack, Counter, SideBet, sideBetStep } from "./ui";
 import PlayingCard from "./PlayingCard";
 import CardFlight from "./CardFlight";
 import Confetti from "./Confetti";
@@ -48,6 +48,7 @@ export default function BlackjackImmersive({
     spots,
     sides,
     back,
+    pileAmount,
     outOfChips,
     dealEvents,
     consumeDealEvent,
@@ -451,6 +452,65 @@ const playerCardStyle = (
             })}
         </div>
       </div>
+
+              {/* BET puck — the chip pile that fills the gold circle,
+                   so the player can see their bet grow as they add chips.
+                   Only visible during betting (not during a hand). */}
+              {bettingOpen && (
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-0 bottom-10 z-10 flex justify-center sm:bottom-14"
+                >
+                  <div
+                    className="relative flex h-20 w-20 items-end justify-center overflow-visible rounded-full sm:h-24 sm:w-24"
+                    style={{
+                      background: canBet
+                        ? "radial-gradient(circle at 50% 30%, rgba(229, 199, 121, 0.22) 0%, rgba(5, 10, 7, 0.75) 55%, rgba(5, 10, 7, 0.9) 100%)"
+                        : "radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.04) 0%, rgba(5, 10, 7, 0.75) 60%, rgba(5, 10, 7, 0.9) 100%)",
+                      boxShadow: canBet
+                        ? [
+                            "inset 0 0 0 1px rgba(229, 199, 121, 0.85)",
+                            "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
+                            "inset 0 0 0 4px rgba(229, 199, 121, 0.35)",
+                            "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
+                            "0 0 24px rgba(229, 199, 121, 0.25)",
+                            "0 1px 0 rgba(229, 199, 121, 0.15)",
+                          ].join(", ")
+                        : [
+                            "inset 0 0 0 1px rgba(229, 199, 121, 0.4)",
+                            "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
+                            "inset 0 0 0 4px rgba(229, 199, 121, 0.15)",
+                            "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
+                            "0 1px 0 rgba(229, 199, 121, 0.08)",
+                          ].join(", "),
+                    }}
+                  >
+                    <p
+                      className="pointer-events-none absolute left-1/2 top-2 -translate-x-1/2 text-[9px] font-black uppercase tracking-[0.22em] sm:top-2.5 sm:text-[10px]"
+                      style={{
+                        color: "#e5c779",
+                        textShadow:
+                          "0 0 4px rgba(229, 199, 121, 0.6), 0 1px 0 rgba(0, 0, 0, 0.9)",
+                      }}
+                    >
+                      Bet
+                    </p>
+
+                    {pileAmount > 0 ? (
+                      <div className="mb-2 flex items-end justify-center sm:mb-2.5">
+                        <ChipStack amount={pileAmount} />
+                      </div>
+                    ) : (
+                      <p
+                        className="mb-3 text-sm font-black tabular-nums text-white/50 sm:mb-4 sm:text-base"
+                        style={{ textShadow: "0 1px 0 rgba(0, 0, 0, 0.9)" }}
+                      >
+                        ◈ 0
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Marquages du tapis — fixes au bas de la table */}
         <div
