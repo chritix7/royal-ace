@@ -6,12 +6,11 @@ import { MIN_BET, REFILL, money, tableBg } from "../lib/game";
 import { ChipStack } from "./ui";
 import PlayingCard from "./PlayingCard";
 import Confetti from "./Confetti";
-import type { Game } from "../lib/useBlackjack";
+import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import DealerShoe from "./DealerShoe";
 import CardFlight from "./CardFlight";
 import PayoutChips from "./PayoutChips";
 import VegasFeltOverlay from "./VegasFeltOverlay";
-import type { DealFlightEvent } from "../lib/useBlackjack";
 
 const RESULT_UI: Record<Result, { label: string; cls: string }> = {
   blackjack: { label: "Blackjack", cls: "border-[#e5c779] bg-[#e5c779]/20 text-[#f5d778]" },
