@@ -1054,25 +1054,28 @@ export default function DealerShoe({
               }}
             />
           </div>
-          {/* Three cards sticking out, top one animates during dispense
-              and carries the data-shoe-top-card hook so the card-flight
-              layer can take OFF from it — the dealer pulling the top
-              card off the ramp. */}
+          {/* Three cards sticking out of the dispenser slit. The top
+              one carries the data-shoe-top-card hook so the card-
+              flight layer takes OFF from exactly its position — one
+              single visible card motion, from the ramp straight to
+              the destination. During the "dispense" cycle the top
+              ramp card is hidden so there is no second card lingering
+              behind the flight; it comes back during refill via the
+              shoe-stack-settle keyframe. */}
           {[0, 1, 2].map((i) => {
             const isTop = i === 2;
+            const isTopDispensing = isTop && cycle === "dispense";
             return (
               <RampCard
                 key={i}
                 top={isTop}
-                className={
-                  isTop && cycle === "dispense"
-                    ? "animate-shoe-top-dispense"
-                    : ""
-                }
                 style={{
                   left: `${55 + (2 - i) * 2}px`,
                   bottom: `${14 + (2 - i) * 6}px`,
                   transform: `translateZ(${3 + i * 3}px)`,
+                  // Hide the top card the moment a deal starts so
+                  // the flight carries the whole visible motion.
+                  opacity: isTopDispensing ? 0 : 1,
                   animation:
                     cycle === "refill"
                       ? "shoe-stack-settle 420ms cubic-bezier(.2,.8,.25,1) both"

@@ -158,9 +158,13 @@ export default function CardFlight({
     top: activeFlight.fromY,
     transformOrigin: "center",
     transition: `transform ${FLIGHT_MS}ms cubic-bezier(.18,.78,.2,1)`,
+    // Initial state is tuned to look like the top ramp card at rest
+    // (small, slight -2° tilt): the ramp card gets hidden the same
+    // frame, so this reads as the ramp card "detaching" and gliding
+    // to its spot. End state is the real card at full size, flat.
     transform: activeFlight.started
-      ? `translate3d(${dx}px, ${dy}px, 0) translate(-50%, -50%) rotate(0deg)`
-      : "translate(-50%, -50%) rotate(-28deg) scale(.72)",
+      ? `translate3d(${dx}px, ${dy}px, 0) translate(-50%, -50%) rotate(0deg) scale(1)`
+      : "translate(-50%, -50%) rotate(-2deg) scale(0.6)",
   };
 
   if (fit && activeFlight.cardHeight) {

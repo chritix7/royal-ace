@@ -84,13 +84,6 @@ body {
   animation: pop 380ms ease-out both;
 }
 
-/* Chip-stack landing sparkle (blackjack payout). */
-@keyframes chip-sparkle {
-  0%   { opacity: 0; transform: translateX(-50%) scale(0.4); }
-  40%  { opacity: 1; transform: translateX(-50%) scale(1.4); }
-  100% { opacity: 0; transform: translateX(-50%) scale(2); }
-}
-
 /* Vegas color-picker modal: a soft fade on the backdrop and a short
    lift on the card so it feels premium rather than clunky. */
 @keyframes vegas-fade {
@@ -114,10 +107,6 @@ body {
   .animate-vegas-fade,
   .animate-vegas-pop {
     animation: none;
-  }
-  /* Chip sparkle: skip the keyframe but let the stack still land. */
-  @keyframes chip-sparkle {
-    0%, 100% { opacity: 0; }
   }
 }
 

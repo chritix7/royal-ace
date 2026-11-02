@@ -9,7 +9,6 @@ import Confetti from "./Confetti";
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import DealerShoe from "./DealerShoe";
 import CardFlight from "./CardFlight";
-import PayoutChips from "./PayoutChips";
 import VegasFeltOverlay from "./VegasFeltOverlay";
 
 const RESULT_UI: Record<Result, { label: string; cls: string }> = {
@@ -211,7 +210,6 @@ function getShoeStatus(g: Game): {
             dealTick={s.dealTick}
             fillPct={shoePct}
           />
-          <PayoutChips hands={s.hands} phase={s.phase} />
           <CardFlight
             dealEvents={dealEvents}
             consumeDealEvent={consumeDealEvent}
