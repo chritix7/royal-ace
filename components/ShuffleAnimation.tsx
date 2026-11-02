@@ -57,8 +57,10 @@ export default function ShuffleAnimation({
           const rx = Math.cos(angle) * radius;
           const ry = Math.sin(angle) * radius * 0.6;
           const rotation = ((i * 47) % 180) - 90;
-          const delay = i * 140;
-          const duration = 1600;
+          // Slower cadence — the shuffle reads as a deliberate, elegant
+          // moment rather than a frantic flutter.
+          const delay = i * 220;
+          const duration = 2600;
           return (
             <div
               key={i}
