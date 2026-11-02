@@ -384,13 +384,14 @@ function getShoeStatus(g: Game): {
             })}
           </div>
 
-          {/* Table markings — engraved ornament text, matches immersive. */}
+          {/* Table markings — engraved ornament text, matches immersive.
+              Shrink down on mobile so the three labels fit on one line. */}
 <div
   aria-hidden="true"
-  className="pointer-events-none mt-1.5 flex translate-y-[3px] flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center sm:gap-x-3"
+  className="pointer-events-none mt-1.5 flex translate-y-[3px] items-center justify-center gap-1.5 text-center sm:gap-x-3"
 >
   <p
-    className="whitespace-nowrap font-serif text-[9px] font-bold uppercase tracking-[0.22em] sm:text-[10px]"
+    className="whitespace-nowrap font-serif text-[7px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.22em]"
     style={{
       color: "rgba(229,199,121,0.42)",
       textShadow: "0 1px 0 rgba(0,0,0,0.9)",
@@ -401,14 +402,14 @@ function getShoeStatus(g: Game): {
 
   <span
     aria-hidden
-    className="text-[8px] leading-none sm:text-[9px]"
+    className="text-[7px] leading-none sm:text-[9px]"
     style={{ color: "rgba(229,199,121,0.5)" }}
   >
     ❖
   </span>
 
   <p
-    className="whitespace-nowrap font-serif text-[9px] font-bold uppercase tracking-[0.22em] sm:text-[10px]"
+    className="whitespace-nowrap font-serif text-[7px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.22em]"
     style={{
       color: "rgba(229,199,121,0.36)",
       textShadow: "0 1px 0 rgba(0,0,0,0.9)",
@@ -419,14 +420,14 @@ function getShoeStatus(g: Game): {
 
   <span
     aria-hidden
-    className="text-[8px] leading-none sm:text-[9px]"
+    className="text-[7px] leading-none sm:text-[9px]"
     style={{ color: "rgba(229,199,121,0.5)" }}
   >
     ❖
   </span>
 
   <p
-    className="whitespace-nowrap font-serif text-[9px] font-bold uppercase tracking-[0.22em] sm:text-[10px]"
+    className="whitespace-nowrap font-serif text-[7px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.22em]"
     style={{
       color: "rgba(229,199,121,0.36)",
       textShadow: "0 1px 0 rgba(0,0,0,0.9)",

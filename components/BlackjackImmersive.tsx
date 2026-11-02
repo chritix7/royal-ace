@@ -527,13 +527,15 @@ const playerCardStyle = (
 
               {/* Table markings — engraved ornament along the bottom
                    edge of the felt. Serif typography, gold diamond
-                   separators, same wording a real pit sign would use. */}
+                   separators, same wording a real pit sign would use.
+                   Shrink down on mobile so the three labels fit without
+                   overflow. */}
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-x-0 bottom-2 z-10 flex items-center justify-center gap-2 px-3 sm:gap-3"
+                className="pointer-events-none absolute inset-x-0 bottom-2 z-10 flex items-center justify-center gap-1.5 px-3 sm:gap-3"
               >
                 <p
-                  className="whitespace-nowrap font-serif text-[9px] font-bold uppercase tracking-[0.22em] sm:text-[10px]"
+                  className="whitespace-nowrap font-serif text-[7px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.22em]"
                   style={{
                     color: "rgba(229,199,121,0.42)",
                     textShadow: "0 1px 0 rgba(0,0,0,0.9)",
@@ -543,13 +545,13 @@ const playerCardStyle = (
                 </p>
                 <span
                   aria-hidden
-                  className="text-[8px] leading-none sm:text-[9px]"
+                  className="text-[7px] leading-none sm:text-[9px]"
                   style={{ color: "rgba(229,199,121,0.5)" }}
                 >
                   ❖
                 </span>
                 <p
-                  className="whitespace-nowrap font-serif text-[9px] font-bold uppercase tracking-[0.22em] sm:text-[10px]"
+                  className="whitespace-nowrap font-serif text-[7px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.22em]"
                   style={{
                     color: "rgba(229,199,121,0.36)",
                     textShadow: "0 1px 0 rgba(0,0,0,0.9)",
@@ -559,13 +561,13 @@ const playerCardStyle = (
                 </p>
                 <span
                   aria-hidden
-                  className="text-[8px] leading-none sm:text-[9px]"
+                  className="text-[7px] leading-none sm:text-[9px]"
                   style={{ color: "rgba(229,199,121,0.5)" }}
                 >
                   ❖
                 </span>
                 <p
-                  className="whitespace-nowrap font-serif text-[9px] font-bold uppercase tracking-[0.22em] sm:text-[10px]"
+                  className="whitespace-nowrap font-serif text-[7px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.22em]"
                   style={{
                     color: "rgba(229,199,121,0.36)",
                     textShadow: "0 1px 0 rgba(0,0,0,0.9)",
