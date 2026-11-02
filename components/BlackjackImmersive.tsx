@@ -300,6 +300,7 @@ const playerCardStyle = (
   className="absolute -right-[38px] -top-[14px] z-0 hidden md:block"
   status={getShoeStatus(g)}
   dealTick={s.dealTick}
+  fillPct={g.shoePct}
 />
 
 

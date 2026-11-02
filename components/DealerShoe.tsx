@@ -29,6 +29,9 @@ type DealerShoeProps = {
   className?: string;
   status?: ShoeStatus;
   dealTick?: number;
+  /** Shoe fullness, 0–100. Controls how many card layers show through
+   *  the smoked lucite window. Defaults to 100 (full). */
+  fillPct?: number;
 };
 
 const CARD_BACK =
@@ -70,11 +73,21 @@ export default function DealerShoe({
   className = "",
   status = { label: "Ready", tone: "gold" },
   dealTick = 0,
+  fillPct = 100,
 }: DealerShoeProps) {
   const [cycle, setCycle] = useState<"idle" | "dispense" | "refill">("idle");
   const firstTick = useRef(true);
   const led = LED_COLOR[status.tone] ?? LED_COLOR.gold;
   const active = status.tone === "orange" || status.label.toLowerCase() === "dealing";
+
+  // Fullness drives how many card layers show through the smoked lucite
+  // window. Five bands keeps the depletion visible and legible without
+  // a tiny stepped flicker. Clamped to [0, 5].
+  const clampedPct = Math.max(0, Math.min(100, fillPct));
+  const visibleLayers = Math.max(
+    0,
+    Math.min(5, Math.ceil(clampedPct / 20))
+  );
 
   useEffect(() => {
     if (firstTick.current) {
@@ -801,24 +814,50 @@ export default function DealerShoe({
                     "linear-gradient(90deg, transparent, rgba(229, 199, 121, 0.5), transparent)",
                 }}
               />
-              {/* Inner well with card stack */}
+              {/* Inner well with card stack — the stack visibly depletes
+                  as the shoe is dealt down, so the player can read
+                  how much is left at a glance. */}
               <div
                 className="absolute inset-x-[14px] inset-y-[8px] overflow-hidden rounded-[6px] border border-white/[0.06]"
                 style={{ background: "linear-gradient(180deg, #1a2b22 0%, #0a140e 100%)" }}
               >
-                {[0, 1, 2, 3, 4].map((i) => (
+                {[0, 1, 2, 3, 4].map((i) => {
+                  const shown = i < visibleLayers;
+                  // The topmost shown layer gets a hair-brighter rim to
+                  // sell the "freshly-cut deck" look. The bottom layers
+                  // are dimmer, like older cards.
+                  const isTop = i === visibleLayers - 1;
+                  return (
+                    <div
+                      key={i}
+                      className="absolute inset-x-[14px] h-[32px] rounded-[3px] border border-[#c9ac65]/40"
+                      style={{
+                        bottom: `${2 + i * 2}px`,
+                        background: CARD_BACK,
+                        opacity: shown ? (isTop ? 0.92 : 0.78) : 0,
+                        transform: shown ? "translateY(0)" : "translateY(4px)",
+                        transition:
+                          "opacity 420ms ease-out, transform 420ms ease-out",
+                      }}
+                    >
+                      <div className="absolute inset-[4px] rounded-[2px] border border-[#e4c879]/35" />
+                    </div>
+                  );
+                })}
+                {/* "Low shoe" ember — faint red tint across the well
+                    when the stack is critically low. Purely cosmetic;
+                    the real reshuffle trigger lives elsewhere. */}
+                {visibleLayers <= 1 && (
                   <div
-                    key={i}
-                    className="absolute inset-x-[14px] h-[32px] rounded-[3px] border border-[#c9ac65]/40"
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0"
                     style={{
-                      bottom: `${2 + i * 2}px`,
-                      background: CARD_BACK,
-                      opacity: 0.85,
+                      background:
+                        "linear-gradient(180deg, rgba(248,113,113,0) 0%, rgba(248,113,113,0.08) 100%)",
+                      transition: "opacity 420ms ease-out",
                     }}
-                  >
-                    <div className="absolute inset-[4px] rounded-[2px] border border-[#e4c879]/35" />
-                  </div>
-                ))}
+                  />
+                )}
               </div>
               {/* Thin gold LED strip across the deck */}
               <div

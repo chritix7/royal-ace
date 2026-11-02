@@ -204,6 +204,7 @@ function getShoeStatus(g: Game): {
           <DealerShoe
             className="absolute -right-[38px] -top-[14px] z-0 hidden sm:block"
             status={getShoeStatus(g)}
+            fillPct={shoePct}
           />
           {s.shuffling && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/60" role="status">
