@@ -28,6 +28,7 @@ export default function PlayingCard({
   fit = false,
   back = ["#142d27", "#1b3d33"],
   animated = true,
+  flipDurationMs = 900,
 }: {
   card: Card;
   faceDown?: boolean;
@@ -36,6 +37,11 @@ export default function PlayingCard({
   fit?: boolean;
   back?: [string, string];
   animated?: boolean;
+  /** How long the inner front/back flip takes when `faceDown` toggles.
+   *  Default 900ms matches the slow, deliberate reveal of the dealer's
+   *  hole card. The card-flight layer passes a shorter value so the
+   *  flip during a deal syncs with the trajectory. */
+  flipDurationMs?: number;
 }) {
   const isRed = card.suit === "♥" || card.suit === "♦";
   const isFace = FACE_RANKS.has(card.rank);
@@ -110,10 +116,11 @@ export default function PlayingCard({
       aria-label={faceDown ? "Face-down card" : `${card.rank} of ${card.suit}`}
     >
       <div
-        className="relative h-full w-full transition-transform duration-[900ms] ease-[cubic-bezier(0.3,0.75,0.2,1)]"
+        className="relative h-full w-full transition-transform ease-[cubic-bezier(0.3,0.75,0.2,1)]"
         style={{
           transformStyle: "preserve-3d",
           transform: faceDown ? "rotateY(0deg)" : "rotateY(180deg)",
+          transitionDuration: `${flipDurationMs}ms`,
         }}
       >
         {/* ── Back ── */}

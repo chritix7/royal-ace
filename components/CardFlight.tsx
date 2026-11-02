@@ -182,12 +182,19 @@ export default function CardFlight({
     >
       <PlayingCard
         card={activeFlight.event.card}
-        faceDown={activeFlight.event.faceDown}
+        /* The ramp card is face-down. The flight starts face-down to
+           match it visually, then flips face-up during the trajectory
+           so the result is only revealed when the card lands.
+           The dealer's hole card (event.faceDown === true) stays
+           face-down throughout. */
+        faceDown={!activeFlight.started || activeFlight.event.faceDown}
+        /* Sync the inner flip duration with the flight time so the
+           reveal lands exactly when the card arrives. */
+        flipDurationMs={FLIGHT_MS}
         back={back}
         compact={activeFlight.event.target !== "dealer" && compact}
         fit={fit}
-        /* The wrapper owns all the motion — the inner card must stay
-           static, otherwise two animations fight. */
+        /* The wrapper owns all the motion — no CSS deal-in animation. */
         animated={false}
       />
     </div>,
