@@ -1,133 +1,113 @@
-import { useSyncExternalStore } from "react";
-import { dayNumber, today } from "./clock";
-import { onEvent, type GameEvent } from "./events";
-import { hashRand } from "./hashRand";
-import { wallet } from "./wallet";
+/**
+ * Daily missions — a lightweight gamification layer. Three missions
+ * are drawn from the pool each local day; progress ticks as the player
+ * plays, and completion fires an achievement-style toast through the
+ * existing `toast` channel. Resets at local midnight.
+ */
 
-export type Mission = { id: string; title: string; event: GameEvent; goal: number; reward: number; tier: "easy" | "medium" | "hard" };
+export type MissionType =
+  | "win"       // win N rounds (counts "win" + "blackjack")
+  | "blackjack" // hit N blackjacks
+  | "double"    // win N doubled hands
+  | "split"    // win N hands after splitting
+  | "pp"        // win N Perfect Pairs side bets
+  | "t3"        // win N 21+3 side bets
+  | "correct"   // make N correct basic-strategy decisions
+  | "streak"    // reach a win streak of N in a row
+  | "profit"    // net profit of N over the day
+  | "rounds";   // play N rounds
 
-/** Chaque jour : 1 mission facile, 1 moyenne, 1 difficile, tirées au sort (le même tirage toute la journée). */
-export const MISSION_POOL: Mission[] = [
-  { id: "spin30", title: "Spin the slot machine 30 times", event: "spin", goal: 30, reward: 120, tier: "easy" },
-  { id: "slotwin8", title: "Win on 8 slot spins", event: "slotWin", goal: 8, reward: 120, tier: "easy" },
-  { id: "bjhand10", title: "Play 10 blackjack hands", event: "bjHand", goal: 10, reward: 100, tier: "easy" },
-  { id: "bjwin4", title: "Win 4 blackjack hands", event: "bjWin", goal: 4, reward: 120, tier: "easy" },
+export type MissionDef = {
+  id: string;
+  type: MissionType;
+  target: number;
+  label: string;
+};
 
-  { id: "spin80", title: "Spin the slot machine 80 times", event: "spin", goal: 80, reward: 300, tier: "medium" },
-  { id: "wild2", title: "Make the Boss expand 2 times", event: "wildExpand", goal: 2, reward: 300, tier: "medium" },
-  { id: "bjcorrect25", title: "Make 25 correct blackjack decisions", event: "bjCorrect", goal: 25, reward: 300, tier: "medium" },
-  { id: "bjwin12", title: "Win 12 blackjack hands", event: "bjWin", goal: 12, reward: 320, tier: "medium" },
-  { id: "gamble2", title: "Win 2 gambles", event: "gambleWin", goal: 2, reward: 280, tier: "medium" },
-  { id: "bjdouble1", title: "Win a doubled hand at blackjack", event: "bjDouble", goal: 1, reward: 280, tier: "medium" },
+export type Mission = MissionDef & {
+  progress: number;
+  completed: boolean;
+};
 
-  { id: "bonus1", title: "Trigger or buy a free spins bonus", event: "bonus", goal: 1, reward: 600, tier: "hard" },
-  { id: "vault1", title: "Open the vault", event: "vault", goal: 1, reward: 700, tier: "hard" },
-  { id: "big1", title: "Land a win worth 20× your bet or more", event: "bigWin", goal: 1, reward: 600, tier: "hard" },
-  { id: "bjbj1", title: "Get a blackjack", event: "bjBlackjack", goal: 1, reward: 500, tier: "hard" },
-  { id: "respin4", title: "Trigger 4 re-spins", event: "respin", goal: 4, reward: 500, tier: "hard" },
-  { id: "bjwin30", title: "Win 30 blackjack hands", event: "bjWin", goal: 30, reward: 650, tier: "hard" },
-  { id: "bjsplit1", title: "Win a split hand at blackjack", event: "bjSplit", goal: 1, reward: 450, tier: "hard" },
+/**
+ * Pool of possible missions. Three are drawn each day with a seeded
+ * shuffle so a given day always rolls the same set (no mission
+ * replacement by reloading). Targets are tuned to be reachable in
+ * a short session.
+ */
+export const MISSION_POOL: MissionDef[] = [
+  { id: "win-5",       type: "win",       target: 5,   label: "Win 5 rounds" },
+  { id: "win-10",      type: "win",       target: 10,  label: "Win 10 rounds" },
+  { id: "bj-1",        type: "blackjack", target: 1,   label: "Hit a blackjack" },
+  { id: "bj-2",        type: "blackjack", target: 2,   label: "Hit 2 blackjacks" },
+  { id: "double-1",    type: "double",    target: 1,   label: "Win a doubled hand" },
+  { id: "double-2",    type: "double",    target: 2,   label: "Win 2 doubled hands" },
+  { id: "split-1",     type: "split",     target: 1,   label: "Win after a split" },
+  { id: "pp-1",        type: "pp",        target: 1,   label: "Win a Perfect Pairs bet" },
+  { id: "t3-1",        type: "t3",        target: 1,   label: "Win a 21+3 bet" },
+  { id: "correct-10",  type: "correct",   target: 10,  label: "Play 10 correct decisions" },
+  { id: "correct-20",  type: "correct",   target: 20,  label: "Play 20 correct decisions" },
+  { id: "streak-3",    type: "streak",    target: 3,   label: "Reach a 3-win streak" },
+  { id: "streak-5",    type: "streak",    target: 5,   label: "Reach a 5-win streak" },
+  { id: "profit-200",  type: "profit",    target: 200, label: "Finish ◈ 200 up" },
+  { id: "profit-500",  type: "profit",    target: 500, label: "Finish ◈ 500 up" },
+  { id: "rounds-15",   type: "rounds",    target: 15,  label: "Play 15 rounds" },
+  { id: "rounds-30",   type: "rounds",    target: 30,  label: "Play 30 rounds" },
 ];
 
-export function missionsFor(day: string): Mission[] {
-  const n = dayNumber(day);
-  if (Number.isNaN(n)) return [];
-  return (["easy", "medium", "hard"] as const).map((tier, k) => {
-    const pool = MISSION_POOL.filter((m) => m.tier === tier);
-    return pool[Math.floor(hashRand(n * 7 + k + 1) * pool.length)];
-  });
+/** Current local-day stamp, e.g. "2026-11-03". */
+export function todayStamp(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
-export type MissionState = { day: string; counters: Partial<Record<GameEvent, number>>; claimed: string[] };
-const EMPTY: MissionState = { day: "", counters: {}, claimed: [] };
-
-export type MissionView = { def: Mission; progress: number; done: boolean; claimed: boolean };
-/** Progression de chaque mission du jour : elle suit simplement le compteur de son événement. */
-export function missionView(state: MissionState): MissionView[] {
-  return missionsFor(state.day).map((def) => {
-    const progress = Math.min(def.goal, state.counters[def.event] ?? 0);
-    return { def, progress, done: progress >= def.goal, claimed: state.claimed.includes(def.id) };
-  });
+/** Simple seeded PRNG so the daily draw is stable across reloads. */
+function seededRng(seed: number) {
+  let s = seed >>> 0;
+  return () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 0x100000000;
+  };
 }
 
-const KEY = "royalace:missions";
-let state: MissionState = EMPTY;
-let hydrated = false;
-let listening = false;
-const listeners = new Set<() => void>();
-const emit = () => listeners.forEach((l) => l());
-const persist = () => {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(state));
-  } catch {}
-};
-
-/** Nouveau jour : on repart de zéro (compteurs et récompenses réclamées). */
-function rollover() {
-  const day = today();
-  if (state.day !== day) state = { day, counters: {}, claimed: [] };
+function seedFromStamp(stamp: string): number {
+  // Combine the YYYYMMDD digits into an integer seed.
+  let h = 2166136261;
+  for (let i = 0; i < stamp.length; i++) {
+    h ^= stamp.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
 }
 
-export const missionsStore = {
-  get: () => state,
-  subscribe(l: () => void) {
-    listeners.add(l);
-    return () => {
-      listeners.delete(l);
-    };
-  },
-  hydrate() {
-    if (hydrated) return;
-    hydrated = true;
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) {
-        const d = JSON.parse(raw);
-        if (typeof d.day === "string" && d.counters && typeof d.counters === "object") {
-          state = { day: d.day, counters: d.counters, claimed: Array.isArray(d.claimed) ? d.claimed : [] };
-        }
-      }
-    } catch {}
-    rollover();
-    persist();
-    if (!listening) {
-      listening = true;
-      onEvent((event, amount) => missionsStore.add(event, amount));
-    }
-    emit();
-  },
-  add(event: GameEvent, amount = 1) {
-    rollover();
-    state = { ...state, counters: { ...state.counters, [event]: (state.counters[event] ?? 0) + amount } };
-    persist();
-    emit();
-  },
-  /** Vérifie le changement de jour (par exemple quand on ouvre le panneau). */
-  refresh() {
-    const before = state.day;
-    rollover();
-    if (state.day !== before) {
-      persist();
-      emit();
-    }
-  },
-  /** Réclame la récompense d'une mission terminée. Renvoie les chips gagnées (0 si impossible). */
-  claim(id: string): number {
-    rollover();
-    const item = missionView(state).find((m) => m.def.id === id);
-    if (!item || !item.done || item.claimed) return 0;
-    state = { ...state, claimed: [...state.claimed, id] };
-    persist();
-    wallet.add(item.def.reward);
-    emit();
-    return item.def.reward;
-  },
-  /** Pour les tests. */
-  _reset() {
-    state = EMPTY;
-    hydrated = false;
-    emit();
-  },
-};
+/** Draw 3 missions for a given day, mixed types if possible. */
+export function pickDaily(stamp: string): Mission[] {
+  const rng = seededRng(seedFromStamp(stamp));
+  // Fisher–Yates on a copy
+  const pool = [...MISSION_POOL];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
 
-export const useMissions = () => useSyncExternalStore(missionsStore.subscribe, missionsStore.get, () => EMPTY);
+  // Pick 3, preferring type diversity.
+  const chosen: MissionDef[] = [];
+  const types = new Set<MissionType>();
+  for (const m of pool) {
+    if (chosen.length === 3) break;
+    if (types.has(m.type)) continue;
+    chosen.push(m);
+    types.add(m.type);
+  }
+  // Fallback if we didn't fill (shouldn't happen with current pool).
+  while (chosen.length < 3) {
+    const next = pool.find((m) => !chosen.includes(m));
+    if (!next) break;
+    chosen.push(next);
+  }
+
+  return chosen.map((m) => ({ ...m, progress: 0, completed: false }));
+}

@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import type { Theme, VegasVariant } from "../lib/game";
 import { CHIPS, CHIP_BG, THEME_LABELS, THEME_SWATCHES, VEGAS_VARIANTS, money } from "../lib/game";
 import { Counter, Spark, Toggle, SideBet, small } from "./ui";
+import MissionsPanel from "./MissionsPanel";
 import { ACHIEVEMENTS } from "../lib/achievements";
 import { audio, useAudioSettings } from "../lib/audio";
 import type { Game } from "../lib/useBlackjack";
@@ -294,6 +295,8 @@ export default function Sidebar({ g }: { g: Game }) {
             </div>
           </details>
         </div>
+
+        <MissionsPanel missions={s.missions} />
 
         <div className="rounded-3xl border border-white/[0.07] bg-[#101713] p-6">
           <h3 className="text-lg font-bold">Session</h3>

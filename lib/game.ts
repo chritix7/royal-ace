@@ -1,4 +1,5 @@
 import type { Card, Hand } from "./blackjack";
+import type { Mission } from "./missions";
 
 export type Phase = "betting" | "dealing" | "insurance" | "player" | "dealer" | "settled";
 export type Stats = { played: number; won: number; lost: number; pushed: number; blackjacks: number; profit: number; decisions: number; correct: number; dealerBJs: number; dealerPlayed: number; dealerBusts: number };
@@ -44,6 +45,13 @@ export type S = {
   celebrate: number;
   shuffling: boolean;
   dealTick: number;
+  /** Daily-mission state. `missionDate` is the local-day stamp
+   *  (YYYY-MM-DD) the current missions were drawn for; when it falls
+   *  behind today, the missions reroll. `missionProfit` tracks the
+   *  day's running net profit for the "finish ◈ N up" missions. */
+  missions: Mission[];
+  missionDate: string;
+  missionProfit: number;
 };
 
 export const CHIPS = [10, 20, 50, 100, 500];
@@ -90,6 +98,9 @@ export const INITIAL: S = {
   celebrate: 0,
   shuffling: false,
   dealTick: 0,
+  missions: [],
+  missionDate: "",
+  missionProfit: 0,
 };
 
 export const THEMES: Record<Theme, string> = {
