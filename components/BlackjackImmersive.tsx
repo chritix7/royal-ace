@@ -331,6 +331,12 @@ const playerCardStyle = (
       back={back}
       compact={activeFlight.event.target !== "dealer" && compact}
       fit
+      /* The outer portal wrapper owns the motion (translate +
+         rotate + scale from the shoe outlet to the target slot).
+         The inner card must NOT run its own CSS deal-in on top of
+         that or two animations fight — that was the stutter / "the
+         card looks like it's dealing twice" bug. Static card. */
+      animated={false}
     />
   </div>,
   document.body
