@@ -77,18 +77,27 @@ export default function CardFlight({
     const event = dealEvents[0];
     // Prefer the top ramp card (the one physically sticking out of
     // the dispenser slit) so the flight reads as "the dealer pulls
-    // the top card off the ramp". Fall back to the slit itself when
-    // the ramp isn't visible.
-    const topCard = document.querySelector<HTMLElement>("[data-shoe-top-card]");
-    const outlet = document.querySelector<HTMLElement>("[data-shoe-outlet]");
+    // the top card off the ramp". There may be more than one shoe in
+    // the DOM — a full-size one for desktop and a mini one for mobile,
+    // each hidden at the opposite breakpoint — so pick the first one
+    // that is actually laid out. Fall back to the outlet slit the
+    // same way, then to no flight when nothing visible is available.
+    const pickVisible = (sel: string): HTMLElement | null => {
+      const nodes = document.querySelectorAll<HTMLElement>(sel);
+      for (const n of nodes) {
+        if (n.getClientRects().length > 0) return n;
+      }
+      return null;
+    };
     const source =
-      topCard && topCard.getClientRects().length > 0 ? topCard : outlet;
+      pickVisible("[data-shoe-top-card]") ??
+      pickVisible("[data-shoe-outlet]");
     const target = document.querySelector<HTMLElement>(
       `[data-deal-target="${event.target}"]`
     );
 
-    // Shoe hidden (mobile): no flight — the card just appears.
-    if (!source || !target || source.getClientRects().length === 0) {
+    // No shoe at all on screen: the card just appears.
+    if (!source || !target) {
       consumeDealEvent(event.id);
       return;
     }

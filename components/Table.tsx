@@ -210,6 +210,19 @@ function getShoeStatus(g: Game): {
             dealTick={s.dealTick}
             fillPct={shoePct}
           />
+
+          {/* Mobile shoe — scaled-down version so the deal flight has a
+              visible source on phones and the ramp animation still plays. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute right-1 top-1 z-0 origin-top-right scale-[0.45] sm:hidden"
+          >
+            <DealerShoe
+              status={getShoeStatus(g)}
+              dealTick={s.dealTick}
+              fillPct={shoePct}
+            />
+          </div>
           <CardFlight
             dealEvents={dealEvents}
             consumeDealEvent={consumeDealEvent}
