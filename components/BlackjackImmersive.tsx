@@ -17,6 +17,7 @@ import { Counter, SideBet } from "./ui";
 import PlayingCard from "./PlayingCard";
 import Confetti from "./Confetti";
 import DealerShoe from "./DealerShoe";
+import PayoutChips from "./PayoutChips";
 import VegasFeltOverlay from "./VegasFeltOverlay";
 import InfoPanel from "./blackjack-immersive/InfoPanel";
 import ImmersiveSidePill from "./blackjack-immersive/ImmersiveSidePill";
@@ -302,6 +303,8 @@ const playerCardStyle = (
   dealTick={s.dealTick}
   fillPct={g.shoePct}
 />
+
+<PayoutChips hands={s.hands} phase={s.phase} />
 
 
 

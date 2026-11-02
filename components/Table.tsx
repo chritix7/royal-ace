@@ -8,6 +8,7 @@ import PlayingCard from "./PlayingCard";
 import Confetti from "./Confetti";
 import type { Game } from "../lib/useBlackjack";
 import DealerShoe from "./DealerShoe";
+import PayoutChips from "./PayoutChips";
 import VegasFeltOverlay from "./VegasFeltOverlay";
 
 const RESULT_UI: Record<Result, { label: string; cls: string }> = {
@@ -206,6 +207,7 @@ function getShoeStatus(g: Game): {
             status={getShoeStatus(g)}
             fillPct={shoePct}
           />
+          <PayoutChips hands={s.hands} phase={s.phase} />
           {s.shuffling && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/60" role="status">
               <div className="flex gap-3 text-3xl text-[#e5c779]">
@@ -234,7 +236,10 @@ function getShoeStatus(g: Game): {
 )}
 
   {/* Cartes du croupier */}
-<div className="relative z-10 mt-4 flex justify-center">
+<div
+  data-deal-target="dealer"
+  className="relative z-10 mt-4 flex justify-center"
+>
   <p
     aria-hidden="true"
     className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pl-[0.45em] text-[10px] font-bold uppercase tracking-[0.45em] text-white/[0.12] sm:text-xs"
@@ -295,6 +300,7 @@ function getShoeStatus(g: Game): {
               return (
                 <div
                   key={i}
+                  data-deal-target={`hand-${i}`}
                   className={`rounded-2xl border p-2 transition sm:p-3 ${
                     isActive ? "border-[#e5c779]/70 bg-[#e5c779]/10" : "border-transparent"
                   } ${compact && !isActive && s.phase === "player" ? "opacity-75" : ""}`}
