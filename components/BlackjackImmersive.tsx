@@ -392,12 +392,23 @@ const playerCardStyle = (
                   className={`min-w-0 rounded-2xl border p-1 transition-colors sm:p-2 ${
                     selected
                       ? "border-[#e5c779]/70 bg-[#e5c779]/10"
-                      : resultGlow === "win"
-                        ? "border-transparent animate-result-glow-win"
-                        : resultGlow === "lose"
-                          ? "border-transparent animate-result-glow-lose"
-                          : "border-transparent"
+                      : "border-transparent"
                   }`}
+                  style={
+                    selected
+                      ? undefined
+                      : resultGlow === "win"
+                        ? {
+                            background:
+                              "radial-gradient(ellipse at 50% 55%, rgba(229,199,121,0.2) 0%, rgba(229,199,121,0.07) 45%, transparent 80%)",
+                          }
+                        : resultGlow === "lose"
+                          ? {
+                              background:
+                                "radial-gradient(ellipse at 50% 55%, rgba(239,68,68,0.16) 0%, rgba(239,68,68,0.05) 45%, transparent 80%)",
+                            }
+                          : undefined
+                  }
                 >
                   {/* Engraved per-hand spot badge — only on multi-hand
                       play, since the central BET puck covers single hand. */}

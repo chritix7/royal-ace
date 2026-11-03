@@ -343,12 +343,23 @@ function getShoeStatus(g: Game): {
                   className={`rounded-2xl border p-2 transition-colors sm:p-3 ${
                     isActive
                       ? "border-[#e5c779]/70 bg-[#e5c779]/10"
-                      : resultGlow === "win"
-                        ? "border-transparent animate-result-glow-win"
-                        : resultGlow === "lose"
-                          ? "border-transparent animate-result-glow-lose"
-                          : "border-transparent"
+                      : "border-transparent"
                   } ${compact && !isActive && s.phase === "player" ? "opacity-75" : ""}`}
+                  style={
+                    isActive
+                      ? undefined
+                      : resultGlow === "win"
+                        ? {
+                            background:
+                              "radial-gradient(ellipse at 50% 55%, rgba(229,199,121,0.2) 0%, rgba(229,199,121,0.07) 45%, transparent 80%)",
+                          }
+                        : resultGlow === "lose"
+                          ? {
+                              background:
+                                "radial-gradient(ellipse at 50% 55%, rgba(239,68,68,0.16) 0%, rgba(239,68,68,0.05) 45%, transparent 80%)",
+                            }
+                          : undefined
+                  }
                 >
                   {/* Engraved per-hand spot badge — only in multi-hand play. */}
                   {multi && (
