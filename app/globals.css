@@ -84,6 +84,24 @@ body {
   animation: pop 380ms ease-out both;
 }
 
+/* Per-hand result glow: a soft pulsing halo around a winning or
+   losing hand container so the outcome is readable at a glance in
+   multi-hand play without having to parse the result text. */
+@keyframes result-glow-win {
+  0%, 100% { box-shadow: 0 0 20px rgba(229,199,121,0.25), inset 0 0 14px rgba(229,199,121,0.08); }
+  50%      { box-shadow: 0 0 32px rgba(229,199,121,0.5), inset 0 0 22px rgba(229,199,121,0.16); }
+}
+@keyframes result-glow-lose {
+  0%, 100% { box-shadow: 0 0 14px rgba(239,68,68,0.18), inset 0 0 10px rgba(239,68,68,0.06); }
+  50%      { box-shadow: 0 0 22px rgba(239,68,68,0.32), inset 0 0 16px rgba(239,68,68,0.12); }
+}
+.animate-result-glow-win {
+  animation: result-glow-win 2200ms ease-in-out infinite;
+}
+.animate-result-glow-lose {
+  animation: result-glow-lose 2600ms ease-in-out infinite;
+}
+
 /* Hole-card reveal: a brief gold halo that pulses behind the dealer's
    second card while it flips, so the reveal reads even on small
    screens / full-screen contexts. */
@@ -118,7 +136,9 @@ body {
   .animate-pop,
   .animate-vegas-fade,
   .animate-vegas-pop,
-  .animate-reveal-glow {
+  .animate-reveal-glow,
+  .animate-result-glow-win,
+  .animate-result-glow-lose {
     animation: none;
   }
 }
