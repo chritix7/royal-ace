@@ -377,15 +377,6 @@ const playerCardStyle = (
                 s.hands.length > 1;
               const multi = s.hands.length > 1;
 
-              const result = hand.result;
-              const resultGlow =
-                result === "blackjack" || result === "win"
-                  ? "win"
-                  : result === "lose" ||
-                    result === "bust" ||
-                    result === "surrender"
-                    ? "lose"
-                    : null;
               return (
                 <div
                   key={index}
@@ -394,24 +385,6 @@ const playerCardStyle = (
                       ? "border-[#e5c779]/70 bg-[#e5c779]/10"
                       : "border-transparent"
                   }`}
-                  style={
-                    selected
-                      ? undefined
-                      : resultGlow === "win"
-                        ? {
-                            // Ellipse smaller than the box so the fade
-                            // to transparent completes INSIDE the hand's
-                            // bounds — no visible rectangle edges.
-                            background:
-                              "radial-gradient(65% 80% at 50% 55%, rgba(229,199,121,0.32) 0%, rgba(229,199,121,0.1) 40%, transparent 100%)",
-                          }
-                        : resultGlow === "lose"
-                          ? {
-                              background:
-                                "radial-gradient(65% 80% at 50% 55%, rgba(239,68,68,0.26) 0%, rgba(239,68,68,0.08) 40%, transparent 100%)",
-                            }
-                          : undefined
-                  }
                 >
                   {/* Engraved per-hand spot badge — only on multi-hand
                       play, since the central BET puck covers single hand. */}
