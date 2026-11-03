@@ -84,6 +84,18 @@ body {
   animation: pop 380ms ease-out both;
 }
 
+/* Hole-card reveal: a brief gold halo that pulses behind the dealer's
+   second card while it flips, so the reveal reads even on small
+   screens / full-screen contexts. */
+@keyframes reveal-glow {
+  0%   { opacity: 0; transform: scale(0.85); }
+  40%  { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0; transform: scale(1.15); }
+}
+.animate-reveal-glow {
+  animation: reveal-glow 1500ms ease-out both;
+}
+
 /* Vegas color-picker modal: a soft fade on the backdrop and a short
    lift on the card so it feels premium rather than clunky. */
 @keyframes vegas-fade {
@@ -105,7 +117,8 @@ body {
   .animate-deal,
   .animate-pop,
   .animate-vegas-fade,
-  .animate-vegas-pop {
+  .animate-vegas-pop,
+  .animate-reveal-glow {
     animation: none;
   }
 }

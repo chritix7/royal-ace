@@ -279,6 +279,7 @@ function getShoeStatus(g: Game): {
         faceDown={i === 1 && !s.hole}
         overlap={i > 0}
         back={back}
+        highlight={i === 1 && s.revealing}
         animated={false}
       />
     </span>

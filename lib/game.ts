@@ -44,6 +44,10 @@ export type S = {
   celebrate: number;
   shuffling: boolean;
   dealTick: number;
+  /** True while the dealer's hole card is being flipped (and briefly
+   *  before/after), so the UI can glow around it to make the reveal
+   *  readable even on small/full-screen contexts. */
+  revealing: boolean;
 };
 
 export const CHIPS = [10, 20, 50, 100, 500];
@@ -90,6 +94,7 @@ export const INITIAL: S = {
   celebrate: 0,
   shuffling: false,
   dealTick: 0,
+  revealing: false,
 };
 
 export const THEMES: Record<Theme, string> = {

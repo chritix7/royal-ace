@@ -291,6 +291,7 @@ const playerCardStyle = (
       faceDown={index === 1 && !s.hole}
       overlap={index > 0}
       back={back}
+      highlight={index === 1 && s.revealing}
       fit
       animated={false}
     />

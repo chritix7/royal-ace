@@ -29,6 +29,7 @@ export default function PlayingCard({
   back = ["#142d27", "#1b3d33"],
   animated = true,
   flipDurationMs = 900,
+  highlight = false,
 }: {
   card: Card;
   faceDown?: boolean;
@@ -42,6 +43,10 @@ export default function PlayingCard({
    *  hole card. The card-flight layer passes a shorter value so the
    *  flip during a deal syncs with the trajectory. */
   flipDurationMs?: number;
+  /** Draws a soft gold halo pulse around the card. Used on the
+   *  dealer's hole card during the reveal moment so the flip reads
+   *  on any screen size. */
+  highlight?: boolean;
 }) {
   const isRed = card.suit === "♥" || card.suit === "♦";
   const isFace = FACE_RANKS.has(card.rank);
@@ -110,11 +115,25 @@ export default function PlayingCard({
   return (
     <div
       ref={cardRef}
-      className={`shrink-0 ${animated ? "animate-deal" : ""} ${size} ${overlap ? shift : ""}`}
+      className={`relative shrink-0 ${animated ? "animate-deal" : ""} ${size} ${overlap ? shift : ""}`}
       style={{ perspective: "1000px" }}
       role="img"
       aria-label={faceDown ? "Face-down card" : `${card.rank} of ${card.suit}`}
     >
+      {/* Reveal halo — soft gold pulse behind the card. Used on the
+          dealer's hole card during the reveal so the flip reads on
+          any screen size. */}
+      {highlight && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-[-18%] rounded-xl animate-reveal-glow"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(246,228,169,0.6) 0%, rgba(229,199,121,0) 70%)",
+            zIndex: -1,
+          }}
+        />
+      )}
       <div
         className="relative h-full w-full transition-transform ease-[cubic-bezier(0.3,0.75,0.2,1)]"
         style={{

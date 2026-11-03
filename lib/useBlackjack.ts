@@ -719,9 +719,12 @@ function giveDealer() {
     const { dealer, hands } = ref.current;
     const naturals = hands.map((h) => isBlackjack(h.cards));
     if (isBlackjack(dealer) || naturals.every(Boolean)) {
-      set({ phase: "dealer" });
+      set({ phase: "dealer", revealing: true });
+      await sleep(360);
       reveal();
       await sleep(900);
+      set({ revealing: false });
+      await sleep(220);
       await settle();
       return;
     }
@@ -823,19 +826,30 @@ function giveDealer() {
   }
 
   async function dealerPlay() {
-    set({ phase: "dealer", message: "Dealer's turn…" });
+    // Dramatic reveal: short anticipation beat → mark the hole card as
+    // "revealing" so the UI can glow around it → flip (PlayingCard
+    // handles the 900ms rotateY) → brief rest before the dealer draws.
+    set({ phase: "dealer", message: "Dealer's turn…", revealing: true });
+    await sleep(360);
     reveal();
     await sleep(900);
+    set({ revealing: false });
+    await sleep(220);
+
     const { h17 } = ref.current.settings;
     const anyLive = ref.current.hands.some(
       (h) => h.result !== "surrender" && !(!h.split && isBlackjack(h.cards)) && handValue(h.cards).total <= 21
     );
+    // Dealer draws with a brisker 650ms cadence between cards — each
+    // decision reads clearly without dragging the moment.
     for (;;) {
       const { total, soft } = handValue(ref.current.dealer);
       if (!anyLive || total > 17 || (total === 17 && !(h17 && soft))) break;
       giveDealer();
-      await sleep(800);
+      await sleep(650);
     }
+    // Let the dealer's final total land before settling.
+    await sleep(380);
     await settle();
   }
 
