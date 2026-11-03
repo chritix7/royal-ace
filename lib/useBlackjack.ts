@@ -854,8 +854,8 @@ function giveDealer() {
       giveDealer();
       await sleep(650);
     }
-    // Let the dealer's final total land before settling.
-    await sleep(380);
+    // Short beat so the final dealer total is readable, then settle.
+    await sleep(160);
     await settle();
   }
 
