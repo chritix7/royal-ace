@@ -11,6 +11,7 @@ import DealerShoe from "./DealerShoe";
 import CardFlight from "./CardFlight";
 import HandSpotBadge from "./HandSpotBadge";
 import ShuffleAnimation from "./ShuffleAnimation";
+import SideWinBadge from "./SideWinBadge";
 import VegasFeltOverlay from "./VegasFeltOverlay";
 
 const RESULT_UI: Record<Result, { label: string; cls: string }> = {
@@ -572,7 +573,7 @@ function getShoeStatus(g: Game): {
   </div>
 
   <div className="order-2 flex w-full max-w-[300px] items-stretch justify-center gap-2 lg:order-none lg:contents">
-    <div className="min-w-0 flex-1 lg:order-1 lg:w-36 lg:flex-none">
+    <div className="relative min-w-0 flex-1 lg:order-1 lg:w-36 lg:flex-none">
       <SidePill
         label="PP"
         amount={s.ppBet}
@@ -580,9 +581,12 @@ function getShoeStatus(g: Game): {
         onIncrease={() => adjustSide("ppBet", 10)}
         onDecrease={() => adjustSide("ppBet", -10)}
       />
+      {roundBreakdown && (
+        <SideWinBadge net={roundBreakdown.perfectPairs} />
+      )}
     </div>
 
-    <div className="min-w-0 flex-1 lg:order-3 lg:w-36 lg:flex-none">
+    <div className="relative min-w-0 flex-1 lg:order-3 lg:w-36 lg:flex-none">
       <SidePill
         label="21+3"
         amount={s.t3Bet}
@@ -590,6 +594,9 @@ function getShoeStatus(g: Game): {
         onIncrease={() => adjustSide("t3Bet", 10)}
         onDecrease={() => adjustSide("t3Bet", -10)}
       />
+      {roundBreakdown && (
+        <SideWinBadge net={roundBreakdown.twentyOnePlusThree} />
+      )}
     </div>
   </div>
 </div>

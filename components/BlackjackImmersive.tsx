@@ -17,6 +17,7 @@ import { ChipStack, Counter, SideBet, sideBetStep } from "./ui";
 import PlayingCard from "./PlayingCard";
 import CardFlight from "./CardFlight";
 import HandSpotBadge from "./HandSpotBadge";
+import SideWinBadge from "./SideWinBadge";
 import Confetti from "./Confetti";
 import DealerShoe from "./DealerShoe";
 import ShuffleAnimation from "./ShuffleAnimation";
@@ -698,27 +699,37 @@ const playerCardStyle = (
 </div>
 
             <div className="mt-1.5 grid grid-cols-2 gap-1.5">
-  <ImmersiveSidePill
-    label="PP"
-    amount={s.ppBet}
-    disabled={!canBet}
-    onIncrease={() => adjustSide("ppBet", sideBetStep(s.ppBet))}
-    onDecrease={() => adjustSide("ppBet", -sideBetStep(Math.max(0, s.ppBet - 1)))}
-    plusDisabled={
-      !canBet || s.ppBet >= 1000 || stake + sideBetStep(s.ppBet) > s.balance
-    }
-  />
+  <div className="relative">
+    <ImmersiveSidePill
+      label="PP"
+      amount={s.ppBet}
+      disabled={!canBet}
+      onIncrease={() => adjustSide("ppBet", sideBetStep(s.ppBet))}
+      onDecrease={() => adjustSide("ppBet", -sideBetStep(Math.max(0, s.ppBet - 1)))}
+      plusDisabled={
+        !canBet || s.ppBet >= 1000 || stake + sideBetStep(s.ppBet) > s.balance
+      }
+    />
+    {roundBreakdown && (
+      <SideWinBadge net={roundBreakdown.perfectPairs} />
+    )}
+  </div>
 
-  <ImmersiveSidePill
-    label="21+3"
-    amount={s.t3Bet}
-    disabled={!canBet}
-    onIncrease={() => adjustSide("t3Bet", sideBetStep(s.t3Bet))}
-    onDecrease={() => adjustSide("t3Bet", -sideBetStep(Math.max(0, s.t3Bet - 1)))}
-    plusDisabled={
-      !canBet || s.t3Bet >= 1000 || stake + sideBetStep(s.t3Bet) > s.balance
-    }
-  />
+  <div className="relative">
+    <ImmersiveSidePill
+      label="21+3"
+      amount={s.t3Bet}
+      disabled={!canBet}
+      onIncrease={() => adjustSide("t3Bet", sideBetStep(s.t3Bet))}
+      onDecrease={() => adjustSide("t3Bet", -sideBetStep(Math.max(0, s.t3Bet - 1)))}
+      plusDisabled={
+        !canBet || s.t3Bet >= 1000 || stake + sideBetStep(s.t3Bet) > s.balance
+      }
+    />
+    {roundBreakdown && (
+      <SideWinBadge net={roundBreakdown.twentyOnePlusThree} />
+    )}
+  </div>
 </div>
           </div>
         ) : (
