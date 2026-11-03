@@ -351,12 +351,12 @@ function getShoeStatus(g: Game): {
                       : resultGlow === "win"
                         ? {
                             background:
-                              "radial-gradient(ellipse at 50% 55%, rgba(229,199,121,0.2) 0%, rgba(229,199,121,0.07) 45%, transparent 80%)",
+                              "radial-gradient(65% 80% at 50% 55%, rgba(229,199,121,0.32) 0%, rgba(229,199,121,0.1) 40%, transparent 100%)",
                           }
                         : resultGlow === "lose"
                           ? {
                               background:
-                                "radial-gradient(ellipse at 50% 55%, rgba(239,68,68,0.16) 0%, rgba(239,68,68,0.05) 45%, transparent 80%)",
+                                "radial-gradient(65% 80% at 50% 55%, rgba(239,68,68,0.26) 0%, rgba(239,68,68,0.08) 40%, transparent 100%)",
                             }
                           : undefined
                   }
