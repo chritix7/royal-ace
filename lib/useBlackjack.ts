@@ -730,7 +730,7 @@ function giveDealer() {
       reveal();
       await sleep(900);
       set({ revealing: false });
-      await sleep(220);
+      await sleep(120);
       await settle();
       return;
     }
@@ -840,7 +840,7 @@ function giveDealer() {
     reveal();
     await sleep(900);
     set({ revealing: false });
-    await sleep(220);
+    await sleep(120);
 
     const { h17 } = ref.current.settings;
     const anyLive = ref.current.hands.some(
@@ -848,14 +848,18 @@ function giveDealer() {
     );
     // Dealer draws with a brisker 650ms cadence between cards — each
     // decision reads clearly without dragging the moment.
+    let drewAny = false;
     for (;;) {
       const { total, soft } = handValue(ref.current.dealer);
       if (!anyLive || total > 17 || (total === 17 && !(h17 && soft))) break;
       giveDealer();
+      drewAny = true;
       await sleep(650);
     }
-    // Short beat so the final dealer total is readable, then settle.
-    await sleep(160);
+    // Only pause before settle when the dealer actually drew — if the
+    // reveal alone brought the dealer to a stand (e.g. 10 + hole 10),
+    // the total is already readable and we snap straight to the result.
+    if (drewAny) await sleep(160);
     await settle();
   }
 
