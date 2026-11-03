@@ -208,7 +208,7 @@ const playerCardStyle = (
 
       <main
         style={tableStyle}
-        className={`relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${tableBg(s.settings)}`}
+        className={`felt-texture relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${tableBg(s.settings)}`}
       >
         {s.settings.theme === "vegas" && <VegasFeltOverlay />}
         {s.celebrate > 0 && (

@@ -203,7 +203,7 @@ function getShoeStatus(g: Game): {
           </div>
         </div>
 
-        <div className={`relative overflow-hidden ${tableBg(s.settings)} px-2 py-4 sm:px-9 sm:py-5`}>
+        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-4 sm:px-9 sm:py-5`}>
           {s.settings.theme === "vegas" && <VegasFeltOverlay />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} />}
           <DealerShoe
