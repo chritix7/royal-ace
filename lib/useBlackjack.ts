@@ -4,6 +4,7 @@ import { perfectPairs, twentyOnePlusThree } from "./sidebets";
 import { ACHIEVEMENTS } from "./achievements";
 import { track as sendTrack } from "./events";
 import { sfx } from "./sound";
+import { HAPTIC, haptic } from "./haptics";
 import { music } from "./music";
 import { wallet } from "./wallet";
 import { CHIPS, MIN_BET, REFILL, EMPTY_STATS, EMPTY_RECORDS, DEFAULT_SETTINGS, INITIAL, tableBacks, sleep as delay, floor10 } from "./game";
@@ -498,6 +499,7 @@ function giveDealer() {
     if (!ref.current.hole) {
       set({ hole: true });
       sfx.flip();
+      haptic(HAPTIC.tick);
     }
   }
 
@@ -510,6 +512,7 @@ function giveDealer() {
     if ((c.bet + v) * c.settings.spots + c.ppBet + c.t3Bet <= c.balance) {
       set({ bet: c.bet + v });
       sfx.chip();
+      haptic(HAPTIC.tick);
     }
   }
   function setBetTo(amount: number) {
@@ -629,7 +632,10 @@ function giveDealer() {
 
   const now = ref.current;
 
-  if (payout > 0) sfx.win();
+  if (payout > 0) {
+    sfx.win();
+    haptic(HAPTIC.big);
+  }
 
   set({
     balance: now.balance + payout,
@@ -950,11 +956,21 @@ if (!settlementId) {
       ? "Round complete · net loss."
       : "Round complete · break even.";
 
-    if (gotBJ) sfx.blackjack();
-    else if (net > 0) sfx.win();
-    else if (hands.every((h) => h.result === "bust")) sfx.bust();
-    else if (net < 0) sfx.lose();
-    else sfx.push();
+    if (gotBJ) {
+      sfx.blackjack();
+      haptic(HAPTIC.epic);
+    } else if (net > 0) {
+      sfx.win();
+      haptic(net >= 200 ? HAPTIC.big : HAPTIC.win);
+    } else if (hands.every((h) => h.result === "bust")) {
+      sfx.bust();
+      haptic(HAPTIC.tick);
+    } else if (net < 0) {
+      sfx.lose();
+      haptic(HAPTIC.tick);
+    } else {
+      sfx.push();
+    }
 
     // Le croupier a vraiment joué sa main (il n'a ni blackjack, ni joué contre des mains déjà perdues)
     const dealerPlayed = !dBJ && hands.some((h) => h.result !== "bust" && h.result !== "surrender" && h.result !== "blackjack");
