@@ -6,6 +6,7 @@ import type { Theme, VegasVariant } from "../lib/game";
 import { CHIPS, THEME_LABELS, THEME_SWATCHES, VEGAS_VARIANTS, money } from "../lib/game";
 import { Counter, Spark, Toggle, SideBet, small } from "./ui";
 import ChipButton from "./ChipButton";
+import { CountGauge, DeckMeter } from "./CountGauge";
 import { ACHIEVEMENTS } from "../lib/achievements";
 import { audio, useAudioSettings } from "../lib/audio";
 import type { Game } from "../lib/useBlackjack";
@@ -504,15 +505,20 @@ export default function Sidebar({ g }: { g: Game }) {
         {showCount && (
           <div className="rounded-3xl border border-white/[0.07] bg-[#101713] p-6">
             <h3 className="text-lg font-bold">Hi-Lo count</h3>
-            <dl className="mt-3 grid grid-cols-2 gap-y-2 text-xs text-white/50">
-              <dt>Running count</dt>
-              <dd className="text-right font-bold text-[#e5c779]">{running > 0 ? "+" : ""}{running}</dd>
-              <dt>True count</dt>
-              <dd className="text-right font-bold text-[#e5c779]">{trueCount > 0 ? "+" : ""}{trueCount.toFixed(1)}</dd>
-              <dt>Decks left</dt>
-              <dd className="text-right text-white">{decksLeft.toFixed(1)}</dd>
-            </dl>
-            <p className="mt-3 text-[11px] leading-4 text-white/35">
+            <div className="mt-4 space-y-3">
+              {/* Running count: scale with total decks, since the max
+                  swing scales with cards still in the shoe. */}
+              <CountGauge
+                label="Running count"
+                value={running}
+                max={Math.max(10, s.settings.decks * 5)}
+                digits={0}
+              />
+              {/* True count typically ranges between −5 and +5 in play. */}
+              <CountGauge label="True count" value={trueCount} max={5} />
+              <DeckMeter decksLeft={decksLeft} totalDecks={s.settings.decks} />
+            </div>
+            <p className="mt-4 text-[11px] leading-4 text-white/35">
               2–6 count +1 · 7–9 count 0 · 10–A count −1. A high positive count means the shoe is rich in tens and aces.
             </p>
           </div>
