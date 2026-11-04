@@ -18,8 +18,6 @@ import { money } from "../lib/game";
  * caller. The hook's `takeInsurance(bool)` is passed through onDecide.
  */
 
-const DISPLAY_MS_AFTER_MOUNT = 0;
-
 export default function InsuranceModal({
   open,
   cost,
@@ -63,7 +61,7 @@ export default function InsuranceModal({
 
       {/* dialog card */}
       <div
-        className="relative w-full max-w-md overflow-hidden rounded-3xl border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a1512] via-[#120e0b] to-[#070504] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.9)] animate-vegas-pop"
+        className="relative w-full max-w-md overflow-hidden rounded-3xl border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a1512] via-[#120e0b] to-[#070504] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.9)] animate-insurance-slide-in"
         style={{
           backgroundImage:
             "radial-gradient(120% 60% at 50% 0%, rgba(215,180,91,0.18) 0%, transparent 60%), linear-gradient(180deg, #1a1512 0%, #120e0b 60%, #070504 100%)",
@@ -79,12 +77,10 @@ export default function InsuranceModal({
         <div className="flex flex-col items-center">
           <div
             aria-hidden
-            className="relative mb-3 flex h-14 w-14 items-center justify-center rounded-xl"
+            className="relative mb-3 flex h-14 w-14 items-center justify-center rounded-xl animate-insurance-ace"
             style={{
               background:
                 "radial-gradient(circle at 50% 35%, #f6e4a9 0%, #d7b45b 55%, #8a6c2b 100%)",
-              boxShadow:
-                "inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.65), 0 0 18px rgba(229,199,121,0.5)",
             }}
           >
             <span
