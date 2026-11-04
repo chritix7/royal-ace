@@ -113,6 +113,20 @@ body {
   }
 }
 
+/* Score badge tick — a short scale pop on each total change so the
+   player feels the hand state update. The bust-tint (red) is driven
+   by the component class, not the keyframe, so the color change stays
+   even after the pop finishes. */
+@keyframes score-tick {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+.animate-score-tick {
+  animation: score-tick 420ms cubic-bezier(0.25, 1.4, 0.5, 1) both;
+  display: inline-block;
+}
+
 /* Round-result reveal: a bouncy pop + a gentle gold halo for wins.
    Used on the "Round complete" / net amount at settle so the moment
    feels earned instead of just appearing. */

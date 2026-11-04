@@ -295,7 +295,10 @@ function getShoeStatus(g: Game): {
             role="status"
             aria-live="polite"
           >
-            <div key={s.message} className="animate-pop max-w-full rounded-full border border-[#d7b45b]/30 bg-black/30 px-3 py-1.5 text-center text-xs text-[#e5c779] sm:px-5 sm:py-2 sm:text-sm">
+            <div
+              key={`msg-${s.message}-${s.phase}-${s.celebrate}`}
+              className="animate-result-pop max-w-full rounded-full border border-[#d7b45b]/30 bg-black/30 px-3 py-1.5 text-center text-xs text-[#e5c779] sm:px-5 sm:py-2 sm:text-sm"
+            >
               {s.message}
             </div>
             {s.net !== null && s.net !== 0 && (

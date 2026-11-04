@@ -309,8 +309,8 @@ const playerCardStyle = (
           className="flex min-h-[52px] shrink-0 flex-col items-center justify-center gap-0.5 px-3 text-center sm:min-h-[60px]"
         >
           <p
-            key={s.message}
-            className="max-w-full animate-pop text-xs font-semibold text-[#ead5a3] sm:text-sm"
+            key={`msg-${s.message}-${s.phase}-${s.celebrate}`}
+            className="max-w-full animate-result-pop text-xs font-semibold text-[#ead5a3] sm:text-sm"
           >
             {s.message}
           </p>
