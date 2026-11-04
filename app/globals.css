@@ -113,6 +113,39 @@ body {
   }
 }
 
+/* Chip-pile bump — a short vertical hop on each chip added so the
+   bet circle visibly reacts. Lighter than animate-pop so it feels
+   like a stack settling, not an entrance. */
+@keyframes chip-bump {
+  0%   { transform: translateY(0) scale(1); }
+  40%  { transform: translateY(-4px) scale(1.06); }
+  100% { transform: translateY(0) scale(1); }
+}
+.animate-chip-bump {
+  animation: chip-bump 320ms cubic-bezier(0.25, 1.4, 0.5, 1) both;
+}
+
+/* Chip-button click — a gold ring that expands outward and fades on
+   every tap. Applied to an inset-0 overlay inside the button so the
+   box-shadow emits from the button's circular edge. The component
+   re-triggers the animation via ref reset so rapid repeated clicks
+   each get their own ring. */
+@keyframes chip-click {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(229, 199, 121, 0.75),
+      0 0 0 0 rgba(229, 199, 121, 0.5);
+  }
+  100% {
+    box-shadow:
+      0 0 0 12px rgba(229, 199, 121, 0),
+      0 0 22px rgba(229, 199, 121, 0);
+  }
+}
+.animate-chip-click {
+  animation: chip-click 500ms ease-out;
+}
+
 /* Deal-button idle breathing — a soft gold halo that pulses when
    the button is enabled (bet placed, balance ok). Infinite loop at
    ~2.2s so it reads as a quiet invitation, never as urgency. */
@@ -243,7 +276,9 @@ body {
   .animate-result-win,
   .animate-score-tick,
   .animate-msg-slide,
-  .animate-deal-ready {
+  .animate-deal-ready,
+  .animate-chip-click,
+  .animate-chip-bump {
     animation: none;
   }
 }

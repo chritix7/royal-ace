@@ -41,7 +41,7 @@ export function ChipStack({ amount }: { amount: number }) {
   return (
     <div
       key={amount}
-      className="animate-pop flex items-end justify-center gap-2"
+      className="animate-chip-bump flex items-end justify-center gap-2"
       aria-label={`${amount} chips bet`}
     >
       {stacks.map(({ v, n }) => {

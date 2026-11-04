@@ -3,8 +3,9 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { Theme, VegasVariant } from "../lib/game";
-import { CHIPS, CHIP_BG, THEME_LABELS, THEME_SWATCHES, VEGAS_VARIANTS, money } from "../lib/game";
+import { CHIPS, THEME_LABELS, THEME_SWATCHES, VEGAS_VARIANTS, money } from "../lib/game";
 import { Counter, Spark, Toggle, SideBet, small } from "./ui";
+import ChipButton from "./ChipButton";
 import { ACHIEVEMENTS } from "../lib/achievements";
 import { audio, useAudioSettings } from "../lib/audio";
 import type { Game } from "../lib/useBlackjack";
@@ -118,15 +119,12 @@ export default function Sidebar({ g }: { g: Game }) {
           </div>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             {CHIPS.map((v) => (
-              <button
+              <ChipButton
                 key={v}
+                value={v}
                 onClick={() => addChip(v)}
                 disabled={!canBet || (s.bet + v) * spots + sides > s.balance}
-                aria-label={`Add ${v} chips`}
-                className={`flex h-14 w-14 items-center justify-center rounded-full border-4 border-dashed border-white/70 text-sm font-black text-white shadow-lg outline-none transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:translate-y-0 ${CHIP_BG[v]}`}
-              >
-                {v}
-              </button>
+              />
             ))}
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2">

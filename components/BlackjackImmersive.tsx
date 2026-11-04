@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import { handValue, isBlackjack } from "../lib/blackjack";
 import {
   CHIPS,
-  CHIP_BG,
   MIN_BET,
   REFILL,
   tableBg,
@@ -14,6 +13,7 @@ import {
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import { useSession } from "../lib/sessionStore";
 import { ChipStack, Counter, SideBet, sideBetStep } from "./ui";
+import ChipButton from "./ChipButton";
 import PlayingCard from "./PlayingCard";
 import CardFlight from "./CardFlight";
 import HandResultBadge from "./HandResultBadge";
@@ -639,19 +639,16 @@ const playerCardStyle = (
 
   <div className="mx-auto grid w-full max-w-[300px] grid-cols-5 gap-1.5">
     {CHIPS.map((value) => (
-      <button
+      <ChipButton
         key={value}
-        type="button"
+        value={value}
+        size="sm"
         onClick={() => addChip(value)}
         disabled={
           !canBet ||
           (s.bet + value) * spots + sides > s.balance
         }
-        aria-label={`Add ${value} chips`}
-        className={`mx-auto flex h-8 w-8 items-center justify-center rounded-full border-2 border-dashed border-white/60 text-[10px] font-black outline-none focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-30 ${CHIP_BG[value]}`}
-      >
-        {value}
-      </button>
+      />
     ))}
   </div>
 
