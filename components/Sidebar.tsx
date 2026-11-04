@@ -4,11 +4,19 @@ import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { Theme, VegasVariant } from "../lib/game";
 import { CHIPS, THEME_LABELS, THEME_SWATCHES, VEGAS_VARIANTS, money } from "../lib/game";
-import { Counter, Spark, Toggle, SideBet, small } from "./ui";
+import { Counter, Spark, Toggle, SideBet } from "./ui";
 import ChipButton from "./ChipButton";
 import { CountGauge, DeckMeter } from "./CountGauge";
 import { FairnessBar, StackedBar } from "./FairnessBar";
 import MiniSpark from "./MiniSpark";
+import {
+  Panel,
+  PanelHeader,
+  eyebrow,
+  hairline,
+  btnGhost,
+  btnPill,
+} from "./SidebarKit";
 import { ACHIEVEMENTS } from "../lib/achievements";
 import { audio, useAudioSettings } from "../lib/audio";
 import type { Game } from "../lib/useBlackjack";
@@ -46,6 +54,8 @@ const verdict = (hits: number, n: number, p: number) => {
   return normal ? <span className="text-emerald-300">· normal</span> : <span className="text-amber-300">· unusual</span>;
 };
 
+type SidebarTab = "session" | "stats" | "coach" | "count" | "records";
+
 export default function Sidebar({ g }: { g: Game }) {
   const sound = useAudioSettings();
   const { s, showHint, setShowHint, showCount, setShowCount, canBet, winRate, spots, sides, stake, running, trueCount, decksLeft, addChip, setBetTo, adjustSide, updateSettings, resetAll } = g;
@@ -59,7 +69,15 @@ export default function Sidebar({ g }: { g: Game }) {
   const [recapOpen, setRecapOpen] = useState(false);
   const [shareState, setShareState] = useState<"idle" | "copied">("idle");
   const [mounted, setMounted] = useState(false);
+  // Active info-panel tab — one card shown at a time, drops 4-5 panels
+  // worth of vertical scroll. "count" is hidden unless the trainer is on.
+  const [tab, setTab] = useState<SidebarTab>("session");
   useEffect(() => setMounted(true), []);
+  // If the count trainer gets turned off while we're on the Count tab,
+  // fall back to the one that always exists.
+  useEffect(() => {
+    if (tab === "count" && !showCount) setTab("session");
+  }, [tab, showCount]);
   const activeVariant: VegasVariant = s.settings.vegasVariant ?? "anthracite";
 
   // Close whichever modal is open on Escape.
@@ -121,20 +139,28 @@ export default function Sidebar({ g }: { g: Game }) {
   };
 
   return (
-      <aside className="flex flex-col gap-5">
-        <div className="rounded-3xl border border-[#c8a65b]/30 bg-[#151b15] p-6">
-          <p className="text-xs text-white/50">Your chips</p>
-          <p className="mt-1 text-3xl font-black text-[#e5c779]">
-            ◈ <Counter value={s.balance} />
-          </p>
-        </div>
-
-        <div className="rounded-3xl border border-[#c8a65b]/20 bg-[#101713] p-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold">Your bet</h3>
-            <span className="text-lg font-bold text-[#e5c779]">◈ {money(s.bet)}</span>
+      <aside className="flex flex-col gap-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1 lg:[scrollbar-width:thin] lg:[scrollbar-color:#d7b45b40_transparent]">
+        {/* MASTER PANEL — balance, bet, side bets. One container so the
+            player sees chips → bet → sides as a single instrument. */}
+        <Panel>
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <p className={eyebrow}>Your chips</p>
+              <p className="mt-0.5 text-2xl font-black text-[#e5c779] tabular-nums">
+                ◈ <Counter value={s.balance} />
+              </p>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className={eyebrow}>Bet</p>
+              <p className="mt-0.5 text-xl font-black text-[#f5d778] tabular-nums">
+                ◈ {money(s.bet)}
+              </p>
+            </div>
           </div>
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
+
+          <div className={hairline} />
+
+          <div className="flex flex-wrap justify-center gap-2">
             {CHIPS.map((v) => (
               <ChipButton
                 key={v}
@@ -144,12 +170,32 @@ export default function Sidebar({ g }: { g: Game }) {
               />
             ))}
           </div>
-          <div className="mt-4 grid grid-cols-3 gap-2">
-            <button onClick={() => setBetTo(s.lastBet)} disabled={!canBet} className={small}>Rebet</button>
-            <button onClick={() => setBetTo(s.bet * 2)} disabled={!canBet || s.bet === 0} className={small}>×2</button>
-            <button onClick={() => setBetTo(0)} disabled={!canBet || s.bet === 0} className={small}>Clear</button>
+
+          <div className="mt-3 grid grid-cols-3 gap-1.5">
+            <button
+              onClick={() => setBetTo(s.lastBet)}
+              disabled={!canBet}
+              className={btnPill}
+            >
+              Rebet
+            </button>
+            <button
+              onClick={() => setBetTo(s.bet * 2)}
+              disabled={!canBet || s.bet === 0}
+              className={btnPill}
+            >
+              ×2
+            </button>
+            <button
+              onClick={() => setBetTo(0)}
+              disabled={!canBet || s.bet === 0}
+              className={btnPill}
+            >
+              Clear
+            </button>
           </div>
-          <div className="mt-4 space-y-2">
+
+          <div className="mt-3 space-y-1.5">
             <SideBet
               label="Perfect Pairs" hint="Your first 2 cards pair · up to 25:1" amount={s.ppBet}
               onChange={(d) => adjustSide("ppBet", d)}
@@ -163,10 +209,31 @@ export default function Sidebar({ g }: { g: Game }) {
               plusDisabled={!canBet || s.t3Bet >= 1000 || stake + 10 > s.balance}
             />
           </div>
-        </div>
+        </Panel>
 
-        <div className="rounded-3xl border border-white/[0.07] bg-[#101713] p-6">
-          <h3 className="text-lg font-bold">Table rules</h3>
+        {/* TABLE RULES — collapsed by default: set once, changed rarely. */}
+        <Panel padded={false}>
+          <details className="group">
+            <summary className="flex cursor-pointer list-none items-center justify-between rounded-3xl px-5 py-4 outline-none transition hover:bg-white/[0.02] focus-visible:ring-2 focus-visible:ring-[#e5c779]">
+              <div>
+                <p className={eyebrow}>Configure</p>
+                <h3 className="text-sm font-black tracking-wide text-white">
+                  Table rules
+                </h3>
+              </div>
+              <span className="flex items-center gap-2 text-[11px] text-white/45">
+                <span className="rounded-full border border-white/10 px-2 py-0.5">
+                  {s.settings.decks}D · {spots}H
+                </span>
+                <span
+                  aria-hidden
+                  className="text-white/40 transition-transform group-open:rotate-180"
+                >
+                  ▾
+                </span>
+              </span>
+            </summary>
+            <div className="border-t border-[#d7b45b]/10 px-5 py-4">
           <div className="mt-3 flex gap-2" role="group" aria-label="Number of decks">
             {[2, 6, 8].map((d) => (
               <button
@@ -308,10 +375,54 @@ export default function Sidebar({ g }: { g: Game }) {
               </dl>
             </div>
           </details>
-        </div>
+            </div>
+          </details>
+        </Panel>
 
-        <div className="rounded-3xl border border-white/[0.07] bg-[#101713] p-6">
-          <h3 className="text-lg font-bold">Session</h3>
+        {/* TABBED INFO SECTION — Session / Stats / Coach / Count / Records
+            share one card so the sidebar drops from eight stacked panels
+            to three. Only one of the five bodies renders at a time. */}
+        <Panel padded={false}>
+          <div
+            role="tablist"
+            aria-label="Blackjack sidebar"
+            className="flex items-center gap-1 overflow-x-auto border-b border-[#d7b45b]/10 px-2 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {(
+              [
+                { id: "session", label: "Session" },
+                { id: "stats", label: "Stats" },
+                { id: "coach", label: "Coach" },
+                ...(showCount
+                  ? ([{ id: "count", label: "Count" }] as const)
+                  : []),
+                { id: "records", label: "Records" },
+              ] as const
+            ).map((t) => {
+              const active = tab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setTab(t.id)}
+                  className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold tracking-wide outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] ${
+                    active
+                      ? "bg-[#d7b45b]/15 text-[#f5d778] shadow-[inset_0_0_0_1px_rgba(215,180,91,0.55)]"
+                      : "text-white/55 hover:text-white"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="px-5 py-4">
+            {tab === "session" && (
+              <>
+          <h3 className="sr-only">Session</h3>
           <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/45">
@@ -388,7 +499,7 @@ export default function Sidebar({ g }: { g: Game }) {
   }}
   disabled={!canBet}
   aria-haspopup="dialog"
-  className={`${small} mt-5 w-full`}
+  className={`${btnGhost} mt-5 w-full`}
 >
   Reset wallet & Blackjack stats
 </button>
@@ -397,12 +508,14 @@ export default function Sidebar({ g }: { g: Game }) {
   Shared wallet reset. Today, achievements and records are kept.
   Confirmation required.
 </p>
-        </div>
+              </>
+            )}
 
-        <div className="min-w-0 rounded-3xl border border-white/[0.07] bg-[#101713] p-5">
-          <h3 className="text-lg font-bold">Fairness check</h3>
+            {tab === "stats" && (
+              <>
+          <h3 className="sr-only">Fairness check</h3>
 
-          <p className="mt-2 text-xs leading-5 text-white/45">
+          <p className="text-xs leading-5 text-white/45">
             Observed results in your saved Blackjack statistics. Small samples
             can vary considerably.
           </p>
@@ -538,22 +651,25 @@ export default function Sidebar({ g }: { g: Game }) {
             Reference figures are indicative, not a guarantee or proof of
             fairness. Results depend on the rules, decisions and sample size.
           </p>
-        </div>
+              </>
+            )}
 
-        <div className="rounded-3xl border border-white/[0.07] bg-[#101713] p-6">
-          <h3 className="text-lg font-bold">Coach</h3>
-          <p className="mt-1 text-xs text-white/40">Each decision is graded against basic strategy.</p>
+            {tab === "coach" && (
+              <>
+          <h3 className="sr-only">Coach</h3>
+          <p className="text-xs text-white/40">Each decision is graded against basic strategy.</p>
           <p className="mt-3 text-2xl font-black text-[#e5c779]">
             {s.stats.decisions ? Math.round((s.stats.correct / s.stats.decisions) * 100) : 0}%
           </p>
           <p className="text-[11px] text-white/40">{s.stats.correct} / {s.stats.decisions} correct decisions</p>
           <p className="mt-3 min-h-8 text-xs text-white/70" aria-live="polite">{s.coach ?? "Make a move to get feedback."}</p>
-        </div>
+              </>
+            )}
 
-        {showCount && (
-          <div className="rounded-3xl border border-white/[0.07] bg-[#101713] p-6">
-            <h3 className="text-lg font-bold">Hi-Lo count</h3>
-            <div className="mt-4 space-y-3">
+            {tab === "count" && showCount && (
+              <>
+            <h3 className="sr-only">Hi-Lo count</h3>
+            <div className="space-y-3">
               {/* Running count: scale with total decks, since the max
                   swing scales with cards still in the shoe. */}
               <CountGauge
@@ -569,11 +685,12 @@ export default function Sidebar({ g }: { g: Game }) {
             <p className="mt-4 text-[11px] leading-4 text-white/35">
               2–6 count +1 · 7–9 count 0 · 10–A count −1. A high positive count means the shoe is rich in tens and aces.
             </p>
-          </div>
-        )}
+              </>
+            )}
 
-        <div className="rounded-3xl border border-white/[0.07] bg-[#101713] p-6">
-          <h3 className="text-lg font-bold">Records</h3>
+            {tab === "records" && (
+              <>
+          <h3 className="sr-only">Records</h3>
           <dl className="mt-3 grid grid-cols-2 gap-y-2 text-xs text-white/50">
             <dt>Biggest win</dt><dd className="text-right text-white">◈ {money(s.records.biggestWin)}</dd>
             <dt>Best win streak</dt><dd className="text-right text-white">{s.records.bestStreak}</dd>
@@ -647,7 +764,10 @@ export default function Sidebar({ g }: { g: Game }) {
               })}
             </ul>
           </div>
-        </div>
+              </>
+            )}
+          </div>
+        </Panel>
 
         <p className="px-3 text-center text-[11px] leading-5 text-white/25">
           Virtual chips only. No real money, deposits or cash-outs.

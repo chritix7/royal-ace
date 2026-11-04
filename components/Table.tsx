@@ -15,8 +15,11 @@ import SideNotePill from "./SideNotePill";
 import SideWinBadge from "./SideWinBadge";
 import VegasFeltOverlay from "./VegasFeltOverlay";
 
+// Premium action button base — used across Hit / Stand / Double / Split /
+// Surrender / Deal. Common shape (border, radius, size, focus ring), with
+// tone + gradient layered on per button.
 const mobileAction =
-  "inline-flex h-10 w-full items-center justify-center rounded-xl border px-1 text-center text-[11px] font-semibold leading-none outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] focus-visible:ring-offset-2 focus-visible:ring-offset-[#101713] disabled:cursor-not-allowed disabled:opacity-40 lg:h-12";
+  "inline-flex h-10 w-full items-center justify-center rounded-xl border px-1 text-center text-[11px] font-bold uppercase tracking-wide leading-none outline-none shadow-[0_2px_0_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.08)] transition-[filter,transform,background,color,border-color] focus-visible:ring-2 focus-visible:ring-[#e5c779] focus-visible:ring-offset-2 focus-visible:ring-offset-[#101713] enabled:active:translate-y-px enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 lg:h-12 sm:text-sm";
 
 const signedMoney = (value: number) =>
   `${value > 0 ? "+" : value < 0 ? "−" : ""}◈ ${money(Math.abs(value))}`;
@@ -643,14 +646,14 @@ function getShoeStatus(g: Game): {
           ) : canBet ? (
             <div className="flex flex-col items-center gap-2">
               {outOfChips ? (
-                <button onClick={refill} className={`${mobileAction} border-transparent bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c]  sm:w-auto sm:px-4 sm:text-base`}>
+                <button onClick={refill} className={`${mobileAction} border-[#d7b45b]/60 bg-gradient-to-b from-[#e5c779] to-[#c89a3f] text-[#10130e] sm:w-auto sm:px-4`}>
                   Out of chips · take a ◈ {REFILL} refill
                 </button>
               ) : (
                 <button
                   onClick={deal}
                   disabled={s.bet < MIN_BET || stake > s.balance}
-                  className={`${mobileAction} max-w-sm border-transparent bg-[#d7b45b] text-xs text-[#10130e] hover:bg-[#efd58c] sm:w-auto sm:px-10 sm:text-base lg:min-w-[280px] ${
+                  className={`${mobileAction} max-w-sm border-[#d7b45b]/70 bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e] sm:w-auto sm:px-10 lg:min-w-[280px] ${
                     s.bet >= MIN_BET && stake <= s.balance ? "animate-deal-ready" : ""
                   }`}
                 >
@@ -661,19 +664,19 @@ function getShoeStatus(g: Game): {
             </div>
           ) : (
             <div className="grid grid-cols-5 gap-1.5 lg:mx-auto lg:max-w-3xl lg:gap-3">
-              <button onClick={hit} disabled={!playing} className={`${mobileAction} border-transparent bg-[#d7b45b] text-[#10130e] hover:bg-[#efd58c]  sm:w-auto sm:px-4 sm:text-base`}>
+              <button onClick={hit} disabled={!playing} className={`${mobileAction} border-[#d7b45b]/60 bg-gradient-to-b from-[#e5c779] to-[#c89a3f] text-[#10130e] sm:w-auto sm:px-4`}>
                 Hit
               </button>
-              <button onClick={stand} disabled={!playing} className={`${mobileAction} border-white/20 text-white hover:border-[#d7b45b] hover:text-[#e5c779]  sm:w-auto sm:px-4 sm:text-base`}>
+              <button onClick={stand} disabled={!playing} className={`${mobileAction} border-white/15 bg-white/[0.04] text-white hover:border-[#d7b45b]/50 hover:text-[#e5c779] sm:w-auto sm:px-4`}>
                 Stand
               </button>
-              <button onClick={double} disabled={!canDouble} className={`${mobileAction} border-[#d7b45b]/50 text-[#e5c779] hover:bg-[#d7b45b]/10  sm:w-auto sm:px-4 sm:text-base`}>
+              <button onClick={double} disabled={!canDouble} className={`${mobileAction} border-[#d7b45b]/50 bg-[#d7b45b]/10 text-[#e5c779] hover:bg-[#d7b45b]/20 sm:w-auto sm:px-4`}>
                 Double
               </button>
-              <button onClick={split} disabled={!canSplit} className={`${mobileAction} border-amber-400/40 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20  sm:w-auto sm:px-4 sm:text-base`}>
+              <button onClick={split} disabled={!canSplit} className={`${mobileAction} border-amber-400/40 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 sm:w-auto sm:px-4`}>
                 Split
               </button>
-              <button onClick={surrender} disabled={!canSurrender} className={`${mobileAction} border-white/15 text-white/60 hover:border-red-300/50 hover:text-red-200  sm:w-auto sm:px-4 sm:text-base`}>
+              <button onClick={surrender} disabled={!canSurrender} className={`${mobileAction} border-white/10 bg-white/[0.02] text-white/60 hover:border-red-300/40 hover:text-red-200 sm:w-auto sm:px-4`}>
                 <span className="lg:hidden">Surr.</span>
                 <span className="hidden lg:inline">Surrender</span>
               </button>
