@@ -53,8 +53,9 @@ export default function Home() {
       <header className="sticky top-0 z-40 border-b border-[#c8a65b]/20 bg-[#0b100e] pt-[env(safe-area-inset-top)]">
   <div className="mx-auto max-w-7xl px-4 py-3 sm:px-8 sm:py-4">
     <div className="flex items-center justify-between gap-3">
-      <h1 className="truncate text-lg font-black tracking-[0.12em] sm:text-3xl">
-        ROYAL <span className="text-[#d7b45b]">ACE</span>
+      <h1 className="header-shine truncate text-lg font-black tracking-[0.12em] sm:text-3xl">
+        ROYAL{" "}
+        <span className="animate-header-breathe text-[#d7b45b]">ACE</span>
       </h1>
 
       <div
