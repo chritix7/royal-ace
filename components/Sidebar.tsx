@@ -7,6 +7,7 @@ import { CHIPS, THEME_LABELS, THEME_SWATCHES, VEGAS_VARIANTS, money } from "../l
 import { Counter, Spark, Toggle, SideBet, small } from "./ui";
 import ChipButton from "./ChipButton";
 import { CountGauge, DeckMeter } from "./CountGauge";
+import { FairnessBar, StackedBar } from "./FairnessBar";
 import { ACHIEVEMENTS } from "../lib/achievements";
 import { audio, useAudioSettings } from "../lib/audio";
 import type { Game } from "../lib/useBlackjack";
@@ -23,6 +24,20 @@ function Kbd({ children }: { children: ReactNode }) {
 
 /** Pourcentage lisible. */
 const rate = (hits: number, n: number) => (n > 0 ? `${((100 * hits) / n).toFixed(1)}%` : "–");
+/** Numeric rate (0..100) for feeding the gauges. */
+const rateNum = (hits: number, n: number) => (n > 0 ? (100 * hits) / n : 0);
+/** Classify observed-vs-reference as neutral (too little data), normal
+ *  (within 3σ of a point reference, or inside a range), or unusual. */
+const classifyPoint = (hits: number, n: number, p: number) => {
+  if (n < 100) return "neutral" as const;
+  const normal = Math.abs(hits / n - p) <= 3 * Math.sqrt((p * (1 - p)) / n);
+  return normal ? ("normal" as const) : ("unusual" as const);
+};
+const classifyRange = (hits: number, n: number, lo: number, hi: number) => {
+  if (n < 100) return "neutral" as const;
+  const r = hits / n;
+  return r >= lo && r <= hi ? ("normal" as const) : ("unusual" as const);
+};
 /** Vrai si le résultat reste dans ce que le hasard donne normalement (3 écarts-types). */
 const verdict = (hits: number, n: number, p: number) => {
   if (n < 100) return <span className="text-white/30">· play more</span>;
@@ -363,134 +378,145 @@ export default function Sidebar({ g }: { g: Game }) {
         </div>
 
         <div className="min-w-0 rounded-3xl border border-white/[0.07] bg-[#101713] p-5">
-  <h3 className="text-lg font-bold">
-    Fairness check
-  </h3>
+          <h3 className="text-lg font-bold">Fairness check</h3>
 
-  <p className="mt-2 text-xs leading-5 text-white/45">
-    Observed results in your saved Blackjack statistics.
-    Small samples can vary considerably.
-  </p>
+          <p className="mt-2 text-xs leading-5 text-white/45">
+            Observed results in your saved Blackjack statistics. Small samples
+            can vary considerably.
+          </p>
 
-  <dl className="mt-4 divide-y divide-white/[0.07]">
-    <div className="pb-3">
-      <dt className="text-xs leading-5 text-white/55">
-        Rounds played
-      </dt>
-      <dd className="mt-1 text-sm font-semibold tabular-nums text-white">
-        {money(s.stats.played)}
-      </dd>
-    </div>
+          <dl className="mt-4 space-y-4">
+            <div>
+              <dt className="text-xs leading-5 text-white/55">Rounds played</dt>
+              <dd className="mt-1 text-sm font-semibold tabular-nums text-white">
+                {money(s.stats.played)}
+              </dd>
+            </div>
 
-    <div className="py-3">
-      <dt className="text-xs leading-5 text-white/55">
-        Dealer blackjacks
-      </dt>
+            <div>
+              <dt className="text-xs leading-5 text-white/55">
+                Dealer blackjacks
+              </dt>
+              <dd className="mt-2">
+                <FairnessBar
+                  observed={rateNum(s.stats.dealerBJs, s.stats.played)}
+                  reference={4.75}
+                  referenceLabel="4.8%"
+                  max={10}
+                  tone={classifyPoint(
+                    s.stats.dealerBJs,
+                    s.stats.played,
+                    0.0475,
+                  )}
+                />
+                <div className="mt-1 text-[11px] leading-4">
+                  {verdict(s.stats.dealerBJs, s.stats.played, 0.0475)}
+                </div>
+              </dd>
+            </div>
 
-      <dd className="mt-1">
-        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <span className="text-sm font-semibold tabular-nums text-white">
-            {rate(s.stats.dealerBJs, s.stats.played)}
-          </span>
+            <div>
+              <dt className="text-xs leading-5 text-white/55">
+                Rounds with your blackjack
+              </dt>
+              <dd className="mt-2">
+                <FairnessBar
+                  observed={rateNum(s.stats.blackjacks, s.stats.played)}
+                  reference={4.75}
+                  referenceLabel="≈ 4.8%"
+                  max={10}
+                  tone="neutral"
+                />
+              </dd>
+              <dd className="mt-1 text-[11px] leading-4 text-white/40">
+                Counts rounds with at least one blackjack. No single-hand
+                reference is applied to mixed one-, two- and three-hand
+                sessions.
+              </dd>
+            </div>
 
-          <span className="text-[11px] leading-4 text-white/40">
-            Reference ≈ 4.8%
-          </span>
+            <div>
+              <dt className="text-xs leading-5 text-white/55">
+                Dealer busts when playing
+              </dt>
+              <dd className="mt-2">
+                <FairnessBar
+                  observed={rateNum(s.stats.dealerBusts, s.stats.dealerPlayed)}
+                  reference={[28, 32]}
+                  referenceLabel="28–32%"
+                  max={60}
+                  tone={classifyRange(
+                    s.stats.dealerBusts,
+                    s.stats.dealerPlayed,
+                    0.28,
+                    0.32,
+                  )}
+                />
+              </dd>
+            </div>
+
+            <div>
+              <dt className="text-xs leading-5 text-white/55">
+                Your resolved hands
+              </dt>
+              <dd className="mt-2">
+                <StackedBar
+                  parts={[
+                    {
+                      label: "Won",
+                      value: s.stats.won,
+                      color: "#5ad48c",
+                    },
+                    {
+                      label: "Push",
+                      value: s.stats.pushed,
+                      color: "#c6c7cf",
+                    },
+                    {
+                      label: "Lost",
+                      value: s.stats.lost,
+                      color: "#f87171",
+                    },
+                  ]}
+                />
+                <div className="mt-2 grid grid-cols-3 gap-2 text-center text-[11px]">
+                  <div>
+                    <p className="text-emerald-300 font-semibold tabular-nums">
+                      {rate(
+                        s.stats.won,
+                        s.stats.won + s.stats.lost + s.stats.pushed,
+                      )}
+                    </p>
+                    <p className="text-white/45">Won</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold tabular-nums text-white/85">
+                      {rate(
+                        s.stats.pushed,
+                        s.stats.won + s.stats.lost + s.stats.pushed,
+                      )}
+                    </p>
+                    <p className="text-white/45">Push</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold tabular-nums text-red-300">
+                      {rate(
+                        s.stats.lost,
+                        s.stats.won + s.stats.lost + s.stats.pushed,
+                      )}
+                    </p>
+                    <p className="text-white/45">Lost</p>
+                  </div>
+                </div>
+              </dd>
+            </div>
+          </dl>
+
+          <p className="mt-4 border-t border-white/[0.07] pt-3 text-[11px] leading-5 text-white/40">
+            Reference figures are indicative, not a guarantee or proof of
+            fairness. Results depend on the rules, decisions and sample size.
+          </p>
         </div>
-
-        <div className="mt-1 text-[11px] leading-4">
-          {verdict(
-            s.stats.dealerBJs,
-            s.stats.played,
-            0.0475
-          )}
-        </div>
-      </dd>
-    </div>
-
-    <div className="py-3">
-      <dt className="text-xs leading-5 text-white/55">
-        Rounds with your blackjack
-      </dt>
-
-      <dd className="mt-1 text-sm font-semibold tabular-nums text-white">
-        {rate(s.stats.blackjacks, s.stats.played)}
-      </dd>
-
-      <dd className="mt-1 text-[11px] leading-4 text-white/40">
-        Counts rounds with at least one blackjack.
-        No single-hand reference is applied to mixed
-        one-, two- and three-hand sessions.
-      </dd>
-    </div>
-
-    <div className="py-3">
-      <dt className="text-xs leading-5 text-white/55">
-        Dealer busts when playing
-      </dt>
-
-      <dd className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-        <span className="text-sm font-semibold tabular-nums text-white">
-          {rate(s.stats.dealerBusts, s.stats.dealerPlayed)}
-        </span>
-
-        <span className="text-[11px] leading-4 text-white/40">
-          Reference 28–32%
-        </span>
-      </dd>
-    </div>
-
-    <div className="pt-3">
-      <dt className="text-xs leading-5 text-white/55">
-        Your resolved hands
-      </dt>
-
-      <dd className="mt-2 grid grid-cols-3 gap-2">
-        <div className="min-w-0 rounded-lg bg-white/[0.04] px-1 py-2 text-center">
-          <p className="text-[10px] text-white/45">
-            Won
-          </p>
-          <p className="mt-1 text-xs font-semibold tabular-nums text-emerald-300">
-            {rate(
-              s.stats.won,
-              s.stats.won + s.stats.lost + s.stats.pushed
-            )}
-          </p>
-        </div>
-
-        <div className="min-w-0 rounded-lg bg-white/[0.04] px-1 py-2 text-center">
-          <p className="text-[10px] text-white/45">
-            Lost
-          </p>
-          <p className="mt-1 text-xs font-semibold tabular-nums text-red-300">
-            {rate(
-              s.stats.lost,
-              s.stats.won + s.stats.lost + s.stats.pushed
-            )}
-          </p>
-        </div>
-
-        <div className="min-w-0 rounded-lg bg-white/[0.04] px-1 py-2 text-center">
-          <p className="text-[10px] text-white/45">
-            Push
-          </p>
-          <p className="mt-1 text-xs font-semibold tabular-nums text-white/80">
-            {rate(
-              s.stats.pushed,
-              s.stats.won + s.stats.lost + s.stats.pushed
-            )}
-          </p>
-        </div>
-      </dd>
-    </div>
-  </dl>
-
-  <p className="mt-4 border-t border-white/[0.07] pt-3 text-[11px] leading-5 text-white/40">
-    Reference figures are indicative, not a guarantee
-    or proof of fairness. Results depend on the rules,
-    decisions and sample size.
-  </p>
-</div>
 
         <div className="rounded-3xl border border-white/[0.07] bg-[#101713] p-6">
           <h3 className="text-lg font-bold">Coach</h3>
