@@ -17,6 +17,7 @@ import {
   btnGhost,
   btnPill,
 } from "./SidebarKit";
+import SectionModal from "./SectionModal";
 import { ACHIEVEMENTS } from "../lib/achievements";
 import { audio, useAudioSettings } from "../lib/audio";
 import type { Game } from "../lib/useBlackjack";
@@ -69,15 +70,17 @@ export default function Sidebar({ g }: { g: Game }) {
   const [recapOpen, setRecapOpen] = useState(false);
   const [shareState, setShareState] = useState<"idle" | "copied">("idle");
   const [mounted, setMounted] = useState(false);
-  // Active info-panel tab — one card shown at a time, drops 4-5 panels
-  // worth of vertical scroll. "count" is hidden unless the trainer is on.
-  const [tab, setTab] = useState<SidebarTab>("session");
+  // Which info-section modal is open, or null when nothing is open.
+  // The sidebar block just shows four buttons now — each opens a
+  // centered SectionModal with that section's content so the sidebar
+  // itself never has to scroll past them.
+  const [openSection, setOpenSection] = useState<SidebarTab | null>(null);
   useEffect(() => setMounted(true), []);
-  // If the count trainer gets turned off while we're on the Count tab,
-  // fall back to the one that always exists.
+  // If the count trainer gets turned off while its modal is open,
+  // close the modal so we don't dangle on a non-visible section.
   useEffect(() => {
-    if (tab === "count" && !showCount) setTab("session");
-  }, [tab, showCount]);
+    if (openSection === "count" && !showCount) setOpenSection(null);
+  }, [openSection, showCount]);
   const activeVariant: VegasVariant = s.settings.vegasVariant ?? "anthracite";
 
   // Close whichever modal is open on Escape.
@@ -395,49 +398,65 @@ export default function Sidebar({ g }: { g: Game }) {
           </details>
         </Panel>
 
-        {/* TABBED INFO SECTION — Session / Stats / Coach / Count / Records
-            share one card so the sidebar drops from eight stacked panels
-            to three. Only one of the five bodies renders at a time. */}
-        <Panel padded={false}>
-          <div
-            role="tablist"
-            aria-label="Blackjack sidebar"
-            className="flex items-center gap-1 overflow-x-auto border-b border-[#d7b45b]/10 px-2 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
+        {/* EXPLORE — compact button grid; clicking a button opens a
+            centered SectionModal instead of showing the content
+            inline, so the sidebar never scrolls past these panels. */}
+        <Panel>
+          <PanelHeader eyebrow="Explore" title="Session, stats & more" />
+          <div className="mt-3 grid grid-cols-2 gap-2">
             {(
               [
-                { id: "session", label: "Session" },
-                { id: "stats", label: "Stats" },
-                { id: "coach", label: "Coach" },
+                { id: "session", label: "Session", glyph: "◈" },
+                { id: "stats", label: "Stats", glyph: "⌾" },
+                { id: "coach", label: "Coach", glyph: "✦" },
                 ...(showCount
-                  ? ([{ id: "count", label: "Count" }] as const)
+                  ? ([{ id: "count", label: "Count", glyph: "+/−" }] as const)
                   : []),
-                { id: "records", label: "Records" },
+                { id: "records", label: "Records", glyph: "★" },
               ] as const
-            ).map((t) => {
-              const active = tab === t.id;
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setTab(t.id)}
-                  className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold tracking-wide outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] ${
-                    active
-                      ? "bg-[#d7b45b]/15 text-[#f5d778] shadow-[inset_0_0_0_1px_rgba(215,180,91,0.55)]"
-                      : "text-white/55 hover:text-white"
-                  }`}
+            ).map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setOpenSection(t.id)}
+                aria-haspopup="dialog"
+                className="group relative flex items-center gap-2.5 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-[#161c17] to-[#0e1310] px-3 py-2.5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_1px_0_rgba(0,0,0,0.5)] outline-none transition hover:-translate-y-0.5 hover:border-[#d7b45b]/50 focus-visible:ring-2 focus-visible:ring-[#e5c779]"
+              >
+                <span
+                  aria-hidden
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black text-[#1a1612]"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 50% 35%, #f6e4a9 0%, #d7b45b 55%, #8a6c2b 100%)",
+                    boxShadow:
+                      "inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.5), 0 0 6px rgba(229,199,121,0.3)",
+                  }}
                 >
+                  {t.glyph}
+                </span>
+                <span className="text-[12px] font-bold tracking-wide text-white/85 group-hover:text-[#f5d778]">
                   {t.label}
-                </button>
-              );
-            })}
+                </span>
+                <span
+                  aria-hidden
+                  className="ml-auto text-[10px] text-white/30 group-hover:text-[#e5c779]"
+                >
+                  ▸
+                </span>
+              </button>
+            ))}
           </div>
+        </Panel>
 
-          <div className="px-5 py-4">
-            {tab === "session" && (
-              <>
+        {/* ─── Section modals — one per button above ─── */}
+
+        <SectionModal
+          open={openSection === "session"}
+          onClose={() => setOpenSection(null)}
+          eyebrow="Blackjack"
+          title="Session"
+          maxWidth="md"
+        >
           <h3 className="sr-only">Session</h3>
           <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
             <div className="mb-2 flex items-center justify-between">
@@ -524,11 +543,15 @@ export default function Sidebar({ g }: { g: Game }) {
   Shared wallet reset. Today, achievements and records are kept.
   Confirmation required.
 </p>
-              </>
-            )}
+        </SectionModal>
 
-            {tab === "stats" && (
-              <>
+        <SectionModal
+          open={openSection === "stats"}
+          onClose={() => setOpenSection(null)}
+          eyebrow="Fairness"
+          title="Stats"
+          maxWidth="md"
+        >
           <h3 className="sr-only">Fairness check</h3>
 
           <p className="text-xs leading-5 text-white/45">
@@ -667,11 +690,15 @@ export default function Sidebar({ g }: { g: Game }) {
             Reference figures are indicative, not a guarantee or proof of
             fairness. Results depend on the rules, decisions and sample size.
           </p>
-              </>
-            )}
+        </SectionModal>
 
-            {tab === "coach" && (
-              <>
+        <SectionModal
+          open={openSection === "coach"}
+          onClose={() => setOpenSection(null)}
+          eyebrow="Basic strategy"
+          title="Coach"
+          maxWidth="md"
+        >
           <h3 className="sr-only">Coach</h3>
           <p className="text-xs text-white/40">Each decision is graded against basic strategy.</p>
           <p className="mt-3 text-2xl font-black text-[#e5c779]">
@@ -679,11 +706,16 @@ export default function Sidebar({ g }: { g: Game }) {
           </p>
           <p className="text-[11px] text-white/40">{s.stats.correct} / {s.stats.decisions} correct decisions</p>
           <p className="mt-3 min-h-8 text-xs text-white/70" aria-live="polite">{s.coach ?? "Make a move to get feedback."}</p>
-              </>
-            )}
+        </SectionModal>
 
-            {tab === "count" && showCount && (
-              <>
+        {showCount && (
+          <SectionModal
+            open={openSection === "count"}
+            onClose={() => setOpenSection(null)}
+            eyebrow="Trainer"
+            title="Hi-Lo count"
+            maxWidth="md"
+          >
             <h3 className="sr-only">Hi-Lo count</h3>
             <div className="space-y-3">
               {/* Running count: scale with total decks, since the max
@@ -701,11 +733,16 @@ export default function Sidebar({ g }: { g: Game }) {
             <p className="mt-4 text-[11px] leading-4 text-white/35">
               2–6 count +1 · 7–9 count 0 · 10–A count −1. A high positive count means the shoe is rich in tens and aces.
             </p>
-              </>
-            )}
+          </SectionModal>
+        )}
 
-            {tab === "records" && (
-              <>
+        <SectionModal
+          open={openSection === "records"}
+          onClose={() => setOpenSection(null)}
+          eyebrow="Archives"
+          title="Records"
+          maxWidth="md"
+        >
           <h3 className="sr-only">Records</h3>
           <dl className="mt-3 grid grid-cols-2 gap-y-2 text-xs text-white/50">
             <dt>Biggest win</dt><dd className="text-right text-white">◈ {money(s.records.biggestWin)}</dd>
@@ -780,10 +817,7 @@ export default function Sidebar({ g }: { g: Game }) {
               })}
             </ul>
           </div>
-              </>
-            )}
-          </div>
-        </Panel>
+        </SectionModal>
 
         <p className="px-3 text-center text-[11px] leading-5 text-white/25">
           Virtual chips only. No real money, deposits or cash-outs.
