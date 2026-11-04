@@ -557,16 +557,74 @@ export default function Sidebar({ g }: { g: Game }) {
             <dt>Best win streak</dt><dd className="text-right text-white">{s.records.bestStreak}</dd>
             <dt>Peak balance</dt><dd className="text-right text-white">◈ {money(s.records.peakBalance)}</dd>
           </dl>
-          <ul className="mt-4 space-y-1.5 text-xs">
-            {ACHIEVEMENTS.map((a) => {
-              const done = s.unlocked.includes(a.id);
-              return (
-                <li key={a.id} className={done ? "text-[#e5c779]" : "text-white/30"}>
-                  {done ? "★" : "☆"} {a.title} <span className="text-white/30">· {a.desc}</span>
-                </li>
-              );
-            })}
-          </ul>
+          <div className="mt-5">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
+              Achievements · {s.unlocked.length}/{ACHIEVEMENTS.length}
+            </p>
+            <ul className="grid grid-cols-2 gap-2">
+              {ACHIEVEMENTS.map((a) => {
+                const done = s.unlocked.includes(a.id);
+                return (
+                  <li
+                    key={a.id}
+                    className={`relative overflow-hidden rounded-xl border p-2 transition ${
+                      done
+                        ? "border-[#e5c779]/60 bg-[#e5c779]/[0.06]"
+                        : "border-white/[0.06] bg-black/20"
+                    }`}
+                    style={
+                      done
+                        ? {
+                            boxShadow:
+                              "0 0 14px rgba(229,199,121,0.18), inset 0 1px 0 rgba(229,199,121,0.15)",
+                          }
+                        : undefined
+                    }
+                  >
+                    <div className="flex items-start gap-2">
+                      <span
+                        aria-hidden
+                        className={`relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black leading-none ${
+                          done ? "text-[#1a1612]" : "text-white/30"
+                        }`}
+                        style={
+                          done
+                            ? {
+                                background:
+                                  "radial-gradient(circle at 50% 35%, #f6e4a9 0%, #d7b45b 55%, #8a6c2b 100%)",
+                                boxShadow:
+                                  "inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.5), 0 0 8px rgba(229,199,121,0.4)",
+                              }
+                            : {
+                                background: "rgba(255,255,255,0.05)",
+                                boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)",
+                              }
+                        }
+                      >
+                        ★
+                      </span>
+                      <div className="min-w-0">
+                        <p
+                          className={`truncate text-[11px] font-bold ${
+                            done ? "text-[#f5d778]" : "text-white/55"
+                          }`}
+                        >
+                          {a.title}
+                        </p>
+                        <p
+                          className={`mt-0.5 text-[10px] leading-3 ${
+                            done ? "text-white/60" : "text-white/30"
+                          }`}
+                        >
+                          {a.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </div>
 
         <p className="px-3 text-center text-[11px] leading-5 text-white/25">
