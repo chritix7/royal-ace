@@ -113,6 +113,26 @@ body {
   }
 }
 
+/* Phase-transition message slide — lighter than the round-complete
+   pop. Used for "Your move.", "Dealer's turn…", "Hit, stand…" and
+   the other mid-round phrases so the UI feels alive without turning
+   every message change into a bouncy event. */
+@keyframes msg-slide {
+  from {
+    transform: translateY(-4px);
+    opacity: 0;
+    filter: blur(1.5px);
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+.animate-msg-slide {
+  animation: msg-slide 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 /* Score badge tick — a short scale pop on each total change so the
    player feels the hand state update. The bust-tint (red) is driven
    by the component class, not the keyframe, so the color change stays
@@ -202,7 +222,8 @@ body {
   .animate-side-shine,
   .animate-result-pop,
   .animate-result-win,
-  .animate-score-tick {
+  .animate-score-tick,
+  .animate-msg-slide {
     animation: none;
   }
 }

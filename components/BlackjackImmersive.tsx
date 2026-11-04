@@ -318,7 +318,9 @@ const playerCardStyle = (
         >
           <p
             key={`msg-${s.message}-${s.phase}-${s.celebrate}`}
-            className="max-w-full animate-result-pop text-xs font-semibold text-[#ead5a3] sm:text-sm"
+            className={`max-w-full text-xs font-semibold text-[#ead5a3] sm:text-sm ${
+              s.phase === "settled" ? "animate-result-pop" : "animate-msg-slide"
+            }`}
           >
             {s.message}
           </p>

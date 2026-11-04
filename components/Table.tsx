@@ -295,7 +295,9 @@ function getShoeStatus(g: Game): {
           >
             <div
               key={`msg-${s.message}-${s.phase}-${s.celebrate}`}
-              className="animate-result-pop max-w-full rounded-full border border-[#d7b45b]/30 bg-black/30 px-3 py-1.5 text-center text-xs text-[#e5c779] sm:px-5 sm:py-2 sm:text-sm"
+              className={`max-w-full rounded-full border border-[#d7b45b]/30 bg-black/30 px-3 py-1.5 text-center text-xs text-[#e5c779] sm:px-5 sm:py-2 sm:text-sm ${
+                s.phase === "settled" ? "animate-result-pop" : "animate-msg-slide"
+              }`}
             >
               {s.message}
             </div>
