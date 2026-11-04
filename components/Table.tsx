@@ -299,7 +299,14 @@ function getShoeStatus(g: Game): {
               {s.message}
             </div>
             {s.net !== null && s.net !== 0 && (
-              <div className={`animate-pop text-xl font-black sm:text-2xl ${s.net > 0 ? "text-[#f5d778]" : "text-red-300"}`}>
+              <div
+                key={`net-${s.net}-${s.celebrate}`}
+                className={`inline-block text-xl font-black sm:text-2xl ${
+                  s.net > 0
+                    ? "text-[#f5d778] animate-result-win"
+                    : "text-red-300 animate-result-pop"
+                }`}
+              >
                 {s.net > 0 ? "+" : "−"}◈ {money(Math.abs(s.net))}
               </div>
             )}

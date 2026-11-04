@@ -113,6 +113,32 @@ body {
   }
 }
 
+/* Round-result reveal: a bouncy pop + a gentle gold halo for wins.
+   Used on the "Round complete" / net amount at settle so the moment
+   feels earned instead of just appearing. */
+@keyframes result-pop {
+  0%   { opacity: 0; transform: scale(0.5); }
+  55%  { opacity: 1; transform: scale(1.18); }
+  80%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+@keyframes result-glow-win {
+  0%, 100% { text-shadow: 0 0 10px rgba(246,228,169,0.35), 0 1px 0 rgba(0,0,0,0.85); }
+  50%      { text-shadow: 0 0 22px rgba(246,228,169,0.85), 0 0 40px rgba(229,199,121,0.45), 0 1px 0 rgba(0,0,0,0.85); }
+}
+.animate-result-pop {
+  animation: result-pop 620ms cubic-bezier(0.2, 1.35, 0.4, 1) both;
+}
+/* Combined pop + glow for winning results — CSS can stack two
+   animations with different properties on a single element via a
+   comma-separated declaration, so the scale pop AND the gold text
+   shadow both play. */
+.animate-result-win {
+  animation:
+    result-pop 620ms cubic-bezier(0.2, 1.35, 0.4, 1) both,
+    result-glow-win 1600ms ease-in-out 200ms 1 both;
+}
+
 /* Gold shine sweep across the side-bet win pill, one-shot on
    appearance so the win reads with a tiny flourish without ongoing
    motion. */
@@ -159,7 +185,9 @@ body {
   .animate-vegas-fade,
   .animate-vegas-pop,
   .animate-reveal-glow,
-  .animate-side-shine {
+  .animate-side-shine,
+  .animate-result-pop,
+  .animate-result-win {
     animation: none;
   }
 }
