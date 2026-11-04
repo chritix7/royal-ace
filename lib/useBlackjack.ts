@@ -832,6 +832,22 @@ function giveDealer() {
   }
 
   async function dealerPlay() {
+    const anyLive = ref.current.hands.some(
+      (h) => h.result !== "surrender" && !(!h.split && isBlackjack(h.cards)) && handValue(h.cards).total <= 21
+    );
+
+    // Fast path: if every hand already busted/surrendered, the dealer
+    // has nothing to beat — no suspense needed. Flip the hole card AND
+    // settle in the same tick so the reveal and the result appear
+    // together instead of making the player wait through the dramatic
+    // beat for a result they already know.
+    if (!anyLive) {
+      set({ phase: "dealer", message: "Dealer's turn…" });
+      reveal();
+      await settle();
+      return;
+    }
+
     // Dramatic reveal: short anticipation beat → mark the hole card as
     // "revealing" so the UI can glow around it → flip (PlayingCard
     // handles the 900ms rotateY) → brief rest before the dealer draws.
@@ -843,15 +859,13 @@ function giveDealer() {
     await sleep(120);
 
     const { h17 } = ref.current.settings;
-    const anyLive = ref.current.hands.some(
-      (h) => h.result !== "surrender" && !(!h.split && isBlackjack(h.cards)) && handValue(h.cards).total <= 21
-    );
     // Dealer draws with a brisker 650ms cadence between cards — each
-    // decision reads clearly without dragging the moment.
+    // decision reads clearly without dragging the moment. anyLive is
+    // true here (the fast path above returned when it was false).
     let drewAny = false;
     for (;;) {
       const { total, soft } = handValue(ref.current.dealer);
-      if (!anyLive || total > 17 || (total === 17 && !(h17 && soft))) break;
+      if (total > 17 || (total === 17 && !(h17 && soft))) break;
       giveDealer();
       drewAny = true;
       await sleep(650);
