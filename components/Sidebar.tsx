@@ -8,6 +8,7 @@ import { Counter, Spark, Toggle, SideBet, small } from "./ui";
 import ChipButton from "./ChipButton";
 import { CountGauge, DeckMeter } from "./CountGauge";
 import { FairnessBar, StackedBar } from "./FairnessBar";
+import MiniSpark from "./MiniSpark";
 import { ACHIEVEMENTS } from "../lib/achievements";
 import { audio, useAudioSettings } from "../lib/audio";
 import type { Game } from "../lib/useBlackjack";
@@ -312,18 +313,39 @@ export default function Sidebar({ g }: { g: Game }) {
         <div className="rounded-3xl border border-white/[0.07] bg-[#101713] p-6">
           <h3 className="text-lg font-bold">Session</h3>
           <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/45">Today</p>
-  <dl className="mt-2 grid grid-cols-2 gap-y-1.5 text-xs text-white/50">
-    <dt>Net</dt>
-<dd className={`text-right font-bold ${session.bj.net >= 0 ? "text-emerald-300" : "text-red-300"}`}>
-  {session.bj.net >= 0 ? "+" : "−"}◈ {money(Math.abs(session.bj.net))}
-</dd>
-    <dt>Rounds</dt>
-    <dd className="text-right text-white">{money(session.bj.spins)}</dd>
-    <dt>Biggest win</dt>
-    <dd className="text-right text-white">◈ {money(session.bj.biggest)}</dd>
-  </dl>
-</div>
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/45">
+                Today
+              </p>
+              <p
+                className={`text-xs font-bold tabular-nums ${
+                  session.bj.net >= 0 ? "text-emerald-300" : "text-red-300"
+                }`}
+              >
+                {session.bj.net >= 0 ? "+" : "−"}◈{" "}
+                {money(Math.abs(session.bj.net))}
+              </p>
+            </div>
+            {/* Today's trend: the tail of s.trend covering today's rounds. */}
+            <MiniSpark
+              data={s.trend.slice(
+                -Math.min(
+                  Math.max(session.bj.spins + 1, 2),
+                  s.trend.length,
+                ),
+              )}
+            />
+            <dl className="mt-2 grid grid-cols-2 gap-y-1 text-[11px] text-white/50">
+              <dt>Rounds</dt>
+              <dd className="text-right tabular-nums text-white">
+                {money(session.bj.spins)}
+              </dd>
+              <dt>Biggest win</dt>
+              <dd className="text-right tabular-nums text-white">
+                ◈ {money(session.bj.biggest)}
+              </dd>
+            </dl>
+          </div>
           <dl className="mt-3 grid grid-cols-2 gap-y-2 text-xs text-white/50">
             <dt>Rounds played</dt>
 <dd className="text-right text-white">{s.stats.played}</dd>
