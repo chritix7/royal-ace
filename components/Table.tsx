@@ -11,6 +11,7 @@ import DealerShoe from "./DealerShoe";
 import CardFlight from "./CardFlight";
 import HandSpotBadge from "./HandSpotBadge";
 import ShuffleAnimation from "./ShuffleAnimation";
+import SideNotePill from "./SideNotePill";
 import SideWinBadge from "./SideWinBadge";
 import VegasFeltOverlay from "./VegasFeltOverlay";
 
@@ -302,11 +303,7 @@ function getShoeStatus(g: Game): {
                 {s.net > 0 ? "+" : "−"}◈ {money(Math.abs(s.net))}
               </div>
             )}
-            {s.sideNote && (
-              <div className={`animate-pop max-w-full rounded-full border px-3 py-1 text-center text-[11px] sm:text-xs ${s.sideNote.includes("+") ? "border-[#e5c779]/60 bg-[#e5c779]/15 text-[#f5d778]" : "border-white/15 text-white/50"}`}>
-                {s.sideNote}
-              </div>
-            )}
+            <SideNotePill note={s.sideNote} />
             {advice && (
               <div className="max-w-full rounded-full border border-sky-300/40 bg-sky-400/10 px-3 py-1 text-center text-[11px] text-sky-200 sm:text-xs">
                 Basic strategy: {advice}

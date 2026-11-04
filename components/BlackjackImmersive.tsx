@@ -17,6 +17,7 @@ import { ChipStack, Counter, SideBet, sideBetStep } from "./ui";
 import PlayingCard from "./PlayingCard";
 import CardFlight from "./CardFlight";
 import HandSpotBadge from "./HandSpotBadge";
+import SideNotePill from "./SideNotePill";
 import SideWinBadge from "./SideWinBadge";
 import Confetti from "./Confetti";
 import DealerShoe from "./DealerShoe";
@@ -305,11 +306,13 @@ const playerCardStyle = (
           role="status"
           aria-live="polite"
           aria-atomic="true"
-          className="flex h-[52px] shrink-0 flex-col items-center justify-center gap-0.5 px-3 text-center sm:h-[60px]"
+          className="flex min-h-[52px] shrink-0 flex-col items-center justify-center gap-0.5 px-3 text-center sm:min-h-[60px]"
         >
           <p className="max-w-full text-xs font-semibold text-[#ead5a3] sm:text-sm">
             {s.message}
           </p>
+
+          <SideNotePill note={s.sideNote} />
 
           {s.phase === "settled" && s.net !== null ? (
   <div className="flex items-center justify-center gap-2">

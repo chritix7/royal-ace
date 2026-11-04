@@ -113,6 +113,17 @@ body {
   }
 }
 
+/* Gold shine sweep across the side-bet win pill, one-shot on
+   appearance so the win reads with a tiny flourish without ongoing
+   motion. */
+@keyframes side-shine {
+  0%   { transform: translateX(-130%); }
+  70%, 100% { transform: translateX(220%); }
+}
+.animate-side-shine {
+  animation: side-shine 1100ms ease-out 180ms 1 both;
+}
+
 /* Hole-card reveal: a brief gold halo that pulses behind the dealer's
    second card while it flips, so the reveal reads even on small
    screens / full-screen contexts. */
@@ -147,7 +158,8 @@ body {
   .animate-pop,
   .animate-vegas-fade,
   .animate-vegas-pop,
-  .animate-reveal-glow {
+  .animate-reveal-glow,
+  .animate-side-shine {
     animation: none;
   }
 }
