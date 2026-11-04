@@ -16,6 +16,7 @@ import { useSession } from "../lib/sessionStore";
 import { ChipStack, Counter, SideBet, sideBetStep } from "./ui";
 import PlayingCard from "./PlayingCard";
 import CardFlight from "./CardFlight";
+import HandResultBadge from "./HandResultBadge";
 import HandSpotBadge from "./HandSpotBadge";
 import SideNotePill from "./SideNotePill";
 import SideWinBadge from "./SideWinBadge";
@@ -437,19 +438,7 @@ const playerCardStyle = (
                     </span>
 
                     {hand.result && (
-                      <span
-                        className={`font-semibold ${
-                          hand.result === "win" ||
-                          hand.result === "blackjack"
-                            ? "text-emerald-300"
-                            : hand.result === "push" ||
-                              hand.result === "surrender"
-                            ? "text-white/60"
-                            : "text-red-300"
-                        }`}
-                      >
-                        {hand.result}
-                      </span>
+                      <HandResultBadge result={hand.result} size="sm" />
                     )}
                   </div>
 

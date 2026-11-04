@@ -1,7 +1,6 @@
 "use client";
 
 import { handValue, isBlackjack } from "../lib/blackjack";
-import type { Result } from "../lib/blackjack";
 import { MIN_BET, REFILL, money, tableBg } from "../lib/game";
 import { ChipStack } from "./ui";
 import PlayingCard from "./PlayingCard";
@@ -9,20 +8,12 @@ import Confetti from "./Confetti";
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import DealerShoe from "./DealerShoe";
 import CardFlight from "./CardFlight";
+import HandResultBadge from "./HandResultBadge";
 import HandSpotBadge from "./HandSpotBadge";
 import ShuffleAnimation from "./ShuffleAnimation";
 import SideNotePill from "./SideNotePill";
 import SideWinBadge from "./SideWinBadge";
 import VegasFeltOverlay from "./VegasFeltOverlay";
-
-const RESULT_UI: Record<Result, { label: string; cls: string }> = {
-  blackjack: { label: "Blackjack", cls: "border-[#e5c779] bg-[#e5c779]/20 text-[#f5d778]" },
-  win: { label: "Win", cls: "border-emerald-400/50 bg-emerald-500/20 text-emerald-300" },
-  push: { label: "Push", cls: "border-white/30 bg-white/10 text-white/70" },
-  lose: { label: "Lose", cls: "border-red-400/50 bg-red-500/20 text-red-300" },
-  bust: { label: "Bust", cls: "border-red-400/50 bg-red-500/20 text-red-300" },
-  surrender: { label: "Surrender", cls: "border-white/30 bg-white/10 text-white/70" },
-};
 
 const mobileAction =
   "inline-flex h-10 w-full items-center justify-center rounded-xl border px-1 text-center text-[11px] font-semibold leading-none outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] focus-visible:ring-offset-2 focus-visible:ring-offset-[#101713] disabled:cursor-not-allowed disabled:opacity-40 lg:h-12";
@@ -371,11 +362,7 @@ function getShoeStatus(g: Game): {
                       ◈ {money(h.bet)}
                       {h.doubled && " (doubled)"}
                     </span>
-                    {h.result && (
-                      <span className={`animate-pop rounded-full border px-2 py-0.5 font-bold ${RESULT_UI[h.result].cls}`}>
-                        {RESULT_UI[h.result].label}
-                      </span>
-                    )}
+                    {h.result && <HandResultBadge result={h.result} />}
                   </div>
                   <div className={`flex justify-center ${compact ? "min-h-[60px] sm:min-h-24" : "min-h-20 sm:min-h-28"}`}>
                     {h.cards.map((card, k) => (
