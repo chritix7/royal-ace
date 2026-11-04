@@ -301,29 +301,26 @@ export function SideBet({
   // Step down from the amount we'll land on — keeps the cadence
   // symmetric so going + then − returns to the same value.
   const stepDown = sideBetStep(Math.max(0, amount - 1));
-    const b = `${
+  // Premium +/- pills — glass-dark, inset top highlight, warms to gold
+  // on hover and presses down 1px on active.
+  const b = `${
     roomy ? "h-9 w-9 text-base" : "h-7 w-7 text-sm"
-  } flex shrink-0 items-center justify-center rounded-full border border-white/15 text-white/70 outline-none transition hover:border-[#d7b45b] focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-30`;
+  } flex shrink-0 items-center justify-center rounded-full border border-white/15 bg-gradient-to-b from-white/[0.05] to-black/20 text-white/75 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_0_rgba(0,0,0,0.5)] outline-none transition hover:border-[#d7b45b]/60 hover:text-[#e5c779] focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px disabled:opacity-30`;
 
   return (
     <div
-      className={`flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 ${
-        roomy ? "gap-2 px-2 py-2" : "px-3 py-2"
+      className={`flex items-center justify-between rounded-2xl border border-white/10 bg-gradient-to-b from-black/30 to-black/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${
+        roomy ? "gap-2 px-2 py-2" : "px-3 py-1.5"
       }`}
+      title={hint}
     >
-      <div className={roomy ? "min-w-0 flex-1" : ""}>
-        <p className="text-xs font-semibold text-white">
-          {label}
-        </p>
-        <p
-          className={`text-[10px] text-white/40 ${
-            roomy ? "truncate" : ""
-          }`}
-          title={hint}
-        >
-          {hint}
-        </p>
-      </div>
+      <p
+        className={`truncate text-xs font-bold tracking-wide text-white ${
+          roomy ? "min-w-0 flex-1" : ""
+        }`}
+      >
+        {label}
+      </p>
 
       <div
         className={`flex shrink-0 items-center ${
@@ -340,7 +337,7 @@ export function SideBet({
           −
         </button>
 
-        <span className="w-10 shrink-0 text-center text-xs font-bold tabular-nums text-[#e5c779]">
+        <span className="w-10 shrink-0 text-center text-xs font-black tabular-nums text-[#e5c779]">
           {amount}
         </span>
 

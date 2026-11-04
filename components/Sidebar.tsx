@@ -229,13 +229,13 @@ export default function Sidebar({ g }: { g: Game }) {
                   Table rules
                 </h3>
               </div>
-              <span className="flex items-center gap-2 text-[11px] text-white/45">
-                <span className="rounded-full border border-white/10 px-2 py-0.5">
+              <span className="flex items-center gap-2 text-[11px]">
+                <span className="rounded-full border border-[#d7b45b]/30 bg-gradient-to-b from-[#d7b45b]/[0.08] to-transparent px-2 py-0.5 font-black uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.12)]">
                   {s.settings.decks}D · {spots}H
                 </span>
                 <span
                   aria-hidden
-                  className="text-white/40 transition-transform group-open:rotate-180"
+                  className="text-[#d7b45b]/60 transition-transform group-open:rotate-180"
                 >
                   ▾
                 </span>
@@ -407,8 +407,8 @@ export default function Sidebar({ g }: { g: Game }) {
             centered SectionModal instead of showing the content
             inline, so the sidebar never scrolls past these panels. */}
         <Panel>
-          <PanelHeader eyebrow="Explore" title="Session, stats & more" />
-          <div className="mt-3 grid grid-cols-2 gap-2">
+          <p className={eyebrow}>Explore</p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
             {(
               [
                 { id: "session", label: "Session", glyph: "◈" },
@@ -425,26 +425,31 @@ export default function Sidebar({ g }: { g: Game }) {
                 type="button"
                 onClick={() => setOpenSection(t.id)}
                 aria-haspopup="dialog"
-                className="group relative flex items-center gap-2.5 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-[#161c17] to-[#0e1310] px-3 py-2.5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_1px_0_rgba(0,0,0,0.5)] outline-none transition hover:-translate-y-0.5 hover:border-[#d7b45b]/50 focus-visible:ring-2 focus-visible:ring-[#e5c779]"
+                className="group relative flex items-center gap-2 overflow-hidden rounded-2xl border border-[#d7b45b]/20 bg-gradient-to-b from-[#1a2219] to-[#0c110e] px-2.5 py-2 text-left shadow-[inset_0_1px_0_rgba(229,199,121,0.08),0_2px_0_rgba(0,0,0,0.5)] outline-none transition-[transform,border-color,background] hover:-translate-y-0.5 hover:border-[#d7b45b]/70 hover:from-[#1f2820] hover:to-[#101713] focus-visible:ring-2 focus-visible:ring-[#e5c779]"
               >
+                {/* sheen that runs on hover */}
                 <span
                   aria-hidden
-                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black text-[#1a1612]"
+                  className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-[#e5c779]/10 to-transparent transition-transform duration-700 group-hover:translate-x-full"
+                />
+                <span
+                  aria-hidden
+                  className="relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black text-[#1a1612]"
                   style={{
                     background:
                       "radial-gradient(circle at 50% 35%, #f6e4a9 0%, #d7b45b 55%, #8a6c2b 100%)",
                     boxShadow:
-                      "inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.5), 0 0 6px rgba(229,199,121,0.3)",
+                      "inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.5), 0 0 6px rgba(229,199,121,0.35)",
                   }}
                 >
                   {t.glyph}
                 </span>
-                <span className="text-[12px] font-bold tracking-wide text-white/85 group-hover:text-[#f5d778]">
+                <span className="relative text-[12px] font-black uppercase tracking-wider text-white/85 group-hover:text-[#f5d778]">
                   {t.label}
                 </span>
                 <span
                   aria-hidden
-                  className="ml-auto text-[10px] text-white/30 group-hover:text-[#e5c779]"
+                  className="relative ml-auto text-[10px] text-white/30 transition-transform group-hover:translate-x-0.5 group-hover:text-[#e5c779]"
                 >
                   ▸
                 </span>
@@ -823,10 +828,6 @@ export default function Sidebar({ g }: { g: Game }) {
             </ul>
           </div>
         </SectionModal>
-
-        <p className="px-3 text-center text-[11px] leading-5 text-white/25">
-          Virtual chips only. No real money, deposits or cash-outs.
-        </p>
 
         {mounted && recapOpen && createPortal(
           <div

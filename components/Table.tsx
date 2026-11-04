@@ -14,15 +14,13 @@ import ShuffleAnimation from "./ShuffleAnimation";
 import SideNotePill from "./SideNotePill";
 import SideWinBadge from "./SideWinBadge";
 import VegasFeltOverlay from "./VegasFeltOverlay";
+import ResultRail from "./blackjack-immersive/ResultRail";
 
 // Premium action button base — used across Hit / Stand / Double / Split /
 // Surrender / Deal. Common shape (border, radius, size, focus ring), with
 // tone + gradient layered on per button.
 const mobileAction =
   "inline-flex h-10 w-full items-center justify-center rounded-xl border px-1 text-center text-[11px] font-bold uppercase tracking-wide leading-none outline-none shadow-[0_2px_0_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.08)] transition-[filter,transform,background,color,border-color] focus-visible:ring-2 focus-visible:ring-[#e5c779] focus-visible:ring-offset-2 focus-visible:ring-offset-[#101713] enabled:active:translate-y-px enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 lg:h-12 sm:text-sm";
-
-const signedMoney = (value: number) =>
-  `${value > 0 ? "+" : value < 0 ? "−" : ""}◈ ${money(Math.abs(value))}`;
 
 type SidePillProps = {
   label: string;
@@ -183,6 +181,12 @@ function getShoeStatus(g: Game): {
   return (
       <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl">
         <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-4 sm:px-9 sm:py-5`}>
+          {/* Floating result rail — same component as the Focus view,
+              positioned on the left edge of the felt. Shows the round
+              breakdown and a New-round button at settle, a Hand-in-
+              progress pill otherwise. md:+ only, like in Focus. */}
+          <ResultRail g={g} onNewRound={deal} />
+
           {/* Floating Shoe meter — a compact gold-tinted pill at the top-
               left of the felt. Replaces the old table header strip; the
               dealer rules are already engraved on the felt below. */}
@@ -598,53 +602,8 @@ function getShoeStatus(g: Game): {
 </div>
         </div>
 
-        {/* Contrôles */}
-        {s.phase === "settled" && roundBreakdown && (
-  <details className="mx-3 mb-3 rounded-2xl border border-[#d7b45b]/20 bg-black/20 sm:mx-7">
-    <summary className="cursor-pointer rounded-2xl px-4 py-3 text-xs font-semibold text-[#e5c779] outline-none focus-visible:ring-2 focus-visible:ring-[#e5c779]">
-      Round breakdown · {signedMoney(roundBreakdown.total)}
-    </summary>
-
-    <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-2 px-4 pb-4 text-xs">
-      {[
-        { label: "Main hands", value: roundBreakdown.main },
-        { label: "Insurance", value: roundBreakdown.insurance },
-        { label: "Perfect Pairs", value: roundBreakdown.perfectPairs },
-        { label: "21+3", value: roundBreakdown.twentyOnePlusThree },
-      ].map(({ label, value }) => (
-        <div key={label} className="contents">
-          <dt className="text-white/50">{label}</dt>
-          <dd
-            className={`text-right font-semibold tabular-nums ${
-              value > 0
-                ? "text-emerald-300"
-                : value < 0
-                ? "text-red-300"
-                : "text-white/50"
-            }`}
-          >
-            {signedMoney(value)}
-          </dd>
-        </div>
-      ))}
-
-      <dt className="border-t border-white/10 pt-2 font-semibold text-white">
-        Round net
-      </dt>
-      <dd
-        className={`border-t border-white/10 pt-2 text-right font-bold tabular-nums ${
-          roundBreakdown.total > 0
-            ? "text-emerald-300"
-            : roundBreakdown.total < 0
-            ? "text-red-300"
-            : "text-white/70"
-        }`}
-      >
-        {signedMoney(roundBreakdown.total)}
-      </dd>
-    </dl>
-  </details>
-)}
+        {/* The round breakdown moved onto the felt as a floating
+            ResultRail panel on the left edge — see above. */}
         <div className="sticky bottom-0 z-20 border-t border-white/10 bg-[#101713]/95 px-2 py-2 backdrop-blur sm:px-7 sm:py-4 lg:static lg:border-0 lg:bg-transparent">
           {s.phase === "insurance" ? (
             // The InsuranceModal (mounted at the Blackjack parent) owns

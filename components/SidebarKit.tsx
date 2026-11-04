@@ -29,9 +29,11 @@ export const btnPrimary =
 export const btnGhost =
   "inline-flex min-h-9 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.02] px-3 py-1.5 text-[11px] font-semibold text-white/65 outline-none transition hover:border-[#d7b45b]/40 hover:text-[#e5c779] focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-30";
 
-/** Pill — used for quick bet controls (Rebet / ×2 / Clear). Smaller. */
+/** Pill — used for quick bet controls (Rebet / ×2 / Clear). Smaller.
+ *  Gradient glass body + inset top-highlight, uppercase tracked label,
+ *  gold hover state, press-down 1px on active. */
 export const btnPill =
-  "inline-flex min-h-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.02] px-2 py-1 text-[11px] font-semibold text-white/65 outline-none transition hover:border-[#d7b45b]/40 hover:text-[#e5c779] focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-30";
+  "inline-flex min-h-8 items-center justify-center rounded-full border border-white/12 bg-gradient-to-b from-[#1a2219]/90 to-[#0e1310]/90 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_0_rgba(0,0,0,0.45)] outline-none transition hover:border-[#d7b45b]/60 hover:text-[#e5c779] focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px disabled:cursor-not-allowed disabled:opacity-30";
 
 export function Panel({
   children,
