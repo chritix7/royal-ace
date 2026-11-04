@@ -32,6 +32,14 @@ export default function Home() {
   const [rewardsOpen, setRewardsOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
+  // Immersive (Focus) mode — the fullscreen blackjack view. Lifted up
+  // from <Blackjack> so the toggle button can live in the top toolbar
+  // on the same line as the game tabs and the audio controls.
+  const [focusMode, setFocusMode] = useState(false);
+  // Clear focus whenever the user leaves the blackjack tab.
+  useEffect(() => {
+    if (tab !== "blackjack") setFocusMode(false);
+  }, [tab]);
   const balance = useBalance();
   const flash = useBalanceFlash();
   const locked = useLocked();
@@ -173,15 +181,35 @@ export default function Home() {
     Round in progress…
   </span>
 
-  <div className="ml-auto shrink-0">
+  <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-2">
     <AudioControls />
+
+    {/* Focus (immersive) toggle — only meaningful on the blackjack tab.
+        Lives in the top toolbar so it shares a row with the game tabs
+        and the audio controls. */}
+    {tab === "blackjack" && (
+      <button
+        type="button"
+        onClick={() => setFocusMode((v) => !v)}
+        aria-pressed={focusMode}
+        aria-label={focusMode ? "Exit focus mode" : "Enter focus mode"}
+        className="hidden items-center justify-center gap-1.5 rounded-full border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] outline-none transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 focus-visible:ring-2 focus-visible:ring-[#e5c779] active:translate-y-px sm:inline-flex"
+      >
+        <span aria-hidden="true">⛶</span>
+        Focus
+      </button>
+    )}
   </div>
 </div>
 
         {/* Les deux jeux restent montés : on ne perd pas une manche en changeant d'onglet. */}
         <div className={tab === "blackjack" ? "" : "hidden"}>
           <ErrorBoundary label="Blackjack">
-            <Blackjack active={tab === "blackjack"} />
+            <Blackjack
+              active={tab === "blackjack"}
+              focusMode={focusMode}
+              onFocusChange={setFocusMode}
+            />
           </ErrorBoundary>
         </div>
         <div className={tab === "slots" ? "" : "hidden"}>

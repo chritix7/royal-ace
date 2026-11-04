@@ -182,23 +182,30 @@ function getShoeStatus(g: Game): {
 
   return (
       <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl">
-        <div className="flex items-center justify-between gap-3 border-b border-white/[0.07] px-4 py-3 sm:px-6 sm:py-4">
-          <div className="min-w-0">
-            <h3 className="text-lg font-bold sm:text-xl">Blackjack</h3>
-            <p className="mt-0.5 truncate text-[10px] text-white/40 sm:text-xs">
-              {s.settings.decks} decks · dealer {s.settings.h17 ? "hits" : "stands on"} soft 17 · blackjack pays{" "}
-              {s.settings.bj65 ? "6 to 5" : "3 to 2"}
-            </p>
-          </div>
-          <div className="w-20 shrink-0 text-right text-[10px] text-white/40 sm:w-28 sm:text-[11px]">
-            Shoe · {s.shoe.length || totalCards}
-            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10">
-              <div className="h-full rounded-full bg-[#d7b45b]/70 transition-all duration-500" style={{ width: `${shoePct}%` }} />
-            </div>
-          </div>
-        </div>
-
         <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-4 sm:px-9 sm:py-5`}>
+          {/* Floating Shoe meter — a compact gold-tinted pill at the top-
+              left of the felt. Replaces the old table header strip; the
+              dealer rules are already engraved on the felt below. */}
+          <div
+            aria-hidden={false}
+            className="pointer-events-none absolute left-3 top-3 z-10 flex items-center gap-2 rounded-full border border-[#d7b45b]/30 bg-black/55 px-2.5 py-1 text-[10px] font-semibold text-[#e5c779] shadow-[0_2px_8px_rgba(0,0,0,0.4)] backdrop-blur-sm sm:left-5 sm:top-5 sm:text-[11px]"
+          >
+            <span className="uppercase tracking-[0.18em] text-[#d7b45b]/80">
+              Shoe
+            </span>
+            <span className="tabular-nums text-white/90">
+              {s.shoe.length || totalCards}
+            </span>
+            <span
+              aria-hidden
+              className="h-1.5 w-10 overflow-hidden rounded-full bg-white/10 sm:w-14"
+            >
+              <span
+                className="block h-full rounded-full bg-gradient-to-r from-[#d7b45b]/40 to-[#d7b45b] transition-[width] duration-500"
+                style={{ width: `${shoePct}%` }}
+              />
+            </span>
+          </div>
           {s.settings.theme === "vegas" && <VegasFeltOverlay />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} />}
           <DealerShoe
