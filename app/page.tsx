@@ -74,11 +74,12 @@ export default function Home() {
 </div>
     </div>
 
+    {/* Mobile quick-nav row — compact emoji chips */}
     <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">
       <button
         onClick={() => setStatsOpen(true)}
         aria-label="Open statistics"
-        className="flex h-11 flex-1 touch-manipulation select-none items-center justify-center rounded-2xl border border-[#c8a65b]/40 bg-[#151b15] text-lg text-[#e5c779] transition active:scale-95"
+        className="flex h-11 flex-1 touch-manipulation select-none items-center justify-center rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] text-lg text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.12),0_2px_0_rgba(0,0,0,0.5)] transition active:translate-y-px active:scale-[0.97]"
       >
         📊
       </button>
@@ -86,7 +87,7 @@ export default function Home() {
       <button
         onClick={() => setAchievementsOpen(true)}
         aria-label="Open achievements"
-        className="flex h-11 flex-1 touch-manipulation select-none items-center justify-center rounded-2xl border border-[#c8a65b]/40 bg-[#151b15] text-lg text-[#e5c779] transition active:scale-95"
+        className="flex h-11 flex-1 touch-manipulation select-none items-center justify-center rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] text-lg text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.12),0_2px_0_rgba(0,0,0,0.5)] transition active:translate-y-px active:scale-[0.97]"
       >
         🏆
       </button>
@@ -94,30 +95,31 @@ export default function Home() {
       <button
         onClick={() => setRewardsOpen(true)}
         aria-label="Open rewards"
-        className="flex h-11 flex-1 touch-manipulation select-none items-center justify-center rounded-2xl border border-[#c8a65b]/40 bg-[#151b15] text-lg text-[#e5c779] transition active:scale-95"
+        className="flex h-11 flex-1 touch-manipulation select-none items-center justify-center rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] text-lg text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.12),0_2px_0_rgba(0,0,0,0.5)] transition active:translate-y-px active:scale-[0.97]"
       >
         🎁
       </button>
     </div>
 
-    <div className="hidden items-center justify-end gap-3 sm:flex">
+    {/* Desktop nav — full-label pills with hover halo */}
+    <div className="hidden items-center justify-end gap-2 sm:flex">
       <button
         onClick={() => setStatsOpen(true)}
-        className="rounded-2xl border border-[#c8a65b]/40 bg-[#151b15] px-4 py-2 text-sm font-bold text-[#e5c779] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10"
+        className="rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-4 py-2 text-[12px] font-bold uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 active:translate-y-px"
       >
         📊 Stats
       </button>
 
       <button
         onClick={() => setAchievementsOpen(true)}
-        className="rounded-2xl border border-[#c8a65b]/40 bg-[#151b15] px-4 py-2 text-sm font-bold text-[#e5c779] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10"
+        className="rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-4 py-2 text-[12px] font-bold uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 active:translate-y-px"
       >
         🏆 Achievements
       </button>
 
       <button
         onClick={() => setRewardsOpen(true)}
-        className="rounded-2xl border border-[#c8a65b]/40 bg-[#151b15] px-4 py-2 text-sm font-bold text-[#e5c779] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10"
+        className="rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-4 py-2 text-[12px] font-bold uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 active:translate-y-px"
       >
         🎁 Rewards
       </button>

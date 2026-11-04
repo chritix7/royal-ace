@@ -234,37 +234,49 @@ export default function Sidebar({ g }: { g: Game }) {
               </span>
             </summary>
             <div className="border-t border-[#d7b45b]/10 px-5 py-4">
-          <div className="mt-3 flex gap-2" role="group" aria-label="Number of decks">
-            {[2, 6, 8].map((d) => (
-              <button
-                key={d}
-                onClick={() => updateSettings({ decks: d })}
-                disabled={!canBet}
-                aria-pressed={s.settings.decks === d}
-                className={`flex-1 rounded-full border py-2 text-xs outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-40 ${
-                  s.settings.decks === d ? "border-[#d7b45b] bg-[#d7b45b]/10 text-[#e5c779]" : "border-white/10 text-white/60"
-                }`}
-              >
-                {d} decks
-              </button>
-            ))}
+          <div>
+            <p className={`${eyebrow} mb-1.5`}>Decks</p>
+            <div className="flex gap-1.5" role="group" aria-label="Number of decks">
+              {[2, 6, 8].map((d) => (
+                <button
+                  key={d}
+                  onClick={() => updateSettings({ decks: d })}
+                  disabled={!canBet}
+                  aria-pressed={s.settings.decks === d}
+                  className={`flex-1 rounded-full border py-1.5 text-[11px] font-bold outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-40 ${
+                    s.settings.decks === d
+                      ? "border-[#d7b45b]/70 bg-[#d7b45b]/15 text-[#f5d778] shadow-[inset_0_1px_0_rgba(229,199,121,0.2)]"
+                      : "border-white/10 bg-white/[0.02] text-white/55 hover:border-[#d7b45b]/40 hover:text-white/85"
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="mt-3 flex gap-2" role="group" aria-label="Hands per round">
-            {[1, 2, 3].map((n) => (
-              <button
-                key={n}
-                onClick={() => updateSettings({ spots: n })}
-                disabled={!canBet}
-                aria-pressed={spots === n}
-                className={`flex-1 rounded-full border py-2 text-xs outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-40 ${
-                  spots === n ? "border-[#d7b45b] bg-[#d7b45b]/10 text-[#e5c779]" : "border-white/10 text-white/60"
-                }`}
-              >
-                {n} hand{n > 1 ? "s" : ""}
-              </button>
-            ))}
+          <div className="mt-3">
+            <p className={`${eyebrow} mb-1.5`}>Hands per round</p>
+            <div className="flex gap-1.5" role="group" aria-label="Hands per round">
+              {[1, 2, 3].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => updateSettings({ spots: n })}
+                  disabled={!canBet}
+                  aria-pressed={spots === n}
+                  className={`flex-1 rounded-full border py-1.5 text-[11px] font-bold outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-40 ${
+                    spots === n
+                      ? "border-[#d7b45b]/70 bg-[#d7b45b]/15 text-[#f5d778] shadow-[inset_0_1px_0_rgba(229,199,121,0.2)]"
+                      : "border-white/10 bg-white/[0.02] text-white/55 hover:border-[#d7b45b]/40 hover:text-white/85"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2" role="radiogroup" aria-label="Table theme">
+          <div className="mt-3">
+            <p className={`${eyebrow} mb-1.5`}>Felt</p>
+            <div className="grid grid-cols-2 gap-1.5" role="radiogroup" aria-label="Table theme">
             {(["green", "blue", "burgundy", "vegas"] as Theme[]).map((th) => {
               const active = s.settings.theme === th;
               // Vegas swatch mirrors the active variant so the preview is
@@ -335,13 +347,17 @@ export default function Sidebar({ g }: { g: Game }) {
                 </button>
               );
             })}
+            </div>
           </div>
-          <div className="mt-4 space-y-3">
-            <Toggle label="Dealer hits soft 17" checked={s.settings.h17} disabled={!canBet} onChange={(v) => updateSettings({ h17: v })} />
-            <Toggle label="Blackjack pays 6 to 5" checked={s.settings.bj65} disabled={!canBet} onChange={(v) => updateSettings({ bj65: v })} />
-            <Toggle label="Sound effects" checked={sound.sfx} onChange={(v) => audio.set({ sfx: v })} />
-            <Toggle label="Strategy hints" checked={showHint} onChange={setShowHint} />
-            <Toggle label="Card counting trainer" checked={showCount} onChange={setShowCount} />
+          <div className="mt-4">
+            <p className={`${eyebrow} mb-2`}>Options</p>
+            <div className="space-y-2.5 rounded-2xl border border-white/[0.06] bg-black/20 p-3">
+              <Toggle label="Dealer hits soft 17" checked={s.settings.h17} disabled={!canBet} onChange={(v) => updateSettings({ h17: v })} />
+              <Toggle label="Blackjack pays 6 to 5" checked={s.settings.bj65} disabled={!canBet} onChange={(v) => updateSettings({ bj65: v })} />
+              <Toggle label="Sound effects" checked={sound.sfx} onChange={(v) => audio.set({ sfx: v })} />
+              <Toggle label="Strategy hints" checked={showHint} onChange={setShowHint} />
+              <Toggle label="Card counting trainer" checked={showCount} onChange={setShowCount} />
+            </div>
           </div>
 
           {/* Keyboard shortcuts cheat sheet — collapsed by default so it

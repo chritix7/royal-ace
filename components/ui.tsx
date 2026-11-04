@@ -232,15 +232,39 @@ export function Spark({ data }: { data: number[] }) {
 
 export function Toggle({ label, checked, onChange, disabled }: { label: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
-    <label className={`flex items-center justify-between text-xs text-white/60 ${disabled ? "opacity-40" : "cursor-pointer"}`}>
-      {label}
-      <input
-        type="checkbox"
-        checked={checked}
-        disabled={disabled}
-        onChange={(e) => onChange(e.target.checked)}
-        className="h-4 w-4 accent-[#d7b45b]"
-      />
+    <label
+      className={`flex items-center justify-between text-xs ${
+        checked ? "text-white/85" : "text-white/55"
+      } ${disabled ? "opacity-40" : "cursor-pointer hover:text-white/95"}`}
+    >
+      <span className="truncate">{label}</span>
+      <span className="relative inline-flex shrink-0 items-center">
+        <input
+          type="checkbox"
+          checked={checked}
+          disabled={disabled}
+          onChange={(e) => onChange(e.target.checked)}
+          className="peer sr-only"
+        />
+        {/* Switch track */}
+        <span
+          aria-hidden
+          className={`h-5 w-9 rounded-full border transition-colors ${
+            checked
+              ? "border-[#d7b45b]/60 bg-gradient-to-r from-[#d7b45b]/40 to-[#d7b45b]/60 shadow-[inset_0_1px_2px_rgba(0,0,0,0.4),0_0_8px_rgba(229,199,121,0.35)]"
+              : "border-white/15 bg-black/40"
+          }`}
+        />
+        {/* Switch knob */}
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border transition-[left,background,border-color,box-shadow] duration-200 ${
+            checked
+              ? "left-[18px] border-[#8a6c2b] bg-gradient-to-b from-[#f6e4a9] to-[#d7b45b] shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
+              : "left-[2px] border-white/20 bg-white/80"
+          }`}
+        />
+      </span>
     </label>
   );
 }
