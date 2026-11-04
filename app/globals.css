@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* Reserve space for the vertical scrollbar at all times so opening a
+   modal (which locks body scroll) does not shift the whole page a
+   scrollbar-width to the right when the scrollbar disappears. */
+html {
+  scrollbar-gutter: stable;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

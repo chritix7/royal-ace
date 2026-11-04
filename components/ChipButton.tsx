@@ -166,7 +166,9 @@ export default function ChipButton({
     onClick();
   }
 
-  const dims = size === "sm" ? "h-9 w-9" : "h-14 w-14";
+  // md is the sidebar size — slim enough that all 5 denominations fit
+  // on a single row inside a 300px sidebar column.
+  const dims = size === "sm" ? "h-9 w-9" : "h-11 w-11";
 
   return (
     <button

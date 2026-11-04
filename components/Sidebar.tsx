@@ -146,24 +146,29 @@ export default function Sidebar({ g }: { g: Game }) {
         {/* MASTER PANEL — balance, bet, side bets. One container so the
             player sees chips → bet → sides as a single instrument. */}
         <Panel>
-          <div className="flex items-end justify-between gap-3">
-            <div className="min-w-0">
-              <p className={eyebrow}>Your chips</p>
-              <p className="mt-0.5 text-2xl font-black text-[#e5c779] tabular-nums">
-                ◈ <Counter value={s.balance} />
-              </p>
-            </div>
-            <div className="shrink-0 text-right">
-              <p className={eyebrow}>Bet</p>
-              <p className="mt-0.5 text-xl font-black text-[#f5d778] tabular-nums">
-                ◈ {money(s.bet)}
-              </p>
-            </div>
+          {/* Two compact rows: each has an uppercase gold label and an
+              inline amount, so Chips and Bet each occupy a single text
+              line and the whole header is two lines tall, not four. */}
+          <div className="flex items-baseline justify-between gap-3">
+            <p className={eyebrow}>Your chips</p>
+            <p className="text-base font-black text-[#e5c779] tabular-nums leading-none">
+              ◈ <Counter value={s.balance} />
+            </p>
+          </div>
+          <div className="mt-1 flex items-baseline justify-between gap-3">
+            <p className={eyebrow}>Bet</p>
+            <p className="text-base font-black text-[#f5d778] tabular-nums leading-none">
+              ◈ {money(s.bet)}
+            </p>
           </div>
 
-          <div className={hairline} />
+          <div className="my-3 h-px w-full bg-gradient-to-r from-transparent via-[#d7b45b]/15 to-transparent" />
 
-          <div className="flex flex-wrap justify-center gap-2">
+          {/* All 5 chip denominations on ONE row — ChipButton md shrank
+              to h-11 so the row fits comfortably inside a 300px sidebar.
+              Grid of 5 equal columns so the chips stay centered without
+              gaping when the sidebar is wider than the row. */}
+          <div className="grid grid-cols-5 place-items-center gap-1">
             {CHIPS.map((v) => (
               <ChipButton
                 key={v}
