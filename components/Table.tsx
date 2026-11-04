@@ -239,7 +239,14 @@ function getShoeStatus(g: Game): {
   {/* Score du croupier — ne prend aucune hauteur */}
 {s.dealer.length > 0 && (
   <div className="pointer-events-none absolute -top-5 left-1/2 z-20 -translate-x-1/2">
-    <span className="rounded-full bg-black/30 px-2.5 py-0.5 text-[11px] font-bold text-white sm:text-xs">
+    <span
+      key={`dv-${dealerVal.total}-${s.hole ? 1 : 0}`}
+      className={`animate-score-tick rounded-full px-2.5 py-0.5 text-[11px] font-bold sm:text-xs ${
+        s.hole && dealerVal.total > 21
+          ? "bg-[#c04040]/45 text-[#ffd8d8] shadow-[0_0_10px_rgba(192,64,64,0.45)]"
+          : "bg-black/30 text-white"
+      }`}
+    >
       {s.hole && isBlackjack(s.dealer)
         ? "Blackjack"
         : dealerVal.soft && dealerVal.total < 21 && s.hole
@@ -350,7 +357,14 @@ function getShoeStatus(g: Game): {
                   )}
 
                   <div className="mb-2 flex flex-wrap items-center justify-center gap-2 text-[11px] sm:mb-3 sm:text-xs">
-                    <span className="rounded-full bg-black/30 px-2.5 py-0.5 font-bold text-white">
+                    <span
+                      key={`v-${i}-${v.total}`}
+                      className={`animate-score-tick rounded-full px-2.5 py-0.5 font-bold ${
+                        v.total > 21
+                          ? "bg-[#c04040]/45 text-[#ffd8d8] shadow-[0_0_10px_rgba(192,64,64,0.45)]"
+                          : "bg-black/30 text-white"
+                      }`}
+                    >
                       {v.soft && v.total < 21 ? `${v.total - 10}/${v.total}` : v.total}
                     </span>
                     <span className="text-white/50">

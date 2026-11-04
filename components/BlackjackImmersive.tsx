@@ -251,7 +251,14 @@ const playerCardStyle = (
           {/* Score du croupier */}
           {s.dealer.length > 0 && (
             <div className="relative z-20">
-              <span className="rounded-full bg-black/30 px-2.5 py-0.5 text-[11px] font-bold text-white sm:text-xs">
+              <span
+                key={`dv-${dealerVal.total}-${s.hole ? 1 : 0}`}
+                className={`animate-score-tick rounded-full px-2.5 py-0.5 text-[11px] font-bold sm:text-xs ${
+                  s.hole && dealerVal.total > 21
+                    ? "bg-[#c04040]/45 text-[#ffd8d8] shadow-[0_0_10px_rgba(192,64,64,0.45)]"
+                    : "bg-black/30 text-white"
+                }`}
+              >
                 {s.hole && isBlackjack(s.dealer)
                   ? "Blackjack"
                   : dealerVal.soft && dealerVal.total < 21 && s.hole
@@ -411,7 +418,14 @@ const playerCardStyle = (
                       </span>
                     )}
 
-                    <span className="rounded-full bg-black/30 px-2 py-0.5 font-bold">
+                    <span
+                      key={`v-${index}-${value.total}`}
+                      className={`animate-score-tick rounded-full px-2 py-0.5 font-bold ${
+                        value.total > 21
+                          ? "bg-[#c04040]/45 text-[#ffd8d8] shadow-[0_0_10px_rgba(192,64,64,0.45)]"
+                          : "bg-black/30 text-white"
+                      }`}
+                    >
                       {value.soft && value.total < 21
                         ? `${value.total - 10}/${value.total}`
                         : value.total}

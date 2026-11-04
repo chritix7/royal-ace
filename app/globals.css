@@ -201,7 +201,8 @@ body {
   .animate-reveal-glow,
   .animate-side-shine,
   .animate-result-pop,
-  .animate-result-win {
+  .animate-result-win,
+  .animate-score-tick {
     animation: none;
   }
 }
