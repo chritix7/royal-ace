@@ -17,7 +17,6 @@ import AchievementToasts from "../components/AchievementToasts";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { progressionStore } from "../lib/progression";
 import { weeklyStore } from "../lib/weekly";
-import WinFeed from "../components/WinFeed";
 import ChipFly from "../components/ChipFly";
 import { useBalanceFlash } from "../hooks/useBalanceFlash";
 import { sessionStore } from "../lib/sessionStore";
@@ -51,30 +50,55 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#080c0b] text-white">
       <header className="sticky top-0 z-40 border-b border-[#c8a65b]/20 bg-[#0b100e] pt-[env(safe-area-inset-top)]">
-  <div className="mx-auto max-w-7xl px-4 py-3 sm:px-8 sm:py-4">
-    <div className="flex items-center justify-between gap-3">
+  <div className="mx-auto max-w-screen-2xl px-4 py-3 sm:px-8 sm:py-4">
+    <div className="flex items-center gap-3">
       <h1 className="header-shine truncate text-lg font-black tracking-[0.12em] sm:text-3xl">
         ROYAL{" "}
         <span className="animate-header-breathe text-[#d7b45b]">ACE</span>
       </h1>
 
+      {/* Desktop quick-nav — sits on the same row between ROYAL ACE and the
+          chips counter, in order: Stats · Achievements · Rewards · Chips. */}
+      <div className="ml-auto hidden items-center gap-2 sm:flex">
+        <button
+          onClick={() => setStatsOpen(true)}
+          className="rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-4 py-2 text-[12px] font-bold uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 active:translate-y-px"
+        >
+          📊 Stats
+        </button>
+
+        <button
+          onClick={() => setAchievementsOpen(true)}
+          className="rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-4 py-2 text-[12px] font-bold uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 active:translate-y-px"
+        >
+          🏆 Achievements
+        </button>
+
+        <button
+          onClick={() => setRewardsOpen(true)}
+          className="rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-4 py-2 text-[12px] font-bold uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 active:translate-y-px"
+        >
+          🎁 Rewards
+        </button>
+      </div>
+
       <div
-  data-chips-counter="header"
-  className={`rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-3.5 py-1.5 text-right shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] ${
-    flash ? "balance-halo-gold" : ""
-  }`}
->
-  <p className="text-[9px] font-bold uppercase tracking-[0.2em] leading-none text-[#d7b45b]/70">Chips</p>
-  <p className="mt-0.5 text-base font-black leading-tight text-[#e5c779] tabular-nums">
-    ◈{" "}
-    <span className={flash ? "balance-flash" : ""}>
-      <Counter value={balance} />
-    </span>
-  </p>
-</div>
+        data-chips-counter="header"
+        className={`sm:ml-2 ml-auto rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-3.5 py-1.5 text-right shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] ${
+          flash ? "balance-halo-gold" : ""
+        }`}
+      >
+        <p className="text-[9px] font-bold uppercase tracking-[0.2em] leading-none text-[#d7b45b]/70">Chips</p>
+        <p className="mt-0.5 text-base font-black leading-tight text-[#e5c779] tabular-nums">
+          ◈{" "}
+          <span className={flash ? "balance-flash" : ""}>
+            <Counter value={balance} />
+          </span>
+        </p>
+      </div>
     </div>
 
-    {/* Mobile quick-nav row — compact emoji chips */}
+    {/* Mobile quick-nav row — compact emoji chips, kept on its own line below. */}
     <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">
       <button
         onClick={() => setStatsOpen(true)}
@@ -100,34 +124,9 @@ export default function Home() {
         🎁
       </button>
     </div>
-
-    {/* Desktop nav — full-label pills with hover halo */}
-    <div className="hidden items-center justify-end gap-2 sm:flex">
-      <button
-        onClick={() => setStatsOpen(true)}
-        className="rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-4 py-2 text-[12px] font-bold uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 active:translate-y-px"
-      >
-        📊 Stats
-      </button>
-
-      <button
-        onClick={() => setAchievementsOpen(true)}
-        className="rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-4 py-2 text-[12px] font-bold uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 active:translate-y-px"
-      >
-        🏆 Achievements
-      </button>
-
-      <button
-        onClick={() => setRewardsOpen(true)}
-        className="rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-4 py-2 text-[12px] font-bold uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 active:translate-y-px"
-      >
-        🎁 Rewards
-      </button>
-    </div>
   </div>
 </header>
-<WinFeed />
-      <section className="mx-auto max-w-7xl px-4 pb-16 pt-4 sm:px-8 sm:pt-6">
+      <section className="mx-auto max-w-screen-2xl px-4 pb-16 pt-4 sm:px-8 sm:pt-6">
         <div className="mb-6 flex min-w-0 items-center gap-2 sm:gap-3">
   <div
     className="flex shrink-0 items-center gap-2 sm:gap-3"
