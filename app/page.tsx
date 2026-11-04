@@ -60,12 +60,12 @@ export default function Home() {
 
       <div
   data-chips-counter="header"
-  className={`rounded-2xl border border-[#c8a65b]/30 bg-[#151b15] px-3 py-1.5 text-right ${
+  className={`rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-3.5 py-1.5 text-right shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] ${
     flash ? "balance-halo-gold" : ""
   }`}
 >
-  <p className="text-[9px] leading-none text-white/50">Chips</p>
-  <p className="text-base font-bold leading-tight text-[#e5c779]">
+  <p className="text-[9px] font-bold uppercase tracking-[0.2em] leading-none text-[#d7b45b]/70">Chips</p>
+  <p className="mt-0.5 text-base font-black leading-tight text-[#e5c779] tabular-nums">
     ◈{" "}
     <span className={flash ? "balance-flash" : ""}>
       <Counter value={balance} />
@@ -147,10 +147,10 @@ export default function Home() {
   aria-selected={selected}
   disabled={blocked}
   onClick={() => setTab(t.id)}
-  className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-xl outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-40 sm:h-auto sm:w-auto sm:px-6 sm:py-3 sm:text-sm sm:font-bold ${
+  className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-xl outline-none transition-[filter,transform,background,color,border-color] focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 sm:h-auto sm:w-auto sm:px-6 sm:py-3 sm:text-[12px] sm:font-black sm:uppercase sm:tracking-wider ${
     selected
-      ? "border-[#e5c779]/70 bg-[#d7b45b] text-[#10130e] shadow-[0_3px_0_#765b25]"
-      : "border-white/15 bg-[#1c2420] text-white/65 shadow-[0_3px_0_#080c0b] hover:border-[#e5c779]/40 hover:text-white"
+      ? "border-[#e5c779]/70 bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e] shadow-[0_3px_0_#765b25,inset_0_1px_0_rgba(255,255,255,0.3)]"
+      : "border-white/15 bg-gradient-to-b from-[#1c2420] to-[#141a16] text-white/65 shadow-[0_3px_0_#080c0b,inset_0_1px_0_rgba(255,255,255,0.05)] hover:border-[#e5c779]/40 hover:text-white"
   }`}
 >
   <span aria-hidden="true" className="sm:hidden">
