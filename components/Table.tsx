@@ -299,7 +299,11 @@ function getShoeStatus(g: Game): {
                 s.phase === "settled" ? "animate-result-pop" : "animate-msg-slide"
               }`}
             >
-              {s.message}
+              <span
+                className={s.phase === "betting" ? "animate-idle-shimmer" : ""}
+              >
+                {s.message}
+              </span>
             </div>
             {s.net !== null && s.net !== 0 && (
               <div
