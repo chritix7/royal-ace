@@ -767,7 +767,9 @@ const playerCardStyle = (
                   deal();
                 }}
                 disabled={s.bet < MIN_BET || stake > s.balance}
-                className={`${control} ${gold} min-w-0 flex-1 sm:min-h-10`}
+                className={`${control} ${gold} min-w-0 flex-1 sm:min-h-10 ${
+                  s.bet >= MIN_BET && stake <= s.balance ? "animate-deal-ready" : ""
+                }`}
               >
                 {s.phase === "settled" ? "Deal again" : "Deal"} · ◈{" "}
                 {money(stake)}

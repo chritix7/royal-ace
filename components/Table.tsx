@@ -646,7 +646,9 @@ function getShoeStatus(g: Game): {
                 <button
                   onClick={deal}
                   disabled={s.bet < MIN_BET || stake > s.balance}
-                  className={`${mobileAction} max-w-sm border-transparent bg-[#d7b45b] text-xs text-[#10130e] hover:bg-[#efd58c] sm:w-auto sm:px-10 sm:text-base lg:min-w-[280px]`}
+                  className={`${mobileAction} max-w-sm border-transparent bg-[#d7b45b] text-xs text-[#10130e] hover:bg-[#efd58c] sm:w-auto sm:px-10 sm:text-base lg:min-w-[280px] ${
+                    s.bet >= MIN_BET && stake <= s.balance ? "animate-deal-ready" : ""
+                  }`}
                 >
                   {s.phase === "settled" ? "Deal again" : "Deal"} · ◈ {money(stake)}
                 </button>
