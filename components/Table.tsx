@@ -307,14 +307,13 @@ function getShoeStatus(g: Game): {
 </div>
 </div>
 
-          {/* Message (annoncé aux lecteurs d'écran). At settle+breakdown
-              the area collapses: the mobile fused pill lives here (compact)
-              and desktop has the ResultRail on the felt's left edge, so
-              the middle slot is intentionally empty. */}
+          {/* Message slot — the height is FIXED at every phase so the
+              table never shifts when content changes. Mobile reserves
+              48px, desktop reserves 56px. At settle+breakdown on
+              desktop the middle slot stays empty (ResultRail on the
+              left owns the result); on mobile the fused pill fills it. */}
           <div
-            className={`my-2 flex flex-col items-center gap-1 sm:my-3 lg:justify-center ${
-              s.phase === "settled" && roundBreakdown ? "lg:min-h-0" : "lg:min-h-[56px]"
-            }`}
+            className="my-2 flex min-h-[48px] flex-col items-center justify-center gap-1 sm:my-3 lg:min-h-[56px]"
             role="status"
             aria-live="polite"
           >
@@ -560,13 +559,16 @@ function getShoeStatus(g: Game): {
   </p>
 </div>
 
-          {/* Zone de mise — only shown while the player can act on
-              bets (betting + settled). During the hand (dealing /
-              player / dealer / insurance) the Hit/Stand controls own
-              the interaction, so the BET + PP + 21+3 pills are hidden
-              to reclaim ~130px of vertical space on the felt. */}
-{canBet && (
-<div className="relative mt-3 flex flex-col items-center gap-2.5 sm:mt-4 lg:flex-row lg:items-center lg:justify-center lg:gap-4">
+          {/* Bet-zone slot — the ACTUAL controls (BET circle, PP, 21+3)
+              only render while the player can act on bets (betting /
+              settled). The slot itself keeps the SAME height at every
+              phase so the table never shifts between betting, dealing,
+              player, dealer, settled: cards appear into reserved slots
+              and the whole table stays still, like a real pit layout.
+              The engraved arcs are a permanent part of the felt and
+              stay visible even during the hand, like an empty bet spot
+              on a real casino table. */}
+<div className="relative mt-3 min-h-[170px] sm:mt-4 lg:min-h-[120px]">
   {/* Outer betting-area arc engraved in the felt */}
   <div
     aria-hidden="true"
@@ -585,6 +587,8 @@ function getShoeStatus(g: Game): {
         "inset 0 0 0 1px rgba(229, 199, 121, 0.1), inset 0 1px 0 rgba(0, 0, 0, 0.4)",
     }}
   />
+{canBet && (
+<div className="relative flex flex-col items-center gap-2.5 lg:flex-row lg:items-center lg:justify-center lg:gap-4">
 
   <div className="order-1 lg:order-2">
     {/* BET circle — recessed into the felt with a double gold ring.
@@ -690,6 +694,7 @@ function getShoeStatus(g: Game): {
   </div>
 </div>
 )}
+</div>
         </div>
 
         {/* The round breakdown moved onto the felt as a floating
