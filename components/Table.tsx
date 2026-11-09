@@ -186,7 +186,7 @@ function getShoeStatus(g: Game): {
   return (
     <>
       <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl lg:flex lg:h-full lg:min-h-0 lg:flex-col">
-        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 sm:px-9 sm:py-4 lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:justify-between lg:pb-1 lg:pt-14`}>
+        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 sm:px-9 sm:py-4 lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:justify-between lg:pb-7 lg:pt-14`}>
           {/* Floating result rail — same component as the Focus view,
               positioned on the left edge of the felt. Shows the round
               breakdown and a New-round button at settle, a Hand-in-
@@ -245,7 +245,7 @@ function getShoeStatus(g: Game): {
           />
           {s.shuffling && <ShuffleAnimation />}
           {/* Croupier — zone gravée dans le tapis */}
-<div className="relative mt-1.5 flex min-h-[88px] items-center justify-center sm:min-h-28 lg:mt-0 lg:min-h-[88px]">
+<div className="relative mt-1.5 flex min-h-[88px] items-center justify-center sm:min-h-28 lg:mt-0 lg:min-h-[96px]">
 
   {/* Score du croupier — ne prend aucune hauteur */}
 {s.dealer.length > 0 && (
@@ -481,7 +481,7 @@ function getShoeStatus(g: Game): {
                     </span>
                     {h.result && <HandResultBadge result={h.result} />}
                   </div>
-                  <div className={`flex justify-center ${compact ? "min-h-[72px] sm:min-h-24" : "min-h-24 sm:min-h-28 lg:min-h-[88px]"}`}>
+                  <div className={`flex justify-center ${compact ? "min-h-[72px] sm:min-h-24" : "min-h-24 sm:min-h-28 lg:min-h-[96px]"}`}>
                     {h.cards.map((card, k) => (
                       <span
                         key={`p${i}-${k}-${card.rank}${card.suit}`}
@@ -511,14 +511,14 @@ function getShoeStatus(g: Game): {
             })}
           </div>
 
-          {/* Table markings — engraved ornament text, matches immersive.
-              Shrink down on mobile so the three labels fit on one line. */}
-{/* Engraved table rules — only shown from sm+ to reclaim a row of
-    height on mobile. On phones the rules are also surfaced inside
-    the Table-rules collapsible in the sidebar. */}
+          {/* Engraved table rules — pinned to the felt's bottom edge
+              via absolute positioning so player cards, bet-zone and
+              the action strip never push this caption around. Only
+              shown from sm:+ since mobile already surfaces the rules
+              inside the sidebar Table-rules collapsible. */}
 <div
   aria-hidden="true"
-  className="pointer-events-none mt-1.5 hidden translate-y-[3px] items-center justify-center text-center sm:flex sm:gap-x-3"
+  className="pointer-events-none absolute bottom-1 left-1/2 hidden -translate-x-1/2 items-center justify-center whitespace-nowrap text-center sm:flex sm:gap-x-3"
 >
   <p
     className="whitespace-nowrap font-serif text-[10px] font-bold uppercase tracking-[0.22em]"
