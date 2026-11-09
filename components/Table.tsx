@@ -185,8 +185,8 @@ function getShoeStatus(g: Game): {
 
   return (
     <>
-      <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl">
-        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 sm:px-9 sm:py-4`}>
+      <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl lg:flex lg:h-full lg:min-h-0 lg:flex-col">
+        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 sm:px-9 sm:py-4 lg:flex lg:flex-1 lg:flex-col lg:justify-between lg:overflow-y-auto`}>
           {/* Floating result rail — same component as the Focus view,
               positioned on the left edge of the felt. Shows the round
               breakdown and a New-round button at settle, a Hand-in-
@@ -391,11 +391,19 @@ function getShoeStatus(g: Game): {
             {/* At settle (with a round breakdown) the middle message, net
                 amount and side-note pill are HIDDEN at every breakpoint:
                 mobile sees the fused pill above, desktop sees the floating
-                ResultRail on the left edge of the felt. No duplication. */}
+                ResultRail on the left edge of the felt. No duplication.
+                During the betting phase the message loses its pill chrome
+                and sits bare on the felt (same minimal treatment as Focus
+                mode) so "Place your bet to start." reads as an engraved
+                invitation rather than a toast. */}
             <div
               key={`msg-${s.message}-${s.phase}-${s.celebrate}`}
-              className={`max-w-full rounded-full border border-[#d7b45b]/30 bg-black/30 px-3 py-1.5 text-center text-xs text-[#e5c779] sm:px-5 sm:py-2 sm:text-sm ${
+              className={`max-w-full text-center text-xs text-[#e5c779] sm:text-sm ${
                 s.phase === "settled" ? "animate-result-pop" : "animate-msg-slide"
+              } ${
+                s.phase === "betting"
+                  ? "font-semibold text-[#ead5a3]"
+                  : "rounded-full border border-[#d7b45b]/30 bg-black/30 px-3 py-1.5 sm:px-5 sm:py-2"
               } ${s.phase === "settled" && roundBreakdown ? "hidden" : ""}`}
             >
               <span
@@ -559,16 +567,15 @@ function getShoeStatus(g: Game): {
   </p>
 </div>
 
-          {/* Bet-zone slot — the ACTUAL controls (BET circle, PP, 21+3)
-              only render while the player can act on bets (betting /
-              settled). The slot itself keeps the SAME height at every
-              phase so the table never shifts between betting, dealing,
-              player, dealer, settled: cards appear into reserved slots
-              and the whole table stays still, like a real pit layout.
-              The engraved arcs are a permanent part of the felt and
-              stay visible even during the hand, like an empty bet spot
-              on a real casino table. */}
-<div className="relative mt-3 min-h-[170px] sm:mt-4 lg:min-h-[120px]">
+          {/* Bet-zone slot — swaps content based on phase, but the slot
+              height is RESERVED at every phase so the felt stays still
+              across betting → dealing → player → dealer → settled.
+              Mobile keeps the sticky action bar below the felt, but on
+              desktop (lg:+) the Deal button and the play-time actions
+              (Hit / Stand / Double / Split / Surrender) are rendered
+              INSIDE this slot, on top of the engraved arcs — no height
+              is wasted below the table. */}
+<div className="relative mt-3 min-h-[170px] sm:mt-4 lg:mt-0 lg:flex lg:min-h-[160px] lg:flex-col lg:items-center lg:justify-center lg:gap-3">
   {/* Outer betting-area arc engraved in the felt */}
   <div
     aria-hidden="true"
@@ -694,12 +701,82 @@ function getShoeStatus(g: Game): {
   </div>
 </div>
 )}
+
+{/* Desktop-only: the hand controls live INSIDE the felt at the
+    bet-zone slot. On lg+ we hide the sticky bar below the felt
+    and put Deal (betting / settled) or the five action buttons
+    (playing) here, framed by a subtle dark pill so it reads as a
+    pro casino action strip rather than loose buttons on felt. */}
+{s.phase !== "insurance" && (
+  <div className="relative z-10 hidden w-full max-w-3xl items-center justify-center lg:flex">
+    {canBet ? (
+      outOfChips ? (
+        <button
+          onClick={refill}
+          className={`${mobileAction} border-[#d7b45b]/60 bg-gradient-to-b from-[#e5c779] to-[#c89a3f] text-[#10130e] sm:w-auto sm:px-4`}
+        >
+          Out of chips · take a ◈ {REFILL} refill
+        </button>
+      ) : (
+        <button
+          onClick={deal}
+          disabled={s.bet < MIN_BET || stake > s.balance}
+          className={`${mobileAction} max-w-sm border-[#d7b45b]/70 bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e] sm:w-auto sm:px-10 lg:min-w-[260px] ${
+            s.bet >= MIN_BET && stake <= s.balance ? "animate-deal-ready" : ""
+          }`}
+        >
+          {s.phase === "settled" ? "Deal again" : "Deal"} · ◈ {money(stake)}
+        </button>
+      )
+    ) : (
+      <div className="flex w-full items-stretch justify-center gap-2 rounded-2xl border border-[#d7b45b]/15 bg-black/40 px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_6px_18px_rgba(0,0,0,0.45)] backdrop-blur-sm">
+        <button
+          onClick={hit}
+          disabled={!playing}
+          className={`${mobileAction} flex-1 border-[#d7b45b]/60 bg-gradient-to-b from-[#e5c779] to-[#c89a3f] text-[#10130e] sm:w-auto sm:px-4`}
+        >
+          Hit
+        </button>
+        <button
+          onClick={stand}
+          disabled={!playing}
+          className={`${mobileAction} flex-1 border-white/15 bg-white/[0.04] text-white hover:border-[#d7b45b]/50 hover:text-[#e5c779] sm:w-auto sm:px-4`}
+        >
+          Stand
+        </button>
+        <button
+          onClick={double}
+          disabled={!canDouble}
+          className={`${mobileAction} flex-1 border-[#d7b45b]/50 bg-[#d7b45b]/10 text-[#e5c779] hover:bg-[#d7b45b]/20 sm:w-auto sm:px-4`}
+        >
+          Double
+        </button>
+        <button
+          onClick={split}
+          disabled={!canSplit}
+          className={`${mobileAction} flex-1 border-amber-400/40 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 sm:w-auto sm:px-4`}
+        >
+          Split
+        </button>
+        <button
+          onClick={surrender}
+          disabled={!canSurrender}
+          className={`${mobileAction} flex-1 border-white/10 bg-white/[0.02] text-white/60 hover:border-red-300/40 hover:text-red-200 sm:w-auto sm:px-4`}
+        >
+          Surrender
+        </button>
+      </div>
+    )}
+  </div>
+)}
 </div>
         </div>
 
-        {/* The round breakdown moved onto the felt as a floating
-            ResultRail panel on the left edge — see above. */}
-        <div className="sticky bottom-0 z-20 border-t border-white/10 bg-[#101713]/95 px-2 py-2 backdrop-blur sm:px-7 sm:py-3 lg:static lg:border-0 lg:bg-transparent lg:py-2">
+        {/* Sticky bottom action bar — MOBILE / TABLET only (lg:hidden).
+            On lg:+ the same controls live inside the felt's bet-zone
+            slot so the table has a single flat bottom edge, aligned
+            with the sidebar. */}
+        <div className="sticky bottom-0 z-20 border-t border-white/10 bg-[#101713]/95 px-2 py-2 backdrop-blur sm:px-7 sm:py-3 lg:hidden">
           {s.phase === "insurance" ? (
             // The InsuranceModal (mounted at the Blackjack parent) owns
             // this decision now — keep the slot visually empty here.
@@ -714,17 +791,16 @@ function getShoeStatus(g: Game): {
                 <button
                   onClick={deal}
                   disabled={s.bet < MIN_BET || stake > s.balance}
-                  className={`${mobileAction} max-w-sm border-[#d7b45b]/70 bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e] sm:w-auto sm:px-10 lg:min-w-[280px] ${
+                  className={`${mobileAction} max-w-sm border-[#d7b45b]/70 bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e] sm:w-auto sm:px-10 ${
                     s.bet >= MIN_BET && stake <= s.balance ? "animate-deal-ready" : ""
                   }`}
                 >
                   {s.phase === "settled" ? "Deal again" : "Deal"} · ◈ {money(stake)}
                 </button>
               )}
-              <p className="hidden text-[11px] text-white/30 sm:block">Press Space to deal</p>
             </div>
           ) : (
-            <div className="grid grid-cols-5 gap-1.5 lg:mx-auto lg:max-w-3xl lg:gap-3">
+            <div className="grid grid-cols-5 gap-1.5">
               <button onClick={hit} disabled={!playing} className={`${mobileAction} border-[#d7b45b]/60 bg-gradient-to-b from-[#e5c779] to-[#c89a3f] text-[#10130e] sm:w-auto sm:px-4`}>
                 Hit
               </button>

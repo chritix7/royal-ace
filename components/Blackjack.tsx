@@ -48,7 +48,14 @@ export default function Blackjack({
           onClose={() => onFocusChange?.(false)}
         />
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[1fr_300px] lg:items-start">
+        /* Table + Sidebar as two aligned blocks. On lg: both reach the
+           SAME bottom edge: the grid has a fixed height tied to the
+           viewport and both children stretch to fill it (items-stretch).
+           Sidebar scrolls internally when its content (Configure
+           expanded, etc.) exceeds the grid height; Table lives inside
+           a flex column that distributes the felt + actions up to the
+           same line. */
+        <div className="grid gap-6 lg:grid-cols-[1fr_300px] lg:h-[calc(100dvh-9rem)] lg:items-stretch lg:overflow-hidden">
           <Table g={g} />
           <Sidebar g={g} />
         </div>
