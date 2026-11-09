@@ -42,7 +42,7 @@ function SidePill({
   const active = !disabled && amount > 0;
   return (
     <div
-      className="relative flex w-full min-w-0 items-center justify-between gap-2 rounded-full px-3 py-1.5 lg:w-36"
+      className="relative flex w-full min-w-0 items-center justify-between gap-2 rounded-full px-3 py-1.5 lg:w-36 lg:py-1"
       style={{
         background: active
           ? "radial-gradient(ellipse at 50% 20%, rgba(229, 199, 121, 0.18) 0%, rgba(5, 10, 7, 0.6) 60%, rgba(5, 10, 7, 0.75) 100%)"
@@ -245,7 +245,7 @@ function getShoeStatus(g: Game): {
           />
           {s.shuffling && <ShuffleAnimation />}
           {/* Croupier — zone gravée dans le tapis */}
-<div className="relative mt-1.5 flex min-h-[88px] items-center justify-center sm:min-h-28">
+<div className="relative mt-1.5 flex min-h-[88px] items-center justify-center sm:min-h-28 lg:min-h-[96px]">
 
   {/* Score du croupier — ne prend aucune hauteur */}
 {s.dealer.length > 0 && (
@@ -313,7 +313,7 @@ function getShoeStatus(g: Game): {
               desktop the middle slot stays empty (ResultRail on the
               left owns the result); on mobile the fused pill fills it. */}
           <div
-            className="my-2 flex min-h-[48px] flex-col items-center justify-center gap-1 sm:my-3 lg:min-h-[56px]"
+            className="my-2 flex min-h-[48px] flex-col items-center justify-center gap-1 sm:my-3 lg:min-h-[76px]"
             role="status"
             aria-live="polite"
           >
@@ -481,7 +481,7 @@ function getShoeStatus(g: Game): {
                     </span>
                     {h.result && <HandResultBadge result={h.result} />}
                   </div>
-                  <div className={`flex justify-center ${compact ? "min-h-[72px] sm:min-h-24" : "min-h-24 sm:min-h-28"}`}>
+                  <div className={`flex justify-center ${compact ? "min-h-[72px] sm:min-h-24" : "min-h-24 sm:min-h-28 lg:min-h-[96px]"}`}>
                     {h.cards.map((card, k) => (
                       <span
                         key={`p${i}-${k}-${card.rank}${card.suit}`}
@@ -575,7 +575,7 @@ function getShoeStatus(g: Game): {
               (Hit / Stand / Double / Split / Surrender) are rendered
               INSIDE this slot, on top of the engraved arcs — no height
               is wasted below the table. */}
-<div className="relative mt-3 min-h-[170px] sm:mt-4 lg:mt-0 lg:flex lg:min-h-[160px] lg:flex-col lg:items-center lg:justify-center lg:gap-3">
+<div className="relative mt-3 min-h-[170px] sm:mt-4 lg:mt-0 lg:flex lg:min-h-[140px] lg:flex-col lg:items-center lg:justify-end lg:gap-3">
   {/* Outer betting-area arc engraved in the felt */}
   <div
     aria-hidden="true"
@@ -604,7 +604,7 @@ function getShoeStatus(g: Game): {
         below as a small gold label. */}
     <div className="flex flex-col items-center">
       <div
-        className="relative flex h-20 w-20 items-end justify-center overflow-visible rounded-full text-center sm:h-24 sm:w-24"
+        className="relative flex h-20 w-20 items-end justify-center overflow-visible rounded-full text-center sm:h-24 sm:w-24 lg:h-[72px] lg:w-[72px]"
         style={{
           background: canBet
             ? "radial-gradient(circle at 50% 30%, rgba(229, 199, 121, 0.22) 0%, rgba(5, 10, 7, 0.75) 55%, rgba(5, 10, 7, 0.9) 100%)"

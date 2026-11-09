@@ -134,8 +134,8 @@ export default function Home() {
     </div>
   </div>
 </header>
-      <section className="mx-auto max-w-screen-2xl px-4 pb-4 pt-3 sm:px-8 sm:pb-4 sm:pt-4">
-        <div className="mb-3 flex min-w-0 items-center gap-2 sm:mb-4 sm:gap-3">
+      <section className="mx-auto max-w-screen-2xl px-4 pb-3 pt-3 sm:px-8">
+        <div className="mb-3 flex min-w-0 items-center gap-2 sm:gap-3">
   <div
     className="flex shrink-0 items-center gap-2 sm:gap-3"
     role="tablist"
