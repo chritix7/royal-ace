@@ -186,7 +186,7 @@ function getShoeStatus(g: Game): {
   return (
     <>
       <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl lg:flex lg:h-full lg:min-h-0 lg:flex-col">
-        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 sm:px-9 sm:py-4 lg:flex lg:flex-1 lg:flex-col lg:justify-between lg:overflow-y-auto`}>
+        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 sm:px-9 sm:py-4 lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:justify-between lg:py-3`}>
           {/* Floating result rail — same component as the Focus view,
               positioned on the left edge of the felt. Shows the round
               breakdown and a New-round button at settle, a Hand-in-
@@ -245,7 +245,7 @@ function getShoeStatus(g: Game): {
           />
           {s.shuffling && <ShuffleAnimation />}
           {/* Croupier — zone gravée dans le tapis */}
-<div className="relative mt-1.5 flex min-h-[88px] items-center justify-center sm:min-h-28 lg:min-h-[96px]">
+<div className="relative mt-1.5 flex min-h-[88px] items-center justify-center sm:min-h-28 lg:mt-0 lg:min-h-[88px]">
 
   {/* Score du croupier — ne prend aucune hauteur */}
 {s.dealer.length > 0 && (
@@ -313,7 +313,7 @@ function getShoeStatus(g: Game): {
               desktop the middle slot stays empty (ResultRail on the
               left owns the result); on mobile the fused pill fills it. */}
           <div
-            className="my-2 flex min-h-[48px] flex-col items-center justify-center gap-1 sm:my-3 lg:min-h-[76px]"
+            className="my-2 flex min-h-[48px] flex-col items-center justify-center gap-1 sm:my-3 lg:my-0 lg:min-h-[64px]"
             role="status"
             aria-live="polite"
           >
@@ -481,7 +481,7 @@ function getShoeStatus(g: Game): {
                     </span>
                     {h.result && <HandResultBadge result={h.result} />}
                   </div>
-                  <div className={`flex justify-center ${compact ? "min-h-[72px] sm:min-h-24" : "min-h-24 sm:min-h-28 lg:min-h-[96px]"}`}>
+                  <div className={`flex justify-center ${compact ? "min-h-[72px] sm:min-h-24" : "min-h-24 sm:min-h-28 lg:min-h-[88px]"}`}>
                     {h.cards.map((card, k) => (
                       <span
                         key={`p${i}-${k}-${card.rank}${card.suit}`}
@@ -575,7 +575,7 @@ function getShoeStatus(g: Game): {
               (Hit / Stand / Double / Split / Surrender) are rendered
               INSIDE this slot, on top of the engraved arcs — no height
               is wasted below the table. */}
-<div className="relative mt-3 min-h-[170px] sm:mt-4 lg:mt-0 lg:flex lg:min-h-[140px] lg:flex-col lg:items-center lg:justify-end lg:gap-3">
+<div className="relative mt-3 min-h-[170px] sm:mt-4 lg:mt-0 lg:flex lg:min-h-[120px] lg:flex-col lg:items-center lg:justify-end lg:gap-2">
   {/* Outer betting-area arc engraved in the felt */}
   <div
     aria-hidden="true"
