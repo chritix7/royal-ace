@@ -22,7 +22,7 @@ import MobileResultModal from "./MobileResultModal";
 // Surrender / Deal. Common shape (border, radius, size, focus ring), with
 // tone + gradient layered on per button.
 const mobileAction =
-  "inline-flex h-10 w-full items-center justify-center rounded-xl border px-1 text-center text-[11px] font-bold uppercase tracking-wide leading-none outline-none shadow-[0_2px_0_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.08)] transition-[filter,transform,background,color,border-color] focus-visible:ring-2 focus-visible:ring-[#e5c779] focus-visible:ring-offset-2 focus-visible:ring-offset-[#101713] enabled:active:translate-y-px enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 lg:h-12 sm:text-sm";
+  "inline-flex h-10 w-full items-center justify-center rounded-xl border px-1 text-center text-[11px] font-bold uppercase tracking-wide leading-none outline-none shadow-[0_2px_0_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.08)] transition-[filter,transform,background,color,border-color] focus-visible:ring-2 focus-visible:ring-[#e5c779] focus-visible:ring-offset-2 focus-visible:ring-offset-[#101713] enabled:active:translate-y-px enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 lg:h-11 sm:text-sm";
 
 type SidePillProps = {
   label: string;
@@ -309,15 +309,86 @@ function getShoeStatus(g: Game): {
 
           {/* Message (annoncé aux lecteurs d'écran) */}
           <div
-            className="my-2 flex flex-col items-center gap-1 sm:my-3 lg:min-h-[72px] lg:justify-center"
+            className="my-2 flex flex-col items-center gap-1 sm:my-3 lg:min-h-[56px] lg:justify-center"
             role="status"
             aria-live="polite"
           >
+            {/* MOBILE FUSED RESULT PILL — at settle, mobile shows a single
+                full-width button that fuses verdict + net + Details. The
+                regular message, net amount and side-note pill are hidden
+                on this breakpoint only, so the stack between dealer and
+                player cards is one row instead of four. */}
+            {s.phase === "settled" && roundBreakdown && (
+              (() => {
+                const net = roundBreakdown.total;
+                const verdict = net > 0 ? "Win" : net < 0 ? "Loss" : "Push";
+                const tone =
+                  net > 0
+                    ? {
+                        border: "border-[#d7b45b]/70",
+                        bg: "bg-gradient-to-r from-[#d7b45b]/22 via-[#d7b45b]/12 to-[#d7b45b]/22",
+                        text: "text-[#f5d778]",
+                        shadow:
+                          "shadow-[0_0_16px_rgba(215,180,91,0.25),inset_0_1px_0_rgba(229,199,121,0.2)]",
+                        amount: "text-[#f5d778]",
+                      }
+                    : net < 0
+                      ? {
+                          border: "border-red-400/40",
+                          bg: "bg-gradient-to-r from-red-500/15 via-red-500/8 to-red-500/15",
+                          text: "text-red-200",
+                          shadow:
+                            "shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
+                          amount: "text-red-300",
+                        }
+                      : {
+                          border: "border-white/20",
+                          bg: "bg-black/40",
+                          text: "text-white/75",
+                          shadow:
+                            "shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
+                          amount: "text-white/80",
+                        };
+                return (
+                  <button
+                    type="button"
+                    key={`fused-${net}-${s.celebrate}`}
+                    onClick={() => setResultOpen(true)}
+                    aria-label="Open round details"
+                    className={`group flex w-full max-w-sm animate-result-pop items-center justify-between gap-2 rounded-full border px-3.5 py-1.5 ${tone.border} ${tone.bg} ${tone.shadow} outline-none transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-[#e5c779] md:hidden`}
+                  >
+                    <span
+                      className={`text-[10px] font-black uppercase tracking-[0.22em] ${tone.text}`}
+                    >
+                      {verdict}
+                    </span>
+                    <span
+                      className={`text-base font-black tabular-nums ${tone.amount}`}
+                    >
+                      {net > 0 ? "+" : net < 0 ? "−" : ""}◈{" "}
+                      {money(Math.abs(net))}
+                    </span>
+                    <span
+                      className={`flex shrink-0 items-center gap-1 text-[10px] font-bold uppercase tracking-wider ${tone.text}`}
+                    >
+                      <span
+                        aria-hidden
+                        className="text-[11px] leading-none transition-transform duration-300 group-hover:scale-110"
+                      >
+                        ✦
+                      </span>
+                      Details
+                    </span>
+                  </button>
+                );
+              })()
+            )}
+
             <div
               key={`msg-${s.message}-${s.phase}-${s.celebrate}`}
               className={`max-w-full rounded-full border border-[#d7b45b]/30 bg-black/30 px-3 py-1.5 text-center text-xs text-[#e5c779] sm:px-5 sm:py-2 sm:text-sm ${
                 s.phase === "settled" ? "animate-result-pop" : "animate-msg-slide"
-              }`}
+              } ${s.phase === "settled" && roundBreakdown ? "hidden md:block" : ""}`}
             >
               <span
                 className={s.phase === "betting" ? "animate-idle-shimmer" : ""}
@@ -326,7 +397,13 @@ function getShoeStatus(g: Game): {
               </span>
             </div>
             {s.net !== null && s.net !== 0 && (
-              <div className="flex items-center gap-2">
+              <div
+                className={`items-center gap-2 ${
+                  s.phase === "settled" && roundBreakdown
+                    ? "hidden md:flex"
+                    : "flex"
+                }`}
+              >
                 <div
                   key={`net-${s.net}-${s.celebrate}`}
                   className={`inline-block text-xl font-black sm:text-2xl ${
@@ -337,25 +414,18 @@ function getShoeStatus(g: Game): {
                 >
                   {s.net > 0 ? "+" : "−"}◈ {money(Math.abs(s.net))}
                 </div>
-                {roundBreakdown && (
-                  <button
-                    type="button"
-                    onClick={() => setResultOpen(true)}
-                    aria-label="Open round details"
-                    className="group inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-[#d7b45b]/70 bg-gradient-to-b from-[#d7b45b]/25 to-[#d7b45b]/10 px-3 text-[11px] font-bold uppercase tracking-wider text-[#f0d38b] shadow-[0_0_14px_rgba(215,180,91,0.18)] outline-none transition hover:border-[#e5c779] hover:text-[#f7dd9b] focus-visible:ring-2 focus-visible:ring-[#e5c779] md:hidden"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="text-[10px] leading-none transition-transform duration-300 group-hover:scale-110"
-                    >
-                      ✦
-                    </span>
-                    Details
-                  </button>
-                )}
               </div>
             )}
-            <SideNotePill note={s.sideNote} />
+            {/* Side-note pill: hidden on mobile at settle (the fused pill
+                replaces it there — side-bet detail still lives inside the
+                Details modal). Shown normally otherwise. */}
+            <div
+              className={
+                s.phase === "settled" && roundBreakdown ? "hidden md:block" : ""
+              }
+            >
+              <SideNotePill note={s.sideNote} />
+            </div>
             {advice && (
               <div className="max-w-full rounded-full border border-sky-300/40 bg-sky-400/10 px-3 py-1 text-center text-[11px] text-sky-200 sm:text-xs">
                 Basic strategy: {advice}
@@ -622,7 +692,7 @@ function getShoeStatus(g: Game): {
 
         {/* The round breakdown moved onto the felt as a floating
             ResultRail panel on the left edge — see above. */}
-        <div className="sticky bottom-0 z-20 border-t border-white/10 bg-[#101713]/95 px-2 py-2 backdrop-blur sm:px-7 sm:py-4 lg:static lg:border-0 lg:bg-transparent">
+        <div className="sticky bottom-0 z-20 border-t border-white/10 bg-[#101713]/95 px-2 py-2 backdrop-blur sm:px-7 sm:py-3 lg:static lg:border-0 lg:bg-transparent lg:py-2">
           {s.phase === "insurance" ? (
             // The InsuranceModal (mounted at the Blackjack parent) owns
             // this decision now — keep the slot visually empty here.

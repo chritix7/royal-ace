@@ -310,12 +310,12 @@ export function SideBet({
   return (
     <div
       className={`flex items-center justify-between rounded-2xl border border-white/10 bg-gradient-to-b from-black/30 to-black/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${
-        roomy ? "gap-2 px-2 py-2" : "px-3 py-1.5"
+        roomy ? "gap-2 px-2 py-2" : "px-3 py-1"
       }`}
       title={hint}
     >
       <p
-        className={`truncate text-xs font-bold tracking-wide text-white ${
+        className={`truncate text-[11px] font-bold tracking-wide text-white ${
           roomy ? "min-w-0 flex-1" : ""
         }`}
       >
