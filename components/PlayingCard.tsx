@@ -61,8 +61,8 @@ export default function PlayingCard({
   const size = fit
     ? "h-[var(--bj-card-h)] w-[calc(var(--bj-card-h)*0.72)]"
     : compact
-      ? "h-[60px] w-[42px] sm:h-24 sm:w-[68px]"
-      : "h-20 w-[56px] sm:h-28 sm:w-20";
+      ? "h-[60px] w-[42px] sm:h-24 sm:w-[68px] lg:h-20 lg:w-[56px]"
+      : "h-20 w-[56px] sm:h-28 sm:w-20 lg:h-24 lg:w-[68px]";
 
   const shift = fit
     ? "-ml-[calc(var(--bj-card-h)*0.28)]"
