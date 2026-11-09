@@ -19,7 +19,7 @@ export default function ResultRail({
 
   return (
     <aside
-      className="absolute left-4 top-1/2 z-30 hidden -translate-y-1/2 md:block"
+      className="absolute left-4 top-[calc(50%-15px)] z-30 hidden -translate-y-1/2 md:block"
       aria-live="polite"
     >
       <div

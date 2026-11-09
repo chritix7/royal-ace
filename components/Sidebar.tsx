@@ -3,9 +3,9 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { Theme, VegasVariant } from "../lib/game";
-import { CHIPS, THEME_LABELS, THEME_SWATCHES, VEGAS_VARIANTS, money } from "../lib/game";
+import { THEME_LABELS, THEME_SWATCHES, VEGAS_VARIANTS, money } from "../lib/game";
 import { Counter, Spark, Toggle, SideBet } from "./ui";
-import ChipButton from "./ChipButton";
+import ChipRail from "./ChipRail";
 import { CountGauge, DeckMeter } from "./CountGauge";
 import { FairnessBar, StackedBar } from "./FairnessBar";
 import MiniSpark from "./MiniSpark";
@@ -164,20 +164,17 @@ export default function Sidebar({ g }: { g: Game }) {
 
           <div className="my-3 h-px w-full bg-gradient-to-r from-transparent via-[#d7b45b]/15 to-transparent" />
 
-          {/* All 5 chip denominations on ONE row — ChipButton md shrank
-              to h-11 so the row fits comfortably inside a 300px sidebar.
-              Grid of 5 equal columns so the chips stay centered without
-              gaping when the sidebar is wider than the row. */}
-          <div className="grid grid-cols-5 place-items-center gap-1">
-            {CHIPS.map((v) => (
-              <ChipButton
-                key={v}
-                value={v}
-                onClick={() => addChip(v)}
-                disabled={!canBet || (s.bet + v) * spots + sides > s.balance}
-              />
-            ))}
-          </div>
+          {/* Scrollable chip ladder — 3 denominations visible at a
+              time, ◂ / ▸ arrows slide the window through the whole
+              10 → 50,000 range without overflowing the sidebar. */}
+          <ChipRail
+            visibleCount={3}
+            size="md"
+            onPick={(v) => addChip(v)}
+            disabledFor={(v) =>
+              !canBet || (s.bet + v) * spots + sides > s.balance
+            }
+          />
 
           <div className="mt-3 grid grid-cols-3 gap-1.5">
             <button

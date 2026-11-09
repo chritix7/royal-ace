@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { handValue, isBlackjack } from "../lib/blackjack";
 import { MIN_BET, REFILL, money, tableBg } from "../lib/game";
 import { ChipStack } from "./ui";
@@ -15,6 +16,7 @@ import SideNotePill from "./SideNotePill";
 import SideWinBadge from "./SideWinBadge";
 import VegasFeltOverlay from "./VegasFeltOverlay";
 import ResultRail from "./blackjack-immersive/ResultRail";
+import MobileResultModal from "./MobileResultModal";
 
 // Premium action button base — used across Hit / Stand / Double / Split /
 // Surrender / Deal. Common shape (border, radius, size, focus ring), with
@@ -149,6 +151,9 @@ function getShoeStatus(g: Game): {
 }
 
   export default function Table({ g }: { g: Game }) {
+  // Mobile-only round-details modal — on md+ the ResultRail on the
+  // felt already shows the breakdown.
+  const [resultOpen, setResultOpen] = useState(false);
   const {
   s,
   roundBreakdown,
@@ -179,6 +184,7 @@ function getShoeStatus(g: Game): {
 } = g;
 
   return (
+    <>
       <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl">
         <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-4 sm:px-9 sm:py-5`}>
           {/* Floating result rail — same component as the Focus view,
@@ -320,15 +326,33 @@ function getShoeStatus(g: Game): {
               </span>
             </div>
             {s.net !== null && s.net !== 0 && (
-              <div
-                key={`net-${s.net}-${s.celebrate}`}
-                className={`inline-block text-xl font-black sm:text-2xl ${
-                  s.net > 0
-                    ? "text-[#f5d778] animate-result-win"
-                    : "text-red-300 animate-result-pop"
-                }`}
-              >
-                {s.net > 0 ? "+" : "−"}◈ {money(Math.abs(s.net))}
+              <div className="flex items-center gap-2">
+                <div
+                  key={`net-${s.net}-${s.celebrate}`}
+                  className={`inline-block text-xl font-black sm:text-2xl ${
+                    s.net > 0
+                      ? "text-[#f5d778] animate-result-win"
+                      : "text-red-300 animate-result-pop"
+                  }`}
+                >
+                  {s.net > 0 ? "+" : "−"}◈ {money(Math.abs(s.net))}
+                </div>
+                {roundBreakdown && (
+                  <button
+                    type="button"
+                    onClick={() => setResultOpen(true)}
+                    aria-label="Open round details"
+                    className="group inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-[#d7b45b]/70 bg-gradient-to-b from-[#d7b45b]/25 to-[#d7b45b]/10 px-3 text-[11px] font-bold uppercase tracking-wider text-[#f0d38b] shadow-[0_0_14px_rgba(215,180,91,0.18)] outline-none transition hover:border-[#e5c779] hover:text-[#f7dd9b] focus-visible:ring-2 focus-visible:ring-[#e5c779] md:hidden"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="text-[10px] leading-none transition-transform duration-300 group-hover:scale-110"
+                    >
+                      ✦
+                    </span>
+                    Details
+                  </button>
+                )}
               </div>
             )}
             <SideNotePill note={s.sideNote} />
@@ -416,63 +440,57 @@ function getShoeStatus(g: Game): {
 
           {/* Table markings — engraved ornament text, matches immersive.
               Shrink down on mobile so the three labels fit on one line. */}
+{/* Engraved table rules — only shown from sm+ to reclaim a row of
+    height on mobile. On phones the rules are also surfaced inside
+    the Table-rules collapsible in the sidebar. */}
 <div
   aria-hidden="true"
-  className="pointer-events-none mt-1.5 flex translate-y-[3px] items-center justify-center gap-1.5 text-center sm:gap-x-3"
+  className="pointer-events-none mt-1.5 hidden translate-y-[3px] items-center justify-center text-center sm:flex sm:gap-x-3"
 >
   <p
-    className="whitespace-nowrap font-serif text-[7px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.22em]"
+    className="whitespace-nowrap font-serif text-[10px] font-bold uppercase tracking-[0.22em]"
     style={{
       color: "rgba(229,199,121,0.42)",
       textShadow: "0 1px 0 rgba(0,0,0,0.9)",
     }}
   >
-    <span className="sm:hidden">
-      BJ {s.settings.bj65 ? "6:5" : "3:2"}
-    </span>
-    <span className="hidden sm:inline">
-      Blackjack pays {s.settings.bj65 ? "6 to 5" : "3 to 2"}
-    </span>
+    Blackjack pays {s.settings.bj65 ? "6 to 5" : "3 to 2"}
   </p>
 
   <span
     aria-hidden
-    className="text-[7px] leading-none sm:text-[9px]"
+    className="text-[9px] leading-none"
     style={{ color: "rgba(229,199,121,0.5)" }}
   >
     ❖
   </span>
 
   <p
-    className="whitespace-nowrap font-serif text-[7px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.22em]"
+    className="whitespace-nowrap font-serif text-[10px] font-bold uppercase tracking-[0.22em]"
     style={{
       color: "rgba(229,199,121,0.36)",
       textShadow: "0 1px 0 rgba(0,0,0,0.9)",
     }}
   >
-    <span className="sm:hidden">Insurance 2:1</span>
-    <span className="hidden sm:inline">Insurance pays 2 to 1</span>
+    Insurance pays 2 to 1
   </p>
 
   <span
     aria-hidden
-    className="text-[7px] leading-none sm:text-[9px]"
+    className="text-[9px] leading-none"
     style={{ color: "rgba(229,199,121,0.5)" }}
   >
     ❖
   </span>
 
   <p
-    className="whitespace-nowrap font-serif text-[7px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.22em]"
+    className="whitespace-nowrap font-serif text-[10px] font-bold uppercase tracking-[0.22em]"
     style={{
       color: "rgba(229,199,121,0.36)",
       textShadow: "0 1px 0 rgba(0,0,0,0.9)",
     }}
   >
-    <span className="sm:hidden">{s.settings.h17 ? "H17" : "S17"}</span>
-    <span className="hidden sm:inline">
-      Dealer {s.settings.h17 ? "hits" : "stands on"} soft 17
-    </span>
+    Dealer {s.settings.h17 ? "hits" : "stands on"} soft 17
   </p>
 </div>
 
@@ -650,5 +668,11 @@ function getShoeStatus(g: Game): {
           )}
         </div>
       </section>
+      <MobileResultModal
+        open={resultOpen && s.phase === "settled"}
+        onClose={() => setResultOpen(false)}
+        breakdown={roundBreakdown}
+      />
+    </>
   );
 }

@@ -50,13 +50,31 @@ export type S = {
   revealing: boolean;
 };
 
-export const CHIPS = [10, 20, 50, 100, 500];
+export const CHIPS = [
+  10,
+  20,
+  50,
+  100,
+  500,
+  1000,
+  2000,
+  5000,
+  10000,
+  20000,
+  50000,
+];
 export const CHIP_BG: Record<number, string> = {
   10: "bg-sky-700",
   20: "bg-emerald-700",
   50: "bg-red-700",
   100: "bg-slate-800",
   500: "bg-purple-800",
+  1000: "bg-amber-500",
+  2000: "bg-rose-700",
+  5000: "bg-amber-800",
+  10000: "bg-cyan-600",
+  20000: "bg-green-800",
+  50000: "bg-zinc-400",
 };
 export const MIN_BET = 10;
 export const START_BALANCE = 1000;

@@ -24,19 +24,37 @@ type Scheme = {
 };
 
 // Scheme per denomination — body/rim tone + the contrasting center
-// disc. Same color family as the Tailwind classes we used to use.
+// disc. Classic casino chip ladder from $10 (blue) up to $50,000
+// (silver). High-roller plaques (1K+) get warmer / brighter bodies.
 const SCHEMES: Record<number, Scheme> = {
   10: { body: "#0a6ea8", edge: "#043e62", center: "#083a5a", text: "#f5f7fa" },
   20: { body: "#0a7451", edge: "#044529", center: "#0a3b25", text: "#f5f7fa" },
   50: { body: "#b3301e", edge: "#6b1d13", center: "#5e1812", text: "#fff6ef" },
   100: { body: "#1e2630", edge: "#06090d", center: "#0a0d12", text: "#f5f7fa" },
   500: { body: "#6b299c", edge: "#3b1360", center: "#331355", text: "#f7eaff" },
+  1000: { body: "#d4a84e", edge: "#876524", center: "#8a6c2e", text: "#1a1612" },
+  2000: { body: "#b34666", edge: "#5c1f32", center: "#5a1e2f", text: "#fff6ef" },
+  5000: { body: "#8a4a1e", edge: "#4a260f", center: "#3f2210", text: "#fff6ef" },
+  10000: { body: "#0a8bba", edge: "#054b67", center: "#083d51", text: "#f5f7fa" },
+  20000: { body: "#4a7a2a", edge: "#1e3310", center: "#20331a", text: "#f5f7fa" },
+  50000: { body: "#8a8fa2", edge: "#3a3e4c", center: "#2d3140", text: "#1a1612" },
 };
+
+/** Short label on the center disc. Keeps the SVG from overflowing for
+ *  the big denominations by switching to k-suffix notation at $1,000. */
+function chipLabel(value: number): string {
+  if (value >= 1000) return `${value / 1000}K`;
+  return String(value);
+}
 
 function ChipFace({ value }: { value: number }) {
   const scheme = SCHEMES[value] ?? SCHEMES[100];
   // 8 edge pips at 45° intervals, rotated from the top.
   const pipAngles = [0, 45, 90, 135, 180, 225, 270, 315];
+  const label = chipLabel(value);
+  // Shrink the text slightly for 3-char labels so "10K" / "20K" / "50K"
+  // don't crowd the center ring.
+  const fontSize = label.length >= 3 ? 11 : 12.5;
 
   return (
     <svg
@@ -118,7 +136,7 @@ function ChipFace({ value }: { value: number }) {
         x="24"
         y="28.5"
         textAnchor="middle"
-        fontSize="12.5"
+        fontSize={fontSize}
         fontWeight="900"
         fontFamily="ui-sans-serif, system-ui"
         fill={scheme.text}
@@ -127,7 +145,7 @@ function ChipFace({ value }: { value: number }) {
           paintOrder: "stroke",
         }}
       >
-        {value}
+        {label}
       </text>
 
       {/* Specular highlight */}

@@ -78,7 +78,7 @@ export default function AudioControls() {
 
     {/* Volume — framed container matching the other audio pills, with
         a label eyebrow and a gold-tinted track. */}
-    <label className="flex shrink-0 items-center gap-2 rounded-full border border-white/12 bg-gradient-to-b from-[#1a2219] to-[#0e1310] px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_0_rgba(0,0,0,0.45)] sm:px-3">
+    <label className="flex shrink-0 items-center gap-2 rounded-full border border-white/12 bg-gradient-to-b from-[#1a2219] to-[#0e1310] px-2 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_0_rgba(0,0,0,0.45)] sm:px-3">
       <span className="hidden text-[10px] font-black uppercase tracking-wider text-[#d7b45b]/80 sm:inline">
         Volume
       </span>
@@ -91,7 +91,7 @@ export default function AudioControls() {
         value={a.volume}
         onChange={(e) => audio.set({ volume: Number(e.target.value) })}
         aria-label="Master volume"
-        className="h-1 w-14 min-w-0 accent-[#d7b45b] sm:w-20"
+        className="h-1 w-10 min-w-0 accent-[#d7b45b] sm:w-20"
       />
     </label>
   </div>

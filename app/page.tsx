@@ -134,7 +134,7 @@ export default function Home() {
     </div>
   </div>
 </header>
-      <section className="mx-auto max-w-screen-2xl px-4 pb-16 pt-4 sm:px-8 sm:pt-6">
+      <section className="mx-auto max-w-screen-2xl px-4 pb-4 pt-4 sm:px-8 sm:pb-6 sm:pt-6">
         <div className="mb-6 flex min-w-0 items-center gap-2 sm:gap-3">
   <div
     className="flex shrink-0 items-center gap-2 sm:gap-3"
@@ -181,7 +181,7 @@ export default function Home() {
     Round in progress…
   </span>
 
-  <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-2">
+  <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
     <AudioControls />
 
     {/* Focus (immersive) toggle — only meaningful on the blackjack tab.
@@ -193,10 +193,10 @@ export default function Home() {
         onClick={() => setFocusMode((v) => !v)}
         aria-pressed={focusMode}
         aria-label={focusMode ? "Exit focus mode" : "Enter focus mode"}
-        className="hidden items-center justify-center gap-1.5 rounded-full border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] outline-none transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 focus-visible:ring-2 focus-visible:ring-[#e5c779] active:translate-y-px sm:inline-flex"
+        className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] outline-none transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 focus-visible:ring-2 focus-visible:ring-[#e5c779] active:translate-y-px sm:px-3"
       >
         <span aria-hidden="true">⛶</span>
-        Focus
+        <span className="hidden sm:inline">Focus</span>
       </button>
     )}
   </div>

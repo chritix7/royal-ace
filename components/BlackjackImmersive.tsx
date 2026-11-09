@@ -4,7 +4,6 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { handValue, isBlackjack } from "../lib/blackjack";
 import {
-  CHIPS,
   MIN_BET,
   REFILL,
   tableBg,
@@ -13,7 +12,7 @@ import {
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import { useSession } from "../lib/sessionStore";
 import { ChipStack, Counter, SideBet, sideBetStep } from "./ui";
-import ChipButton from "./ChipButton";
+import ChipRail from "./ChipRail";
 import PlayingCard from "./PlayingCard";
 import CardFlight from "./CardFlight";
 import HandResultBadge from "./HandResultBadge";
@@ -641,19 +640,18 @@ const playerCardStyle = (
     </span>
   </div>
 
-  <div className="mx-auto grid w-full max-w-[300px] grid-cols-5 gap-1.5">
-    {CHIPS.map((value) => (
-      <ChipButton
-        key={value}
-        value={value}
-        size="sm"
-        onClick={() => addChip(value)}
-        disabled={
-          !canBet ||
-          (s.bet + value) * spots + sides > s.balance
-        }
-      />
-    ))}
+  <div className="mx-auto w-full max-w-[320px]">
+    {/* Scrollable chip ladder — 5 denominations visible at a time,
+        arrows slide the window through the whole 10 → 50,000 range. */}
+    <ChipRail
+      visibleCount={5}
+      size="sm"
+      onPick={(value) => addChip(value)}
+      disabledFor={(value) =>
+        !canBet ||
+        (s.bet + value) * spots + sides > s.balance
+      }
+    />
   </div>
 
   <div className="mx-auto grid w-full max-w-[300px] grid-cols-3 gap-1.5">
