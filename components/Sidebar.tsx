@@ -219,7 +219,7 @@ export default function Sidebar({ g }: { g: Game }) {
         {/* TABLE RULES — collapsed by default: set once, changed rarely. */}
         <Panel padded={false}>
           <details className="group">
-            <summary className="flex cursor-pointer list-none items-center justify-between rounded-3xl px-5 py-4 outline-none transition hover:bg-white/[0.02] focus-visible:ring-2 focus-visible:ring-[#e5c779]">
+            <summary className="flex cursor-pointer list-none items-center justify-between rounded-3xl px-4 py-3 outline-none transition hover:bg-white/[0.02] focus-visible:ring-2 focus-visible:ring-[#e5c779]">
               <div>
                 <p className={eyebrow}>Configure</p>
                 <h3 className="text-sm font-black tracking-wide text-white">

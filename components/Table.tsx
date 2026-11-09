@@ -245,7 +245,7 @@ function getShoeStatus(g: Game): {
           />
           {s.shuffling && <ShuffleAnimation />}
           {/* Croupier — zone gravée dans le tapis */}
-<div className="relative mt-1.5 flex min-h-[76px] items-center justify-center sm:min-h-28">
+<div className="relative mt-1.5 flex min-h-[88px] items-center justify-center sm:min-h-28">
 
   {/* Score du croupier — ne prend aucune hauteur */}
 {s.dealer.length > 0 && (
@@ -474,7 +474,7 @@ function getShoeStatus(g: Game): {
                     </span>
                     {h.result && <HandResultBadge result={h.result} />}
                   </div>
-                  <div className={`flex justify-center ${compact ? "min-h-[60px] sm:min-h-24" : "min-h-20 sm:min-h-28"}`}>
+                  <div className={`flex justify-center ${compact ? "min-h-[72px] sm:min-h-24" : "min-h-24 sm:min-h-28"}`}>
                     {h.cards.map((card, k) => (
                       <span
                         key={`p${i}-${k}-${card.rank}${card.suit}`}
@@ -560,7 +560,12 @@ function getShoeStatus(g: Game): {
   </p>
 </div>
 
-          {/* Zone de mise */}
+          {/* Zone de mise — only shown while the player can act on
+              bets (betting + settled). During the hand (dealing /
+              player / dealer / insurance) the Hit/Stand controls own
+              the interaction, so the BET + PP + 21+3 pills are hidden
+              to reclaim ~130px of vertical space on the felt. */}
+{canBet && (
 <div className="relative mt-3 flex flex-col items-center gap-2.5 sm:mt-4 lg:flex-row lg:items-center lg:justify-center lg:gap-4">
   {/* Outer betting-area arc engraved in the felt */}
   <div
@@ -684,6 +689,7 @@ function getShoeStatus(g: Game): {
     </div>
   </div>
 </div>
+)}
         </div>
 
         {/* The round breakdown moved onto the felt as a floating
