@@ -58,7 +58,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#080c0b] text-white">
       <header className="sticky top-0 z-40 border-b border-[#c8a65b]/20 bg-[#0b100e] pt-[env(safe-area-inset-top)]">
-  <div className="mx-auto max-w-screen-2xl px-4 py-3 sm:px-8 sm:py-4">
+  <div className="mx-auto max-w-screen-2xl px-4 py-2.5 sm:px-8 sm:py-3">
     <div className="flex items-center gap-3">
       <h1 className="header-shine truncate text-lg font-black tracking-[0.12em] sm:text-3xl">
         ROYAL{" "}
@@ -134,8 +134,8 @@ export default function Home() {
     </div>
   </div>
 </header>
-      <section className="mx-auto max-w-screen-2xl px-4 pb-4 pt-4 sm:px-8 sm:pb-6 sm:pt-6">
-        <div className="mb-6 flex min-w-0 items-center gap-2 sm:gap-3">
+      <section className="mx-auto max-w-screen-2xl px-4 pb-4 pt-3 sm:px-8 sm:pb-4 sm:pt-4">
+        <div className="mb-3 flex min-w-0 items-center gap-2 sm:mb-4 sm:gap-3">
   <div
     className="flex shrink-0 items-center gap-2 sm:gap-3"
     role="tablist"

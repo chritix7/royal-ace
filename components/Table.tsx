@@ -186,7 +186,7 @@ function getShoeStatus(g: Game): {
   return (
     <>
       <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl">
-        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-4 sm:px-9 sm:py-5`}>
+        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 sm:px-9 sm:py-4`}>
           {/* Floating result rail — same component as the Focus view,
               positioned on the left edge of the felt. Shows the round
               breakdown and a New-round button at settle, a Hand-in-
@@ -307,9 +307,14 @@ function getShoeStatus(g: Game): {
 </div>
 </div>
 
-          {/* Message (annoncé aux lecteurs d'écran) */}
+          {/* Message (annoncé aux lecteurs d'écran). At settle+breakdown
+              the area collapses: the mobile fused pill lives here (compact)
+              and desktop has the ResultRail on the felt's left edge, so
+              the middle slot is intentionally empty. */}
           <div
-            className="my-2 flex flex-col items-center gap-1 sm:my-3 lg:min-h-[56px] lg:justify-center"
+            className={`my-2 flex flex-col items-center gap-1 sm:my-3 lg:justify-center ${
+              s.phase === "settled" && roundBreakdown ? "lg:min-h-0" : "lg:min-h-[56px]"
+            }`}
             role="status"
             aria-live="polite"
           >
@@ -355,7 +360,7 @@ function getShoeStatus(g: Game): {
                     key={`fused-${net}-${s.celebrate}`}
                     onClick={() => setResultOpen(true)}
                     aria-label="Open round details"
-                    className={`group flex w-full max-w-sm animate-result-pop items-center justify-between gap-2 rounded-full border px-3.5 py-1.5 ${tone.border} ${tone.bg} ${tone.shadow} outline-none transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-[#e5c779] md:hidden`}
+                    className={`group flex max-w-[280px] animate-result-pop items-center justify-center gap-2.5 rounded-full border px-3 py-1 ${tone.border} ${tone.bg} ${tone.shadow} outline-none transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-[#e5c779] md:hidden`}
                   >
                     <span
                       className={`text-[10px] font-black uppercase tracking-[0.22em] ${tone.text}`}
@@ -384,11 +389,15 @@ function getShoeStatus(g: Game): {
               })()
             )}
 
+            {/* At settle (with a round breakdown) the middle message, net
+                amount and side-note pill are HIDDEN at every breakpoint:
+                mobile sees the fused pill above, desktop sees the floating
+                ResultRail on the left edge of the felt. No duplication. */}
             <div
               key={`msg-${s.message}-${s.phase}-${s.celebrate}`}
               className={`max-w-full rounded-full border border-[#d7b45b]/30 bg-black/30 px-3 py-1.5 text-center text-xs text-[#e5c779] sm:px-5 sm:py-2 sm:text-sm ${
                 s.phase === "settled" ? "animate-result-pop" : "animate-msg-slide"
-              } ${s.phase === "settled" && roundBreakdown ? "hidden md:block" : ""}`}
+              } ${s.phase === "settled" && roundBreakdown ? "hidden" : ""}`}
             >
               <span
                 className={s.phase === "betting" ? "animate-idle-shimmer" : ""}
@@ -396,14 +405,8 @@ function getShoeStatus(g: Game): {
                 {s.message}
               </span>
             </div>
-            {s.net !== null && s.net !== 0 && (
-              <div
-                className={`items-center gap-2 ${
-                  s.phase === "settled" && roundBreakdown
-                    ? "hidden md:flex"
-                    : "flex"
-                }`}
-              >
+            {s.net !== null && s.net !== 0 && !(s.phase === "settled" && roundBreakdown) && (
+              <div className="flex items-center gap-2">
                 <div
                   key={`net-${s.net}-${s.celebrate}`}
                   className={`inline-block text-xl font-black sm:text-2xl ${
@@ -416,16 +419,9 @@ function getShoeStatus(g: Game): {
                 </div>
               </div>
             )}
-            {/* Side-note pill: hidden on mobile at settle (the fused pill
-                replaces it there — side-bet detail still lives inside the
-                Details modal). Shown normally otherwise. */}
-            <div
-              className={
-                s.phase === "settled" && roundBreakdown ? "hidden md:block" : ""
-              }
-            >
+            {!(s.phase === "settled" && roundBreakdown) && (
               <SideNotePill note={s.sideNote} />
-            </div>
+            )}
             {advice && (
               <div className="max-w-full rounded-full border border-sky-300/40 bg-sky-400/10 px-3 py-1 text-center text-[11px] text-sky-200 sm:text-xs">
                 Basic strategy: {advice}

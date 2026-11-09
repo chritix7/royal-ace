@@ -142,7 +142,7 @@ export default function Sidebar({ g }: { g: Game }) {
   };
 
   return (
-      <aside className="flex flex-col gap-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1 lg:[scrollbar-width:thin] lg:[scrollbar-color:#d7b45b40_transparent]">
+      <aside className="flex flex-col gap-3 lg:sticky lg:top-16 lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto lg:pr-1 lg:[scrollbar-width:thin] lg:[scrollbar-color:#d7b45b40_transparent]">
         {/* MASTER PANEL — balance, bet, side bets. One container so the
             player sees chips → bet → sides as a single instrument. */}
         <Panel>

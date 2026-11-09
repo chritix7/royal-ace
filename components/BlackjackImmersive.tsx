@@ -328,10 +328,23 @@ const playerCardStyle = (
             </span>
           </p>
 
-          <SideNotePill note={s.sideNote} />
+          {/* Side-note pill is shown inline at every breakpoint when
+              NOT at settle+breakdown; at settle+breakdown it only shows
+              on mobile (desktop has the ResultRail on the left). */}
+          {!(s.phase === "settled" && roundBreakdown) ? (
+            <SideNotePill note={s.sideNote} />
+          ) : (
+            <div className="md:hidden">
+              <SideNotePill note={s.sideNote} />
+            </div>
+          )}
 
           {s.phase === "settled" && s.net !== null ? (
-  <div className="flex items-center justify-center gap-2">
+  <div
+    className={`items-center justify-center gap-2 ${
+      roundBreakdown ? "flex md:hidden" : "flex"
+    }`}
+  >
     <span
       key={`net-${s.net}-${s.celebrate}`}
       className={`inline-block text-xl font-black tabular-nums ${
