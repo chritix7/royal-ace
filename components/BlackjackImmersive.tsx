@@ -209,7 +209,7 @@ const playerCardStyle = (
 
       <main
         style={tableStyle}
-        className={`felt-texture relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${tableBg(s.settings)}`}
+        className={`felt-texture relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${bettingOpen ? "pb-[220px]" : "pb-[88px]"} ${tableBg(s.settings)}`}
       >
         {s.settings.theme === "vegas" && <VegasFeltOverlay />}
         {s.celebrate > 0 && (
@@ -631,28 +631,26 @@ const playerCardStyle = (
                 <ResultRail g={g} onNewRound={deal} />
       </main>
 
+      {/* Floating action card — pulled out of the flex column so the
+          felt extends all the way to the bottom of the viewport. The
+          card sits inset from the bottom edge with a thick shadow and
+          a gold-rimmed backdrop blur so it reads like a dealer tray
+          hovering over the felt, not a bolted-on bar.
+          Width-capped to 640px; on narrower screens it stays full-
+          width with inset margins. */}
       <footer
-        className="relative z-20 shrink-0 border-t border-[#d7b45b]/25 bg-[#101713] px-2 pt-2 sm:px-5"
+        className="absolute bottom-3 left-1/2 z-20 w-[min(640px,calc(100%-1rem))] -translate-x-1/2 rounded-2xl border border-[#d7b45b]/35 bg-[#101713]/92 px-2 pt-2 shadow-[0_22px_60px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(229,199,121,0.12)] backdrop-blur-md sm:px-5"
         style={{
           paddingBottom: "max(env(safe-area-inset-bottom), 0.5rem)",
         }}
       >
         {bettingOpen ? (
           <div className="mx-auto mb-2 max-w-xl overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-black/20 p-2 pb-4 sm:max-h-[26dvh] sm:pb-2.5">
+            {/* "Bet / hand ◈ X" row removed — the floating BET circle
+                on the felt (with the live chip pile) already shows the
+                amount, the Deal button spells it out, and the chip
+                picker below dictates what's being added. One source. */}
             <div className="space-y-2">
-  <div className="flex min-w-0 items-center justify-between gap-3 px-1">
-    <span className="shrink-0 text-[10px] uppercase tracking-wider text-white/45">
-      Bet / hand
-    </span>
-
-    <span
-      className="min-w-0 truncate text-right font-mono text-sm font-bold tabular-nums text-[#e5c779]"
-      title={`◈ ${money(s.bet)}`}
-    >
-      ◈ {money(s.bet)}
-    </span>
-  </div>
-
   <div className="mx-auto w-full max-w-[320px]">
     {/* Scrollable chip ladder — 5 denominations visible at a time,
         arrows slide the window through the whole 10 → 50,000 range. */}
@@ -705,7 +703,7 @@ const playerCardStyle = (
       onIncrease={() => adjustSide("ppBet", sideBetStep(s.ppBet))}
       onDecrease={() => adjustSide("ppBet", -sideBetStep(Math.max(0, s.ppBet - 1)))}
       plusDisabled={
-        !canBet || s.ppBet >= 1000 || stake + sideBetStep(s.ppBet) > s.balance
+        !canBet || s.ppBet >= 5000 || stake + sideBetStep(s.ppBet) > s.balance
       }
     />
     {roundBreakdown && (
@@ -721,7 +719,7 @@ const playerCardStyle = (
       onIncrease={() => adjustSide("t3Bet", sideBetStep(s.t3Bet))}
       onDecrease={() => adjustSide("t3Bet", -sideBetStep(Math.max(0, s.t3Bet - 1)))}
       plusDisabled={
-        !canBet || s.t3Bet >= 1000 || stake + sideBetStep(s.t3Bet) > s.balance
+        !canBet || s.t3Bet >= 5000 || stake + sideBetStep(s.t3Bet) > s.balance
       }
     />
     {roundBreakdown && (

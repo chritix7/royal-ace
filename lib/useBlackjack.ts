@@ -542,7 +542,7 @@ function giveDealer() {
     if (!ready.current || blocked.current || transaction.current) return;
     if (c.phase !== "betting" && c.phase !== "settled") return;
     const next = c[key] + delta;
-    if (next < 0 || next > 1000) return;
+    if (next < 0 || next > 5000) return;
     if (c.bet * c.settings.spots + c.ppBet + c.t3Bet + delta > c.balance) return;
     set({ [key]: next } as Partial<S>);
     sfx.chip();

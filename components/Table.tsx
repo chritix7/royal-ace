@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { handValue, isBlackjack } from "../lib/blackjack";
 import { MIN_BET, REFILL, money, tableBg } from "../lib/game";
-import { ChipStack } from "./ui";
+import { ChipStack, sideBetStep } from "./ui";
 import PlayingCard from "./PlayingCard";
 import Confetti from "./Confetti";
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
@@ -437,7 +437,7 @@ function getShoeStatus(g: Game): {
           </div>
 
           {/* Joueur */}
-          <div className="flex flex-wrap items-start justify-center gap-2 sm:gap-5">
+          <div className="flex flex-wrap items-start justify-center gap-2 sm:gap-5 lg:mt-2">
   {s.hands.length === 0 && (
     <div
       aria-hidden="true"
@@ -654,21 +654,16 @@ function getShoeStatus(g: Game): {
         )}
       </div>
 
-      {/* Amount label under the circle (also shows spot count). */}
-      <div className="mt-1.5 text-center">
-        <p
-          className="text-xs font-black tabular-nums sm:text-sm"
-          style={{
-            color: "#f0e5c7",
-            textShadow: "0 1px 0 rgba(0, 0, 0, 0.9)",
-          }}
-        >
-          ◈ {money(s.bet)}
+      {/* Spot count only — the "◈ amount" that lived here was a
+          duplicate of the Deal button's "DEAL · ◈ N" readout. The
+          chip pile inside the BET circle already shows the amount
+          visually, and the Deal button spells it out, so dropping
+          this extra ◈ line declutters the felt. */}
+      {s.settings.spots > 1 && (
+        <p className="mt-1.5 text-center text-[9px] text-white/50">
+          × {s.settings.spots} spots
         </p>
-        {s.settings.spots > 1 && (
-          <p className="text-[9px] text-white/50">× {s.settings.spots} spots</p>
-        )}
-      </div>
+      )}
     </div>
   </div>
 
@@ -678,8 +673,8 @@ function getShoeStatus(g: Game): {
         label="PP"
         amount={s.ppBet}
         disabled={!canBet || s.busy}
-        onIncrease={() => adjustSide("ppBet", 10)}
-        onDecrease={() => adjustSide("ppBet", -10)}
+        onIncrease={() => adjustSide("ppBet", sideBetStep(s.ppBet))}
+        onDecrease={() => adjustSide("ppBet", -sideBetStep(Math.max(0, s.ppBet - 1)))}
       />
       {roundBreakdown && (
         <SideWinBadge net={roundBreakdown.perfectPairs} />
@@ -691,8 +686,8 @@ function getShoeStatus(g: Game): {
         label="21+3"
         amount={s.t3Bet}
         disabled={!canBet || s.busy}
-        onIncrease={() => adjustSide("t3Bet", 10)}
-        onDecrease={() => adjustSide("t3Bet", -10)}
+        onIncrease={() => adjustSide("t3Bet", sideBetStep(s.t3Bet))}
+        onDecrease={() => adjustSide("t3Bet", -sideBetStep(Math.max(0, s.t3Bet - 1)))}
       />
       {roundBreakdown && (
         <SideWinBadge net={roundBreakdown.twentyOnePlusThree} />

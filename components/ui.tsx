@@ -271,13 +271,16 @@ export function Toggle({ label, checked, onChange, disabled }: { label: string; 
 
 /**
  * Adaptive step for the side-bet +/− buttons. Small bets step by 10
- * for fine control; past 100 the step grows so a player can climb to
- * the 1000 cap without a hundred taps. Symmetric both ways.
+ * for fine control; the step grows aggressively as the amount climbs
+ * so a player can reach the 5000 cap in ~15 taps instead of 500.
+ * Symmetric both ways.
  */
 export function sideBetStep(amount: number) {
-  if (amount < 100) return 10;
+  if (amount < 50) return 10;
   if (amount < 500) return 50;
-  return 100;
+  if (amount < 1000) return 100;
+  if (amount < 2500) return 250;
+  return 500;
 }
 
 export function SideBet({
