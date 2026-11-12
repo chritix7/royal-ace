@@ -283,78 +283,66 @@ export function sideBetStep(amount: number) {
   return 500;
 }
 
+/**
+ * Side-bet pill — a single-tap trigger that opens the shared chip-
+ * picker modal on top of the page. The old inline +/− controls are
+ * gone; opening the modal gives one unified premium staking flow for
+ * Perfect Pairs and 21+3 (identical UX to the main bet).
+ */
 export function SideBet({
   label,
   hint,
   amount,
-  onChange,
-  minusDisabled,
-  plusDisabled,
+  onOpen,
+  disabled,
   roomy = false,
 }: {
   label: string;
   hint: string;
   amount: number;
-  onChange: (d: number) => void;
-  minusDisabled: boolean;
-  plusDisabled: boolean;
+  onOpen: () => void;
+  disabled?: boolean;
   roomy?: boolean;
 }) {
-  const stepUp = sideBetStep(amount);
-  // Step down from the amount we'll land on — keeps the cadence
-  // symmetric so going + then − returns to the same value.
-  const stepDown = sideBetStep(Math.max(0, amount - 1));
-  // Premium +/- pills — glass-dark, inset top highlight, warms to gold
-  // on hover and presses down 1px on active.
-  const b = `${
-    roomy ? "h-9 w-9 text-base" : "h-7 w-7 text-sm"
-  } flex shrink-0 items-center justify-center rounded-full border border-white/15 bg-gradient-to-b from-white/[0.05] to-black/20 text-white/75 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_0_rgba(0,0,0,0.5)] outline-none transition hover:border-[#d7b45b]/60 hover:text-[#e5c779] focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px disabled:opacity-30`;
+  const active = !disabled && amount > 0;
 
   return (
-    <div
-      className={`flex items-center justify-between rounded-2xl border border-white/10 bg-gradient-to-b from-black/30 to-black/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${
-        roomy ? "gap-2 px-2 py-2" : "px-3 py-1"
-      }`}
+    <button
+      type="button"
+      aria-label={`${label} — stake ${amount}`}
       title={hint}
+      disabled={disabled}
+      onClick={onOpen}
+      className={`group flex w-full items-center justify-between gap-2 rounded-2xl border outline-none transition-[background,border-color,transform] enabled:active:translate-y-px focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-40 ${
+        roomy ? "px-3 py-2.5" : "px-3 py-1.5"
+      } ${
+        active
+          ? "border-[#d7b45b]/55 bg-gradient-to-b from-[#d7b45b]/[0.1] to-black/20 shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_0_12px_rgba(229,199,121,0.12)]"
+          : "border-white/10 bg-gradient-to-b from-black/30 to-black/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] hover:border-[#d7b45b]/40"
+      }`}
     >
-      <p
-        className={`truncate text-[11px] font-bold tracking-wide text-white ${
-          roomy ? "min-w-0 flex-1" : ""
-        }`}
-      >
-        {label}
-      </p>
-
-      <div
-        className={`flex shrink-0 items-center ${
-          roomy ? "gap-1.5" : "gap-2"
-        }`}
-      >
-        <button
-          type="button"
-          aria-label={`Decrease ${label} by ${stepDown}`}
-          onClick={() => onChange(-stepDown)}
-          disabled={minusDisabled}
-          className={b}
+      <div className="min-w-0 text-left">
+        <p className="truncate text-[11px] font-bold tracking-wide text-white">
+          {label}
+        </p>
+        <p
+          className={`text-[10px] font-black tabular-nums ${
+            active ? "text-[#f5d778]" : "text-white/55"
+          }`}
         >
-          −
-        </button>
-
-        <span className="w-10 shrink-0 text-center text-xs font-black tabular-nums text-[#e5c779]">
-          {amount}
-        </span>
-
-        <button
-          type="button"
-          aria-label={`Increase ${label} by ${stepUp}`}
-          onClick={() => onChange(stepUp)}
-          disabled={plusDisabled}
-          className={b}
-        >
-          +
-        </button>
+          {amount > 0 ? `◈ ${amount}` : "Tap to stake"}
+        </p>
       </div>
-    </div>
+
+      <span
+        aria-hidden
+        className={`shrink-0 text-[11px] ${
+          active ? "text-[#e5c779]" : "text-white/35 group-hover:text-[#d7b45b]"
+        }`}
+      >
+        ▸
+      </span>
+    </button>
   );
 }
 

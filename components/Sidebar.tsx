@@ -18,6 +18,7 @@ import {
   btnPill,
 } from "./SidebarKit";
 import SectionModal from "./SectionModal";
+import SideBetModal from "./SideBetModal";
 import { ACHIEVEMENTS } from "../lib/achievements";
 import { audio, useAudioSettings } from "../lib/audio";
 import type { Game } from "../lib/useBlackjack";
@@ -75,6 +76,8 @@ export default function Sidebar({ g }: { g: Game }) {
   // centered SectionModal with that section's content so the sidebar
   // itself never has to scroll past them.
   const [openSection, setOpenSection] = useState<SidebarTab | null>(null);
+  // Which side-bet staking modal is open (Perfect Pairs / 21+3 / none).
+  const [openSideBet, setOpenSideBet] = useState<"pp" | "t3" | null>(null);
   useEffect(() => setMounted(true), []);
   // If the count trainer gets turned off while its modal is open,
   // close the modal so we don't dangle on a non-visible section.
@@ -202,16 +205,18 @@ export default function Sidebar({ g }: { g: Game }) {
 
           <div className="mt-3 space-y-1.5">
             <SideBet
-              label="Perfect Pairs" hint="Your first 2 cards pair · up to 25:1" amount={s.ppBet}
-              onChange={(d) => adjustSide("ppBet", d)}
-              minusDisabled={!canBet || s.ppBet <= 0}
-              plusDisabled={!canBet || s.ppBet >= 5000 || stake + 10 > s.balance}
+              label="Perfect Pairs"
+              hint="Your first 2 cards pair · up to 25:1"
+              amount={s.ppBet}
+              disabled={!canBet}
+              onOpen={() => setOpenSideBet("pp")}
             />
             <SideBet
-              label="21+3" hint="Your 2 cards + dealer's card · up to 100:1" amount={s.t3Bet}
-              onChange={(d) => adjustSide("t3Bet", d)}
-              minusDisabled={!canBet || s.t3Bet <= 0}
-              plusDisabled={!canBet || s.t3Bet >= 5000 || stake + 10 > s.balance}
+              label="21+3"
+              hint="Your 2 cards + dealer's card · up to 100:1"
+              amount={s.t3Bet}
+              disabled={!canBet}
+              onOpen={() => setOpenSideBet("t3")}
             />
           </div>
         </Panel>
@@ -1138,6 +1143,32 @@ export default function Sidebar({ g }: { g: Game }) {
           </div>,
           document.body
         )}
+
+        {/* Side-bet chip-picker modals — one at a time. Portaled through
+            createPortal inside SideBetModal, so position-wise the mount
+            point here just controls lifecycle. */}
+        <SideBetModal
+          open={openSideBet === "pp"}
+          onClose={() => setOpenSideBet(null)}
+          label="Perfect Pairs"
+          hint="Your first 2 cards pair · up to 25:1"
+          amount={s.ppBet}
+          canBet={canBet}
+          remainingBalance={s.balance - (s.bet * spots + s.t3Bet)}
+          onAdd={(chip) => adjustSide("ppBet", chip)}
+          onClear={() => adjustSide("ppBet", -s.ppBet)}
+        />
+        <SideBetModal
+          open={openSideBet === "t3"}
+          onClose={() => setOpenSideBet(null)}
+          label="21+3"
+          hint="Your 2 cards + dealer's card · up to 100:1"
+          amount={s.t3Bet}
+          canBet={canBet}
+          remainingBalance={s.balance - (s.bet * spots + s.ppBet)}
+          onAdd={(chip) => adjustSide("t3Bet", chip)}
+          onClear={() => adjustSide("t3Bet", -s.t3Bet)}
+        />
       </aside>
   );
 }

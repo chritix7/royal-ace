@@ -11,7 +11,7 @@ import {
 } from "../lib/game";
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import { useSession } from "../lib/sessionStore";
-import { ChipStack, Counter, SideBet, sideBetStep } from "./ui";
+import { ChipStack, Counter } from "./ui";
 import ChipRail from "./ChipRail";
 import PlayingCard from "./PlayingCard";
 import CardFlight from "./CardFlight";
@@ -24,6 +24,7 @@ import DealerShoe from "./DealerShoe";
 import ShuffleAnimation from "./ShuffleAnimation";
 import VegasFeltOverlay from "./VegasFeltOverlay";
 import InfoPanel from "./blackjack-immersive/InfoPanel";
+import SideBetModal from "./SideBetModal";
 import ImmersiveSidePill from "./blackjack-immersive/ImmersiveSidePill";
 import ResultRail from "./blackjack-immersive/ResultRail";
 import { getShoeStatus } from "./blackjack-immersive/getShoeStatus";
@@ -72,6 +73,7 @@ export default function BlackjackImmersive({
   const [menuOpen, setMenuOpen] = useState(false);
   const [editBet, setEditBet] = useState(s.phase === "betting");
   const [resultOpen, setResultOpen] = useState(false);
+  const [sideBetOpen, setSideBetOpen] = useState<"pp" | "t3" | null>(null);
 
   // Card-flight motion is handled by the dedicated CardFlight layer
   // (see <CardFlight /> below). Keeping the state out of this component
@@ -700,11 +702,7 @@ const playerCardStyle = (
       label="PP"
       amount={s.ppBet}
       disabled={!canBet}
-      onIncrease={() => adjustSide("ppBet", sideBetStep(s.ppBet))}
-      onDecrease={() => adjustSide("ppBet", -sideBetStep(Math.max(0, s.ppBet - 1)))}
-      plusDisabled={
-        !canBet || s.ppBet >= 5000 || stake + sideBetStep(s.ppBet) > s.balance
-      }
+      onOpen={() => setSideBetOpen("pp")}
     />
     {roundBreakdown && (
       <SideWinBadge net={roundBreakdown.perfectPairs} />
@@ -716,11 +714,7 @@ const playerCardStyle = (
       label="21+3"
       amount={s.t3Bet}
       disabled={!canBet}
-      onIncrease={() => adjustSide("t3Bet", sideBetStep(s.t3Bet))}
-      onDecrease={() => adjustSide("t3Bet", -sideBetStep(Math.max(0, s.t3Bet - 1)))}
-      plusDisabled={
-        !canBet || s.t3Bet >= 5000 || stake + sideBetStep(s.t3Bet) > s.balance
-      }
+      onOpen={() => setSideBetOpen("t3")}
     />
     {roundBreakdown && (
       <SideWinBadge net={roundBreakdown.twentyOnePlusThree} />
@@ -928,6 +922,32 @@ const playerCardStyle = (
       {menuOpen && (
         <InfoPanel g={g} onClose={() => setMenuOpen(false)} />
       )}
+
+      {/* Side-bet staking modals — same shared SideBetModal as the
+          classic view uses, so Perfect Pairs / 21+3 behave identically
+          everywhere: tap pill → chip picker → commit. */}
+      <SideBetModal
+        open={sideBetOpen === "pp"}
+        onClose={() => setSideBetOpen(null)}
+        label="Perfect Pairs"
+        hint="Your first 2 cards pair · up to 25:1"
+        amount={s.ppBet}
+        canBet={canBet}
+        remainingBalance={s.balance - (s.bet * spots + s.t3Bet)}
+        onAdd={(chip) => adjustSide("ppBet", chip)}
+        onClear={() => adjustSide("ppBet", -s.ppBet)}
+      />
+      <SideBetModal
+        open={sideBetOpen === "t3"}
+        onClose={() => setSideBetOpen(null)}
+        label="21+3"
+        hint="Your 2 cards + dealer's card · up to 100:1"
+        amount={s.t3Bet}
+        canBet={canBet}
+        remainingBalance={s.balance - (s.bet * spots + s.ppBet)}
+        onAdd={(chip) => adjustSide("t3Bet", chip)}
+        onClear={() => adjustSide("t3Bet", -s.t3Bet)}
+      />
     </div>,
     document.body
   );

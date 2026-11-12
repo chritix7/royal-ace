@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { handValue, isBlackjack } from "../lib/blackjack";
 import { MIN_BET, REFILL, money, tableBg } from "../lib/game";
-import { ChipStack, sideBetStep } from "./ui";
+import { ChipStack } from "./ui";
 import PlayingCard from "./PlayingCard";
 import Confetti from "./Confetti";
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
@@ -17,6 +17,7 @@ import SideWinBadge from "./SideWinBadge";
 import VegasFeltOverlay from "./VegasFeltOverlay";
 import ResultRail from "./blackjack-immersive/ResultRail";
 import MobileResultModal from "./MobileResultModal";
+import SideBetModal from "./SideBetModal";
 
 // Premium action button base — used across Hit / Stand / Double / Split /
 // Surrender / Deal. Common shape (border, radius, size, focus ring), with
@@ -28,21 +29,29 @@ type SidePillProps = {
   label: string;
   amount: number;
   disabled: boolean;
-  onIncrease: () => void;
-  onDecrease: () => void;
+  onOpen: () => void;
 };
 
+/**
+ * Felt-engraved side-bet pill — looks recessed into the felt with a
+ * gold inner ring. The whole pill is a button that opens the shared
+ * SideBetModal (chip picker) so the player can stake without the
+ * clumsy +/− dance.
+ */
 function SidePill({
   label,
   amount,
   disabled,
-  onIncrease,
-  onDecrease,
+  onOpen,
 }: SidePillProps) {
   const active = !disabled && amount > 0;
   return (
-    <div
-      className="relative flex w-full min-w-0 items-center justify-between gap-2 rounded-full px-3 py-1.5 lg:w-36 lg:py-1"
+    <button
+      type="button"
+      onClick={onOpen}
+      disabled={disabled}
+      aria-label={`${label} — stake ${amount}`}
+      className="group relative flex w-full min-w-0 items-center justify-between gap-2 rounded-full px-3 py-1.5 outline-none transition-transform focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px disabled:cursor-not-allowed lg:w-36 lg:py-1"
       style={{
         background: active
           ? "radial-gradient(ellipse at 50% 20%, rgba(229, 199, 121, 0.18) 0%, rgba(5, 10, 7, 0.6) 60%, rgba(5, 10, 7, 0.75) 100%)"
@@ -54,7 +63,7 @@ function SidePill({
         opacity: disabled ? 0.7 : 1,
       }}
     >
-      <div className="min-w-0">
+      <div className="min-w-0 text-left">
         <p
           className="text-[9px] font-black uppercase tracking-[0.18em] sm:text-[10px]"
           style={{
@@ -73,39 +82,19 @@ function SidePill({
             textShadow: "0 1px 0 rgba(0, 0, 0, 0.85)",
           }}
         >
-          {amount > 0 ? `◈ ${money(amount)}` : "Off"}
+          {amount > 0 ? `◈ ${money(amount)}` : "Tap to stake"}
         </p>
       </div>
 
-      <div className="flex shrink-0 items-center gap-1">
-        <button
-          type="button"
-          onClick={onDecrease}
-          disabled={disabled || amount === 0}
-          aria-label={`Decrease ${label} side bet`}
-          className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white/80 transition enabled:hover:text-[#e5c779] disabled:opacity-30"
-          style={{
-            background: "radial-gradient(circle at 35% 25%, #2a2a2d 0%, #0a0a0b 70%, #000 100%)",
-            boxShadow: "inset 0 0 0 1px rgba(229, 199, 121, 0.35), inset 0 1px 2px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(229, 199, 121, 0.08)",
-          }}
-        >
-          −
-        </button>
-        <button
-          type="button"
-          onClick={onIncrease}
-          disabled={disabled}
-          aria-label={`Increase ${label} side bet`}
-          className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white/80 transition enabled:hover:text-[#e5c779] disabled:opacity-30"
-          style={{
-            background: "radial-gradient(circle at 35% 25%, #2a2a2d 0%, #0a0a0b 70%, #000 100%)",
-            boxShadow: "inset 0 0 0 1px rgba(229, 199, 121, 0.35), inset 0 1px 2px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(229, 199, 121, 0.08)",
-          }}
-        >
-          +
-        </button>
-      </div>
-    </div>
+      <span
+        aria-hidden
+        className={`shrink-0 text-xs ${
+          active ? "text-[#e5c779]" : "text-white/40 group-hover:text-[#d7b45b]"
+        }`}
+      >
+        ▸
+      </span>
+    </button>
   );
 }
 
@@ -154,6 +143,9 @@ function getShoeStatus(g: Game): {
   // Mobile-only round-details modal — on md+ the ResultRail on the
   // felt already shows the breakdown.
   const [resultOpen, setResultOpen] = useState(false);
+  // Which side-bet staking modal is open (Perfect Pairs / 21+3 / none).
+  // Tapping either felt pill opens the shared SideBetModal.
+  const [sideBetOpen, setSideBetOpen] = useState<"pp" | "t3" | null>(null);
   const {
   s,
   roundBreakdown,
@@ -673,8 +665,7 @@ function getShoeStatus(g: Game): {
         label="PP"
         amount={s.ppBet}
         disabled={!canBet || s.busy}
-        onIncrease={() => adjustSide("ppBet", sideBetStep(s.ppBet))}
-        onDecrease={() => adjustSide("ppBet", -sideBetStep(Math.max(0, s.ppBet - 1)))}
+        onOpen={() => setSideBetOpen("pp")}
       />
       {roundBreakdown && (
         <SideWinBadge net={roundBreakdown.perfectPairs} />
@@ -686,8 +677,7 @@ function getShoeStatus(g: Game): {
         label="21+3"
         amount={s.t3Bet}
         disabled={!canBet || s.busy}
-        onIncrease={() => adjustSide("t3Bet", sideBetStep(s.t3Bet))}
-        onDecrease={() => adjustSide("t3Bet", -sideBetStep(Math.max(0, s.t3Bet - 1)))}
+        onOpen={() => setSideBetOpen("t3")}
       />
       {roundBreakdown && (
         <SideWinBadge net={roundBreakdown.twentyOnePlusThree} />
@@ -820,6 +810,28 @@ function getShoeStatus(g: Game): {
         open={resultOpen && s.phase === "settled"}
         onClose={() => setResultOpen(false)}
         breakdown={roundBreakdown}
+      />
+      <SideBetModal
+        open={sideBetOpen === "pp"}
+        onClose={() => setSideBetOpen(null)}
+        label="Perfect Pairs"
+        hint="Your first 2 cards pair · up to 25:1"
+        amount={s.ppBet}
+        canBet={canBet && !s.busy}
+        remainingBalance={s.balance - (s.bet * s.settings.spots + s.t3Bet)}
+        onAdd={(chip) => adjustSide("ppBet", chip)}
+        onClear={() => adjustSide("ppBet", -s.ppBet)}
+      />
+      <SideBetModal
+        open={sideBetOpen === "t3"}
+        onClose={() => setSideBetOpen(null)}
+        label="21+3"
+        hint="Your 2 cards + dealer's card · up to 100:1"
+        amount={s.t3Bet}
+        canBet={canBet && !s.busy}
+        remainingBalance={s.balance - (s.bet * s.settings.spots + s.ppBet)}
+        onAdd={(chip) => adjustSide("t3Bet", chip)}
+        onClear={() => adjustSide("t3Bet", -s.t3Bet)}
       />
     </>
   );
