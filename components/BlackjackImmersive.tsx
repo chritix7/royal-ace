@@ -25,6 +25,7 @@ import ShuffleAnimation from "./ShuffleAnimation";
 import VegasFeltOverlay from "./VegasFeltOverlay";
 import InfoPanel from "./blackjack-immersive/InfoPanel";
 import SideBetModal from "./SideBetModal";
+import TableClock from "./TableClock";
 import ImmersiveSidePill from "./blackjack-immersive/ImmersiveSidePill";
 import ResultRail from "./blackjack-immersive/ResultRail";
 import { getShoeStatus } from "./blackjack-immersive/getShoeStatus";
@@ -213,12 +214,37 @@ const playerCardStyle = (
 
       <main
         style={tableStyle}
-        className={`felt-texture relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${bettingOpen ? "pb-[220px]" : "pb-[88px]"} ${tableBg(s.settings)}`}
+        className={`felt-texture relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${bettingOpen ? "pb-[180px]" : "pb-[80px]"} ${tableBg(s.settings)}`}
       >
         {s.settings.theme === "vegas" && <VegasFeltOverlay />}
         {s.celebrate > 0 && (
   <Confetti key={s.celebrate} />
 )}
+
+{/* Floating Shoe meter + Clock — top-left of the felt, same look
+    as the classic view. Shoe shows live card count with a thin
+    gold progress fill; Clock shows the viewer's local HH:MM. */}
+<div
+  aria-hidden={false}
+  className="pointer-events-none absolute left-3 top-3 z-10 flex items-center gap-2 rounded-full border border-[#d7b45b]/30 bg-black/55 px-2.5 py-1 text-[10px] font-semibold text-[#e5c779] shadow-[0_2px_8px_rgba(0,0,0,0.4)] backdrop-blur-sm sm:left-5 sm:top-5 sm:text-[11px]"
+>
+  <span className="uppercase tracking-[0.18em] text-[#d7b45b]/80">
+    Shoe
+  </span>
+  <span className="tabular-nums text-white/90">
+    {s.shoe.length || s.settings.decks * 52}
+  </span>
+  <span
+    aria-hidden
+    className="h-1.5 w-10 overflow-hidden rounded-full bg-white/10 sm:w-14"
+  >
+    <span
+      className="block h-full rounded-full bg-gradient-to-r from-[#d7b45b]/40 to-[#d7b45b] transition-[width] duration-500"
+      style={{ width: `${g.shoePct}%` }}
+    />
+  </span>
+</div>
+<TableClock className="absolute left-3 top-[42px] z-10 sm:left-5 sm:top-[46px]" />
 
 <DealerShoe
   className="absolute -right-[38px] -top-[14px] z-0 hidden md:block"
@@ -649,12 +675,12 @@ const playerCardStyle = (
         }}
       >
         {bettingOpen ? (
-          <div className="mx-auto mb-2 max-w-xl overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-black/20 p-2 pb-4 sm:max-h-[26dvh] sm:pb-2.5">
+          <div className="mx-auto mb-1.5 max-w-xl overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-black/20 p-2 pb-2 sm:max-h-[22dvh]">
             {/* "Bet / hand ◈ X" row removed — the floating BET circle
                 on the felt (with the live chip pile) already shows the
                 amount, the Deal button spells it out, and the chip
                 picker below dictates what's being added. One source. */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
   <div className="mx-auto w-full max-w-[320px]">
     {/* Scrollable chip ladder — 5 denominations visible at a time,
         arrows slide the window through the whole 10 → 50,000 range. */}
@@ -673,7 +699,7 @@ const playerCardStyle = (
     <button
       type="button"
       onClick={() => setBetTo(s.lastBet)}
-      className={`${control} ${neutral} h-10 w-full min-w-0`}
+      className={`${control} ${neutral} !min-h-8 w-full min-w-0 !text-[11px]`}
     >
       Rebet
     </button>
@@ -682,7 +708,7 @@ const playerCardStyle = (
       type="button"
       onClick={() => setBetTo(s.bet * 2)}
       disabled={s.bet === 0}
-      className={`${control} ${neutral} h-10 w-full min-w-0`}
+      className={`${control} ${neutral} !min-h-8 w-full min-w-0 !text-[11px]`}
     >
       ×2
     </button>
@@ -691,7 +717,7 @@ const playerCardStyle = (
       type="button"
       onClick={() => setBetTo(0)}
       disabled={s.bet === 0}
-      className={`${control} ${neutral} h-10 w-full min-w-0`}
+      className={`${control} ${neutral} !min-h-8 w-full min-w-0 !text-[11px]`}
     >
       Clear
     </button>

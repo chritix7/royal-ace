@@ -18,6 +18,7 @@ import VegasFeltOverlay from "./VegasFeltOverlay";
 import ResultRail from "./blackjack-immersive/ResultRail";
 import MobileResultModal from "./MobileResultModal";
 import SideBetModal from "./SideBetModal";
+import TableClock from "./TableClock";
 
 // Premium action button base — used across Hit / Stand / Double / Split /
 // Surrender / Deal. Common shape (border, radius, size, focus ring), with
@@ -208,6 +209,10 @@ function getShoeStatus(g: Game): {
               />
             </span>
           </div>
+
+          {/* Clock — pinned right under the Shoe pill. Shows the
+              player's local time, updates every minute. */}
+          <TableClock className="absolute left-3 top-[42px] z-10 sm:left-5 sm:top-[46px]" />
           {s.settings.theme === "vegas" && <VegasFeltOverlay />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} />}
           <DealerShoe
@@ -301,11 +306,13 @@ function getShoeStatus(g: Game): {
 
           {/* Message slot — the height is FIXED at every phase so the
               table never shifts when content changes. Mobile reserves
-              48px, desktop reserves 56px. At settle+breakdown on
-              desktop the middle slot stays empty (ResultRail on the
-              left owns the result); on mobile the fused pill fills it. */}
+              48px, desktop reserves 88px (bumped so dealer + message
+              + player stack reads more like a dealt table). At settle
+              + breakdown on desktop the middle slot stays empty (the
+              ResultRail on the left owns the result); on mobile the
+              fused pill fills it. */}
           <div
-            className="my-2 flex min-h-[48px] flex-col items-center justify-center gap-1 sm:my-3 lg:my-0 lg:min-h-[64px]"
+            className="my-2 flex min-h-[48px] flex-col items-center justify-center gap-1 sm:my-3 lg:my-0 lg:mt-6 lg:min-h-[88px]"
             role="status"
             aria-live="polite"
           >
@@ -429,7 +436,7 @@ function getShoeStatus(g: Game): {
           </div>
 
           {/* Joueur */}
-          <div className="flex flex-wrap items-start justify-center gap-2 sm:gap-5 lg:mt-2">
+          <div className="flex flex-wrap items-start justify-center gap-2 sm:gap-5 lg:mt-4">
   {s.hands.length === 0 && (
     <div
       aria-hidden="true"
@@ -596,7 +603,7 @@ function getShoeStatus(g: Game): {
         below as a small gold label. */}
     <div className="flex flex-col items-center">
       <div
-        className="relative flex h-20 w-20 items-end justify-center overflow-visible rounded-full text-center sm:h-24 sm:w-24 lg:h-[72px] lg:w-[72px]"
+        className="relative flex h-20 w-20 items-end justify-center overflow-visible rounded-full text-center sm:h-24 sm:w-24 lg:h-16 lg:w-16"
         style={{
           background: canBet
             ? "radial-gradient(circle at 50% 30%, rgba(229, 199, 121, 0.22) 0%, rgba(5, 10, 7, 0.75) 55%, rgba(5, 10, 7, 0.9) 100%)"
