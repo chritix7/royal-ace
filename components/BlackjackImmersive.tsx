@@ -150,36 +150,38 @@ const playerCardStyle = (
         }}
       >
         <div className="min-w-0">
-          <h2 className="truncate text-sm font-black tracking-wider text-[#e5c779] sm:text-base">
-            ROYAL ACE
-            <span className="hidden text-white/50 sm:inline">
-              {" "}· BLACKJACK
+          <h2 className="header-shine truncate text-sm font-black tracking-[0.18em] sm:text-base">
+            <span className="text-white">ROYAL </span>
+            <span className="animate-header-breathe text-[#d7b45b]">ACE</span>
+            <span className="hidden font-bold tracking-wider text-white/40 sm:inline">
+              {" · "}BLACKJACK
             </span>
           </h2>
 
-          <p className="hidden text-[10px] text-white/40 sm:block">
-            {s.settings.decks} decks ·{" "}
-            {s.settings.h17 ? "H17" : "S17"} · Blackjack{" "}
+          <p className="hidden text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d7b45b]/55 sm:block">
+            {s.settings.decks}D ·{" "}
+            {s.settings.h17 ? "H17" : "S17"} · BJ{" "}
             {s.settings.bj65 ? "6:5" : "3:2"}
           </p>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2 sm:gap-4">
-          <div className="text-right">
-            <p className="text-[9px] uppercase tracking-wider text-white/40">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          {/* Chips counter — framed pill matching the main page header */}
+          <div className="rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-3 py-1.5 text-right shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)]">
+            <p className="text-[9px] font-bold uppercase tracking-[0.2em] leading-none text-[#d7b45b]/70">
               Chips
             </p>
-            <p className="text-sm font-bold tabular-nums text-[#e5c779] sm:text-lg">
+            <p className="mt-0.5 text-sm font-black leading-tight tabular-nums text-[#e5c779] sm:text-base">
               ◈ <Counter value={s.balance} />
             </p>
           </div>
 
-          <div className="hidden text-right md:block">
-            <p className="text-[9px] uppercase tracking-wider text-white/40">
+          <div className="hidden rounded-2xl border border-[#c8a65b]/25 bg-gradient-to-b from-[#1a2219] to-[#101713] px-3 py-1.5 text-right shadow-[inset_0_1px_0_rgba(229,199,121,0.1),0_2px_0_rgba(0,0,0,0.5)] md:block">
+            <p className="text-[9px] font-bold uppercase tracking-[0.2em] leading-none text-[#d7b45b]/70">
               Today
             </p>
             <p
-              className={`text-sm font-semibold tabular-nums ${
+              className={`mt-0.5 text-sm font-black leading-tight tabular-nums ${
                 session.bj.net >= 0
                   ? "text-emerald-300"
                   : "text-red-300"
