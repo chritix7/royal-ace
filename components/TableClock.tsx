@@ -21,12 +21,17 @@ function formatHHMM(date: Date): string {
 }
 
 export default function TableClock({ className = "" }: { className?: string }) {
-  const [time, setTime] = useState(() => formatHHMM(new Date()));
+  // Start with a neutral placeholder so Next.js' static prerender
+  // doesn't bake a "server" minute into the HTML (which would hydrate
+  // mismatch across time zones). The real HH:MM lands on the first
+  // effect tick (client-only) and then every second after.
+  const [time, setTime] = useState("—:—");
 
   useEffect(() => {
+    setTime(formatHHMM(new Date()));
     // Tick every second but bail the setState when HH:MM hasn't rolled
-    // over — React will still skip a re-render but we save it the
-    // reconciliation pass each second.
+    // over — React skips the re-render and we save a reconciliation
+    // pass each second.
     const id = window.setInterval(() => {
       const next = formatHHMM(new Date());
       setTime((prev) => (prev === next ? prev : next));
