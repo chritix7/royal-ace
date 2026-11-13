@@ -26,6 +26,8 @@ import VegasFeltOverlay from "./VegasFeltOverlay";
 import InfoPanel from "./blackjack-immersive/InfoPanel";
 import SideBetModal from "./SideBetModal";
 import TableClock from "./TableClock";
+import StreakBadge from "./StreakBadge";
+import HistoryRibbon from "./HistoryRibbon";
 import ImmersiveSidePill from "./blackjack-immersive/ImmersiveSidePill";
 import ResultRail from "./blackjack-immersive/ResultRail";
 import { getShoeStatus } from "./blackjack-immersive/getShoeStatus";
@@ -244,7 +246,19 @@ const playerCardStyle = (
     />
   </span>
 </div>
-<TableClock className="absolute left-3 top-[42px] z-10 sm:left-5 sm:top-[46px]" />
+<TableClock className="absolute left-3 top-[52px] z-10 sm:left-5 sm:top-[58px]" />
+
+{/* Streak + history ribbon — same upper-left stack as the Shoe
+    and Clock. Focus mode has more real estate than the classic
+    table, so both show on phone too. */}
+<StreakBadge
+  history={s.history}
+  className="absolute left-3 top-[86px] z-10 sm:left-5 sm:top-[94px]"
+/>
+<HistoryRibbon
+  history={s.history}
+  className="absolute left-3 top-[114px] z-10 sm:left-5 sm:top-[122px]"
+/>
 
 <DealerShoe
   className="absolute -right-[38px] -top-[14px] z-0 hidden md:block"

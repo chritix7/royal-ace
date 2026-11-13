@@ -19,6 +19,8 @@ import ResultRail from "./blackjack-immersive/ResultRail";
 import MobileResultModal from "./MobileResultModal";
 import SideBetModal from "./SideBetModal";
 import TableClock from "./TableClock";
+import StreakBadge from "./StreakBadge";
+import HistoryRibbon from "./HistoryRibbon";
 
 // Premium action button base — used across Hit / Stand / Double / Split /
 // Surrender / Deal. Common shape (border, radius, size, focus ring), with
@@ -210,9 +212,24 @@ function getShoeStatus(g: Game): {
             </span>
           </div>
 
-          {/* Clock — pinned right under the Shoe pill. Shows the
-              player's local time, updates every minute. */}
-          <TableClock className="absolute left-3 top-[42px] z-10 sm:left-5 sm:top-[46px]" />
+          {/* Clock — lives right under the Shoe pill but with its own
+              squared-off chrome so it doesn't look like a twin pill
+              glued to the shoe. Shows the player's local HH:MM. */}
+          <TableClock className="absolute left-3 top-[52px] z-10 sm:left-5 sm:top-[58px]" />
+
+          {/* Streak + History ribbon — live table telemetry. Both
+              live in the upper-left stack under the Shoe/Clock on
+              desktop (phones get enough load from the dealer corner
+              already — Focus mode is where phone players get the
+              full HUD). */}
+          <StreakBadge
+            history={s.history}
+            className="absolute left-5 top-[90px] z-10 hidden sm:inline-flex"
+          />
+          <HistoryRibbon
+            history={s.history}
+            className="absolute left-5 top-[120px] z-10 hidden sm:inline-flex"
+          />
           {s.settings.theme === "vegas" && <VegasFeltOverlay />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} />}
           <DealerShoe

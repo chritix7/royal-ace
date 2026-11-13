@@ -42,12 +42,15 @@ export default function TableClock({ className = "" }: { className?: string }) {
   return (
     <div
       aria-label={`Current time ${time}`}
-      className={`pointer-events-none flex items-center gap-2 rounded-full border border-[#d7b45b]/30 bg-black/55 px-2.5 py-1 text-[10px] font-semibold text-[#e5c779] shadow-[0_2px_8px_rgba(0,0,0,0.4)] backdrop-blur-sm sm:text-[11px] ${className}`}
+      className={`pointer-events-none inline-flex items-center gap-1.5 rounded-lg border border-[#d7b45b]/25 bg-gradient-to-b from-[#1a1612]/90 to-[#0a0806]/90 px-2 py-0.5 text-[10px] font-semibold text-[#e5c779] shadow-[0_2px_8px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(229,199,121,0.12)] backdrop-blur-sm sm:text-[11px] ${className}`}
     >
-      <span className="uppercase tracking-[0.18em] text-[#d7b45b]/80">
-        Clock
+      <span
+        aria-hidden
+        className="text-[9px] leading-none text-[#d7b45b]/80 sm:text-[10px]"
+      >
+        ⏱
       </span>
-      <span className="tabular-nums text-white/90">{time}</span>
+      <span className="tabular-nums text-[#f5d778]">{time}</span>
     </div>
   );
 }
