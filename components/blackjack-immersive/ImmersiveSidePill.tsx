@@ -12,11 +12,13 @@ export default function ImmersiveSidePill({
   amount,
   disabled,
   onOpen,
+  heat,
 }: {
   label: string;
   amount: number;
   disabled: boolean;
   onOpen: () => void;
+  heat?: "hot" | "cold" | "neutral";
 }) {
   const active = !disabled && amount > 0;
 
@@ -33,9 +35,22 @@ export default function ImmersiveSidePill({
       }`}
     >
       <div className="min-w-0 text-left">
-        <p className="text-[9px] font-black uppercase tracking-wide text-[#e5c779]">
-          {label}
-        </p>
+        <div className="flex items-center gap-1">
+          <p className="text-[9px] font-black uppercase tracking-wide text-[#e5c779]">
+            {label}
+          </p>
+          {heat && heat !== "neutral" && (
+            <span
+              aria-hidden
+              className={`text-[9px] leading-none ${
+                heat === "hot" ? "text-[#f5d778]" : "text-sky-200"
+              }`}
+              title={heat === "hot" ? "Hot streak" : "Cold stretch"}
+            >
+              {heat === "hot" ? "🔥" : "❄"}
+            </span>
+          )}
+        </div>
         <p
           className={`text-[10px] font-bold tabular-nums ${
             active ? "text-[#f5d778]" : "text-white/70"

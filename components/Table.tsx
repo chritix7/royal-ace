@@ -21,6 +21,9 @@ import SideBetModal from "./SideBetModal";
 import TableClock from "./TableClock";
 import StreakBadge from "./StreakBadge";
 import HistoryRibbon from "./HistoryRibbon";
+import DealerBubble from "./DealerBubble";
+import JackpotPill from "./JackpotPill";
+import LuckyRound from "./LuckyRound";
 
 // Premium action button base — used across Hit / Stand / Double / Split /
 // Surrender / Deal. Common shape (border, radius, size, focus ring), with
@@ -230,6 +233,17 @@ function getShoeStatus(g: Game): {
             history={s.history}
             className="absolute left-5 top-[120px] z-10 hidden sm:inline-flex"
           />
+          {/* Dealer flavor chatter — anchored near the dealer's cards
+              but off to the right so it never covers them. */}
+          <DealerBubble
+            g={g}
+            className="right-6 top-16 hidden sm:block lg:top-20"
+          />
+          {/* Progressive jackpot pill — top center on desktop so both
+              players and the dealer lane can see the pot grow. */}
+          <JackpotPill className="absolute left-1/2 top-2 z-10 hidden -translate-x-1/2 lg:inline-flex" />
+          {/* Golden Round banner — floats over the dealer slot. */}
+          <LuckyRound g={g} />
           {s.settings.theme === "vegas" && <VegasFeltOverlay />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} />}
           <DealerShoe

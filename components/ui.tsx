@@ -296,6 +296,7 @@ export function SideBet({
   onOpen,
   disabled,
   roomy = false,
+  heat,
 }: {
   label: string;
   hint: string;
@@ -303,6 +304,8 @@ export function SideBet({
   onOpen: () => void;
   disabled?: boolean;
   roomy?: boolean;
+  /** Optional hot/cold state for this bet in the current session. */
+  heat?: "hot" | "cold" | "neutral";
 }) {
   const active = !disabled && amount > 0;
 
@@ -322,9 +325,23 @@ export function SideBet({
       }`}
     >
       <div className="min-w-0 text-left">
-        <p className="truncate text-[11px] font-bold tracking-wide text-white">
-          {label}
-        </p>
+        <div className="flex items-center gap-1.5">
+          <p className="truncate text-[11px] font-bold tracking-wide text-white">
+            {label}
+          </p>
+          {heat && heat !== "neutral" && (
+            <span
+              aria-label={heat === "hot" ? "Hot streak" : "Cold stretch"}
+              className={`inline-flex items-center rounded-full border px-1 py-[1px] text-[7px] font-black uppercase leading-none tracking-widest ${
+                heat === "hot"
+                  ? "border-[#d7b45b]/70 bg-[#d7b45b]/20 text-[#f5d778]"
+                  : "border-sky-300/40 bg-sky-500/15 text-sky-200"
+              }`}
+            >
+              {heat === "hot" ? "🔥" : "❄"}
+            </span>
+          )}
+        </div>
         <p
           className={`text-[10px] font-black tabular-nums ${
             active ? "text-[#f5d778]" : "text-white/55"

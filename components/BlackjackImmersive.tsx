@@ -28,6 +28,10 @@ import SideBetModal from "./SideBetModal";
 import TableClock from "./TableClock";
 import StreakBadge from "./StreakBadge";
 import HistoryRibbon from "./HistoryRibbon";
+import DealerBubble from "./DealerBubble";
+import JackpotPill from "./JackpotPill";
+import LuckyRound from "./LuckyRound";
+import { useSideBetHeat } from "../hooks/useSideBetHeat";
 import ImmersiveSidePill from "./blackjack-immersive/ImmersiveSidePill";
 import ResultRail from "./blackjack-immersive/ResultRail";
 import { getShoeStatus } from "./blackjack-immersive/getShoeStatus";
@@ -77,6 +81,8 @@ export default function BlackjackImmersive({
   const [editBet, setEditBet] = useState(s.phase === "betting");
   const [resultOpen, setResultOpen] = useState(false);
   const [sideBetOpen, setSideBetOpen] = useState<"pp" | "t3" | null>(null);
+  // Hot/cold heat for each side bet so the pills can show a sticker.
+  const heat = useSideBetHeat(g);
 
   // Card-flight motion is handled by the dedicated CardFlight layer
   // (see <CardFlight /> below). Keeping the state out of this component
@@ -91,8 +97,30 @@ export default function BlackjackImmersive({
 
     document.body.style.overflow = "hidden";
 
+    // Request true browser fullscreen so the OS chrome and tab bar go
+    // away — Focus mode is meant to be casino-immersive. Wrapped in a
+    // try because:
+    //   - Safari iOS has no Element.requestFullscreen on the <html>
+    //     root (only on media elements), so the call throws.
+    //   - Firefox rejects the Promise with a TypeError when the page
+    //     wasn't entered from a user gesture; we accept that and move
+    //     on, since Focus mode is itself triggered by a click.
+    // We don't exit if the user was already fullscreen before entering.
+    const wasFullscreen = Boolean(document.fullscreenElement);
+    if (!wasFullscreen && document.documentElement.requestFullscreen) {
+      document.documentElement
+        .requestFullscreen({ navigationUI: "hide" })
+        .catch(() => {
+          /* fullscreen denied — not fatal, Focus mode still renders */
+        });
+    }
+
     return () => {
       document.body.style.overflow = previousOverflow;
+
+      if (!wasFullscreen && document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
 
       if (previousFocus instanceof HTMLElement) {
         previousFocus.focus();
@@ -259,6 +287,13 @@ const playerCardStyle = (
   history={s.history}
   className="absolute left-3 top-[114px] z-10 sm:left-5 sm:top-[122px]"
 />
+{/* Dealer flavor chatter — in Focus mode we can afford a bit more
+    presence so the bubble sits a little higher on the felt. */}
+<DealerBubble g={g} className="right-5 top-20 sm:top-24" />
+{/* Progressive jackpot — top center on the felt. */}
+<JackpotPill className="absolute left-1/2 top-2 z-10 -translate-x-1/2" />
+{/* Golden Round banner — same component as the classic table. */}
+<LuckyRound g={g} />
 
 <DealerShoe
   className="absolute -right-[38px] -top-[14px] z-0 hidden md:block"
@@ -745,6 +780,7 @@ const playerCardStyle = (
       amount={s.ppBet}
       disabled={!canBet}
       onOpen={() => setSideBetOpen("pp")}
+      heat={heat.pp.state}
     />
     {roundBreakdown && (
       <SideWinBadge net={roundBreakdown.perfectPairs} />
@@ -757,6 +793,7 @@ const playerCardStyle = (
       amount={s.t3Bet}
       disabled={!canBet}
       onOpen={() => setSideBetOpen("t3")}
+      heat={heat.t3.state}
     />
     {roundBreakdown && (
       <SideWinBadge net={roundBreakdown.twentyOnePlusThree} />

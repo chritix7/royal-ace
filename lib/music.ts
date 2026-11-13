@@ -5,8 +5,28 @@ import { getAudio } from "./audio";
  * Trois ambiances : "calm" (blackjack), "normal" (machine à sous), "bonus" (free spins).
  */
 export type MusicMode = "calm" | "normal" | "bonus";
+/**
+ * Variants applied on top of the "calm" (blackjack) mode so players can
+ * pick a table-music vibe. "silent" skips scheduling entirely so the
+ * table is quiet without touching the global mute toggle.
+ */
+export type CalmTheme = "lounge" | "vegas" | "neon" | "silent";
 
-export const BPM: Record<MusicMode, number> = { calm: 82, normal: 104, bonus: 130 };
+const BASE_BPM: Record<MusicMode, number> = { calm: 82, normal: 104, bonus: 130 };
+const CALM_THEME_BPM_OFFSET: Record<CalmTheme, number> = {
+  lounge: 0,
+  vegas: 16, // more energy — Strip casino floor
+  neon: -10, // slower, after-hours room
+  silent: 0, // irrelevant, nothing plays
+};
+export const BPM = new Proxy(BASE_BPM, {
+  get(target, key: string) {
+    if (key === "calm") {
+      return BASE_BPM.calm + CALM_THEME_BPM_OFFSET[calmTheme];
+    }
+    return target[key as MusicMode];
+  },
+}) as unknown as Record<MusicMode, number>;
 // La mineur - Fa - Do - Sol (notes MIDI)
 export const CHORDS = [
   [57, 60, 64],
@@ -22,7 +42,23 @@ let timer: number | null = null;
 let nextTime = 0;
 let step = 0;
 let mode: MusicMode = "normal";
+let calmTheme: CalmTheme = "lounge";
 let noiseBuf: AudioBuffer | null = null;
+
+// Keep the picked theme across sessions — load on first import.
+if (typeof window !== "undefined") {
+  try {
+    const raw = window.localStorage.getItem("royalace:calmTheme");
+    if (raw === "lounge" || raw === "vegas" || raw === "neon" || raw === "silent") {
+      calmTheme = raw;
+    }
+  } catch {}
+}
+
+const themeListeners = new Set<() => void>();
+function emitTheme() {
+  themeListeners.forEach((l) => l());
+}
 
 function note(a: Bus, type: OscillatorType, freq: number, t: number, dur: number, vol: number, cutoff = 0, detune = 0) {
   const o = a.ctx.createOscillator();
@@ -106,6 +142,12 @@ export function playStep(a: Bus, t: number, i: number, m: MusicMode) {
 function tick() {
   const a = getAudio();
   if (!a) return;
+  // Silent theme: keep the scheduler running (so toggling back wakes up
+  // right away) but emit no notes.
+  if (mode === "calm" && calmTheme === "silent") {
+    nextTime = a.ctx.currentTime + 0.16;
+    return;
+  }
   const stepDur = 60 / BPM[mode] / 4;
   while (nextTime < a.ctx.currentTime + 0.16) {
     playStep(a, nextTime, step, mode);
@@ -129,6 +171,24 @@ export const music = {
   },
   setMode(m: MusicMode) {
     mode = m;
+  },
+  /** Blackjack-table music theme. Persisted across sessions. */
+  getCalmTheme(): CalmTheme {
+    return calmTheme;
+  },
+  setCalmTheme(t: CalmTheme) {
+    if (t === calmTheme) return;
+    calmTheme = t;
+    try {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("royalace:calmTheme", t);
+      }
+    } catch {}
+    emitTheme();
+  },
+  subscribeCalmTheme(l: () => void) {
+    themeListeners.add(l);
+    return () => themeListeners.delete(l);
   },
   isRunning: () => timer !== null,
   /** Baisse la musique un instant (pour laisser la place à un gros gain). */

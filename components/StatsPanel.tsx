@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useStats } from "../lib/statsStore";
 import { statsStore } from "../lib/statsStore";
 import { useWinHistory, winHistory } from "../lib/winHistory";
+import { downloadSessionShare } from "../lib/shareSession";
 
 type Props = {
   open: boolean;
@@ -14,6 +15,8 @@ type Props = {
 export default function StatsPanel({ open, onClose }: Props) {
   const stats = useStats();
   const history = useWinHistory();
+  const [sharing, setSharing] = useState<"idle" | "rendering" | "done">("idle");
+  const biggest = history[0];
 
   // Esc closes.
   useEffect(() => {
@@ -205,8 +208,38 @@ export default function StatsPanel({ open, onClose }: Props) {
           </section>
         </div>
 
-        {/* Footer with destructive action */}
-        <div className="relative border-t border-[#d7b45b]/15 px-5 py-3 sm:px-6">
+        {/* Footer — share a snapshot, or reset stats */}
+        <div className="relative flex gap-2 border-t border-[#d7b45b]/15 px-5 py-3 sm:px-6">
+          <button
+            type="button"
+            onClick={async () => {
+              if (sharing === "rendering") return;
+              setSharing("rendering");
+              try {
+                await downloadSessionShare({
+                  stats,
+                  bigWin: biggest
+                    ? {
+                        amount: biggest.amount,
+                        kind: `${biggest.kind} · ${biggest.game}`,
+                      }
+                    : null,
+                });
+                setSharing("done");
+                window.setTimeout(() => setSharing("idle"), 1800);
+              } catch {
+                setSharing("idle");
+              }
+            }}
+            className="flex-1 rounded-full border border-[#d7b45b]/40 bg-gradient-to-b from-[#d7b45b]/[0.14] to-black/20 px-5 py-2.5 text-[11px] font-black uppercase tracking-wider text-[#f5d778] shadow-[inset_0_1px_0_rgba(229,199,121,0.2)] outline-none transition hover:border-[#d7b45b]/60 focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-60"
+            disabled={sharing === "rendering"}
+          >
+            {sharing === "rendering"
+              ? "Rendering…"
+              : sharing === "done"
+                ? "Saved ✓"
+                : "Download session card"}
+          </button>
           <button
             type="button"
             onClick={() => {
@@ -214,9 +247,9 @@ export default function StatsPanel({ open, onClose }: Props) {
                 statsStore.reset();
               }
             }}
-            className="w-full rounded-full border border-red-500/40 bg-red-500/10 px-5 py-2.5 text-[11px] font-black uppercase tracking-wider text-red-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] outline-none transition hover:bg-red-500/20 hover:text-red-200 focus-visible:ring-2 focus-visible:ring-red-400"
+            className="rounded-full border border-red-500/40 bg-red-500/10 px-5 py-2.5 text-[11px] font-black uppercase tracking-wider text-red-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] outline-none transition hover:bg-red-500/20 hover:text-red-200 focus-visible:ring-2 focus-visible:ring-red-400"
           >
-            Reset stats
+            Reset
           </button>
         </div>
       </div>

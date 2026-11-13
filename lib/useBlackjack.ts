@@ -7,6 +7,7 @@ import { sfx } from "./sound";
 import { HAPTIC, haptic } from "./haptics";
 import { music } from "./music";
 import { wallet } from "./wallet";
+import { jackpot } from "./jackpot";
 import { CHIPS, MIN_BET, REFILL, EMPTY_STATS, EMPTY_RECORDS, DEFAULT_SETTINGS, INITIAL, tableBacks, sleep as delay, floor10 } from "./game";
 import type { S, Settings, Records } from "./game";
 import { winHistory } from "./winHistory";
@@ -590,10 +591,14 @@ function giveDealer() {
 
   if (sideWagered === 0) return;
 
+  // Progressive jackpot: every side-bet wager drips into the pot.
+  jackpot.contribute(sideWagered);
+
   const p = c.hands[0].cards;
   let ppPayout = 0;
   let t3Payout = 0;
   let big = false;
+  let hitJackpot = false;
   const notes: string[] = [];
 
   if (c.ppBet > 0) {
@@ -606,6 +611,9 @@ function giveDealer() {
       track("pairWin");
 
       if (w.odds >= 25) big = true;
+      // Perfect Pair (suited) is a 25:1 hit — top PP win rings the
+      // progressive jackpot for a slice of the pot.
+      if (w.odds >= 25) hitJackpot = true;
     }
   }
 
@@ -619,15 +627,30 @@ function giveDealer() {
       track("suitedWin");
 
       if (w.odds >= 40) big = true;
+      // Suited Trips (100:1) rings the jackpot too, for a bigger slice.
+      if (w.odds >= 100) hitJackpot = true;
     }
   }
 
-  const payout = ppPayout + t3Payout;
+  // Pay out a slice of the progressive pot on top of the normal
+  // side-bet winnings. PP tops take a modest slice; 21+3 suited trips
+  // take a larger one. Pot resets to its seed after each payout.
+  let jackpotWin = 0;
+  if (hitJackpot) {
+    const t3SuitedTrips = c.t3Bet > 0 && (twentyOnePlusThree(p[0], p[1], c.dealer[0])?.odds ?? 0) >= 100;
+    jackpotWin = jackpot.payout(t3SuitedTrips ? 0.75 : 0.25);
+    if (jackpotWin > 0) {
+      notes.push(`♦ Jackpot +${jackpotWin}`);
+      big = true;
+    }
+  }
+
+  const payout = ppPayout + t3Payout + jackpotWin;
 
   roundSides.current = {
     wagered: sideWagered,
-    perfectPairs: ppPayout - c.ppBet,
-    twentyOnePlusThree: t3Payout - c.t3Bet,
+    perfectPairs: ppPayout - c.ppBet + (hitJackpot && jackpotWin && !(c.t3Bet > 0 && (twentyOnePlusThree(p[0], p[1], c.dealer[0])?.odds ?? 0) >= 100) ? jackpotWin : 0),
+    twentyOnePlusThree: t3Payout - c.t3Bet + (hitJackpot && jackpotWin && c.t3Bet > 0 && (twentyOnePlusThree(p[0], p[1], c.dealer[0])?.odds ?? 0) >= 100 ? jackpotWin : 0),
   };
 
   const now = ref.current;
@@ -1158,6 +1181,24 @@ if (!settlementId) {
       else if (k === "d") a.double();
       else if (k === "p") a.split();
       else if (k === "r") a.surrender();
+      // Y / N answer the insurance prompt. Silently no-op outside the
+      // insurance phase so the keys stay free for regular use.
+      else if (k === "y" && ref.current.phase === "insurance") a.takeInsurance(true);
+      else if (k === "n" && ref.current.phase === "insurance") a.takeInsurance(false);
+      // C clears the bet during betting; X doubles the current bet
+      // (clamped to the player's balance).
+      else if (k === "c" && ref.current.phase === "betting") a.setBetTo(0);
+      else if (k === "x" && ref.current.phase === "betting") {
+        const curr = ref.current.bet;
+        const bal = ref.current.balance;
+        a.setBetTo(Math.min(curr * 2, curr + bal));
+      }
+      // F toggles Focus mode via a window event — the toggle lives on
+      // the parent page, so we broadcast and let it listen.
+      else if (k === "f") {
+        window.dispatchEvent(new CustomEvent("royal-ace:toggle-focus"));
+        e.preventDefault();
+      }
       else if (k >= "1" && k <= "5") a.addChip(CHIPS[Number(k) - 1]);
       else if (k === " " || k === "enter") {
         // If a button/link has focus, Space/Enter already activates

@@ -18,6 +18,7 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import { progressionStore } from "../lib/progression";
 import { weeklyStore } from "../lib/weekly";
 import ChipFly from "../components/ChipFly";
+import HotkeysOverlay from "../components/HotkeysOverlay";
 import { useBalanceFlash } from "../hooks/useBalanceFlash";
 import { sessionStore } from "../lib/sessionStore";
 
@@ -40,6 +41,18 @@ export default function Home() {
   useEffect(() => {
     if (tab !== "blackjack") setFocusMode(false);
   }, [tab]);
+
+  // F-key toggle for Focus mode — the blackjack hook broadcasts a
+  // CustomEvent when the user presses F; we listen here because the
+  // state lives on this page.
+  useEffect(() => {
+    const onToggle = () => {
+      if (tab === "blackjack") setFocusMode((v) => !v);
+    };
+    window.addEventListener("royal-ace:toggle-focus", onToggle as EventListener);
+    return () =>
+      window.removeEventListener("royal-ace:toggle-focus", onToggle as EventListener);
+  }, [tab]);
   const balance = useBalance();
   const flash = useBalanceFlash();
   const locked = useLocked();
@@ -48,6 +61,8 @@ export default function Home() {
     wallet.hydrate();
     sessionStore.hydrate();
     progressionStore.hydrate();
+    // Progressive jackpot pool survives reloads.
+    import("../lib/jackpot").then(({ jackpot }) => jackpot.hydrate());
     dailyStore.hydrate();
     missionsStore.hydrate();
     achievementsStore.hydrate();
@@ -228,6 +243,7 @@ export default function Home() {
       />
       <AchievementToasts />
       <StatsPanel open={statsOpen} onClose={() => setStatsOpen(false)} />
+      <HotkeysOverlay />
     </main>
   );
 }
