@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useJackpot } from "../lib/jackpot";
+import { useBjJackpot } from "../lib/bjJackpot";
 import { money } from "../lib/game";
 
 /**
@@ -13,7 +13,7 @@ import { money } from "../lib/game";
  * `contribute()` from the deal path and `payout()` on a jackpot win.
  */
 export default function JackpotPill({ className = "" }: { className?: string }) {
-  const pot = useJackpot();
+  const pot = useBjJackpot();
   const prevRef = useRef(pot);
   const [bump, setBump] = useState(false);
 

@@ -61,8 +61,8 @@ export default function Home() {
     wallet.hydrate();
     sessionStore.hydrate();
     progressionStore.hydrate();
-    // Progressive jackpot pool survives reloads.
-    import("../lib/jackpot").then(({ jackpot }) => jackpot.hydrate());
+    // Blackjack progressive jackpot pool survives reloads.
+    import("../lib/bjJackpot").then(({ bjJackpot }) => bjJackpot.hydrate());
     dailyStore.hydrate();
     missionsStore.hydrate();
     achievementsStore.hydrate();

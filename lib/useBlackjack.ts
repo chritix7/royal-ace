@@ -7,7 +7,7 @@ import { sfx } from "./sound";
 import { HAPTIC, haptic } from "./haptics";
 import { music } from "./music";
 import { wallet } from "./wallet";
-import { jackpot } from "./jackpot";
+import { bjJackpot } from "./bjJackpot";
 import { CHIPS, MIN_BET, REFILL, EMPTY_STATS, EMPTY_RECORDS, DEFAULT_SETTINGS, INITIAL, tableBacks, sleep as delay, floor10 } from "./game";
 import type { S, Settings, Records } from "./game";
 import { winHistory } from "./winHistory";
@@ -592,7 +592,7 @@ function giveDealer() {
   if (sideWagered === 0) return;
 
   // Progressive jackpot: every side-bet wager drips into the pot.
-  jackpot.contribute(sideWagered);
+  bjJackpot.contribute(sideWagered);
 
   const p = c.hands[0].cards;
   let ppPayout = 0;
@@ -638,7 +638,7 @@ function giveDealer() {
   let jackpotWin = 0;
   if (hitJackpot) {
     const t3SuitedTrips = c.t3Bet > 0 && (twentyOnePlusThree(p[0], p[1], c.dealer[0])?.odds ?? 0) >= 100;
-    jackpotWin = jackpot.payout(t3SuitedTrips ? 0.75 : 0.25);
+    jackpotWin = bjJackpot.payout(t3SuitedTrips ? 0.75 : 0.25);
     if (jackpotWin > 0) {
       notes.push(`♦ Jackpot +${jackpotWin}`);
       big = true;
