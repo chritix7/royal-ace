@@ -15,13 +15,17 @@ function computeStreak(history: S["history"]): {
   count: number;
 } | null {
   if (!history.length) return null;
-  // The history is stored latest-first — item 0 is the most recent.
-  const first = history[0];
-  if (first.net === 0) return null; // Push breaks any streak.
+  // The game pushes each settled round to the END of history
+  // (useBlackjack: `[...c.history, round].slice(-14)`), so the most
+  // recent round lives at `length - 1` and we walk BACKWARD to pick
+  // up the current streak.
+  const last = history[history.length - 1];
+  if (last.net === 0) return null; // Push breaks any streak.
 
-  const sign = first.net > 0 ? 1 : -1;
+  const sign = last.net > 0 ? 1 : -1;
   let count = 0;
-  for (const round of history) {
+  for (let i = history.length - 1; i >= 0; i--) {
+    const round = history[i];
     const rs = round.net > 0 ? 1 : round.net < 0 ? -1 : 0;
     if (rs !== sign) break;
     count++;

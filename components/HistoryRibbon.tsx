@@ -52,11 +52,11 @@ export default function HistoryRibbon({
   className?: string;
 }) {
   if (!history.length) return null;
-  // The game's history is latest-first, but on the ribbon we want the
-  // OLDEST on the left and the latest on the right — that's how sports
-  // and casino scoreboards read. So we take the latest `max` and
-  // reverse.
-  const recent = history.slice(0, max).reverse();
+  // The game appends each settled round to the END of history, so
+  // `slice(-max)` already gives us the last N rounds in chronological
+  // order (oldest → latest, left → right on the ribbon — the way
+  // scoreboards read).
+  const recent = history.slice(-max);
 
   return (
     <div
