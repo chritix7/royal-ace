@@ -1141,8 +1141,8 @@ if (!settlementId) {
 }
 
   // ---------- Raccourcis clavier ----------
-  const actions = useRef({ hit, stand, double, split, surrender, deal, addChip });
-  actions.current = { hit, stand, double, split, surrender, deal, addChip };
+  const actions = useRef({ hit, stand, double, split, surrender, deal, addChip, takeInsurance, setBetTo });
+  actions.current = { hit, stand, double, split, surrender, deal, addChip, takeInsurance, setBetTo };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
   if (

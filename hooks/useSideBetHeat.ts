@@ -9,26 +9,30 @@ import type { Game } from "../lib/useBlackjack";
  * (recent hits) or cold (long dry spell) marker next to each side bet.
  *
  * We watch for the phase→"settled" transition and record whether each
- * side bet was paid out (net > 0) in that round. Only rounds where the
- * bet was actually placed count toward the history — a player who skips
- * 21+3 for ten rounds shouldn't come back to a "cold" sticker on it.
- *
- * Returns a `heat` object:
- *   - state: "hot" | "cold" | "neutral"
- *   - last:  how many rounds since the bet last hit (within the window)
+ * side bet was paid out (net > 0) in that round using `roundBreakdown`,
+ * which carries the per-side net for the settled round. We also keep
+ * a one-step-behind snapshot of the player's placed stakes
+ * (ppBet / t3Bet) so skipped bets don't count toward the window — a
+ * player who skips 21+3 for ten rounds shouldn't come back to a
+ * "cold" sticker on it.
  *
  * Window: last 12 bet-placed rounds per bet type.
+ * Hot:    2+ hits in the window.
+ * Cold:   8+ bet-placed rounds with no hits.
  */
 
 const WINDOW = 12;
-const HOT_HITS = 2; // 2+ hits in the window → hot
-const COLD_MISSES = 8; // 8+ bet-placed rounds with no hits → cold
+const HOT_HITS = 2;
+const COLD_MISSES = 8;
 
 type Heat = { state: "hot" | "cold" | "neutral"; last: number };
 
 export function useSideBetHeat(g: Game) {
   const prevPhaseRef = useRef<string>(g.s.phase);
   const prevHistoryLenRef = useRef<number>(g.s.history.length);
+  // Snapshot the amounts the player staked on the LAST deal, because
+  // once the round is settled those fields are back to 0.
+  const lastPlacedRef = useRef<{ pp: number; t3: number }>({ pp: 0, t3: 0 });
   const ppHistoryRef = useRef<boolean[]>([]); // true = win
   const t3HistoryRef = useRef<boolean[]>([]);
 
@@ -40,8 +44,6 @@ export function useSideBetHeat(g: Game) {
   function summarize(hist: boolean[]): Heat {
     if (!hist.length) return { state: "neutral", last: 0 };
     const hits = hist.filter((b) => b).length;
-    // "Last" = rounds since last hit, counting from the most recent
-    // bet-placed entry (end of array).
     let last = 0;
     for (let i = hist.length - 1; i >= 0; i--) {
       if (hist[i]) break;
@@ -52,32 +54,31 @@ export function useSideBetHeat(g: Game) {
     return { state: "neutral", last };
   }
 
+  // Catch the stake amounts the moment the dealing begins — that's the
+  // last time ppBet/t3Bet reflect what the player committed.
+  useEffect(() => {
+    if (g.s.phase === "dealing") {
+      lastPlacedRef.current = { pp: g.s.ppBet, t3: g.s.t3Bet };
+    }
+  }, [g.s.phase, g.s.ppBet, g.s.t3Bet]);
+
   useEffect(() => {
     const phase = g.s.phase;
     const prev = prevPhaseRef.current;
     if (phase === "settled" && prev !== "settled") {
-      // The round just closed — snapshot each side bet's outcome, but
-      // only when the bet was actually placed this round. We look at
-      // the game's roundSides (net payout) because the bet amount was
-      // already consumed at deal time.
-      const placedPP = (g.sides?.perfectPairs !== undefined) && (g.sides.wagered > 0 || g.s.ppBet > 0);
-      const placedT3 = (g.sides?.twentyOnePlusThree !== undefined) && (g.sides.wagered > 0 || g.s.t3Bet > 0);
-      // We approximate "placed" by checking the game's ppBet/t3Bet at
-      // settle — the deal flow moves them onto `wagered` first, so they
-      // may be 0 here. Use `g.sides.wagered` to detect.
-      const ppPlaced = (g.sides?.wagered ?? 0) > 0 && g.s.ppBet === 0 ? true : g.s.ppBet > 0;
-      const t3Placed = (g.sides?.wagered ?? 0) > 0 && g.s.t3Bet === 0 ? true : g.s.t3Bet > 0;
+      const breakdown = g.roundBreakdown;
+      const placed = lastPlacedRef.current;
 
-      if (ppPlaced) {
+      if (placed.pp > 0) {
         ppHistoryRef.current = [
           ...ppHistoryRef.current,
-          (g.sides?.perfectPairs ?? 0) > 0,
+          (breakdown?.perfectPairs ?? 0) > 0,
         ].slice(-WINDOW);
       }
-      if (t3Placed) {
+      if (placed.t3 > 0) {
         t3HistoryRef.current = [
           ...t3HistoryRef.current,
-          (g.sides?.twentyOnePlusThree ?? 0) > 0,
+          (breakdown?.twentyOnePlusThree ?? 0) > 0,
         ].slice(-WINDOW);
       }
       setHeat({
@@ -86,13 +87,14 @@ export function useSideBetHeat(g: Game) {
       });
     }
     prevPhaseRef.current = phase;
-  }, [g.s.phase, g.sides, g.s.ppBet, g.s.t3Bet]);
+  }, [g.s.phase, g.roundBreakdown]);
 
   // Reset when the game history is cleared.
   useEffect(() => {
     if (g.s.history.length < prevHistoryLenRef.current) {
       ppHistoryRef.current = [];
       t3HistoryRef.current = [];
+      lastPlacedRef.current = { pp: 0, t3: 0 };
       setHeat({
         pp: { state: "neutral", last: 0 },
         t3: { state: "neutral", last: 0 },
