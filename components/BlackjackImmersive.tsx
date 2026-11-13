@@ -28,7 +28,6 @@ import SideBetModal from "./SideBetModal";
 import TableClock from "./TableClock";
 import StreakBadge from "./StreakBadge";
 import HistoryRibbon from "./HistoryRibbon";
-import DealerBubble from "./DealerBubble";
 import JackpotPill from "./JackpotPill";
 import LuckyRound from "./LuckyRound";
 import { useSideBetHeat } from "../hooks/useSideBetHeat";
@@ -287,9 +286,6 @@ const playerCardStyle = (
   history={s.history}
   className="absolute left-3 top-[114px] z-10 sm:left-5 sm:top-[122px]"
 />
-{/* Dealer flavor chatter — in Focus mode we can afford a bit more
-    presence so the bubble sits a little higher on the felt. */}
-<DealerBubble g={g} className="right-5 top-20 sm:top-24" />
 {/* Progressive jackpot — top center on the felt. */}
 <JackpotPill className="absolute left-1/2 top-2 z-10 -translate-x-1/2" />
 {/* Golden Round banner — same component as the classic table. */}
