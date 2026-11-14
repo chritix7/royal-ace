@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { type Advice, type Card, type Hand, type Result, advise, canSplitCards, handValue, hiLo, isBlackjack, makeShoe } from "./blackjack";
-import { perfectPairs, twentyOnePlusThree } from "./sidebets";
+import { type Advice, type Card, type Hand, type Result, advise, canSplitCards, cardsNeeded, dealerCall, handValue, hiLo, isBlackjack, makeShoe } from "./blackjack";
+import { type SideHeat, heatOf, jackpotShare, perfectPairs, twentyOnePlusThree } from "./sidebets";
 import { ACHIEVEMENTS } from "./achievements";
 import { track as sendTrack } from "./events";
 import { sfx } from "./sound";
@@ -31,21 +31,6 @@ export type DealFlightEvent = {
   cardIndex: number;
   faceDown: boolean;
 };
-
-export type SideHeat = "hot" | "cold" | "neutral";
-
-/** Hot after 2+ hits in the last 12 placed bets, cold after 8+ misses in a row with no hit. */
-function heatOf(hist: boolean[]): SideHeat {
-  const hits = hist.filter(Boolean).length;
-  if (hits >= 2) return "hot";
-  if (hist.length >= 8 && hits === 0) return "cold";
-  return "neutral";
-}
-
-/** Share of the progressive pot a Suited Trips wins, by 21+3 stake. */
-export function jackpotShare(t3Bet: number): number {
-  return Math.max(0.1, Math.min(1, t3Bet / 250));
-}
 
 /** Lucky hour: mirror minutes on the player's clock (11:11, 22:22, 7:07…). */
 function isMirrorMinute(d: Date): boolean {
@@ -716,7 +701,10 @@ function giveDealer() {
       twentyOnePlusThree: 0,
     };
 
-    const fresh = c.shoe.length < Math.max(26, Math.floor(decks * 52 * 0.25));
+    // Reshuffle at 75% penetration, or earlier when the cards left
+    // couldn't cover this round (several spots on a small shoe).
+    const fresh =
+      c.shoe.length < Math.max(26, Math.floor(decks * 52 * 0.25), cardsNeeded(spots));
     sfx.chip();
     set({
       shoe: fresh
@@ -1022,35 +1010,13 @@ if (!settlementId) {
       peakBalance: Math.max(c.records.peakBalance, balance),
     };
 
-    // The dealer's call for the round, as it would be announced at a
-    // table: who won and on what totals, not just the sign of the net.
-    const n = hands.length;
-    const pv = handValue(hands[0].cards).total;
-    const message = hands.every((h) => h.result === "surrender")
-      ? "Surrender · half the bet returned"
-      : gotBJ
-      ? `Blackjack · pays ${c.settings.bj65 ? "6 to 5" : "3 to 2"}`
-      : dBJ
-      ? pushed > 0
-        ? "Dealer blackjack · push"
-        : "Dealer blackjack"
-      : hands.every((h) => h.result === "bust")
-      ? n === 1
-        ? `Bust on ${pv} · dealer wins`
-        : "All hands bust · dealer wins"
-      : dv > 21
-      ? `Dealer busts on ${dv} · player wins`
-      : n === 1
-      ? won > 0
-        ? `Player wins · ${pv} over ${dv}`
-        : pushed > 0
-        ? `Push on ${dv} · bet returned`
-        : `Dealer wins · ${dv} over ${pv}`
-      : won > 0
-      ? `Player wins ${won} of ${n} hands`
-      : pushed > 0
-      ? `Push on ${pushed} of ${n} hands`
-      : `Dealer wins all ${n} hands`;
+    const message = dealerCall(
+      hands.map((h) => h.result as Result),
+      handValue(hands[0].cards).total,
+      dv,
+      dBJ,
+      c.settings.bj65
+    );
 
     if (gotBJ) {
       sfx.blackjack();

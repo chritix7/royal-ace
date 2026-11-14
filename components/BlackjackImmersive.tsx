@@ -32,6 +32,7 @@ import JackpotPill from "./JackpotPill";
 import LuckyRound from "./LuckyRound";
 import ChipSweep from "./ChipSweep";
 import CountUp from "./CountUp";
+import FeltMarkings from "./FeltMarkings";
 import ImmersiveSidePill from "./blackjack-immersive/ImmersiveSidePill";
 import ResultRail from "./blackjack-immersive/ResultRail";
 import { getShoeStatus } from "./blackjack-immersive/getShoeStatus";
@@ -653,9 +654,14 @@ const playerCardStyle = (
                    separators, same wording a real pit sign would use.
                    Shrink down on mobile so the three labels fit without
                    overflow. */}
+              <FeltMarkings
+                bj65={s.settings.bj65}
+                h17={s.settings.h17}
+                className="absolute bottom-2 left-1/2 z-10 hidden -translate-x-1/2 sm:block"
+              />
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-x-0 bottom-2 z-10 flex items-center justify-center gap-1.5 px-3 sm:gap-3"
+                className="pointer-events-none absolute inset-x-0 bottom-2 z-10 flex items-center justify-center gap-1.5 px-3 sm:hidden"
               >
                 <p
                   className="whitespace-nowrap font-serif text-[7px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.22em]"

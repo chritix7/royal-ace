@@ -126,3 +126,45 @@ export function hiLo(card: Card): number {
   if (["7", "8", "9"].includes(card.rank)) return 0;
   return -1;
 }
+
+/**
+ * The dealer's call for a settled round, as announced at a table: who
+ * won and on what totals. `results` holds one entry per player hand,
+ * `playerTotal` is the first hand's total (used for single-hand calls).
+ */
+export function dealerCall(
+  results: Result[],
+  playerTotal: number,
+  dealerTotal: number,
+  dealerBJ: boolean,
+  bj65 = false
+): string {
+  const n = results.length;
+  const count = (r: Result) => results.filter((x) => x === r).length;
+  const won = count("win") + count("blackjack");
+  const pushed = count("push");
+
+  if (count("surrender") === n) return "Surrender · half the bet returned";
+  if (count("blackjack") > 0) return `Blackjack · pays ${bj65 ? "6 to 5" : "3 to 2"}`;
+  if (dealerBJ) return pushed > 0 ? "Dealer blackjack · push" : "Dealer blackjack";
+  if (count("bust") === n)
+    return n === 1 ? `Bust on ${playerTotal} · dealer wins` : "All hands bust · dealer wins";
+  if (dealerTotal > 21) return `Dealer busts on ${dealerTotal} · player wins`;
+  if (n === 1) {
+    if (won > 0) return `Player wins · ${playerTotal} over ${dealerTotal}`;
+    if (pushed > 0) return `Push on ${dealerTotal} · bet returned`;
+    return `Dealer wins · ${dealerTotal} over ${playerTotal}`;
+  }
+  if (won > 0) return `Player wins ${won} of ${n} hands`;
+  if (pushed > 0) return `Push on ${pushed} of ${n} hands`;
+  return `Dealer wins all ${n} hands`;
+}
+
+/**
+ * Cards a round can reasonably need: the shoe is reshuffled before the
+ * deal when fewer remain, so it doesn't run dry in the middle of a hand
+ * (which would bring in a fresh shoe unannounced and skew the count).
+ */
+export function cardsNeeded(spots: number): number {
+  return spots * 8 + 10;
+}

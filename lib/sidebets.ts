@@ -29,3 +29,24 @@ export function twentyOnePlusThree(a: Card, b: Card, c: Card): SideWin {
   if (flush) return { label: "Flush", odds: 5 };
   return null;
 }
+
+export type SideHeat = "hot" | "cold" | "neutral";
+
+/**
+ * Heat of a side bet from its recent placed rounds (true = it paid):
+ * hot after 2+ hits, cold after 8+ rounds without a single hit.
+ */
+export function heatOf(hist: boolean[]): SideHeat {
+  const hits = hist.filter(Boolean).length;
+  if (hits >= 2) return "hot";
+  if (hist.length >= 8 && hits === 0) return "cold";
+  return "neutral";
+}
+
+/**
+ * Share of the progressive pot a Suited Trips wins, by 21+3 stake:
+ * 10% at the smallest stakes, the whole pot from a 250 stake.
+ */
+export function jackpotShare(t3Bet: number): number {
+  return Math.max(0.1, Math.min(1, t3Bet / 250));
+}
