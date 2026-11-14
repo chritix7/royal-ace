@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useBlackjack } from "../lib/useBlackjack";
+import { ambience } from "../lib/ambience";
 import Sidebar from "./Sidebar";
 import Table from "./Table";
 import BlackjackImmersive from "./BlackjackImmersive";
@@ -24,6 +25,12 @@ export default function Blackjack({
   onFocusChange?: (next: boolean) => void;
 }) {
   const g = useBlackjack(active);
+
+  // Room ambience only while the blackjack table is on screen.
+  useEffect(() => {
+    ambience.setWanted(active);
+    return () => ambience.setWanted(false);
+  }, [active]);
 
   // If we leave the tab while in focus mode, ask the parent to drop it
   // so coming back later shows the normal view.

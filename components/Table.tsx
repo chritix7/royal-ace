@@ -23,6 +23,9 @@ import StreakBadge from "./StreakBadge";
 import HistoryRibbon from "./HistoryRibbon";
 import JackpotPill from "./JackpotPill";
 import LuckyRound from "./LuckyRound";
+import ChipSweep from "./ChipSweep";
+import CountUp from "./CountUp";
+import FeltMarkings from "./FeltMarkings";
 
 // Premium action button base — used across Hit / Stand / Double / Split /
 // Surrender / Deal. Common shape (border, radius, size, focus ring), with
@@ -242,6 +245,8 @@ function getShoeStatus(g: Game): {
           )}
           {/* Golden Round banner — floats over the dealer slot. */}
           <LuckyRound g={g} />
+          {/* Chips paid out or swept away when the round settles. */}
+          <ChipSweep g={g} />
           {s.settings.theme === "vegas" && <VegasFeltOverlay />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} />}
           <DealerShoe
@@ -398,7 +403,7 @@ function getShoeStatus(g: Game): {
                       className={`text-base font-black tabular-nums ${tone.amount}`}
                     >
                       {net > 0 ? "+" : net < 0 ? "−" : ""}◈{" "}
-                      {money(Math.abs(net))}
+                      <CountUp value={Math.abs(net)} format={money} />
                     </span>
                     <span
                       className={`flex shrink-0 items-center gap-1 text-[10px] font-bold uppercase tracking-wider ${tone.text}`}
@@ -544,56 +549,11 @@ function getShoeStatus(g: Game): {
               the action strip never push this caption around. Only
               shown from sm:+ since mobile already surfaces the rules
               inside the sidebar Table-rules collapsible. */}
-<div
-  aria-hidden="true"
-  className="pointer-events-none absolute bottom-1 left-1/2 hidden -translate-x-1/2 items-center justify-center whitespace-nowrap text-center sm:flex sm:gap-x-3"
->
-  <p
-    className="whitespace-nowrap font-serif text-[10px] font-bold uppercase tracking-[0.22em]"
-    style={{
-      color: "rgba(229,199,121,0.42)",
-      textShadow: "0 1px 0 rgba(0,0,0,0.9)",
-    }}
-  >
-    Blackjack pays {s.settings.bj65 ? "6 to 5" : "3 to 2"}
-  </p>
-
-  <span
-    aria-hidden
-    className="text-[9px] leading-none"
-    style={{ color: "rgba(229,199,121,0.5)" }}
-  >
-    ❖
-  </span>
-
-  <p
-    className="whitespace-nowrap font-serif text-[10px] font-bold uppercase tracking-[0.22em]"
-    style={{
-      color: "rgba(229,199,121,0.36)",
-      textShadow: "0 1px 0 rgba(0,0,0,0.9)",
-    }}
-  >
-    Insurance pays 2 to 1
-  </p>
-
-  <span
-    aria-hidden
-    className="text-[9px] leading-none"
-    style={{ color: "rgba(229,199,121,0.5)" }}
-  >
-    ❖
-  </span>
-
-  <p
-    className="whitespace-nowrap font-serif text-[10px] font-bold uppercase tracking-[0.22em]"
-    style={{
-      color: "rgba(229,199,121,0.36)",
-      textShadow: "0 1px 0 rgba(0,0,0,0.9)",
-    }}
-  >
-    Dealer {s.settings.h17 ? "hits" : "stands on"} soft 17
-  </p>
-</div>
+<FeltMarkings
+  bj65={s.settings.bj65}
+  h17={s.settings.h17}
+  className="absolute bottom-1 left-1/2 hidden -translate-x-1/2 sm:block"
+/>
 
           {/* Bet-zone slot — swaps content based on phase, but the slot
               height is RESERVED at every phase so the felt stays still

@@ -30,6 +30,8 @@ import StreakBadge from "./StreakBadge";
 import HistoryRibbon from "./HistoryRibbon";
 import JackpotPill from "./JackpotPill";
 import LuckyRound from "./LuckyRound";
+import ChipSweep from "./ChipSweep";
+import CountUp from "./CountUp";
 import ImmersiveSidePill from "./blackjack-immersive/ImmersiveSidePill";
 import ResultRail from "./blackjack-immersive/ResultRail";
 import { getShoeStatus } from "./blackjack-immersive/getShoeStatus";
@@ -304,6 +306,8 @@ const playerCardStyle = (
 )}
 {/* Golden Round banner — same component as the classic table. */}
 <LuckyRound g={g} />
+{/* Chips paid out or swept away when the round settles. */}
+<ChipSweep g={g} />
 
 <DealerShoe
   className="absolute -right-[38px] -top-[14px] z-0 hidden md:block"
@@ -444,7 +448,7 @@ const playerCardStyle = (
           : "text-white/70 animate-result-pop"
       }`}
     >
-      {signed(s.net)}
+      <CountUp value={s.net} format={signed} />
     </span>
 
     {roundBreakdown && (

@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { music, type CalmTheme } from "../lib/music";
+import { ambience } from "../lib/ambience";
 
 const THEMES: Array<{ id: CalmTheme; label: string; blurb: string; glyph: string }> = [
   { id: "lounge", label: "Lounge", blurb: "After-dinner bar, no rush", glyph: "🎷" },
@@ -15,6 +16,12 @@ export default function TableThemePicker({ className = "" }: { className?: strin
     music.subscribeCalmTheme,
     music.getCalmTheme,
     () => "lounge",
+  );
+
+  const room = useSyncExternalStore(
+    ambience.subscribe,
+    ambience.isEnabled,
+    () => true,
   );
 
   return (
@@ -60,6 +67,34 @@ export default function TableThemePicker({ className = "" }: { className?: strin
           );
         })}
       </div>
+
+      {/* Room ambience — crowd murmur and distant chips under the music. */}
+      <button
+        type="button"
+        onClick={() => ambience.setEnabled(!room)}
+        aria-pressed={room}
+        className={`flex w-full items-center justify-between gap-2 rounded-xl border px-2.5 py-2 text-left outline-none transition-[background,border-color] focus-visible:ring-2 focus-visible:ring-[#e5c779] ${
+          room
+            ? "border-[#d7b45b]/60 bg-gradient-to-b from-[#d7b45b]/[0.14] to-black/20"
+            : "border-white/10 bg-gradient-to-b from-black/30 to-black/10 hover:border-[#d7b45b]/40"
+        }`}
+      >
+        <span className="min-w-0">
+          <span className={`block text-[11px] font-black tracking-wide ${room ? "text-[#f5d778]" : "text-white"}`}>
+            Casino room
+          </span>
+          <span className="block truncate text-[9px] text-white/50">
+            Crowd murmur and chips in the distance
+          </span>
+        </span>
+        <span
+          className={`shrink-0 text-[10px] font-black uppercase tracking-widest ${
+            room ? "text-[#f5d778]" : "text-white/45"
+          }`}
+        >
+          {room ? "On" : "Off"}
+        </span>
+      </button>
     </div>
   );
 }

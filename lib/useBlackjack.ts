@@ -152,7 +152,7 @@ function scheduleResultReset() {
       sideNote: null,
       celebrate: 0,
       phase: "betting",
-      message: "Place your bet to start.",
+      message: "Place your bets, please.",
     });
   }, 10000);
 }
@@ -328,7 +328,7 @@ const track: typeof sendTrack = (...args) => {
       net: null,
       sideNote: null,
       phase: "betting",
-      message: "Place your bet to start.",
+      message: "Place your bets, please.",
     });
   } else {
     setRoundBreakdown(saved.snapshot.breakdown);
@@ -899,7 +899,7 @@ function giveDealer() {
     // together instead of making the player wait through the dramatic
     // beat for a result they already know.
     if (!anyLive) {
-      set({ phase: "dealer", message: "Dealer's turn…" });
+      set({ phase: "dealer", message: "Dealer plays…" });
       reveal();
       await settle();
       return;
@@ -908,7 +908,7 @@ function giveDealer() {
     // Dramatic reveal: short anticipation beat → mark the hole card as
     // "revealing" so the UI can glow around it → flip (PlayingCard
     // handles the 900ms rotateY) → brief rest before the dealer draws.
-    set({ phase: "dealer", message: "Dealer's turn…", revealing: true });
+    set({ phase: "dealer", message: "Dealer plays…", revealing: true });
     await sleep(360);
     reveal();
     await sleep(900);
@@ -1022,19 +1022,35 @@ if (!settlementId) {
       peakBalance: Math.max(c.records.peakBalance, balance),
     };
 
+    // The dealer's call for the round, as it would be announced at a
+    // table: who won and on what totals, not just the sign of the net.
+    const n = hands.length;
+    const pv = handValue(hands[0].cards).total;
     const message = hands.every((h) => h.result === "surrender")
-      ? "You surrendered. Half your bet is returned."
+      ? "Surrender · half the bet returned"
       : gotBJ
-      ? `Blackjack! Pays ${c.settings.bj65 ? "6 to 5" : "3 to 2"}.`
+      ? `Blackjack · pays ${c.settings.bj65 ? "6 to 5" : "3 to 2"}`
       : dBJ
-      ? "Dealer has blackjack."
+      ? pushed > 0
+        ? "Dealer blackjack · push"
+        : "Dealer blackjack"
       : hands.every((h) => h.result === "bust")
-      ? "Bust. The dealer wins."
-      : net > 0
-      ? "Round complete · net profit."
-      : net < 0
-      ? "Round complete · net loss."
-      : "Round complete · break even.";
+      ? n === 1
+        ? `Bust on ${pv} · dealer wins`
+        : "All hands bust · dealer wins"
+      : dv > 21
+      ? `Dealer busts on ${dv} · player wins`
+      : n === 1
+      ? won > 0
+        ? `Player wins · ${pv} over ${dv}`
+        : pushed > 0
+        ? `Push on ${dv} · bet returned`
+        : `Dealer wins · ${dv} over ${pv}`
+      : won > 0
+      ? `Player wins ${won} of ${n} hands`
+      : pushed > 0
+      ? `Push on ${pushed} of ${n} hands`
+      : `Dealer wins all ${n} hands`;
 
     if (gotBJ) {
       sfx.blackjack();

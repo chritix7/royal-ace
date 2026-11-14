@@ -3,6 +3,7 @@
 import { MIN_BET, money } from "../../lib/game";
 import type { Game } from "../../lib/useBlackjack";
 import { control, gold, signed } from "./styles";
+import CountUp from "../CountUp";
 
 export default function ResultRail({
   g,
@@ -44,8 +45,9 @@ export default function ResultRail({
             className="animate-pop w-64 overflow-hidden rounded-3xl border border-[#d7b45b]/45 bg-gradient-to-b from-[#101713]/95 to-[#0a100c]/95 shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur-md"
           >
             <div className="border-b border-[#d7b45b]/20 bg-[#d7b45b]/10 px-4 py-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#e5c779]">
-                Round result
+              {/* The dealer's call for the round ("Dealer busts", "Push"…). */}
+              <p className="text-[10px] font-black uppercase leading-snug tracking-[0.18em] text-[#e5c779]">
+                {s.message}
               </p>
 
               <p
@@ -57,7 +59,7 @@ export default function ResultRail({
                     : "text-white/70"
                 }`}
               >
-                {signed(roundBreakdown.total)}
+                <CountUp value={roundBreakdown.total} format={signed} />
               </p>
             </div>
 

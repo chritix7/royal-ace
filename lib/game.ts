@@ -94,7 +94,7 @@ export const INITIAL: S = {
   bet: 20,
   lastBet: 20,
   insurance: 0,
-  message: "Place your bet to start.",
+  message: "Place your bets, please.",
   net: null,
   stats: EMPTY_STATS,
   settings: DEFAULT_SETTINGS,

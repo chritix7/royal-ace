@@ -57,6 +57,17 @@ export const sfx = {
     tone(1800, 0.06, "triangle", 0.1);
     tone(2500, 0.05, "triangle", 0.07, 0.035);
   },
+  // Chips paid out to the player: a short cascade of clicks.
+  chipsIn: (count: number) => {
+    for (let i = 0; i < Math.min(count, 10); i++) {
+      tone(1650 + (i % 3) * 280, 0.05, "triangle", 0.07, 0.18 + i * 0.055);
+    }
+  },
+  // Chips swept away by the dealer: one soft slide and a click.
+  chipsOut: () => {
+    noise(0.22, 0.05, 1800, 0.12);
+    tone(1500, 0.05, "triangle", 0.05, 0.3);
+  },
   win: () => [523, 659, 784].forEach((f, i) => tone(f, 0.25, "triangle", 0.12, i * 0.09)),
   blackjack: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.3, "triangle", 0.13, i * 0.08)),
   push: () => tone(440, 0.18, "sine", 0.1),
