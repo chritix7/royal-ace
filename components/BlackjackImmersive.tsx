@@ -157,6 +157,58 @@ export default function BlackjackImmersive({
     return () => window.removeEventListener("keydown", onKey);
   }, [menuOpen, resultOpen, onClose]);
 
+  // Slim ghost key for the quick bets (Rebet / ×2 / Clear / Done).
+  const quickBet =
+    "inline-flex h-7 w-full items-center justify-center rounded-full border border-white/10 bg-white/[0.03] px-2 text-[10px] font-black uppercase tracking-[0.18em] text-white/70 outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-[color,border-color,background] focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:hover:border-[#d7b45b]/50 enabled:hover:bg-[#d7b45b]/[0.08] enabled:hover:text-[#f5d778] disabled:cursor-not-allowed disabled:opacity-35";
+
+  // Deal (or Refill when out of chips). `stacked` puts the amount on
+  // its own line for the tall desktop key.
+  const dealReady = s.bet >= MIN_BET && stake <= s.balance;
+  const primaryAction = (className: string, stacked = false) =>
+    outOfChips ? (
+      <button
+        type="button"
+        onClick={refill}
+        className={`${control} ${gold} ${className}`}
+      >
+        {stacked ? (
+          <>
+            <span className="text-sm tracking-[0.14em]">Refill</span>
+            <span className="text-[11px] font-black tabular-nums">
+              ◈ {money(REFILL)}
+            </span>
+          </>
+        ) : (
+          `Refill · ◈ ${money(REFILL)}`
+        )}
+      </button>
+    ) : (
+      <button
+        type="button"
+        onClick={() => {
+          setEditBet(false);
+          deal();
+        }}
+        disabled={!dealReady}
+        className={`${control} ${gold} ${className} ${
+          dealReady ? "animate-deal-ready" : ""
+        }`}
+      >
+        {stacked ? (
+          <>
+            <span className="text-sm tracking-[0.14em]">
+              {s.phase === "settled" ? "Deal again" : "Deal"}
+            </span>
+            <span className="text-[11px] font-black tabular-nums">
+              ◈ {money(stake)}
+            </span>
+          </>
+        ) : (
+          `${s.phase === "settled" ? "Deal again" : "Deal"} · ◈ ${money(stake)}`
+        )}
+      </button>
+    );
+
   const tableStyle = {
   "--bj-card-h": compact
     ? "clamp(46px, 9.5dvh, 96px)"
@@ -257,7 +309,7 @@ const playerCardStyle = (
 
       <main
         style={tableStyle}
-        className={`felt-texture relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${bettingOpen ? "pb-[180px]" : "pb-[80px]"} ${tableBg(s.settings)}`}
+        className={`felt-texture relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${bettingOpen ? "pb-[180px] lg:pb-[158px]" : "pb-[80px] lg:pb-[138px]"} ${tableBg(s.settings)}`}
       >
         {s.settings.theme === "vegas" && <VegasFeltOverlay />}
         {s.celebrate > 0 && (
@@ -596,7 +648,7 @@ const playerCardStyle = (
               {bettingOpen && (
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 bottom-10 z-10 flex justify-center sm:bottom-14"
+                  className="pointer-events-none absolute inset-x-0 bottom-10 z-10 flex justify-center sm:bottom-14 lg:hidden"
                 >
                   <div
                     className="relative flex h-20 w-20 items-end justify-center overflow-visible rounded-full sm:h-24 sm:w-24"
@@ -649,19 +701,44 @@ const playerCardStyle = (
                 </div>
               )}
 
-              {/* Table markings — engraved ornament along the bottom
-                   edge of the felt. Serif typography, gold diamond
-                   separators, same wording a real pit sign would use.
-                   Shrink down on mobile so the three labels fit without
-                   overflow. */}
-              <FeltMarkings
-                bj65={s.settings.bj65}
-                h17={s.settings.h17}
-                className="absolute bottom-2 left-1/2 z-10 hidden -translate-x-1/2 sm:block"
-              />
+        {/* Arc de mise imprimé au bord du tapis */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-28 left-1/2 z-0 h-48 w-[min(96%,980px)] -translate-x-1/2 rounded-[50%] border border-white/[0.06]"
+        />
+
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-20 left-1/2 z-0 h-32 w-[min(82%,760px)] -translate-x-1/2 rounded-[50%] border border-white/[0.04]"
+        />
+
+        {s.shuffling && <ShuffleAnimation />}
+                <ResultRail g={g} onNewRound={deal} />
+      </main>
+
+      {/* Floating action card — pulled out of the flex column so the
+          felt extends all the way to the bottom of the viewport. The
+          card sits inset from the bottom edge with a thick shadow and
+          a gold-rimmed backdrop blur so it reads like a dealer tray
+          hovering over the felt, not a bolted-on bar.
+          Width-capped to 640px; on narrower screens it stays full-
+          width with inset margins. */}
+      <footer
+        className="absolute bottom-3 left-1/2 z-20 w-[min(640px,calc(100%-1rem))] -translate-x-1/2 rounded-[22px] border border-[#d7b45b]/45 bg-gradient-to-b from-[#17130e]/95 via-[#0f0d0a]/95 to-[#080706]/95 px-2.5 pt-2.5 shadow-[0_24px_60px_rgba(0,0,0,0.65),0_0_0_1px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(245,215,120,0.18)] backdrop-blur-md sm:px-4 lg:w-[min(800px,calc(100%-2rem))] lg:px-5 lg:pt-3"
+        style={{
+          paddingBottom: "max(env(safe-area-inset-bottom), 0.625rem)",
+        }}
+      >
+        {/* House rules printed on the felt, riding just above the
+            console so it never covers them, whatever its height. */}
+        <FeltMarkings
+          bj65={s.settings.bj65}
+          h17={s.settings.h17}
+          className="absolute bottom-full left-1/2 mb-1.5 hidden -translate-x-1/2 sm:block"
+        />
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-x-0 bottom-2 z-10 flex items-center justify-center gap-1.5 px-3 sm:hidden"
+                className="pointer-events-none absolute inset-x-0 bottom-full mb-1.5 flex items-center justify-center gap-1.5 px-3 sm:hidden"
               >
                 <p
                   className="whitespace-nowrap font-serif text-[7px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.22em]"
@@ -715,111 +792,137 @@ const playerCardStyle = (
                 </p>
               </div>
 
-        {/* Arc de mise imprimé au bord du tapis */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -bottom-28 left-1/2 z-0 h-48 w-[min(96%,980px)] -translate-x-1/2 rounded-[50%] border border-white/[0.06]"
+        {/* Console trim: a gold light line along the top edge and a
+            hairline inner frame, like the rim of a dealer's tray. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#f5d778]/70 to-transparent"
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-[5px] rounded-[17px] border border-[#d7b45b]/[0.12]"
         />
 
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -bottom-20 left-1/2 z-0 h-32 w-[min(82%,760px)] -translate-x-1/2 rounded-[50%] border border-white/[0.04]"
-        />
-
-        {s.shuffling && <ShuffleAnimation />}
-                <ResultRail g={g} onNewRound={deal} />
-      </main>
-
-      {/* Floating action card — pulled out of the flex column so the
-          felt extends all the way to the bottom of the viewport. The
-          card sits inset from the bottom edge with a thick shadow and
-          a gold-rimmed backdrop blur so it reads like a dealer tray
-          hovering over the felt, not a bolted-on bar.
-          Width-capped to 640px; on narrower screens it stays full-
-          width with inset margins. */}
-      <footer
-        className="absolute bottom-3 left-1/2 z-20 w-[min(640px,calc(100%-1rem))] -translate-x-1/2 rounded-2xl border border-[#d7b45b]/35 bg-[#101713]/92 px-2 pt-2 shadow-[0_22px_60px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(229,199,121,0.12)] backdrop-blur-md sm:px-5"
-        style={{
-          paddingBottom: "max(env(safe-area-inset-bottom), 0.5rem)",
-        }}
-      >
         {bettingOpen ? (
-          <div className="mx-auto mb-1.5 max-w-xl overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-black/20 p-2 pb-2 sm:max-h-[22dvh]">
-            {/* "Bet / hand ◈ X" row removed — the floating BET circle
-                on the felt (with the live chip pile) already shows the
-                amount, the Deal button spells it out, and the chip
-                picker below dictates what's being added. One source. */}
-            <div className="space-y-1.5">
-  <div className="mx-auto w-full max-w-[320px]">
-    {/* Scrollable chip ladder — 5 denominations visible at a time,
-        arrows slide the window through the whole 10 → 50,000 range. */}
-    <ChipRail
-      visibleCount={5}
-      size="sm"
-      onPick={(value) => addChip(value)}
-      disabledFor={(value) =>
-        !canBet ||
-        (s.bet + value) * spots + sides > s.balance
-      }
-    />
-  </div>
+          <div className="relative mx-auto mb-2 max-w-xl lg:mb-0 lg:grid lg:max-w-none lg:grid-cols-[auto_minmax(0,1fr)_auto_auto] lg:items-stretch lg:gap-5">
+            {/* Bet puck — desktop only: the chip pile grows in a gold
+                ring at the left of the console, total underneath. */}
+            <div className="hidden lg:flex lg:flex-col lg:items-center lg:justify-center lg:gap-1.5">
+              <div
+                className="relative flex h-16 w-16 items-end justify-center overflow-visible rounded-full"
+                style={{
+                  background:
+                    "radial-gradient(circle at 50% 30%, rgba(229, 199, 121, 0.22) 0%, rgba(5, 10, 7, 0.75) 55%, rgba(5, 10, 7, 0.9) 100%)",
+                  boxShadow: [
+                    "inset 0 0 0 1px rgba(229, 199, 121, 0.85)",
+                    "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
+                    "inset 0 0 0 4px rgba(229, 199, 121, 0.35)",
+                    "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
+                    "0 0 22px rgba(229, 199, 121, 0.22)",
+                  ].join(", "),
+                }}
+              >
+                {pileAmount > 0 ? (
+                  <div className="mb-1.5 flex items-end justify-center">
+                    <ChipStack amount={pileAmount} />
+                  </div>
+                ) : (
+                  <p className="mb-6 text-[9px] font-black uppercase tracking-[0.24em] text-[#e5c779]/75">
+                    Bet
+                  </p>
+                )}
+              </div>
+              <p className="text-[11px] font-black tabular-nums leading-none text-[#f5d778]">
+                ◈ {money(s.bet * spots)}
+              </p>
+            </div>
 
-  <div className="mx-auto grid w-full max-w-[300px] grid-cols-3 gap-1.5">
-    <button
-      type="button"
-      onClick={() => setBetTo(s.lastBet)}
-      className={`${control} ${neutral} !min-h-8 w-full min-w-0 !text-[11px]`}
-    >
-      Rebet
-    </button>
+            {/* Chips and quick bets */}
+            <div className="flex min-w-0 flex-col justify-center gap-2">
+              <div className="mx-auto w-full max-w-[320px]">
+                {/* Scrollable chip ladder — 5 denominations visible at
+                    a time, arrows slide through the 10 → 50,000 range. */}
+                <ChipRail
+                  visibleCount={5}
+                  size="sm"
+                  onPick={(value) => addChip(value)}
+                  disabledFor={(value) =>
+                    !canBet ||
+                    (s.bet + value) * spots + sides > s.balance
+                  }
+                />
+              </div>
 
-    <button
-      type="button"
-      onClick={() => setBetTo(s.bet * 2)}
-      disabled={s.bet === 0}
-      className={`${control} ${neutral} !min-h-8 w-full min-w-0 !text-[11px]`}
-    >
-      ×2
-    </button>
+              <div className="mx-auto grid w-full max-w-[300px] grid-cols-3 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setBetTo(s.lastBet)}
+                  className={quickBet}
+                >
+                  Rebet
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBetTo(s.bet * 2)}
+                  disabled={s.bet === 0}
+                  className={quickBet}
+                >
+                  ×2
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBetTo(0)}
+                  disabled={s.bet === 0}
+                  className={quickBet}
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
 
-    <button
-      type="button"
-      onClick={() => setBetTo(0)}
-      disabled={s.bet === 0}
-      className={`${control} ${neutral} !min-h-8 w-full min-w-0 !text-[11px]`}
-    >
-      Clear
-    </button>
-  </div>
-</div>
+            {/* Side bets — side by side on phones, stacked on desktop */}
+            <div className="mt-2 grid grid-cols-2 gap-1.5 lg:mt-0 lg:w-[158px] lg:grid-cols-1 lg:content-center lg:gap-2 lg:border-l lg:border-[#d7b45b]/15 lg:pl-5">
+              <div className="relative">
+                <ImmersiveSidePill
+                  label="PP"
+                  amount={s.ppBet}
+                  disabled={!canBet}
+                  onOpen={() => setSideBetOpen("pp")}
+                  heat={heat.pp}
+                />
+                {roundBreakdown && (
+                  <SideWinBadge net={roundBreakdown.perfectPairs} />
+                )}
+              </div>
 
-            <div className="mt-1.5 grid grid-cols-2 gap-1.5">
-  <div className="relative">
-    <ImmersiveSidePill
-      label="PP"
-      amount={s.ppBet}
-      disabled={!canBet}
-      onOpen={() => setSideBetOpen("pp")}
-      heat={heat.pp}
-    />
-    {roundBreakdown && (
-      <SideWinBadge net={roundBreakdown.perfectPairs} />
-    )}
-  </div>
+              <div className="relative">
+                <ImmersiveSidePill
+                  label="21+3"
+                  amount={s.t3Bet}
+                  disabled={!canBet}
+                  onOpen={() => setSideBetOpen("t3")}
+                  heat={heat.t3}
+                />
+                {roundBreakdown && (
+                  <SideWinBadge net={roundBreakdown.twentyOnePlusThree} />
+                )}
+              </div>
+            </div>
 
-  <div className="relative">
-    <ImmersiveSidePill
-      label="21+3"
-      amount={s.t3Bet}
-      disabled={!canBet}
-      onOpen={() => setSideBetOpen("t3")}
-      heat={heat.t3}
-    />
-    {roundBreakdown && (
-      <SideWinBadge net={roundBreakdown.twentyOnePlusThree} />
-    )}
-  </div>
-</div>
+            {/* Deal — desktop: a tall gold key closing the console.
+                Phones use the full-width row underneath instead. */}
+            <div className="hidden lg:flex lg:w-[132px] lg:flex-col lg:gap-1.5">
+              {primaryAction("flex-1 flex-col gap-0.5 !rounded-2xl", true)}
+              {s.phase === "settled" && (
+                <button
+                  type="button"
+                  onClick={() => setEditBet(false)}
+                  className={quickBet}
+                >
+                  Done
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="mb-2 flex min-h-6 items-center justify-center gap-3 text-[11px] text-white/50">
@@ -853,31 +956,12 @@ const playerCardStyle = (
             className="mx-auto h-10 max-w-xl sm:h-11"
           />
         ) : canBet ? (
-          <div className="mx-auto flex max-w-xl justify-center gap-2">
-            {outOfChips ? (
-              <button
-                type="button"
-                onClick={refill}
-                className={`${control} ${gold} min-w-0 flex-1`}
-              >
-                Refill · ◈ {money(REFILL)}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setEditBet(false);
-                  deal();
-                }}
-                disabled={s.bet < MIN_BET || stake > s.balance}
-                className={`${control} ${gold} min-w-0 flex-1 sm:min-h-10 ${
-                  s.bet >= MIN_BET && stake <= s.balance ? "animate-deal-ready" : ""
-                }`}
-              >
-                {s.phase === "settled" ? "Deal again" : "Deal"} · ◈{" "}
-                {money(stake)}
-              </button>
-            )}
+          <div
+            className={`mx-auto flex max-w-xl justify-center gap-2 ${
+              bettingOpen ? "lg:hidden" : ""
+            }`}
+          >
+            {primaryAction("min-w-0 flex-1 sm:min-h-10")}
 
             {bettingOpen && s.phase === "settled" && (
               <button
