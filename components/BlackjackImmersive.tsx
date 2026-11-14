@@ -99,6 +99,14 @@ export default function BlackjackImmersive({
 
     document.body.style.overflow = "hidden";
 
+    // The page reserves a scrollbar gutter (`scrollbar-gutter: stable`
+    // on <html>) so modals don't shift it. A fixed full-screen view
+    // doesn't cover that gutter, which showed as a white strip down
+    // the right edge — release it while Focus is open.
+    const root = document.documentElement;
+    const previousGutter = root.style.scrollbarGutter;
+    root.style.scrollbarGutter = "auto";
+
     // Request true browser fullscreen so the OS chrome and tab bar go
     // away — Focus mode is meant to be casino-immersive. Wrapped in a
     // try because:
@@ -130,6 +138,7 @@ export default function BlackjackImmersive({
     return () => {
       document.removeEventListener("fullscreenchange", onFsChange);
       document.body.style.overflow = previousOverflow;
+      root.style.scrollbarGutter = previousGutter;
 
       if (!wasFullscreen && document.fullscreenElement && document.exitFullscreen) {
         document.exitFullscreen().catch(() => {});
