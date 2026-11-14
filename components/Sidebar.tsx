@@ -20,7 +20,6 @@ import {
 import SectionModal from "./SectionModal";
 import SideBetModal from "./SideBetModal";
 import TableThemePicker from "./TableThemePicker";
-import { useSideBetHeat } from "../hooks/useSideBetHeat";
 import { ACHIEVEMENTS } from "../lib/achievements";
 import { audio, useAudioSettings } from "../lib/audio";
 import type { Game } from "../lib/useBlackjack";
@@ -80,8 +79,8 @@ export default function Sidebar({ g }: { g: Game }) {
   const [openSection, setOpenSection] = useState<SidebarTab | null>(null);
   // Which side-bet staking modal is open (Perfect Pairs / 21+3 / none).
   const [openSideBet, setOpenSideBet] = useState<"pp" | "t3" | null>(null);
-  // Hot / cold state per side bet, computed from session history.
-  const heat = useSideBetHeat(g);
+  // Hot / cold state per side bet, tracked by the game hook.
+  const heat = g.heat;
   useEffect(() => setMounted(true), []);
   // If the count trainer gets turned off while its modal is open,
   // close the modal so we don't dangle on a non-visible section.
@@ -214,15 +213,15 @@ export default function Sidebar({ g }: { g: Game }) {
               amount={s.ppBet}
               disabled={!canBet}
               onOpen={() => setOpenSideBet("pp")}
-              heat={heat.pp.state}
+              heat={heat.pp}
             />
             <SideBet
               label="21+3"
-              hint="Your 2 cards + dealer's card · up to 100:1"
+              hint="Your 2 cards + dealer's card · up to 100:1 · Suited Trips wins the jackpot"
               amount={s.t3Bet}
               disabled={!canBet}
               onOpen={() => setOpenSideBet("t3")}
-              heat={heat.t3.state}
+              heat={heat.t3}
             />
           </div>
           <div className="mt-4">
@@ -1171,7 +1170,7 @@ export default function Sidebar({ g }: { g: Game }) {
           open={openSideBet === "t3"}
           onClose={() => setOpenSideBet(null)}
           label="21+3"
-          hint="Your 2 cards + dealer's card · up to 100:1"
+          hint="Your 2 cards + dealer's card · up to 100:1 · Suited Trips wins the jackpot"
           amount={s.t3Bet}
           canBet={canBet}
           remainingBalance={s.balance - (s.bet * spots + s.ppBet)}

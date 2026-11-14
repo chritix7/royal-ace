@@ -14,8 +14,10 @@ import type { GlobalStats } from "./statsStore";
 
 export type SessionShareInput = {
   stats: GlobalStats;
+  /** Largest recorded win, if any. */
   bigWin?: { amount: number; kind: string } | null;
-  streakBest?: number;
+  /** How many big wins are on record. */
+  bigWinCount?: number;
 };
 
 function fmt(n: number): string {
@@ -30,7 +32,7 @@ function pct(num: number, den: number): string {
 export async function renderSessionShare({
   stats,
   bigWin,
-  streakBest,
+  bigWinCount = 0,
 }: SessionShareInput): Promise<Blob> {
   const W = 1080;
   const H = 1080;
@@ -60,7 +62,7 @@ export async function renderSessionShare({
   ctx.fillStyle = "rgba(215,180,91,0.7)";
   ctx.font = "900 20px system-ui, -apple-system, 'Segoe UI', sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("ROYAL  ACE  ·  SESSION  SUMMARY", W / 2, 130);
+  ctx.fillText("ROYAL  ACE  ·  PLAYER  CARD", W / 2, 130);
 
   // Title
   const grad = ctx.createLinearGradient(0, 160, 0, 240);
@@ -68,7 +70,7 @@ export async function renderSessionShare({
   grad.addColorStop(1, "#c89a3f");
   ctx.fillStyle = grad;
   ctx.font = "900 90px 'Georgia', serif";
-  ctx.fillText("My night at the table", W / 2, 240);
+  ctx.fillText("My record at the table", W / 2, 240);
 
   // Date / sub
   ctx.fillStyle = "rgba(255,255,255,0.55)";
@@ -86,9 +88,9 @@ export async function renderSessionShare({
     { label: "Hands played", value: fmt(stats.bjHands) },
     { label: "Win rate", value: pct(stats.bjWins, stats.bjHands) },
     { label: "Blackjacks", value: fmt(stats.blackjacks) },
-    { label: "Best streak", value: fmt(streakBest ?? 0) },
+    { label: "Doubled wins", value: fmt(stats.doubledWins) },
     { label: "Decision rate", value: pct(stats.correctDecisions, stats.bjHands) },
-    { label: "Big wins", value: fmt(bigWin ? 1 : 0) },
+    { label: "Big wins", value: fmt(bigWinCount) },
   ];
 
   const cardW = 288;

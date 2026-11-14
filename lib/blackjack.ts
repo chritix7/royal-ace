@@ -63,17 +63,23 @@ export const isBlackjack = (cards: Card[]) =>
 export const canSplitCards = (cards: Card[]) =>
   cards.length === 2 && cards[0].value === cards[1].value;
 
-export type Advice = "Hit" | "Stand" | "Double" | "Split";
+export type Advice = "Hit" | "Stand" | "Double" | "Split" | "Surrender";
 
-/** Stratégie de base simplifiée (croupier qui tire sur 16, reste sur 17). */
+/**
+ * Stratégie de base (sabot multi-jeux). `opts.h17` adapte les quelques
+ * décisions qui changent quand le croupier tire sur 17 souple, et
+ * `opts.canSurrender` active les abandons tardifs recommandés.
+ */
 export function advise(
   cards: Card[],
   up: Card,
   canDouble: boolean,
-  canSplit: boolean
+  canSplit: boolean,
+  opts: { canSurrender?: boolean; h17?: boolean } = {}
 ): Advice {
   const u = up.value;
   const { total, soft } = handValue(cards);
+  const h17 = !!opts.h17;
 
   if (canSplit) {
     const v = cards[0].value;
@@ -85,10 +91,19 @@ export function advise(
     if (v === 4 && (u === 5 || u === 6)) return "Split";
   }
 
+  // Abandon tardif : 16 dur contre 9/10/As, 15 dur contre 10 ;
+  // en H17 aussi 15 et 17 contre un As. (8-8 est déjà splitté au-dessus.)
+  if (opts.canSurrender && !soft && cards.length === 2) {
+    if (total === 16 && u >= 9) return "Surrender";
+    if (total === 15 && (u === 10 || (h17 && u === 11))) return "Surrender";
+    if (total === 17 && h17 && u === 11) return "Surrender";
+  }
+
   if (soft) {
-    if (total >= 19) return "Stand";
+    if (total >= 20) return "Stand";
+    if (total === 19) return h17 && u === 6 && canDouble ? "Double" : "Stand";
     if (total === 18) {
-      if (u >= 3 && u <= 6) return canDouble ? "Double" : "Stand";
+      if (u >= (h17 ? 2 : 3) && u <= 6) return canDouble ? "Double" : "Stand";
       return u <= 8 ? "Stand" : "Hit";
     }
     if (total === 17) return u >= 3 && u <= 6 && canDouble ? "Double" : "Hit";
@@ -99,7 +114,7 @@ export function advise(
   if (total >= 17) return "Stand";
   if (total >= 13) return u <= 6 ? "Stand" : "Hit";
   if (total === 12) return u >= 4 && u <= 6 ? "Stand" : "Hit";
-  if (total === 11) return canDouble ? "Double" : "Hit";
+  if (total === 11) return canDouble && (u <= 10 || h17) ? "Double" : "Hit";
   if (total === 10) return u <= 9 && canDouble ? "Double" : "Hit";
   if (total === 9) return u >= 3 && u <= 6 && canDouble ? "Double" : "Hit";
   return "Hit";

@@ -32,6 +32,26 @@ export type DealFlightEvent = {
   faceDown: boolean;
 };
 
+export type SideHeat = "hot" | "cold" | "neutral";
+
+/** Hot after 2+ hits in the last 12 placed bets, cold after 8+ misses in a row with no hit. */
+function heatOf(hist: boolean[]): SideHeat {
+  const hits = hist.filter(Boolean).length;
+  if (hits >= 2) return "hot";
+  if (hist.length >= 8 && hits === 0) return "cold";
+  return "neutral";
+}
+
+/** Share of the progressive pot a Suited Trips wins, by 21+3 stake. */
+export function jackpotShare(t3Bet: number): number {
+  return Math.max(0.1, Math.min(1, t3Bet / 250));
+}
+
+/** Lucky hour: mirror minutes on the player's clock (11:11, 22:22, 7:07…). */
+function isMirrorMinute(d: Date): boolean {
+  return d.getMinutes() === d.getHours() && d.getMinutes() > 0;
+}
+
 export function useBlackjack(active = true) {
   const activeRef = useRef(active);
   activeRef.current = active;
@@ -50,6 +70,31 @@ export function useBlackjack(active = true) {
   useState<RoundBreakdown | null>(null);
 
 const breakdownRef = useRef<RoundBreakdown | null>(null);
+
+  // Golden Round: rolled when a hand is dealt (never before, so the
+  // player can't size the bet around it) and paid inside settle so the
+  // bonus is part of the round's net, stats and history.
+  const goldenRef = useRef(false);
+  const [golden, setGoldenState] = useState(false);
+  function setGolden(v: boolean) {
+    goldenRef.current = v;
+    setGoldenState(v);
+  }
+
+  // Side-bet heat: last rounds where each side bet was actually placed
+  // (true = it paid). Lives here so it survives switching to Focus.
+  const heatRef = useRef<{ pp: boolean[]; t3: boolean[] }>({ pp: [], t3: [] });
+  const [heat, setHeat] = useState<{ pp: SideHeat; t3: SideHeat }>({
+    pp: "neutral",
+    t3: "neutral",
+  });
+  function recordHeat(key: "pp" | "t3", hit: boolean) {
+    heatRef.current = {
+      ...heatRef.current,
+      [key]: [...heatRef.current[key], hit].slice(-12),
+    };
+    setHeat({ pp: heatOf(heatRef.current.pp), t3: heatOf(heatRef.current.t3) });
+  }
 
 const [dealEvents, setDealEvents] = useState<DealFlightEvent[]>([]);
 const nextDealEventId = useRef(0);
@@ -573,7 +618,8 @@ function giveDealer() {
     if (!h || !up) return;
     const cd = h.cards.length === 2 && c.balance >= h.bet;
     const cs = canSplitCards(h.cards) && c.hands.length < 4 && c.balance >= h.bet;
-    const best = advise(h.cards, up, cd, cs);
+    const csur = c.hands.length === 1 && h.cards.length === 2 && !h.split;
+    const best = advise(h.cards, up, cd, cs, { canSurrender: csur, h17: c.settings.h17 });
     const ok = best === action;
     set({
       stats: { ...c.stats, decisions: c.stats.decisions + 1, correct: c.stats.correct + (ok ? 1 : 0) },
@@ -586,88 +632,74 @@ function giveDealer() {
 
   /** Paris annexes : résolus dès la distribution, sur la 1re main. */
   function resolveSide() {
-  const c = ref.current;
-  const sideWagered = c.ppBet + c.t3Bet;
+    const c = ref.current;
+    const sideWagered = c.ppBet + c.t3Bet;
+    if (sideWagered === 0) return;
 
-  if (sideWagered === 0) return;
+    // Progressive jackpot: every side-bet wager drips into the pot.
+    bjJackpot.contribute(sideWagered);
 
-  // Progressive jackpot: every side-bet wager drips into the pot.
-  bjJackpot.contribute(sideWagered);
+    const p = c.hands[0].cards;
+    let ppPayout = 0;
+    let t3Payout = 0;
+    let jackpotWin = 0;
+    let big = false;
+    const notes: string[] = [];
 
-  const p = c.hands[0].cards;
-  let ppPayout = 0;
-  let t3Payout = 0;
-  let big = false;
-  let hitJackpot = false;
-  const notes: string[] = [];
-
-  if (c.ppBet > 0) {
-    const w = perfectPairs(p[0], p[1]);
-
-    if (w) {
-      ppPayout = c.ppBet * (w.odds + 1);
-      notes.push(`${w.label} +${c.ppBet * w.odds}`);
-      unlock("pair");
-      track("pairWin");
-
-      if (w.odds >= 25) big = true;
-      // Perfect Pair (suited) is a 25:1 hit — top PP win rings the
-      // progressive jackpot for a slice of the pot.
-      if (w.odds >= 25) hitJackpot = true;
+    if (c.ppBet > 0) {
+      const w = perfectPairs(p[0], p[1]);
+      recordHeat("pp", !!w);
+      if (w) {
+        ppPayout = c.ppBet * (w.odds + 1);
+        notes.push(`${w.label} +${c.ppBet * w.odds}`);
+        unlock("pair");
+        track("pairWin");
+        if (w.odds >= 25) big = true;
+      }
     }
-  }
 
-  if (c.t3Bet > 0) {
-    const w = twentyOnePlusThree(p[0], p[1], c.dealer[0]);
+    if (c.t3Bet > 0) {
+      const w = twentyOnePlusThree(p[0], p[1], c.dealer[0]);
+      recordHeat("t3", !!w);
+      if (w) {
+        t3Payout = c.t3Bet * (w.odds + 1);
+        notes.push(`${w.label} +${c.t3Bet * w.odds}`);
+        unlock("suited");
+        track("suitedWin");
+        if (w.odds >= 40) big = true;
 
-    if (w) {
-      t3Payout = c.t3Bet * (w.odds + 1);
-      notes.push(`${w.label} +${c.t3Bet * w.odds}`);
-      unlock("suited");
-      track("suitedWin");
-
-      if (w.odds >= 40) big = true;
-      // Suited Trips (100:1) rings the jackpot too, for a bigger slice.
-      if (w.odds >= 100) hitJackpot = true;
+        // Suited Trips (about 1 hand in 4,800) is the only hand that
+        // rings the progressive jackpot. The share scales with the
+        // 21+3 stake: 10% of the pot at the minimum, the whole pot
+        // from a 250 stake — so a token bet can't farm the seed.
+        if (w.odds >= 100) {
+          jackpotWin = bjJackpot.payout(jackpotShare(c.t3Bet));
+          if (jackpotWin > 0) notes.push(`♦ Jackpot +${jackpotWin}`);
+        }
+      }
     }
-  }
 
-  // Pay out a slice of the progressive pot on top of the normal
-  // side-bet winnings. PP tops take a modest slice; 21+3 suited trips
-  // take a larger one. Pot resets to its seed after each payout.
-  let jackpotWin = 0;
-  if (hitJackpot) {
-    const t3SuitedTrips = c.t3Bet > 0 && (twentyOnePlusThree(p[0], p[1], c.dealer[0])?.odds ?? 0) >= 100;
-    jackpotWin = bjJackpot.payout(t3SuitedTrips ? 0.75 : 0.25);
-    if (jackpotWin > 0) {
-      notes.push(`♦ Jackpot +${jackpotWin}`);
-      big = true;
+    const payout = ppPayout + t3Payout + jackpotWin;
+
+    roundSides.current = {
+      wagered: sideWagered,
+      perfectPairs: ppPayout - c.ppBet,
+      twentyOnePlusThree: t3Payout - c.t3Bet + jackpotWin,
+    };
+
+    if (payout > 0) {
+      sfx.win();
+      haptic(HAPTIC.big);
     }
+
+    set({
+      balance: ref.current.balance + payout,
+      sideNote: notes.length
+        ? `Side bets: ${notes.join(" · ")}`
+        : "Side bets lost.",
+      ...(big ? { celebrate: Date.now() } : {}),
+    });
   }
-
-  const payout = ppPayout + t3Payout + jackpotWin;
-
-  roundSides.current = {
-    wagered: sideWagered,
-    perfectPairs: ppPayout - c.ppBet + (hitJackpot && jackpotWin && !(c.t3Bet > 0 && (twentyOnePlusThree(p[0], p[1], c.dealer[0])?.odds ?? 0) >= 100) ? jackpotWin : 0),
-    twentyOnePlusThree: t3Payout - c.t3Bet + (hitJackpot && jackpotWin && c.t3Bet > 0 && (twentyOnePlusThree(p[0], p[1], c.dealer[0])?.odds ?? 0) >= 100 ? jackpotWin : 0),
-  };
-
-  const now = ref.current;
-
-  if (payout > 0) {
-    sfx.win();
-    haptic(HAPTIC.big);
-  }
-
-  set({
-    balance: now.balance + payout,
-    sideNote: notes.length
-      ? `Side bets: ${notes.join(" · ")}`
-      : "Side bets lost.",
-    ...(big ? { celebrate: Date.now() } : {}),
-  });
-}
 
   async function dealImpl() {
     const c = ref.current;
@@ -676,6 +708,7 @@ function giveDealer() {
     const stake = c.bet * spots + c.ppBet + c.t3Bet;
     if ((c.phase !== "betting" && c.phase !== "settled") || c.bet < MIN_BET || stake > c.balance) return;
     setRoundBreakdown(null);
+    setGolden(isMirrorMinute(new Date()) || Math.random() < 1 / 15);
 
     roundSides.current = {
       wagered: 0,
@@ -846,6 +879,7 @@ function giveDealer() {
     const c = ref.current;
     const h = c.hands[0];
     if (c.phase !== "player" || c.busy || c.hands.length !== 1 || !h || h.cards.length !== 2 || h.split) return;
+    grade("Surrender");
     set({ busy: true, phase: "dealer", message: "You surrender." });
     setHand(0, { done: true, result: "surrender" });
     reveal();
@@ -966,14 +1000,19 @@ if (!settlementId) {
     const sides = roundSides.current;
     const sideNet = sides.perfectPairs + sides.twentyOnePlusThree;
 
-    const net = mainNet + insuranceNet + sideNet;
-    const balance = c.balance + payout;
+    // Golden Round: +10% on the main hands' profit, paid with the hand.
+    const goldenBonus =
+      goldenRef.current && mainNet > 0 ? Math.round(mainNet * 0.1) : 0;
+
+    const net = mainNet + insuranceNet + sideNet + goldenBonus;
+    const balance = c.balance + payout + goldenBonus;
 
     setRoundBreakdown({
       main: mainNet,
       insurance: insuranceNet,
       perfectPairs: sides.perfectPairs,
       twentyOnePlusThree: sides.twentyOnePlusThree,
+      golden: goldenBonus,
       total: net,
     });
     const streak = net > 0 ? c.streak + 1 : net < 0 ? 0 : c.streak;
@@ -1122,6 +1161,9 @@ if (!settlementId) {
   if (!confirmed) return;
 
   setRoundBreakdown(null);
+  setGolden(false);
+  heatRef.current = { pp: [], t3: [] };
+  setHeat({ pp: "neutral", t3: "neutral" });
 
   roundSides.current = {
     wagered: 0,
@@ -1227,7 +1269,7 @@ if (!settlementId) {
   const canSplit = playing && !!hand && canSplitCards(hand.cards) && s.hands.length < 4 && s.balance >= hand.bet;
   const canSurrender = playing && s.hands.length === 1 && !!hand && hand.cards.length === 2 && !hand.split;
   const advice =
-    showHint && playing && hand && s.dealer[0] ? advise(hand.cards, s.dealer[0], canDouble, canSplit) : null;
+    showHint && playing && hand && s.dealer[0] ? advise(hand.cards, s.dealer[0], canDouble, canSplit, { canSurrender, h17: s.settings.h17 }) : null;
 
   const dealerShown = s.hole ? s.dealer : s.dealer.slice(0, 1);
   const dealerVal = handValue(dealerShown);
@@ -1257,6 +1299,8 @@ const winRate = resolvedHands
   return {
     s,
     roundBreakdown,
+    golden,
+    heat,
     dealEvents,
     consumeDealEvent,
     showHint,

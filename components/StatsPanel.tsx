@@ -16,7 +16,11 @@ export default function StatsPanel({ open, onClose }: Props) {
   const stats = useStats();
   const history = useWinHistory();
   const [sharing, setSharing] = useState<"idle" | "rendering" | "done">("idle");
-  const biggest = history[0];
+  // The history is newest-first; the card wants the largest win.
+  const biggest = history.reduce<(typeof history)[number] | null>(
+    (best, entry) => (!best || entry.amount > best.amount ? entry : best),
+    null,
+  );
 
   // Esc closes.
   useEffect(() => {
@@ -224,6 +228,7 @@ export default function StatsPanel({ open, onClose }: Props) {
                         kind: `${biggest.kind} · ${biggest.game}`,
                       }
                     : null,
+                  bigWinCount: history.length,
                 });
                 setSharing("done");
                 window.setTimeout(() => setSharing("idle"), 1800);

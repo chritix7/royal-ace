@@ -95,6 +95,9 @@ export default function MobileResultModal({
             ["Insurance", breakdown.insurance],
             ["Perfect Pairs", breakdown.perfectPairs],
             ["21+3", breakdown.twentyOnePlusThree],
+            ...(breakdown.golden
+              ? [["★ Golden bonus", breakdown.golden]]
+              : []),
           ].map(([label, value]) => (
             <div
               key={String(label)}

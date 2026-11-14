@@ -29,7 +29,7 @@ export default function JackpotPill({ className = "" }: { className?: string }) 
   return (
     <div
       aria-label={`Progressive jackpot ◈ ${money(pot)}`}
-      title="Progressive side-bet jackpot — contributes to Royal Ace's shared pool"
+      title="Progressive jackpot — grows with every side bet. Suited Trips on 21+3 wins it: 10% of the pot at the minimum stake, the whole pot from a 250 stake."
       className={`pointer-events-none inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider backdrop-blur-sm transition-[transform,box-shadow,border-color,color] duration-300 sm:text-[11px] ${
         bump
           ? "scale-[1.04] border-[#d7b45b] bg-gradient-to-b from-[#f5d778]/40 to-[#d7b45b]/20 text-[#f5d778] shadow-[0_0_16px_rgba(229,199,121,0.5),inset_0_1px_0_rgba(255,255,255,0.2)]"

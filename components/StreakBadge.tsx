@@ -5,43 +5,48 @@ import type { S } from "../lib/game";
 /**
  * Current win/loss streak read from the live round history. Renders
  * nothing until the player has chained at least 2 same-sign rounds —
- * below that the table stays uncluttered. Pushes don't form a streak.
+ * below that the table stays uncluttered. A push neither extends nor
+ * breaks a streak, matching the game's own streak counter.
  *
  *  - 🔥 N  → N consecutive wins (gold pill, soft gold halo)
  *  - ❄ N  → N consecutive losses (muted red pill)
  */
-function computeStreak(history: S["history"]): {
+function computeStreak(
+  wins: number,
+  history: S["history"],
+): {
   kind: "win" | "loss";
   count: number;
 } | null {
-  if (!history.length) return null;
-  // The game pushes each settled round to the END of history
-  // (useBlackjack: `[...c.history, round].slice(-14)`), so the most
-  // recent round lives at `length - 1` and we walk BACKWARD to pick
-  // up the current streak.
-  const last = history[history.length - 1];
-  if (last.net === 0) return null; // Push breaks any streak.
+  // Wins come straight from the game's own counter (`s.streak`), so
+  // the badge always agrees with the "streak" achievement and the
+  // records: a push neither extends nor breaks the run, and the count
+  // isn't capped by the length of the history buffer.
+  if (wins >= 2) return { kind: "win", count: wins };
+  if (wins > 0) return null;
 
-  const sign = last.net > 0 ? 1 : -1;
+  // Losses: walk back from the latest round (history is oldest-first),
+  // skipping pushes the same way the win counter does.
   let count = 0;
   for (let i = history.length - 1; i >= 0; i--) {
-    const round = history[i];
-    const rs = round.net > 0 ? 1 : round.net < 0 ? -1 : 0;
-    if (rs !== sign) break;
-    count++;
+    const net = history[i].net;
+    if (net > 0) break;
+    if (net < 0) count++;
   }
-  if (count < 2) return null;
-  return { kind: sign > 0 ? "win" : "loss", count };
+  return count >= 2 ? { kind: "loss", count } : null;
 }
 
 export default function StreakBadge({
+  wins,
   history,
   className = "",
 }: {
+  /** Current win streak from the game state (`s.streak`). */
+  wins: number;
   history: S["history"];
   className?: string;
 }) {
-  const streak = computeStreak(history);
+  const streak = computeStreak(wins, history);
   if (!streak) return null;
 
   const isWin = streak.kind === "win";

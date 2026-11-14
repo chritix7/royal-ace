@@ -67,6 +67,9 @@ export default function ResultRail({
                 ["Insurance", roundBreakdown.insurance],
                 ["Perfect Pairs", roundBreakdown.perfectPairs],
                 ["21+3", roundBreakdown.twentyOnePlusThree],
+                ...(roundBreakdown.golden
+                  ? [["★ Golden bonus", roundBreakdown.golden]]
+                  : []),
               ].map(([label, value]) => (
                 <div
                   key={String(label)}

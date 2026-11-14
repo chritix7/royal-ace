@@ -30,7 +30,6 @@ import StreakBadge from "./StreakBadge";
 import HistoryRibbon from "./HistoryRibbon";
 import JackpotPill from "./JackpotPill";
 import LuckyRound from "./LuckyRound";
-import { useSideBetHeat } from "../hooks/useSideBetHeat";
 import ImmersiveSidePill from "./blackjack-immersive/ImmersiveSidePill";
 import ResultRail from "./blackjack-immersive/ResultRail";
 import { getShoeStatus } from "./blackjack-immersive/getShoeStatus";
@@ -81,7 +80,8 @@ export default function BlackjackImmersive({
   const [resultOpen, setResultOpen] = useState(false);
   const [sideBetOpen, setSideBetOpen] = useState<"pp" | "t3" | null>(null);
   // Hot/cold heat for each side bet so the pills can show a sticker.
-  const heat = useSideBetHeat(g);
+  const heat = g.heat;
+  const goldenShown = g.golden && s.phase !== "betting";
 
   // Card-flight motion is handled by the dedicated CardFlight layer
   // (see <CardFlight /> below). Keeping the state out of this component
@@ -114,7 +114,18 @@ export default function BlackjackImmersive({
         });
     }
 
+    // Esc in fullscreen is swallowed by the browser (no keydown), so
+    // leaving fullscreen is our only signal the player wants out:
+    // close Focus with it rather than strand them in a half state.
+    let entered = false;
+    const onFsChange = () => {
+      if (document.fullscreenElement) entered = true;
+      else if (entered && !wasFullscreen) onClose();
+    };
+    document.addEventListener("fullscreenchange", onFsChange);
+
     return () => {
+      document.removeEventListener("fullscreenchange", onFsChange);
       document.body.style.overflow = previousOverflow;
 
       if (!wasFullscreen && document.fullscreenElement && document.exitFullscreen) {
@@ -279,6 +290,7 @@ const playerCardStyle = (
     and Clock. Focus mode has more real estate than the classic
     table, so both show on phone too. */}
 <StreakBadge
+  wins={s.streak}
   history={s.history}
   className="absolute left-3 top-[86px] z-10 sm:left-5 sm:top-[94px]"
 />
@@ -287,7 +299,9 @@ const playerCardStyle = (
   className="absolute left-3 top-[114px] z-10 sm:left-5 sm:top-[122px]"
 />
 {/* Progressive jackpot — top center on the felt. */}
-<JackpotPill className="absolute left-1/2 top-2 z-10 -translate-x-1/2" />
+{!goldenShown && (
+  <JackpotPill className="absolute left-1/2 top-2 z-10 -translate-x-1/2" />
+)}
 {/* Golden Round banner — same component as the classic table. */}
 <LuckyRound g={g} />
 
@@ -776,7 +790,7 @@ const playerCardStyle = (
       amount={s.ppBet}
       disabled={!canBet}
       onOpen={() => setSideBetOpen("pp")}
-      heat={heat.pp.state}
+      heat={heat.pp}
     />
     {roundBreakdown && (
       <SideWinBadge net={roundBreakdown.perfectPairs} />
@@ -789,7 +803,7 @@ const playerCardStyle = (
       amount={s.t3Bet}
       disabled={!canBet}
       onOpen={() => setSideBetOpen("t3")}
-      heat={heat.t3.state}
+      heat={heat.t3}
     />
     {roundBreakdown && (
       <SideWinBadge net={roundBreakdown.twentyOnePlusThree} />
@@ -1016,7 +1030,7 @@ const playerCardStyle = (
         open={sideBetOpen === "t3"}
         onClose={() => setSideBetOpen(null)}
         label="21+3"
-        hint="Your 2 cards + dealer's card · up to 100:1"
+        hint="Your 2 cards + dealer's card · up to 100:1 · Suited Trips wins the jackpot"
         amount={s.t3Bet}
         canBet={canBet}
         remainingBalance={s.balance - (s.bet * spots + s.ppBet)}

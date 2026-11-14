@@ -7,6 +7,8 @@ export type RoundBreakdown = {
   insurance: number;
   perfectPairs: number;
   twentyOnePlusThree: number;
+  /** Golden Round bonus paid on this round (absent on older saves). */
+  golden?: number;
   total: number;
 };
 

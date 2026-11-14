@@ -148,6 +148,7 @@ function getShoeStatus(g: Game): {
   // Mobile-only round-details modal — on md+ the ResultRail on the
   // felt already shows the breakdown.
   const [resultOpen, setResultOpen] = useState(false);
+  const goldenShown = g.golden && g.s.phase !== "betting";
   // Which side-bet staking modal is open (Perfect Pairs / 21+3 / none).
   // Tapping either felt pill opens the shared SideBetModal.
   const [sideBetOpen, setSideBetOpen] = useState<"pp" | "t3" | null>(null);
@@ -225,6 +226,7 @@ function getShoeStatus(g: Game): {
               already — Focus mode is where phone players get the
               full HUD). */}
           <StreakBadge
+            wins={s.streak}
             history={s.history}
             className="absolute left-5 top-[90px] z-10 hidden sm:inline-flex"
           />
@@ -234,7 +236,10 @@ function getShoeStatus(g: Game): {
           />
           {/* Progressive jackpot pill — top center on desktop so both
               players and the dealer lane can see the pot grow. */}
-          <JackpotPill className="absolute left-1/2 top-2 z-10 hidden -translate-x-1/2 lg:inline-flex" />
+          {/* The Golden Round banner takes this slot while it shows. */}
+          {!goldenShown && (
+            <JackpotPill className="absolute left-1/2 top-2 z-10 hidden -translate-x-1/2 lg:inline-flex" />
+          )}
           {/* Golden Round banner — floats over the dealer slot. */}
           <LuckyRound g={g} />
           {s.settings.theme === "vegas" && <VegasFeltOverlay />}
@@ -857,7 +862,7 @@ function getShoeStatus(g: Game): {
         open={sideBetOpen === "t3"}
         onClose={() => setSideBetOpen(null)}
         label="21+3"
-        hint="Your 2 cards + dealer's card · up to 100:1"
+        hint="Your 2 cards + dealer's card · up to 100:1 · Suited Trips wins the jackpot"
         amount={s.t3Bet}
         canBet={canBet && !s.busy}
         remainingBalance={s.balance - (s.bet * s.settings.spots + s.ppBet)}

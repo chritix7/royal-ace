@@ -27,6 +27,7 @@ const SHORTCUTS: Array<{ keys: string[]; label: string; group: string }> = [
 
   // Betting / flow
   { keys: ["Space"], label: "Deal / Rebet", group: "Flow" },
+  { keys: ["1", "2", "3", "4", "5"], label: "Add a chip (10 · 20 · 50 · 100 · 500)", group: "Flow" },
   { keys: ["C"], label: "Clear bet", group: "Flow" },
   { keys: ["X"], label: "Double the current bet", group: "Flow" },
 
