@@ -29,7 +29,7 @@ export default function ResultRail({
 
   return (
     <aside
-      className="absolute left-4 top-[calc(50%-15px)] z-30 hidden -translate-y-1/2 md:block"
+      className="absolute left-4 top-[calc(50%+14px)] z-30 hidden -translate-y-1/2 md:block"
       aria-live="polite"
     >
       <div
@@ -42,16 +42,16 @@ export default function ResultRail({
         {showResult ? (
           <div
             key={`result-${s.net}-${roundBreakdown.total}`}
-            className="animate-pop w-64 overflow-hidden rounded-3xl border border-[#d7b45b]/45 bg-gradient-to-b from-[#101713]/95 to-[#0a100c]/95 shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur-md"
+            className="animate-pop w-56 overflow-hidden rounded-2xl border border-[#d7b45b]/45 bg-gradient-to-b from-[#101713]/95 to-[#0a100c]/95 shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur-md"
           >
-            <div className="border-b border-[#d7b45b]/20 bg-[#d7b45b]/10 px-4 py-3">
+            <div className="border-b border-[#d7b45b]/20 bg-[#d7b45b]/10 px-3.5 py-2.5">
               {/* The dealer's call for the round ("Dealer busts", "Push"…). */}
               <p className="text-[10px] font-black uppercase leading-snug tracking-[0.18em] text-[#e5c779]">
                 {s.message}
               </p>
 
               <p
-                className={`mt-1 text-3xl font-black tabular-nums ${
+                className={`mt-0.5 text-2xl font-black leading-tight tabular-nums ${
                   roundBreakdown.total > 0
                     ? "text-[#f5d778]"
                     : roundBreakdown.total < 0
@@ -63,16 +63,19 @@ export default function ResultRail({
               </p>
             </div>
 
-            <dl className="space-y-2 px-4 py-3 text-[11px]">
+            {/* Only the lines that moved chips this round: the main
+                hands always, the rest when they are not zero. The
+                total is the big figure above, so it isn't repeated. */}
+            <dl className="space-y-1.5 px-3.5 py-2.5 text-[11px]">
               {[
                 ["Main hands", roundBreakdown.main],
                 ["Insurance", roundBreakdown.insurance],
                 ["Perfect Pairs", roundBreakdown.perfectPairs],
                 ["21+3", roundBreakdown.twentyOnePlusThree],
-                ...(roundBreakdown.golden
-                  ? [["★ Golden bonus", roundBreakdown.golden]]
-                  : []),
-              ].map(([label, value]) => (
+                ["★ Golden bonus", roundBreakdown.golden ?? 0],
+              ]
+                .filter(([, value], i) => i === 0 || value !== 0)
+                .map(([label, value]) => (
                 <div
                   key={String(label)}
                   className="flex items-center justify-between gap-3"
@@ -83,29 +86,14 @@ export default function ResultRail({
                   </dd>
                 </div>
               ))}
-
-              <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-2">
-                <dt className="text-xs font-bold text-white">Total</dt>
-                <dd
-                  className={`text-sm font-black tabular-nums ${
-                    roundBreakdown.total > 0
-                      ? "text-[#f5d778]"
-                      : roundBreakdown.total < 0
-                      ? "text-red-300"
-                      : "text-white/70"
-                  }`}
-                >
-                  {signed(roundBreakdown.total)}
-                </dd>
-              </div>
             </dl>
 
-            <div className="border-t border-white/10 p-3">
+            <div className="border-t border-white/10 p-2">
               <button
                 type="button"
                 onClick={onNewRound}
                 disabled={!canStartRound}
-                className={`${control} ${gold} h-9 w-full text-[11px] uppercase tracking-wider`}
+                className={`${control} ${gold} !min-h-8 h-8 w-full !text-[11px] uppercase tracking-wider`}
               >
                 New round · ◈ {money(stake)}
               </button>

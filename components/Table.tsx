@@ -467,7 +467,11 @@ function getShoeStatus(g: Game): {
           </div>
 
           {/* Joueur */}
-          <div className="flex flex-wrap items-start justify-center gap-2 sm:gap-5 lg:mt-4">
+          {/* On desktop the player zone has a fixed height and never
+              wraps, so splitting (extra hands, spot badges, longer
+              labels) can't push the bet zone and its buttons down past
+              the bottom edge of the felt. */}
+          <div className="flex flex-wrap items-start justify-center gap-2 sm:gap-5 lg:mt-4 lg:h-[156px] lg:flex-nowrap lg:gap-3">
   {s.hands.length === 0 && (
     <div
       aria-hidden="true"
@@ -483,18 +487,22 @@ function getShoeStatus(g: Game): {
                 <div
                   key={i}
                   data-deal-target={`hand-${i}`}
-                  className={`rounded-2xl border p-2 transition sm:p-3 ${
+                  className={`relative rounded-2xl border p-2 transition sm:p-3 ${
                     isActive ? "border-[#e5c779]/70 bg-[#e5c779]/10" : "border-transparent"
                   } ${compact && !isActive && s.phase === "player" ? "opacity-75" : ""}`}
                 >
                   {/* Engraved per-hand spot badge — only in multi-hand play. */}
                   {multi && (
-                    <div className="mb-1 flex justify-center">
+                    <div className="mb-1 flex justify-center lg:absolute lg:-left-2.5 lg:-top-2.5 lg:z-10 lg:mb-0">
                       <HandSpotBadge index={i} active={isActive} />
                     </div>
                   )}
 
-                  <div className="mb-2 flex flex-wrap items-center justify-center gap-2 text-[11px] sm:mb-3 sm:text-xs">
+                  <div
+                    className={`mb-2 flex flex-wrap items-center justify-center gap-2 text-[11px] sm:mb-3 sm:text-xs ${
+                      s.hands.length <= 3 ? "lg:flex-nowrap lg:whitespace-nowrap" : ""
+                    }`}
+                  >
                     <span
                       key={`v-${i}-${v.total}`}
                       className={`animate-score-tick rounded-full px-2.5 py-0.5 font-bold ${
@@ -507,7 +515,7 @@ function getShoeStatus(g: Game): {
                     </span>
                     <span className="text-white/50">
                       ◈ {money(h.bet)}
-                      {h.doubled && " (doubled)"}
+                      {h.doubled && (multi ? " ×2" : " (doubled)")}
                     </span>
                     {h.result && <HandResultBadge result={h.result} />}
                   </div>
