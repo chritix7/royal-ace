@@ -611,7 +611,7 @@ function giveDealer() {
       goodStreak: ok ? c.goodStreak + 1 : 0,
       coach: ok ? `✓ ${action} was the right play.` : `✗ You chose ${action}. Basic strategy says ${best}.`,
     });
-    if (ok) track("bjCorrect");
+    track(ok ? "bjCorrect" : "bjMistake");
     if (ok && c.goodStreak + 1 >= 10) unlock("sharp");
   }
 

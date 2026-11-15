@@ -4,8 +4,8 @@ import { wallet } from "./wallet";
 import { progressionStore } from "./progression";
 
 /** Bonus quotidien : 200 chips le premier jour, +100 par jour consécutif, jusqu'à 800 le 7e jour. */
-export const DAILY_BASE = 200;
-export const DAILY_STEP = 100;
+export const DAILY_BASE = 1000;
+export const DAILY_STEP = 500;
 export const DAILY_MAX_DAYS = 7;
 export type VipTier = {
   id: string;

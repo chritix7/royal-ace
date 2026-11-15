@@ -75,12 +75,18 @@ export default function AchievementToasts() {
           role="status"
         >
           <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#e5c779]">
-            Achievement unlocked
+            Challenge complete
           </p>
 
           <p className="mt-1 text-sm font-semibold text-white">
             🏆 {toast.title}
           </p>
+
+          {toast.reward ? (
+            <p className="mt-1 text-xs text-white/60">
+              ◈ {toast.reward.toLocaleString("en-US")} to claim in Challenges
+            </p>
+          ) : null}
         </div>
       ))}
     </div>

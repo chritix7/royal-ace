@@ -1,29 +1,39 @@
 import { useSyncExternalStore } from "react";
-import { ACHIEVEMENTS } from "./achievements";
-import { onEvent } from "./events";
+import { challengesFor, type Challenge } from "./achievements";
+import { today } from "./clock";
+import { onEvent, type GameEvent } from "./events";
 import { wallet } from "./wallet";
 
 /**
- * Moteur des succès : écoute les événements des jeux et le solde,
- * puis sauvegarde les succès débloqués dans le navigateur.
+ * Daily challenges engine: listens to the game events, keeps today's
+ * counters in the browser, announces a challenge when it is completed
+ * and pays its reward when the player claims it. Everything resets at
+ * midnight (local time), when a new set of challenges is drawn.
  */
 
-export type AchievementState = Record<string, number>;
-export type AchievementToast = { key: number; id: string; title: string };
+export type AchievementState = {
+  day: string;
+  /** Today's counters, by challenge key (event name or derived run). */
+  counters: Record<string, number>;
+  /** Challenges whose reward has been paid today. */
+  claimed: string[];
+  /** Challenges already announced by a toast today. */
+  announced: string[];
+};
+export type AchievementToast = { key: number; id: string; title: string; reward?: number };
+export type ChallengeView = { def: Challenge; progress: number; done: boolean; claimed: boolean };
 
-const EMPTY: AchievementState = {};
+const EMPTY: AchievementState = { day: "", counters: {}, claimed: [], announced: [] };
 const EMPTY_TOASTS: AchievementToast[] = [];
-const KEY = "royalace:achievements";
-const HIGH_ROLLER_BALANCE = 10_000;
-const SHARP_MIND_STREAK = 10;
-const HOT_STREAK = 5;
+const KEY = "royalace:daily-challenges";
 
 let state: AchievementState = EMPTY;
 let toasts: AchievementToast[] = [];
 let toastKey = 0;
 let hydrated = false;
 let listening = false;
-let correctStreak = 0;
+/** Current run of correct blackjack decisions (not persisted). */
+let correctRun = 0;
 const listeners = new Set<() => void>();
 
 const emit = () => listeners.forEach((listener) => listener());
@@ -34,56 +44,63 @@ function persist() {
   } catch {}
 }
 
-function unlock(id: string) {
-  if (state[id]) return;
-  state = { ...state, [id]: Date.now() };
-  persist();
-  const achievement = ACHIEVEMENTS.find((item) => item.id === id);
-toasts = [...toasts, { key: ++toastKey, id, title: achievement?.title ?? id }];
-  emit();
+/** New day: counters, claims and announcements start over. */
+function rollover() {
+  const day = today();
+  if (state.day !== day) {
+    state = { day, counters: {}, claimed: [], announced: [] };
+    correctRun = 0;
+  }
 }
 
-function handleEvent(event: Parameters<Parameters<typeof onEvent>[0]>[0], amount = 1) {
-  if (event === "bjBlackjack") {
-    unlock("bj");
-    return;
-  }
+/** Progress of each of today's challenges. */
+export function challengeView(s: AchievementState): ChallengeView[] {
+  return challengesFor(s.day).map((def) => {
+    const progress = Math.min(def.goal, s.counters[def.key] ?? 0);
+    return { def, progress, done: progress >= def.goal, claimed: s.claimed.includes(def.id) };
+  });
+}
 
-  if (event === "bjDouble") {
-    unlock("double");
-    return;
-  }
+function bump(key: string, amount: number) {
+  state = { ...state, counters: { ...state.counters, [key]: (state.counters[key] ?? 0) + amount } };
+}
 
-  if (event === "bjSplit") {
-    unlock("split");
-    return;
-  }
+function best(key: string, value: number) {
+  if (value <= (state.counters[key] ?? 0)) return;
+  state = { ...state, counters: { ...state.counters, [key]: value } };
+}
 
-  if (event === "bjCorrect") {
-    correctStreak += 1;
-    if (correctStreak >= SHARP_MIND_STREAK) unlock("sharp");
-    return;
-  }
+function handleEvent(event: GameEvent, amount = 1) {
+  rollover();
 
-  if (event === "bjHand") {
-    correctStreak = 0;
-    return;
-  }
-
-  if (event === "pairWin") {
-    unlock("pair");
-    return;
-  }
-
-  if (event === "suitedWin") {
-    unlock("suited");
+  if (event === "bjMistake") {
+    correctRun = 0;
     return;
   }
 
   if (event === "bjStreak") {
-    if (amount >= HOT_STREAK) unlock("streak5");
-    return;
+    // The event carries the current win streak, not an increment.
+    best("bjStreak", amount);
+  } else {
+    bump(event, amount);
+    if (event === "bjCorrect") {
+      correctRun += amount;
+      best("bjCorrectRun", correctRun);
+    }
   }
+
+  // Announce what this event just completed.
+  for (const item of challengeView(state)) {
+    if (!item.done || state.announced.includes(item.def.id)) continue;
+    state = { ...state, announced: [...state.announced, item.def.id] };
+    toasts = [
+      ...toasts,
+      { key: ++toastKey, id: item.def.id, title: item.def.title, reward: item.def.reward },
+    ];
+  }
+
+  persist();
+  emit();
 }
 
 export const achievementsStore = {
@@ -104,54 +121,77 @@ export const achievementsStore = {
     try {
       const raw = localStorage.getItem(KEY);
       if (raw) {
-        const saved: unknown = JSON.parse(raw);
-        if (saved && typeof saved === "object") {
-          const cleaned: AchievementState = {};
-
-          for (const [id, value] of Object.entries(saved)) {
-            const isValidAchievement = ACHIEVEMENTS.some(
-              (achievement) => achievement.id === id,
-            );
-
-            if (isValidAchievement && typeof value === "number") {
-              cleaned[id] = value;
-            }
+        const saved = JSON.parse(raw);
+        if (saved && typeof saved.day === "string" && saved.counters && typeof saved.counters === "object") {
+          const counters: Record<string, number> = {};
+          for (const [k, v] of Object.entries(saved.counters)) {
+            if (typeof v === "number" && Number.isFinite(v) && v > 0) counters[k] = v;
           }
-
-          state = cleaned;
+          const strings = (x: unknown) =>
+            Array.isArray(x) ? x.filter((i): i is string => typeof i === "string") : [];
+          state = {
+            day: saved.day,
+            counters,
+            claimed: strings(saved.claimed),
+            announced: strings(saved.announced),
+          };
         }
       }
     } catch {}
 
+    rollover();
+    persist();
+
     if (!listening) {
       listening = true;
       onEvent(handleEvent);
-      wallet.subscribe(() => {
-        if (wallet.getBalance() >= HIGH_ROLLER_BALANCE) unlock("rich");
-      });
     }
 
-    if (wallet.getBalance() >= HIGH_ROLLER_BALANCE) unlock("rich");
     emit();
   },
 
-  isUnlocked(id: string) {
-    return Boolean(state[id]);
+  /** Records a game event (the store does this itself once hydrated). */
+  add(event: GameEvent, amount = 1) {
+    handleEvent(event, amount);
   },
 
-  unlockedCount() {
-    return Object.keys(state).length;
+  /** Checks for a new day (for instance when the panel opens). */
+  refresh() {
+    const before = state.day;
+    rollover();
+    if (state.day !== before) {
+      persist();
+      emit();
+    }
+  },
+
+  /**
+   * Pays the reward of a completed challenge. Returns the chips paid,
+   * or 0 when it can't be claimed (not done, already claimed, or a
+   * round is in progress — the wallet is locked during a hand).
+   */
+  claim(id: string): number {
+    rollover();
+    if (wallet.getLocked()) return 0;
+    const item = challengeView(state).find((c) => c.def.id === id);
+    if (!item || !item.done || item.claimed) return 0;
+    state = { ...state, claimed: [...state.claimed, id] };
+    persist();
+    wallet.add(item.def.reward);
+    emit();
+    return item.def.reward;
   },
 
   dismissToast(key: number) {
-  toasts = toasts.filter((toast) => toast.key !== key);
-  emit();
-},
+    toasts = toasts.filter((toast) => toast.key !== key);
+    emit();
+  },
 
-  /** Pour les tests. */
+  /** For tests. */
   _reset() {
     state = EMPTY;
-    correctStreak = 0;
+    toasts = [];
+    correctRun = 0;
     hydrated = false;
     emit();
   },

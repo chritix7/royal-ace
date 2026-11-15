@@ -771,7 +771,7 @@ export default function Sidebar({ g }: { g: Game }) {
           </dl>
           <div className="mt-5">
             <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-              Achievements · {s.unlocked.length}/{ACHIEVEMENTS.length}
+              Career badges · {s.unlocked.length}/{ACHIEVEMENTS.length}
             </p>
             <ul className="grid grid-cols-2 gap-2">
               {ACHIEVEMENTS.map((a) => {

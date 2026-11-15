@@ -8,8 +8,7 @@ import RewardsPanel from "../components/RewardsPanel";
 import Slots from "../components/Slots";
 import StatsPanel from "../components/StatsPanel";
 import { Counter } from "../components/ui";
-import { ACHIEVEMENTS } from "../lib/achievements";
-import { achievementsStore, useAchievements } from "../lib/achievementsStore";
+import { achievementsStore, challengeView, useAchievements } from "../lib/achievementsStore";
 import { today } from "../lib/clock";
 import { dailyStatus, dailyStore, useDaily } from "../lib/daily";
 import { missionView, missionsStore, useMissions } from "../lib/missions";
@@ -103,8 +102,9 @@ export default function Home() {
 
   // Live figures for the header cards.
   const stats = useStats();
-  const unlocked = useAchievements();
-  const unlockedCount = ACHIEVEMENTS.filter((a) => unlocked[a.id]).length;
+  const challenges = challengeView(useAchievements());
+  const challengesDone = challenges.filter((c) => c.done).length;
+  const challengesToClaim = challenges.filter((c) => c.done && !c.claimed).length;
   const daily = useDaily();
   const missions = useMissions();
   const progression = useProgression();
@@ -151,8 +151,13 @@ export default function Home() {
           onClick={() => setStatsOpen(true)}
         />
         <HeaderCard
-          label="Achievements"
-          value={`${unlockedCount} of ${ACHIEVEMENTS.length}`}
+          label="Challenges"
+          value={
+            challengesToClaim > 0
+              ? `${challengesToClaim} to claim`
+              : `${challengesDone} of ${challenges.length} today`
+          }
+          highlight={challengesToClaim > 0}
           onClick={() => setAchievementsOpen(true)}
         />
         <HeaderCard

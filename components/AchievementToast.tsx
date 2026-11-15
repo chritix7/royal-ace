@@ -148,7 +148,7 @@ export default function AchievementToast({
                 textShadow: "0 1px 0 rgba(0,0,0,0.9)",
               }}
             >
-              Achievement unlocked
+              Career badge earned
             </p>
             <p className="mt-0.5 truncate text-sm font-black text-white">
               {title}

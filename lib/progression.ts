@@ -90,7 +90,7 @@ const persist = () => {
 const levelFromXp = (xp: number) => Math.max(1, Math.floor(xp / XP_PER_LEVEL) + 1);
 
 export function levelReward(level: number) {
-  return 250 + (level - 1) * 100;
+  return 1000 + (level - 1) * 400;
 }
 
 function handleEvent(event: GameEvent, amount = 1) {

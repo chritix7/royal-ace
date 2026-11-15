@@ -8,25 +8,25 @@ export type Mission = { id: string; title: string; event: GameEvent; goal: numbe
 
 /** Chaque jour : 1 mission facile, 1 moyenne, 1 difficile, tirées au sort (le même tirage toute la journée). */
 export const MISSION_POOL: Mission[] = [
-  { id: "spin30", title: "Spin the slot machine 30 times", event: "spin", goal: 30, reward: 120, tier: "easy" },
-  { id: "slotwin8", title: "Win on 8 slot spins", event: "slotWin", goal: 8, reward: 120, tier: "easy" },
-  { id: "bjhand10", title: "Play 10 blackjack hands", event: "bjHand", goal: 10, reward: 100, tier: "easy" },
-  { id: "bjwin4", title: "Win 4 blackjack hands", event: "bjWin", goal: 4, reward: 120, tier: "easy" },
+  { id: "spin30", title: "Spin the slot machine 30 times", event: "spin", goal: 30, reward: 600, tier: "easy" },
+  { id: "slotwin8", title: "Win on 8 slot spins", event: "slotWin", goal: 8, reward: 600, tier: "easy" },
+  { id: "bjhand10", title: "Play 10 blackjack hands", event: "bjHand", goal: 10, reward: 500, tier: "easy" },
+  { id: "bjwin4", title: "Win 4 blackjack hands", event: "bjWin", goal: 4, reward: 600, tier: "easy" },
 
-  { id: "spin80", title: "Spin the slot machine 80 times", event: "spin", goal: 80, reward: 300, tier: "medium" },
-  { id: "wild2", title: "Make the Boss expand 2 times", event: "wildExpand", goal: 2, reward: 300, tier: "medium" },
-  { id: "bjcorrect25", title: "Make 25 correct blackjack decisions", event: "bjCorrect", goal: 25, reward: 300, tier: "medium" },
-  { id: "bjwin12", title: "Win 12 blackjack hands", event: "bjWin", goal: 12, reward: 320, tier: "medium" },
-  { id: "gamble2", title: "Win 2 gambles", event: "gambleWin", goal: 2, reward: 280, tier: "medium" },
-  { id: "bjdouble1", title: "Win a doubled hand at blackjack", event: "bjDouble", goal: 1, reward: 280, tier: "medium" },
+  { id: "spin80", title: "Spin the slot machine 80 times", event: "spin", goal: 80, reward: 1500, tier: "medium" },
+  { id: "wild2", title: "Make the Boss expand 2 times", event: "wildExpand", goal: 2, reward: 1500, tier: "medium" },
+  { id: "bjcorrect25", title: "Make 25 correct blackjack decisions", event: "bjCorrect", goal: 25, reward: 1500, tier: "medium" },
+  { id: "bjwin12", title: "Win 12 blackjack hands", event: "bjWin", goal: 12, reward: 1600, tier: "medium" },
+  { id: "gamble2", title: "Win 2 gambles", event: "gambleWin", goal: 2, reward: 1400, tier: "medium" },
+  { id: "bjdouble1", title: "Win a doubled hand at blackjack", event: "bjDouble", goal: 1, reward: 1400, tier: "medium" },
 
-  { id: "bonus1", title: "Trigger or buy a free spins bonus", event: "bonus", goal: 1, reward: 600, tier: "hard" },
-  { id: "vault1", title: "Open the vault", event: "vault", goal: 1, reward: 700, tier: "hard" },
-  { id: "big1", title: "Land a win worth 20× your bet or more", event: "bigWin", goal: 1, reward: 600, tier: "hard" },
-  { id: "bjbj1", title: "Get a blackjack", event: "bjBlackjack", goal: 1, reward: 500, tier: "hard" },
-  { id: "respin4", title: "Trigger 4 re-spins", event: "respin", goal: 4, reward: 500, tier: "hard" },
-  { id: "bjwin30", title: "Win 30 blackjack hands", event: "bjWin", goal: 30, reward: 650, tier: "hard" },
-  { id: "bjsplit1", title: "Win a split hand at blackjack", event: "bjSplit", goal: 1, reward: 450, tier: "hard" },
+  { id: "bonus1", title: "Trigger or buy a free spins bonus", event: "bonus", goal: 1, reward: 3000, tier: "hard" },
+  { id: "vault1", title: "Open the vault", event: "vault", goal: 1, reward: 3500, tier: "hard" },
+  { id: "big1", title: "Land a win worth 20× your bet or more", event: "bigWin", goal: 1, reward: 3000, tier: "hard" },
+  { id: "bjbj1", title: "Get a blackjack", event: "bjBlackjack", goal: 1, reward: 2500, tier: "hard" },
+  { id: "respin4", title: "Trigger 4 re-spins", event: "respin", goal: 4, reward: 2500, tier: "hard" },
+  { id: "bjwin30", title: "Win 30 blackjack hands", event: "bjWin", goal: 30, reward: 3250, tier: "hard" },
+  { id: "bjsplit1", title: "Win a split hand at blackjack", event: "bjSplit", goal: 1, reward: 2250, tier: "hard" },
 ];
 
 export function missionsFor(day: string): Mission[] {

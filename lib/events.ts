@@ -18,6 +18,7 @@ export type GameEvent =
   | "bjDouble" // un double gagné
   | "bjSplit" // une main splittée gagnée
   | "bjCorrect" // une décision conforme à la stratégie de base
+  | "bjMistake" // une décision contraire à la stratégie de base
   | "pairWin" // un Perfect Pairs gagné
   | "suitedWin" // un 21+3 gagné
   | "bjStreak"; // série actuelle de manches gagnées
