@@ -11,7 +11,6 @@ import { Counter } from "../components/ui";
 import { achievementsStore, challengeView, useAchievements } from "../lib/achievementsStore";
 import { today } from "../lib/clock";
 import { dailyStatus, dailyStore, useDaily } from "../lib/daily";
-import { missionView, missionsStore, useMissions } from "../lib/missions";
 import { statsStore, useStats } from "../lib/statsStore";
 import { useBalance, useLocked, wallet } from "../lib/wallet";
 import AchievementToasts from "../components/AchievementToasts";
@@ -106,16 +105,13 @@ export default function Home() {
   const challengesDone = challenges.filter((c) => c.done).length;
   const challengesToClaim = challenges.filter((c) => c.done && !c.claimed).length;
   const daily = useDaily();
-  const missions = useMissions();
   const progression = useProgression();
-  // Rewards waiting to be claimed (daily bonus + finished missions).
-  // Depends on today's date, so it is worked out on the client only.
-  const [rewardsReady, setRewardsReady] = useState(0);
+  // Is today's daily bonus still waiting? Depends on today's date, so
+  // it is worked out on the client only.
+  const [bonusReady, setBonusReady] = useState(false);
   useEffect(() => {
-    const dailyReady = dailyStatus(daily, today(), progression.level).canClaim ? 1 : 0;
-    const missionsReady = missionView(missions).filter((m) => m.done && !m.claimed).length;
-    setRewardsReady(dailyReady + missionsReady);
-  }, [daily, missions, progression.level]);
+    setBonusReady(dailyStatus(daily, today(), progression.level).canClaim);
+  }, [daily, progression.level]);
   const flash = useBalanceFlash();
   const locked = useLocked();
 
@@ -126,7 +122,6 @@ export default function Home() {
     // Blackjack progressive jackpot pool survives reloads.
     import("../lib/bjJackpot").then(({ bjJackpot }) => bjJackpot.hydrate());
     dailyStore.hydrate();
-    missionsStore.hydrate();
     achievementsStore.hydrate();
     statsStore.hydrate();
     weeklyStore.hydrate();
@@ -162,8 +157,8 @@ export default function Home() {
         />
         <HeaderCard
           label="Rewards"
-          value={rewardsReady > 0 ? `${rewardsReady} to claim` : "All claimed"}
-          highlight={rewardsReady > 0}
+          value={bonusReady ? "Daily bonus ready" : `Level ${progression.level}`}
+          highlight={bonusReady}
           onClick={() => setRewardsOpen(true)}
         />
       </div>

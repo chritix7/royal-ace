@@ -2,13 +2,11 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { dayNumber, isNextDay, resetClock, setClock, today } from "../lib/clock";
 import { DAILY_BASE, DAILY_MAX_DAYS, dailyReward, dailyStatus, dailyStore } from "../lib/daily";
 import { onEvent, track, type GameEvent } from "../lib/events";
-import { MISSION_POOL, missionView, missionsFor, missionsStore } from "../lib/missions";
 import { wallet } from "../lib/wallet";
 
 const at = (iso: string) => setClock(() => new Date(`${iso}T12:00:00`));
 beforeEach(() => {
   wallet.setBalance(1000);
-  missionsStore._reset();
   dailyStore._reset();
 });
 afterEach(resetClock);
@@ -58,47 +56,7 @@ describe("daily bonus", () => {
   });
 });
 
-describe("missions", () => {
-  it("draws one easy, one medium and one hard mission, the same all day and different over time", () => {
-    const a = missionsFor("2026-10-14");
-    expect(a.map((m) => m.tier)).toEqual(["easy", "medium", "hard"]);
-    expect(missionsFor("2026-10-14")).toEqual(a);
-    const week = Array.from({ length: 30 }, (_, i) => missionsFor(`2026-11-${String(i + 1).padStart(2, "0")}`).map((m) => m.id).join());
-    expect(new Set(week).size).toBeGreaterThan(10); // elle change d'un jour à l'autre
-    expect(missionsFor("")).toEqual([]);
-    expect(new Set(MISSION_POOL.map((m) => m.id)).size).toBe(MISSION_POOL.length);
-  });
-  it("counts game events, caps the progress at the goal and pays each reward once", () => {
-    at("2026-10-14");
-    missionsStore.hydrate();
-    const [easy] = missionsFor("2026-10-14");
-    track(easy.event, easy.goal - 1);
-    let v = missionView(missionsStore.get());
-    expect(v[0].progress).toBe(easy.goal - 1);
-    expect(v[0].done).toBe(false);
-    expect(missionsStore.claim(easy.id)).toBe(0); // pas encore terminée
-    track(easy.event, 50);
-    v = missionView(missionsStore.get());
-    expect(v[0].progress).toBe(easy.goal);
-    expect(v[0].done).toBe(true);
-    expect(missionsStore.claim(easy.id)).toBe(easy.reward);
-    expect(wallet.getBalance()).toBe(1000 + easy.reward);
-    expect(missionsStore.claim(easy.id)).toBe(0); // une seule fois
-    expect(missionView(missionsStore.get())[0].claimed).toBe(true);
-  });
-  it("starts fresh on a new day", () => {
-    at("2026-10-14");
-    missionsStore.hydrate();
-    const [easy] = missionsFor("2026-10-14");
-    track(easy.event, easy.goal);
-    missionsStore.claim(easy.id);
-    at("2026-10-15");
-    track("spin", 1); // le premier événement du lendemain remet tout à zéro
-    const s = missionsStore.get();
-    expect(s.day).toBe("2026-10-15");
-    expect(s.claimed).toEqual([]);
-    expect(s.counters).toEqual({ spin: 1 });
-  });
+describe("event bus", () => {
   it("ignores events with a zero or negative amount, and the bus reaches every listener", () => {
     const seen: [GameEvent, number][] = [];
     const off = onEvent((e, n) => seen.push([e, n]));

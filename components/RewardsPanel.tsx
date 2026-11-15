@@ -11,7 +11,6 @@ import {
   useDaily,
   vipTierForLevel,
 } from "../lib/daily";
-import { missionView, missionsStore, useMissions } from "../lib/missions";
 import { today } from "../lib/clock";
 import { progressionStore, useProgression, xpInLevel, xpForNextLevel } from "../lib/progression";
 import { useWeekly, weeklyStore } from "../lib/weekly";
@@ -22,7 +21,6 @@ const WEEKLY_GOAL = 5000;
 
 export default function RewardsPanel({ open, onClose }: Props) {
   const daily = useDaily();
-  const missions = useMissions();
   const progression = useProgression();
   const weekly = useWeekly();
   const vipTier = vipTierForLevel(progression.level);
@@ -32,7 +30,6 @@ export default function RewardsPanel({ open, onClose }: Props) {
   useEffect(() => {
     if (!open) return;
 
-    missionsStore.refresh();
     progressionStore.hydrate();
     weeklyStore.refresh();
     setFlash(null);
@@ -65,8 +62,6 @@ export default function RewardsPanel({ open, onClose }: Props) {
   if (!open || typeof document === "undefined") return null;
 
   const status = dailyStatus(daily, today(), progression.level);
-  const views = missionView(missions);
-  const claimableMissions = views.filter((m) => m.done && !m.claimed).length;
 
   const weeklyPercent = Math.min(
     100,
@@ -94,15 +89,6 @@ export default function RewardsPanel({ open, onClose }: Props) {
       gained > 0
         ? `Daily bonus claimed: +${gained} chips`
         : "Daily bonus already claimed today.",
-    );
-  };
-
-  const claimMission = (id: string) => {
-    const gained = missionsStore.claim(id);
-    setFlash(
-      gained > 0
-        ? `Mission reward claimed: +${gained} chips`
-        : "This reward is not available.",
     );
   };
 
@@ -144,7 +130,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
         <div className="relative flex items-start justify-between gap-3 border-b border-[#d7b45b]/15 px-5 py-4 sm:px-6">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d7b45b]/80">
-              Daily & missions
+              Loyalty
             </p>
             <h2 className="mt-0.5 text-lg font-black tracking-wide text-white sm:text-xl">
               Rewards
@@ -170,6 +156,59 @@ export default function RewardsPanel({ open, onClose }: Props) {
               {flash}
             </div>
           )}
+
+          {/* Daily */}
+          <section className="mb-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
+                  Daily bonus
+                </p>
+                <p className="mt-1 text-[11px] text-white/55">
+                  Day {Math.min(status.streakDay, DAILY_MAX_DAYS)} of{" "}
+                  {DAILY_MAX_DAYS} · Reward: ◈ {status.reward}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={claimDaily}
+                disabled={!status.canClaim}
+                className={status.canClaim ? primary : ghost}
+              >
+                {status.canClaim ? `Claim · ◈ ${status.reward}` : "Claimed"}
+              </button>
+            </div>
+
+            <div className="mt-3 grid grid-cols-7 gap-1.5">
+              {Array.from({ length: DAILY_MAX_DAYS }, (_, index) => {
+                const day = index + 1;
+                const reached =
+                  status.streakDay > day ||
+                  (!status.canClaim && status.streakDay >= day);
+                const current =
+                  status.canClaim && status.streakDay === day;
+                return (
+                  <div
+                    key={day}
+                    className={`rounded-lg border px-1 py-1.5 text-center ${
+                      current
+                        ? "border-[#e5c779] bg-[#e5c779]/15 text-[#f5d778] shadow-[0_0_8px_rgba(229,199,121,0.3)]"
+                        : reached
+                          ? "border-[#c8a65b]/40 bg-[#c8a65b]/10 text-[#e5c779]"
+                          : "border-white/10 bg-white/[0.02] text-white/35"
+                    }`}
+                  >
+                    <p className="text-[8px] font-black uppercase tracking-wide">
+                      D{day}
+                    </p>
+                    <p className="mt-0.5 text-[10px] font-black tabular-nums">
+                      {dailyReward(day) + vipTier.dailyBonus}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
 
           {/* Level */}
           <section className="mb-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
@@ -265,7 +304,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
-                  Weekly challenge
+                  Weekly score
                 </p>
                 <p className="mt-1 text-[11px] text-white/55">
                   Personal score · Mon → Sun
@@ -329,124 +368,6 @@ export default function RewardsPanel({ open, onClose }: Props) {
             )}
           </section>
 
-          {/* Daily */}
-          <section className="mb-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
-                  Daily bonus
-                </p>
-                <p className="mt-1 text-[11px] text-white/55">
-                  Day {Math.min(status.streakDay, DAILY_MAX_DAYS)} of{" "}
-                  {DAILY_MAX_DAYS} · Reward: ◈ {status.reward}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={claimDaily}
-                disabled={!status.canClaim}
-                className={status.canClaim ? primary : ghost}
-              >
-                {status.canClaim ? `Claim · ◈ ${status.reward}` : "Claimed"}
-              </button>
-            </div>
-
-            <div className="mt-3 grid grid-cols-7 gap-1.5">
-              {Array.from({ length: DAILY_MAX_DAYS }, (_, index) => {
-                const day = index + 1;
-                const reached =
-                  status.streakDay > day ||
-                  (!status.canClaim && status.streakDay >= day);
-                const current =
-                  status.canClaim && status.streakDay === day;
-                return (
-                  <div
-                    key={day}
-                    className={`rounded-lg border px-1 py-1.5 text-center ${
-                      current
-                        ? "border-[#e5c779] bg-[#e5c779]/15 text-[#f5d778] shadow-[0_0_8px_rgba(229,199,121,0.3)]"
-                        : reached
-                          ? "border-[#c8a65b]/40 bg-[#c8a65b]/10 text-[#e5c779]"
-                          : "border-white/10 bg-white/[0.02] text-white/35"
-                    }`}
-                  >
-                    <p className="text-[8px] font-black uppercase tracking-wide">
-                      D{day}
-                    </p>
-                    <p className="mt-0.5 text-[10px] font-black tabular-nums">
-                      {dailyReward(day) + vipTier.dailyBonus}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Missions */}
-          <section>
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
-                Today's missions
-              </p>
-              {claimableMissions > 0 && (
-                <span className="rounded-full border border-[#d7b45b]/60 bg-[#d7b45b]/15 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#f5d778]">
-                  {claimableMissions} ready
-                </span>
-              )}
-            </div>
-
-            <ul className="space-y-2">
-              {views.map(({ def, progress, done, claimed }) => {
-                const percent = Math.round((progress / def.goal) * 100);
-                return (
-                  <li
-                    key={def.id}
-                    className="rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold tracking-wide text-white">
-                          {def.title}
-                        </p>
-                        <p className="mt-0.5 text-[10px] capitalize text-white/45">
-                          {def.tier} · ◈ {def.reward}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => claimMission(def.id)}
-                        disabled={!done || claimed}
-                        className={`${
-                          done && !claimed ? primary : ghost
-                        } !min-h-8 !px-3 !text-[10px]`}
-                      >
-                        {claimed
-                          ? "Claimed"
-                          : done
-                            ? `Claim · ◈ ${def.reward}`
-                            : "In progress"}
-                      </button>
-                    </div>
-
-                    <div className="mt-2">
-                      <div className="mb-1 flex justify-between text-[10px] text-white/45">
-                        <span className="tabular-nums">
-                          {progress} / {def.goal}
-                        </span>
-                        <span className="tabular-nums">{percent}%</span>
-                      </div>
-                      <div className="h-1 overflow-hidden rounded-full bg-black/45">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-[#8a6c2b] to-[#f0d38b] transition-all duration-500"
-                          style={{ width: `${percent}%` }}
-                        />
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
         </div>
       </div>
     </div>,

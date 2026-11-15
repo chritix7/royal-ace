@@ -69,6 +69,7 @@ export const CHALLENGE_POOL: Challenge[] = [
   { id: "boss2", title: "Make the Boss expand 2 times", key: "wildExpand", mode: "count", goal: 2, reward: 1200 },
   { id: "respin3", title: "Trigger 3 re-spins", key: "respin", mode: "count", goal: 3, reward: 1400 },
   { id: "gamble2", title: "Win 2 gambles", key: "gambleWin", mode: "count", goal: 2, reward: 1000 },
+  { id: "vault1", title: "Open the vault", key: "vault", mode: "count", goal: 1, reward: 3500 },
 ];
 
 /**
