@@ -57,22 +57,41 @@ export const sfx = {
     tone(1800, 0.06, "triangle", 0.1);
     tone(2500, 0.05, "triangle", 0.07, 0.035);
   },
-  // Chips paid out to the player: a short cascade of clicks.
-  chipsIn: (count: number) => {
-    for (let i = 0; i < Math.min(count, 10); i++) {
-      tone(1650 + (i % 3) * 280, 0.05, "triangle", 0.07, 0.18 + i * 0.055);
-    }
+  // Win: a quick rising arpeggio that lands on the octave, with a
+  // soft high shimmer over the last note.
+  win: () => {
+    [523, 659, 784, 1047].forEach((f, i) =>
+      tone(f, i === 3 ? 0.45 : 0.2, "triangle", 0.11, i * 0.075)
+    );
+    tone(2093, 0.5, "sine", 0.035, 0.26);
   },
-  // Chips swept away by the dealer: one soft slide and a click.
-  chipsOut: () => {
-    noise(0.22, 0.05, 1800, 0.12);
-    tone(1500, 0.05, "triangle", 0.05, 0.3);
+  // Blackjack: a longer run up two octaves, held on a bright chord
+  // with a light sparkle.
+  blackjack: () => {
+    [392, 523, 659, 784, 1047, 1319].forEach((f, i) =>
+      tone(f, 0.24, "triangle", 0.12, i * 0.07)
+    );
+    [1047, 1319, 1568].forEach((f) => tone(f, 0.75, "sine", 0.06, 0.46));
+    noise(0.3, 0.025, 7000, 0.46);
   },
-  win: () => [523, 659, 784].forEach((f, i) => tone(f, 0.25, "triangle", 0.12, i * 0.09)),
-  blackjack: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.3, "triangle", 0.13, i * 0.08)),
-  push: () => tone(440, 0.18, "sine", 0.1),
-  lose: () => tone(240, 0.4, "sawtooth", 0.07, 0, 120),
-  bust: () => tone(200, 0.5, "square", 0.06, 0, 70),
+  // Push: the same soft note twice — nothing gained, nothing lost.
+  push: () => {
+    tone(494, 0.14, "sine", 0.09);
+    tone(494, 0.22, "sine", 0.08, 0.17);
+  },
+  // Loss: two gentle falling notes over a quiet low one — a sigh, not
+  // a buzzer.
+  lose: () => {
+    tone(392, 0.2, "sine", 0.1);
+    tone(330, 0.42, "sine", 0.1, 0.17, 311);
+    tone(165, 0.5, "triangle", 0.04, 0.17);
+  },
+  // Bust: a low thud, then a short slide down.
+  bust: () => {
+    tone(140, 0.22, "sine", 0.2, 0, 60);
+    noise(0.08, 0.05, 900);
+    tone(349, 0.32, "triangle", 0.07, 0.06, 233);
+  },
   // Machine à sous
   spin: () => {
     for (let i = 0; i < 7; i++) noise(0.05, 0.09, 2500, i * 0.075);

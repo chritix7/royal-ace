@@ -378,39 +378,6 @@ body {
   animation: vegas-pop 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Chips crossing the felt at settle (ChipSweep): travel from
-   --chip-from to --chip-to (percent of the felt height), fanning from
-   --chip-sx to --chip-ex horizontally, then fade where they land. */
-@keyframes chip-sweep {
-  0% {
-    top: var(--chip-from);
-    opacity: 0;
-    transform: translate(-50%, -50%) translateX(var(--chip-sx)) scale(0.85);
-  }
-  12% { opacity: 1; }
-  75% {
-    top: var(--chip-to);
-    opacity: 1;
-    transform: translate(-50%, -50%) translateX(var(--chip-ex)) scale(1);
-  }
-  100% {
-    top: var(--chip-to);
-    opacity: 0;
-    transform: translate(-50%, -50%) translateX(var(--chip-ex)) scale(0.9);
-  }
-}
-.animate-chip-sweep {
-  top: var(--chip-from);
-  opacity: 0;
-  animation: chip-sweep 1100ms cubic-bezier(0.3, 0.7, 0.3, 1) both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-chip-sweep {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .animate-deal,
   .animate-pop,

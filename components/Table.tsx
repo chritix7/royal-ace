@@ -23,7 +23,6 @@ import StreakBadge from "./StreakBadge";
 import HistoryRibbon from "./HistoryRibbon";
 import JackpotPill from "./JackpotPill";
 import LuckyRound from "./LuckyRound";
-import ChipSweep from "./ChipSweep";
 import CountUp from "./CountUp";
 import FeltMarkings from "./FeltMarkings";
 
@@ -245,8 +244,6 @@ function getShoeStatus(g: Game): {
           )}
           {/* Golden Round banner — floats over the dealer slot. */}
           <LuckyRound g={g} />
-          {/* Chips paid out or swept away when the round settles. */}
-          <ChipSweep g={g} />
           {s.settings.theme === "vegas" && <VegasFeltOverlay />}
           {s.celebrate > 0 && <Confetti key={s.celebrate} />}
           <DealerShoe
