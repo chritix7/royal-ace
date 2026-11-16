@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { type Advice, type Card, type Hand, type Result, advise, canSplitCards, cardsNeeded, dealerCall, handValue, hiLo, isBlackjack, makeShoe } from "./blackjack";
+import { type Advice, type Card, type Hand, type Result, advise, canSplitCards, dealerCall, handValue, hiLo, isBlackjack, makeShoe, reshuffleAt } from "./blackjack";
 import { type SideHeat, heatOf, jackpotShare, perfectPairs, twentyOnePlusThree } from "./sidebets";
 import { ACHIEVEMENTS } from "./achievements";
 import { track as sendTrack } from "./events";
@@ -703,8 +703,7 @@ function giveDealer() {
 
     // Reshuffle at 75% penetration, or earlier when the cards left
     // couldn't cover this round (several spots on a small shoe).
-    const fresh =
-      c.shoe.length < Math.max(26, Math.floor(decks * 52 * 0.25), cardsNeeded(spots));
+    const fresh = c.shoe.length < reshuffleAt(decks, spots);
     sfx.chip();
     set({
       shoe: fresh
@@ -1056,7 +1055,17 @@ if (!settlementId) {
       streak,
       records,
       celebrate: gotBJ || net >= 200 ? Date.now() : ref.current.celebrate,
-      history: [...c.history, { net, bj: gotBJ }].slice(-14),
+      history: [
+        ...c.history,
+        {
+          net,
+          bj: gotBJ,
+          // Kept so a past hand can be looked at again from the ribbon.
+          dealer: c.dealer,
+          hands: hands.map((h) => ({ cards: h.cards, bet: h.bet, result: h.result })),
+          call: message,
+        },
+      ].slice(-14),
       trend: [...c.trend, balance].slice(-40),
       stats: {
         ...ref.current.stats,
@@ -1258,6 +1267,11 @@ if (!settlementId) {
   const outOfChips = canBet && s.balance < MIN_BET;
   const totalCards = s.settings.decks * 52;
   const shoePct = s.shoe.length ? Math.min(100, Math.round((s.shoe.length / totalCards) * 100)) : 100;
+  // Cut card: where it sits on the gauge, and whether the shoe has run
+  // past it (the next deal starts with a shuffle).
+  const cutAt = reshuffleAt(s.settings.decks, s.settings.spots);
+  const cutPct = Math.min(100, Math.round((cutAt / totalCards) * 100));
+  const cutCardOut = s.shoe.length > 0 && s.shoe.length < cutAt;
   const resolvedHands =
   s.stats.won + s.stats.lost + s.stats.pushed;
 
@@ -1299,6 +1313,8 @@ const winRate = resolvedHands
     outOfChips,
     totalCards,
     shoePct,
+    cutPct,
+    cutCardOut,
     winRate,
     compact,
     spots,

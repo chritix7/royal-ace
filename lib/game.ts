@@ -13,7 +13,14 @@ export type VegasVariant =
   | "carbon";
 
 export type Settings = { decks: number; h17: boolean; bj65: boolean; muted: boolean; spots: number; theme: Theme; vegasVariant?: VegasVariant };
-export type Round = { net: number; bj: boolean };
+export type Round = {
+  net: number;
+  bj: boolean;
+  /** Cards and results of the round, for the hand replay (absent on older saves). */
+  dealer?: Card[];
+  hands?: { cards: Card[]; bet: number; result?: Hand["result"] }[];
+  call?: string;
+};
 export type S = {
   shoe: Card[];
   dealer: Card[];

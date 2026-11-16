@@ -111,7 +111,7 @@ export default function HotkeysOverlay() {
           <p className="text-[9px] font-black uppercase tracking-[0.25em] text-[#d7b45b]/70">
             Royal Ace
           </p>
-          <h2 className="mt-0.5 text-lg font-black uppercase tracking-wider text-[#f5d778]">
+          <h2 className="font-display mt-0.5 text-lg font-black uppercase tracking-wider text-[#f5d778]">
             Keyboard Shortcuts
           </h2>
 

@@ -168,3 +168,12 @@ export function dealerCall(
 export function cardsNeeded(spots: number): number {
   return spots * 8 + 10;
 }
+
+/**
+ * Where the cut card sits: the shoe is reshuffled before a deal once
+ * fewer cards than this remain (75% penetration, or the round's reserve
+ * when that is larger).
+ */
+export function reshuffleAt(decks: number, spots: number): number {
+  return Math.max(26, Math.floor(decks * 52 * 0.25), cardsNeeded(spots));
+}

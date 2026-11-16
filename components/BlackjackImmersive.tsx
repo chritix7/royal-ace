@@ -32,6 +32,7 @@ import JackpotPill from "./JackpotPill";
 import LuckyRound from "./LuckyRound";
 import CountUp from "./CountUp";
 import FeltMarkings from "./FeltMarkings";
+import ShoeMeter from "./ShoeMeter";
 import ImmersiveSidePill from "./blackjack-immersive/ImmersiveSidePill";
 import ResultRail from "./blackjack-immersive/ResultRail";
 import { getShoeStatus } from "./blackjack-immersive/getShoeStatus";
@@ -254,7 +255,7 @@ const playerCardStyle = (
         }}
       >
         <div className="min-w-0">
-          <h2 className="header-shine truncate text-sm font-black tracking-[0.18em] sm:text-base">
+          <h2 className="font-display header-shine truncate text-sm font-black tracking-[0.18em] sm:text-base">
             <span className="text-white">ROYAL </span>
             <span className="animate-header-breathe text-[#d7b45b]">ACE</span>
             <span className="hidden font-bold tracking-wider text-white/40 sm:inline">
@@ -327,26 +328,7 @@ const playerCardStyle = (
 {/* Floating Shoe meter + Clock — top-left of the felt, same look
     as the classic view. Shoe shows live card count with a thin
     gold progress fill; Clock shows the viewer's local HH:MM. */}
-<div
-  aria-hidden={false}
-  className="pointer-events-none absolute left-3 top-3 z-10 flex items-center gap-2 rounded-full border border-[#d7b45b]/30 bg-black/55 px-2.5 py-1 text-[10px] font-semibold text-[#e5c779] shadow-[0_2px_8px_rgba(0,0,0,0.4)] backdrop-blur-sm sm:left-5 sm:top-5 sm:text-[11px]"
->
-  <span className="uppercase tracking-[0.18em] text-[#d7b45b]/80">
-    Shoe
-  </span>
-  <span className="tabular-nums text-white/90">
-    {s.shoe.length || s.settings.decks * 52}
-  </span>
-  <span
-    aria-hidden
-    className="h-1.5 w-10 overflow-hidden rounded-full bg-white/10 sm:w-14"
-  >
-    <span
-      className="block h-full rounded-full bg-gradient-to-r from-[#d7b45b]/40 to-[#d7b45b] transition-[width] duration-500"
-      style={{ width: `${g.shoePct}%` }}
-    />
-  </span>
-</div>
+<ShoeMeter g={g} className="absolute left-3 top-3 z-10 sm:left-5 sm:top-5" />
 <TableClock className="absolute left-3 top-[52px] z-10 sm:left-5 sm:top-[58px]" />
 
 {/* Streak + history ribbon — same upper-left stack as the Shoe
@@ -359,6 +341,7 @@ const playerCardStyle = (
 />
 <HistoryRibbon
   history={s.history}
+  back={back}
   className="absolute left-3 top-[114px] z-10 sm:left-5 sm:top-[122px]"
 />
 {/* Progressive jackpot — top center on the felt. */}

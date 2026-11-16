@@ -132,7 +132,7 @@ export default function Home() {
       <header className="sticky top-0 z-40 border-b border-[#c8a65b]/20 bg-[#0b100e] pt-[env(safe-area-inset-top)]">
   <div className="mx-auto max-w-screen-2xl px-4 py-2.5 sm:px-8 sm:py-3">
     <div className="flex items-center gap-3">
-      <h1 className="header-shine truncate text-lg font-black tracking-[0.12em] sm:text-3xl">
+      <h1 className="font-display header-shine truncate text-lg font-black tracking-[0.12em] sm:text-3xl">
         ROYAL{" "}
         <span className="animate-header-breathe text-[#d7b45b]">ACE</span>
       </h1>
@@ -191,7 +191,7 @@ export default function Home() {
 
       <button
         onClick={() => setAchievementsOpen(true)}
-        aria-label="Open achievements"
+        aria-label="Open daily challenges"
         className="flex h-11 flex-1 touch-manipulation select-none items-center justify-center rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] text-lg text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.12),0_2px_0_rgba(0,0,0,0.5)] transition active:translate-y-px active:scale-[0.97]"
       >
         🏆

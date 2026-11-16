@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, UnifrakturMaguntia, Share_Tech_Mono } from "next/font/google";
+import { Cinzel, Geist, Geist_Mono, UnifrakturMaguntia, Share_Tech_Mono } from "next/font/google";
 import "./globals.css";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
@@ -11,6 +11,14 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+// Display face for the wordmark, panel titles, dealer calls and the
+// court cards: engraved Roman capitals. Used through the `font-display`
+// class (see globals.css).
+const cinzel = Cinzel({
+  variable: "--font-display",
   subsets: ["latin"],
 });
 
@@ -58,7 +66,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${unifrakturMaguntia.variable} ${shareTechMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${cinzel.variable} ${unifrakturMaguntia.variable} ${shareTechMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {children}

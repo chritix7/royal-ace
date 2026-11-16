@@ -79,7 +79,7 @@ export default function AchievementsPanel({ open, onClose }: Props) {
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d7b45b]/80">
               New set every day
             </p>
-            <h2 className="mt-0.5 text-lg font-black tracking-wide text-white sm:text-xl">
+            <h2 className="font-display mt-0.5 text-lg font-black tracking-wide text-white sm:text-xl">
               Daily challenges
             </h2>
             <p className="mt-1 text-[11px] text-white/50">

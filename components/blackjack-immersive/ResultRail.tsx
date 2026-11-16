@@ -46,7 +46,7 @@ export default function ResultRail({
           >
             <div className="border-b border-[#d7b45b]/20 bg-[#d7b45b]/10 px-3.5 py-2.5">
               {/* The dealer's call for the round ("Dealer busts", "Push"…). */}
-              <p className="text-[10px] font-black uppercase leading-snug tracking-[0.18em] text-[#e5c779]">
+              <p className="font-display text-[10px] font-black uppercase leading-snug tracking-[0.16em] text-[#e5c779]">
                 {s.message}
               </p>
 

@@ -16,10 +16,10 @@ export type VipTier = {
 
 export const VIP_TIERS: VipTier[] = [
   { id: "bronze", label: "Bronze", minLevel: 1, dailyBonus: 0 },
-  { id: "silver", label: "Silver", minLevel: 5, dailyBonus: 250 },
-  { id: "gold", label: "Gold", minLevel: 10, dailyBonus: 500 },
-  { id: "platinum", label: "Platinum", minLevel: 20, dailyBonus: 1000 },
-  { id: "kingpin", label: "Kingpin", minLevel: 35, dailyBonus: 2000 },
+  { id: "silver", label: "Silver", minLevel: 5, dailyBonus: 1000 },
+  { id: "gold", label: "Gold", minLevel: 10, dailyBonus: 2000 },
+  { id: "platinum", label: "Platinum", minLevel: 20, dailyBonus: 4000 },
+  { id: "kingpin", label: "Kingpin", minLevel: 35, dailyBonus: 8000 },
 ];
 
 export function vipTierForLevel(level: number): VipTier {
