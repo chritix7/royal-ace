@@ -475,10 +475,14 @@ export default function Sidebar({ g }: { g: Game }) {
           onClose={() => setOpenSection(null)}
           eyebrow="Blackjack"
           title="Session"
-          maxWidth="md"
+          maxWidth="xl"
         >
           <h3 className="sr-only">Session</h3>
-          <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+          {/* Two columns on desktop so the panel never needs to scroll:
+              today and the trend on the left, totals and reset on the right. */}
+          <div className="lg:grid lg:grid-cols-2 lg:gap-6">
+          <div>
+          <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 lg:mt-0">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/45">
                 Today
@@ -512,21 +516,6 @@ export default function Sidebar({ g }: { g: Game }) {
               </dd>
             </dl>
           </div>
-          <dl className="mt-3 grid grid-cols-2 gap-y-2 text-xs text-white/50">
-            <dt>Rounds played</dt>
-<dd className="text-right text-white">{s.stats.played}</dd>
-            <dt>Won / lost / push</dt>
-            <dd className="text-right text-white">{s.stats.won} / {s.stats.lost} / {s.stats.pushed}</dd>
-            <dt>Hand win rate</dt>
-<dd className="text-right text-white">{winRate}%</dd>
-            <dt>Rounds with blackjack</dt>
-<dd className="text-right text-white">{s.stats.blackjacks}</dd>
-            <dt>Profit</dt>
-            <dd className={`text-right font-bold ${s.stats.profit >= 0 ? "text-emerald-300" : "text-red-300"}`}>
-              {s.stats.profit >= 0 ? "+" : "−"}{money(Math.abs(s.stats.profit))}
-            </dd>
-          </dl>
-
           <div className="mt-4">
             <Spark data={s.trend} />
           </div>
@@ -545,6 +534,23 @@ export default function Sidebar({ g }: { g: Game }) {
               ))}
             </div>
           )}
+          </div>
+
+          <div>
+          <dl className="mt-3 grid grid-cols-2 gap-y-2 text-xs text-white/50 lg:mt-0">
+            <dt>Rounds played</dt>
+<dd className="text-right text-white">{s.stats.played}</dd>
+            <dt>Won / lost / push</dt>
+            <dd className="text-right text-white">{s.stats.won} / {s.stats.lost} / {s.stats.pushed}</dd>
+            <dt>Hand win rate</dt>
+<dd className="text-right text-white">{winRate}%</dd>
+            <dt>Rounds with blackjack</dt>
+<dd className="text-right text-white">{s.stats.blackjacks}</dd>
+            <dt>Profit</dt>
+            <dd className={`text-right font-bold ${s.stats.profit >= 0 ? "text-emerald-300" : "text-red-300"}`}>
+              {s.stats.profit >= 0 ? "+" : "−"}{money(Math.abs(s.stats.profit))}
+            </dd>
+          </dl>
 
           <button
   type="button"
@@ -560,9 +566,11 @@ export default function Sidebar({ g }: { g: Game }) {
 </button>
 
 <p className="mt-2 text-center text-[10px] leading-4 text-white/35">
-  Shared wallet reset. Today, achievements and records are kept.
+  Shared wallet reset. Today, challenges and records are kept.
   Confirmation required.
 </p>
+          </div>
+          </div>
         </SectionModal>
 
         <SectionModal
@@ -570,7 +578,7 @@ export default function Sidebar({ g }: { g: Game }) {
           onClose={() => setOpenSection(null)}
           eyebrow="Fairness"
           title="Stats"
-          maxWidth="md"
+          maxWidth="xl"
         >
           <h3 className="sr-only">Fairness check</h3>
 
@@ -579,7 +587,7 @@ export default function Sidebar({ g }: { g: Game }) {
             can vary considerably.
           </p>
 
-          <dl className="mt-4 space-y-4">
+          <dl className="mt-4 space-y-4 lg:grid lg:grid-cols-2 lg:gap-x-6 lg:gap-y-4 lg:space-y-0">
             <div>
               <dt className="text-xs leading-5 text-white/55">Rounds played</dt>
               <dd className="mt-1 text-sm font-semibold tabular-nums text-white">

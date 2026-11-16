@@ -108,7 +108,7 @@ export default function StatsPanel({ open, onClose }: Props) {
       />
 
       <div
-        className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a1512] via-[#120e0b] to-[#070504] shadow-[0_30px_80px_rgba(0,0,0,0.9)] animate-insurance-slide-in"
+        className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl lg:max-w-5xl border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a1512] via-[#120e0b] to-[#070504] shadow-[0_30px_80px_rgba(0,0,0,0.9)] animate-insurance-slide-in"
         style={{
           backgroundImage:
             "radial-gradient(120% 60% at 50% 0%, rgba(215,180,91,0.15) 0%, transparent 60%), linear-gradient(180deg, #1a1512 0%, #120e0b 60%, #070504 100%)",
@@ -141,22 +141,24 @@ export default function StatsPanel({ open, onClose }: Props) {
         </div>
 
         {/* Scrollable body */}
-        <div className="relative min-h-0 flex-1 overflow-y-auto px-5 py-4 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin] sm:px-6">
+        {/* Three columns on desktop (Slots · Blackjack · big wins) so
+            everything fits without scrolling. */}
+        <div className="relative min-h-0 flex-1 overflow-y-auto px-5 py-4 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin] sm:px-6 lg:grid lg:grid-cols-3 lg:items-start lg:gap-5">
           {groups.map((group) => (
-            <section key={group.title} className="mb-6 last:mb-0">
+            <section key={group.title} className="mb-6 last:mb-0 lg:mb-0">
               <p className="mb-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
                 {group.title}
               </p>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2">
                 {group.items.map((item) => (
                   <div
                     key={item.label}
-                    className="rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
+                    className="rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] lg:px-3 lg:py-2"
                   >
                     <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">
                       {item.label}
                     </p>
-                    <p className="mt-1 text-lg font-black tabular-nums text-[#f0d38b]">
+                    <p className="mt-1 text-lg font-black tabular-nums text-[#f0d38b] lg:mt-0.5 lg:text-base">
                       {item.value}
                     </p>
                   </div>
@@ -168,7 +170,7 @@ export default function StatsPanel({ open, onClose }: Props) {
           <section>
             <div className="mb-2 flex items-center justify-between gap-4">
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
-                Recent big wins
+                Latest big wins
               </p>
               {history.length > 0 && (
                 <button
@@ -189,7 +191,7 @@ export default function StatsPanel({ open, onClose }: Props) {
               </p>
             ) : (
               <ul className="space-y-1.5">
-                {history.map((entry) => (
+                {history.slice(0, 5).map((entry) => (
                   <li
                     key={entry.id}
                     className="flex items-center justify-between gap-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 px-4 py-2.5"

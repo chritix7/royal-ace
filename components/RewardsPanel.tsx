@@ -114,7 +114,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
       />
 
       <div
-        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a1512] via-[#120e0b] to-[#070504] shadow-[0_30px_80px_rgba(0,0,0,0.9)] animate-insurance-slide-in"
+        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl lg:max-w-4xl border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a1512] via-[#120e0b] to-[#070504] shadow-[0_30px_80px_rgba(0,0,0,0.9)] animate-insurance-slide-in"
         style={{
           backgroundImage:
             "radial-gradient(120% 60% at 50% 0%, rgba(215,180,91,0.15) 0%, transparent 60%), linear-gradient(180deg, #1a1512 0%, #120e0b 60%, #070504 100%)",
@@ -147,18 +147,18 @@ export default function RewardsPanel({ open, onClose }: Props) {
         </div>
 
         {/* Body */}
-        <div className="relative min-h-0 flex-1 overflow-y-auto px-5 py-4 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin] sm:px-6">
+        <div className="relative min-h-0 flex-1 overflow-y-auto px-5 py-4 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin] sm:px-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4">
           {flash && (
             <div
               key={flash}
-              className="animate-chip-bump mb-4 rounded-2xl border border-[#d7b45b]/40 bg-[#d7b45b]/10 px-4 py-3 text-xs font-semibold text-[#f5d778]"
+              className="animate-chip-bump mb-4 rounded-2xl border lg:col-span-2 lg:mb-0 border-[#d7b45b]/40 bg-[#d7b45b]/10 px-4 py-3 text-xs font-semibold text-[#f5d778]"
             >
               {flash}
             </div>
           )}
 
           {/* Daily */}
-          <section className="mb-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+          <section className="mb-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-4 lg:mb-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
@@ -211,7 +211,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
           </section>
 
           {/* Level */}
-          <section className="mb-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+          <section className="mb-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-4 lg:mb-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
             <div className="flex items-baseline justify-between gap-3">
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
                 Level {progression.level}
@@ -260,7 +260,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
           </section>
 
           {/* VIP */}
-          <section className="mb-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+          <section className="mb-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-4 lg:mb-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
@@ -300,7 +300,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
           </section>
 
           {/* Weekly */}
-          <section className="mb-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+          <section className="mb-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-4 lg:mb-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
