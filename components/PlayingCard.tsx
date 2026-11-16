@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { Card } from "../lib/blackjack";
+import { CardBackArt, CourtArt } from "./CardArt";
 
 /**
  * A playing card for Royal Ace Blackjack.
@@ -14,35 +15,16 @@ import type { Card } from "../lib/blackjack";
  *   hairline, matching the premium ornamental frame used on the Vegas
  *   color picker.
  * - The ace keeps a large suit inside a double gold ring. Court cards
- *   (J/Q/K) carry, inside that ring, a small gold crest, their letter
- *   in the display face and the suit — the corners stay identical.
- * - The back is engraved: a gold diamond lattice over the table's back
- *   colours, a double frame and the house "RA" medallion.
+ *   (J/Q/K) carry a double-ended framed panel between the corners:
+ *   crest and letter at the top, the same upside down at the bottom,
+ *   the suit in a lozenge between (see CardArt).
+ * - The back is engraved vector art: lattice field, double frame, a
+ *   central rosette with a spade and corner fans, in the table's back
+ *   colours.
  */
 
 const FACE_RANKS = new Set(["A", "J", "Q", "K"]);
 const COURT_RANKS = new Set(["J", "Q", "K"]);
-
-/**
- * Small gold crest drawn over a court card's letter: a three-point
- * crown for the King, a five-point coronet for the Queen, a plumed
- * cap for the Jack. Inline SVG so it looks the same on every device
- * (chess and fleur-de-lis glyphs render as emoji on some phones).
- */
-function Crest({ rank, className = "" }: { rank: string; className?: string }) {
-  const shape =
-    rank === "K"
-      ? "M2 11 L2 4 L7 8 L12 1 L17 8 L22 4 L22 11 Z"
-      : rank === "Q"
-        ? "M2 11 L1 4 L6 8 L8.5 2 L12 7.5 L15.5 2 L18 8 L23 4 L22 11 Z"
-        : "M4 11 L4 7 Q12 -2 20 7 L20 11 Z";
-  return (
-    <svg viewBox="0 0 24 13" aria-hidden className={className}>
-      <path d={shape} fill="#c8a65b" stroke="#8a6c2b" strokeWidth="0.8" strokeLinejoin="round" />
-      <rect x="2" y="11" width="20" height="1.6" rx="0.6" fill="#8a6c2b" />
-    </svg>
-  );
-}
 
 /** Contact shadow plus a soft cast shadow, so a card reads as lying on the felt. */
 const CARD_SHADOW =
@@ -119,31 +101,6 @@ export default function PlayingCard({
       ? "text-2xl"
       : "text-3xl sm:text-4xl";
 
-  // Court letter (J / Q / K) inside the ring, under its crest.
-  const courtLetterSize = fit
-    ? "text-[clamp(11px,calc(var(--bj-card-h)*0.2),30px)]"
-    : compact
-      ? "text-base sm:text-xl lg:text-lg"
-      : "text-xl sm:text-2xl";
-
-  const crestSize = fit
-    ? "w-[calc(var(--bj-card-h)*0.16)]"
-    : compact
-      ? "w-4 sm:w-5"
-      : "w-5 sm:w-6";
-
-  // Monogram on the card back.
-  const monogramSize = fit
-    ? "text-[clamp(8px,calc(var(--bj-card-h)*0.13),18px)]"
-    : compact
-      ? "text-[9px] sm:text-sm lg:text-xs"
-      : "text-xs sm:text-base lg:text-sm";
-  const monogramSuitSize = fit
-    ? "text-[clamp(7px,calc(var(--bj-card-h)*0.1),14px)]"
-    : compact
-      ? "text-[8px] sm:text-xs"
-      : "text-[10px] sm:text-sm";
-
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -203,34 +160,12 @@ export default function PlayingCard({
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
             boxShadow: CARD_SHADOW,
-            // Engraved back: a fine gold diamond lattice over the
-            // table's two back colours.
-            background: [
-              "repeating-linear-gradient(45deg, rgba(215,180,91,0.22) 0 1px, transparent 1px 7px)",
-              "repeating-linear-gradient(-45deg, rgba(215,180,91,0.22) 0 1px, transparent 1px 7px)",
-              `linear-gradient(160deg, ${back[1]} 0%, ${back[0]} 100%)`,
-            ].join(", "),
+            background: back[0],
           }}
         >
-          {/* Double gold frame */}
-          <div className="absolute inset-1 rounded-lg border border-[#d7b45b]/55" />
-          <div className="absolute inset-[7px] rounded-md border border-[#d7b45b]/25" />
-          {/* House medallion: the RA monogram over a spade */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div
-              className="flex aspect-square w-[62%] flex-col items-center justify-center rounded-full border border-[#d7b45b]/70 leading-none text-[#e5c779]"
-              style={{
-                background: `radial-gradient(circle at 50% 35%, ${back[1]} 0%, ${back[0]} 75%)`,
-                boxShadow:
-                  "inset 0 0 0 2px rgba(0,0,0,0.35), inset 0 0 0 3px rgba(215,180,91,0.3), 0 1px 3px rgba(0,0,0,0.5)",
-              }}
-            >
-              <span className={`font-display font-black tracking-[0.08em] ${monogramSize}`}>
-                RA
-              </span>
-              <span className={`mt-px ${monogramSuitSize}`}>♠</span>
-            </div>
-          </div>
+          {/* Engraved back: lattice field, double frame, central
+              rosette with a spade and corner fans (CardArt). */}
+          <CardBackArt back={back} />
         </div>
 
         {/* ── Face ── */}
@@ -262,8 +197,12 @@ export default function PlayingCard({
             </div>
           </div>
 
-          {/* Center suit — face cards get an ornament ring around it. */}
-          {isFace ? (
+          {/* Court cards: a double-ended framed panel between the corners. */}
+          {isCourt ? (
+            <div className="absolute inset-x-[27%] inset-y-[11%]">
+              <CourtArt rank={card.rank} suit={card.suit} ink={inkCenter} />
+            </div>
+          ) : isFace ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <div
                 className={`relative flex items-center justify-center ${
@@ -293,30 +232,12 @@ export default function PlayingCard({
                       "radial-gradient(circle, rgba(200,166,91,0.18) 0%, rgba(200,166,91,0) 70%)",
                   }}
                 />
-                {isCourt ? (
-                  <span className="relative flex flex-col items-center leading-none">
-                    <Crest rank={card.rank} className={crestSize} />
-                    <span
-                      className={`font-display font-black ${courtLetterSize}`}
-                      style={{ color: inkCenter }}
-                    >
-                      {card.rank}
-                    </span>
-                    <span
-                      className={`font-sans ${cornerSuitSize}`}
-                      style={{ color: inkCenter }}
-                    >
-                      {card.suit}
-                    </span>
-                  </span>
-                ) : (
-                  <span
-                    className={`relative ${centerSuitSize} font-sans`}
-                    style={{ color: inkCenter }}
-                  >
-                    {card.suit}
-                  </span>
-                )}
+                <span
+                  className={`relative ${centerSuitSize} font-sans`}
+                  style={{ color: inkCenter }}
+                >
+                  {card.suit}
+                </span>
               </div>
             </div>
           ) : (
