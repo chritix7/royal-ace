@@ -57,7 +57,7 @@ export default function StreakBadge({
     <div
       role="status"
       aria-label={`${isWin ? "Win" : "Loss"} streak: ${streak.count}`}
-      className={`pointer-events-none inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider backdrop-blur-sm sm:text-[11px] ${
+      className={`pointer-events-none items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider backdrop-blur-sm sm:text-[11px] ${
         isWin
           ? "border-[#d7b45b]/70 bg-gradient-to-b from-[#d7b45b]/30 to-[#d7b45b]/[0.08] text-[#f5d778]"
           : "border-red-400/40 bg-red-500/15 text-red-200"

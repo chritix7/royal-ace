@@ -213,7 +213,7 @@ export default function HistoryRibbon({
     <>
       <div
         aria-label="Last rounds"
-        className={`inline-flex items-center rounded-full border border-[#d7b45b]/25 bg-gradient-to-b from-[#1a1612]/85 to-[#0a0806]/85 px-1.5 py-0.5 shadow-[0_2px_8px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(229,199,121,0.1)] backdrop-blur-sm ${className}`}
+        className={`items-center rounded-full border border-[#d7b45b]/25 bg-gradient-to-b from-[#1a1612]/85 to-[#0a0806]/85 px-1.5 py-0.5 shadow-[0_2px_8px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(229,199,121,0.1)] backdrop-blur-sm ${className}`}
       >
         <span className="hidden pl-0.5 pr-1 text-[8px] font-black uppercase tracking-widest text-[#d7b45b]/70 sm:inline">
           Last

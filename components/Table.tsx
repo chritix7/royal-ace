@@ -223,7 +223,7 @@ function getShoeStatus(g: Game): {
               players and the dealer lane can see the pot grow. */}
           {/* The Golden Round banner takes this slot while it shows. */}
           {!goldenShown && (
-            <JackpotPill className="absolute left-1/2 top-2 z-10 hidden -translate-x-1/2 lg:inline-flex" />
+            <JackpotPill className="absolute left-3 top-[86px] z-10 sm:left-1/2 sm:top-2 sm:-translate-x-1/2" />
           )}
           {/* Golden Round banner — floats over the dealer slot. */}
           <LuckyRound g={g} />
@@ -256,7 +256,7 @@ function getShoeStatus(g: Game): {
           />
           {s.shuffling && <ShuffleAnimation />}
           {/* Croupier — zone gravée dans le tapis */}
-<div className="relative mt-1.5 flex min-h-[88px] items-center justify-center sm:min-h-28 lg:mt-0 lg:min-h-[96px]">
+<div className="relative mt-14 flex min-h-[88px] items-center justify-center sm:mt-1.5 sm:min-h-28 lg:mt-0 lg:min-h-[96px]">
 
   {/* Score du croupier — ne prend aucune hauteur */}
 {s.dealer.length > 0 && (

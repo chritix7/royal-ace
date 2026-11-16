@@ -337,16 +337,16 @@ const playerCardStyle = (
 <StreakBadge
   wins={s.streak}
   history={s.history}
-  className="absolute left-3 top-[86px] z-10 sm:left-5 sm:top-[94px]"
+  className="absolute left-3 top-[120px] z-10 inline-flex sm:left-5 sm:top-[94px]"
 />
 <HistoryRibbon
   history={s.history}
   back={back}
-  className="absolute left-3 top-[114px] z-10 sm:left-5 sm:top-[122px]"
+  className="absolute left-3 top-[148px] z-10 inline-flex sm:left-5 sm:top-[122px]"
 />
 {/* Progressive jackpot — top center on the felt. */}
 {!goldenShown && (
-  <JackpotPill className="absolute left-1/2 top-2 z-10 -translate-x-1/2" />
+  <JackpotPill className="absolute left-3 top-[86px] z-10 sm:left-1/2 sm:top-2 sm:-translate-x-1/2" />
 )}
 {/* Golden Round banner — same component as the classic table. */}
 <LuckyRound g={g} />

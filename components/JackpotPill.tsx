@@ -30,7 +30,7 @@ export default function JackpotPill({ className = "" }: { className?: string }) 
     <div
       aria-label={`Progressive jackpot ◈ ${money(pot)}`}
       title="Progressive jackpot — grows with every side bet. Suited Trips on 21+3 wins it: 10% of the pot at the minimum stake, the whole pot from a 250 stake."
-      className={`pointer-events-none inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider backdrop-blur-sm transition-[transform,box-shadow,border-color,color] duration-300 sm:text-[11px] ${
+      className={`pointer-events-none inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 sm:px-2.5 text-[10px] font-black uppercase tracking-wider backdrop-blur-sm transition-[transform,box-shadow,border-color,color] duration-300 sm:text-[11px] ${
         bump
           ? "scale-[1.04] border-[#d7b45b] bg-gradient-to-b from-[#f5d778]/40 to-[#d7b45b]/20 text-[#f5d778] shadow-[0_0_16px_rgba(229,199,121,0.5),inset_0_1px_0_rgba(255,255,255,0.2)]"
           : "border-[#d7b45b]/40 bg-gradient-to-b from-[#1a1612]/85 to-[#0a0806]/85 text-[#e5c779] shadow-[0_2px_8px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(229,199,121,0.12)]"
@@ -39,7 +39,8 @@ export default function JackpotPill({ className = "" }: { className?: string }) 
       <span aria-hidden className="text-[10px] leading-none text-[#d7b45b]">
         ♦
       </span>
-      <span className="font-black tracking-widest">Jackpot</span>
+      {/* The word is dropped on phones: the pill sits in the narrow left stack. */}
+      <span className="hidden font-black tracking-widest sm:inline">Jackpot</span>
       <span className="tabular-nums text-[#f5d778]">◈ {money(pot)}</span>
     </div>
   );
