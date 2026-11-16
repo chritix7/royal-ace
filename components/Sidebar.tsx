@@ -168,6 +168,10 @@ export default function Sidebar({ g }: { g: Game }) {
             </p>
           </div>
 
+          {/* Chips, quick bets and side bets: desktop only. On phones
+              and tablets they sit on the felt itself (see Table), so
+              they are not repeated down here. */}
+          <div className="hidden lg:block">
           <div className="my-3 h-px w-full bg-gradient-to-r from-transparent via-[#d7b45b]/15 to-transparent" />
 
           {/* Scrollable chip ladder — 3 denominations visible at a
@@ -223,6 +227,7 @@ export default function Sidebar({ g }: { g: Game }) {
               onOpen={() => setOpenSideBet("t3")}
               heat={heat.t3}
             />
+          </div>
           </div>
           <div className="mt-4">
             <TableThemePicker />

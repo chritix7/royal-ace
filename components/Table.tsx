@@ -26,6 +26,7 @@ import LuckyRound from "./LuckyRound";
 import CountUp from "./CountUp";
 import FeltMarkings from "./FeltMarkings";
 import ShoeMeter from "./ShoeMeter";
+import ChipRail from "./ChipRail";
 
 // Premium action button base — used across Hit / Stand / Double / Split /
 // Surrender / Deal. Common shape (border, radius, size, focus ring), with
@@ -172,6 +173,10 @@ function getShoeStatus(g: Game): {
   stake,
   back,
   pileAmount,
+  spots,
+  sides,
+  addChip,
+  setBetTo,
   dealEvents,
   consumeDealEvent,
   deal,
@@ -540,7 +545,7 @@ function getShoeStatus(g: Game): {
 <FeltMarkings
   bj65={s.settings.bj65}
   h17={s.settings.h17}
-  className="absolute bottom-1 left-1/2 hidden -translate-x-1/2 sm:block"
+  className="absolute bottom-1 left-1/2 hidden -translate-x-1/2 lg:block"
 />
 
           {/* Bet-zone slot — swaps content based on phase, but the slot
@@ -571,16 +576,18 @@ function getShoeStatus(g: Game): {
     }}
   />
 {canBet && (
-<div className="relative flex flex-col items-center gap-2.5 lg:flex-row lg:items-center lg:justify-center lg:gap-4">
+<div className="relative flex flex-col items-center gap-2 lg:block">
+{/* Bet circle between the two side bets, on every screen size. */}
+<div className="relative flex w-full items-center justify-center gap-2 lg:gap-4">
 
-  <div className="order-1 lg:order-2">
+  <div className="order-2 shrink-0">
     {/* BET circle — recessed into the felt with a double gold ring.
         When there are chips on the table, the pile IS the content of
         the circle, growing taller as the bet grows. The amount sits
         below as a small gold label. */}
     <div className="flex flex-col items-center">
       <div
-        className="relative flex h-20 w-20 items-end justify-center overflow-visible rounded-full text-center sm:h-24 sm:w-24 lg:h-16 lg:w-16"
+        className="relative flex h-16 w-16 items-end justify-center overflow-visible rounded-full text-center sm:h-24 sm:w-24 lg:h-16 lg:w-16"
         style={{
           background: canBet
             ? "radial-gradient(circle at 50% 30%, rgba(229, 199, 121, 0.22) 0%, rgba(5, 10, 7, 0.75) 55%, rgba(5, 10, 7, 0.9) 100%)"
@@ -643,8 +650,8 @@ function getShoeStatus(g: Game): {
     </div>
   </div>
 
-  <div className="order-2 flex w-full max-w-[300px] items-stretch justify-center gap-2 lg:order-none lg:contents">
-    <div className="relative min-w-0 flex-1 lg:order-1 lg:w-36 lg:flex-none">
+  <div className="contents">
+    <div className="relative order-1 min-w-0 max-w-[150px] flex-1 lg:w-36 lg:flex-none">
       <SidePill
         label="PP"
         amount={s.ppBet}
@@ -656,7 +663,7 @@ function getShoeStatus(g: Game): {
       )}
     </div>
 
-    <div className="relative min-w-0 flex-1 lg:order-3 lg:w-36 lg:flex-none">
+    <div className="relative order-3 min-w-0 max-w-[150px] flex-1 lg:w-36 lg:flex-none">
       <SidePill
         label="21+3"
         amount={s.t3Bet}
@@ -668,6 +675,40 @@ function getShoeStatus(g: Game): {
       )}
     </div>
   </div>
+</div>
+
+{/* Phones and tablets: the chips and quick bets sit right here on the
+    felt, so placing a bet never needs scrolling down to the sidebar
+    (desktop keeps them in the sidebar next to the table). */}
+<div className="w-full max-w-[340px] space-y-1.5 lg:hidden">
+  <ChipRail
+    visibleCount={5}
+    size="sm"
+    onPick={(value) => addChip(value)}
+    disabledFor={(value) =>
+      !canBet || (s.bet + value) * spots + sides > s.balance
+    }
+  />
+  <div className="mx-auto grid w-full max-w-[300px] grid-cols-3 gap-1.5">
+    {(
+      [
+        ["Rebet", () => setBetTo(s.lastBet), false],
+        ["×2", () => setBetTo(s.bet * 2), s.bet === 0],
+        ["Clear", () => setBetTo(0), s.bet === 0],
+      ] as const
+    ).map(([label, onClick, off]) => (
+      <button
+        key={label}
+        type="button"
+        onClick={onClick}
+        disabled={off}
+        className="inline-flex h-8 w-full touch-manipulation items-center justify-center rounded-full border border-white/10 bg-black/30 px-2 text-[10px] font-black uppercase tracking-[0.18em] text-white/75 outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px enabled:active:border-[#d7b45b]/50 enabled:active:text-[#f5d778] disabled:opacity-35"
+      >
+        {label}
+      </button>
+    ))}
+  </div>
+</div>
 </div>
 )}
 
