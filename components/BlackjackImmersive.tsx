@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { handValue, isBlackjack } from "../lib/blackjack";
 import {
@@ -94,9 +94,15 @@ export default function BlackjackImmersive({
   const bettingOpen =
     canBet && (editBet || s.phase === "betting");
 
+  const rootRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     const previousFocus = document.activeElement;
+    // Take keyboard focus into the Focus view. Otherwise the Focus
+    // button that opened it keeps it, and Space (deal) presses that
+    // button again and closes the view.
+    rootRef.current?.focus({ preventScroll: true });
 
     document.body.style.overflow = "hidden";
 
@@ -248,7 +254,11 @@ const playerCardStyle = (
 ) as CSSProperties;
 
   return createPortal(
-    <div className="fixed inset-0 z-[80] flex h-[100dvh] flex-col overflow-hidden bg-[#080e0a] text-white">
+    <div
+      ref={rootRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-[80] flex h-[100dvh] flex-col overflow-hidden bg-[#080e0a] text-white outline-none"
+    >
       <header
         className="flex shrink-0 items-center justify-between gap-2 border-b border-[#d7b45b]/20 px-3 pb-2 sm:px-5"
         style={{
@@ -632,64 +642,6 @@ const playerCardStyle = (
         </div>
       </div>
 
-              {/* BET puck — the chip pile that fills the gold circle,
-                   so the player can see their bet grow as they add chips.
-                   Only visible during betting (not during a hand). */}
-              {bettingOpen && (
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 bottom-10 z-10 flex justify-center sm:bottom-14 lg:hidden"
-                >
-                  <div
-                    className="relative flex h-20 w-20 items-end justify-center overflow-visible rounded-full sm:h-24 sm:w-24"
-                    style={{
-                      background: canBet
-                        ? "radial-gradient(circle at 50% 30%, rgba(229, 199, 121, 0.22) 0%, rgba(5, 10, 7, 0.75) 55%, rgba(5, 10, 7, 0.9) 100%)"
-                        : "radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.04) 0%, rgba(5, 10, 7, 0.75) 60%, rgba(5, 10, 7, 0.9) 100%)",
-                      boxShadow: canBet
-                        ? [
-                            "inset 0 0 0 1px rgba(229, 199, 121, 0.85)",
-                            "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
-                            "inset 0 0 0 4px rgba(229, 199, 121, 0.35)",
-                            "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
-                            "0 0 24px rgba(229, 199, 121, 0.25)",
-                            "0 1px 0 rgba(229, 199, 121, 0.15)",
-                          ].join(", ")
-                        : [
-                            "inset 0 0 0 1px rgba(229, 199, 121, 0.4)",
-                            "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
-                            "inset 0 0 0 4px rgba(229, 199, 121, 0.15)",
-                            "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
-                            "0 1px 0 rgba(229, 199, 121, 0.08)",
-                          ].join(", "),
-                    }}
-                  >
-                    <p
-                      className="pointer-events-none absolute left-1/2 top-2 -translate-x-1/2 text-[9px] font-black uppercase tracking-[0.22em] sm:top-2.5 sm:text-[10px]"
-                      style={{
-                        color: "#e5c779",
-                        textShadow:
-                          "0 0 4px rgba(229, 199, 121, 0.6), 0 1px 0 rgba(0, 0, 0, 0.9)",
-                      }}
-                    >
-                      Bet
-                    </p>
-
-                    {pileAmount > 0 ? (
-                      <div className="mb-2 flex items-end justify-center sm:mb-2.5">
-                        <ChipStack amount={pileAmount} />
-                      </div>
-                    ) : (
-                      <p
-                        className="mb-3 text-sm font-black tabular-nums text-white/50 sm:mb-4 sm:text-base"
-                        style={{ textShadow: "0 1px 0 rgba(0, 0, 0, 0.9)" }}
-                      >
-                        ◈ 0
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
 
         {/* Arc de mise imprimé au bord du tapis */}
         <div
@@ -719,6 +671,66 @@ const playerCardStyle = (
           paddingBottom: "max(env(safe-area-inset-bottom), 0.625rem)",
         }}
       >
+        {/* Bet circle (phones and tablets): rides above the console and
+            the rules line, so it is never hidden behind the console and
+            the bet is visible on the felt while chips are added. Desktop
+            has it inside the console. */}
+        {bettingOpen && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-8 flex -translate-x-1/2 justify-center lg:hidden"
+          >
+            <div
+              className="relative flex h-16 w-16 items-end justify-center overflow-visible rounded-full sm:h-20 sm:w-20"
+              style={{
+                background: canBet
+                  ? "radial-gradient(circle at 50% 30%, rgba(229, 199, 121, 0.22) 0%, rgba(5, 10, 7, 0.75) 55%, rgba(5, 10, 7, 0.9) 100%)"
+                  : "radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.04) 0%, rgba(5, 10, 7, 0.75) 60%, rgba(5, 10, 7, 0.9) 100%)",
+                boxShadow: canBet
+                  ? [
+                      "inset 0 0 0 1px rgba(229, 199, 121, 0.85)",
+                      "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
+                      "inset 0 0 0 4px rgba(229, 199, 121, 0.35)",
+                      "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
+                      "0 0 24px rgba(229, 199, 121, 0.25)",
+                      "0 1px 0 rgba(229, 199, 121, 0.15)",
+                    ].join(", ")
+                  : [
+                      "inset 0 0 0 1px rgba(229, 199, 121, 0.4)",
+                      "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
+                      "inset 0 0 0 4px rgba(229, 199, 121, 0.15)",
+                      "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
+                      "0 1px 0 rgba(229, 199, 121, 0.08)",
+                    ].join(", "),
+              }}
+            >
+              <p
+                className="pointer-events-none absolute left-1/2 top-2 -translate-x-1/2 text-[9px] font-black uppercase tracking-[0.22em] sm:top-2.5 sm:text-[10px]"
+                style={{
+                  color: "#e5c779",
+                  textShadow:
+                    "0 0 4px rgba(229, 199, 121, 0.6), 0 1px 0 rgba(0, 0, 0, 0.9)",
+                }}
+              >
+                Bet
+              </p>
+
+              {pileAmount > 0 ? (
+                <div className="mb-2 flex items-end justify-center sm:mb-2.5">
+                  <ChipStack amount={pileAmount} />
+                </div>
+              ) : (
+                <p
+                  className="mb-3 text-sm font-black tabular-nums text-white/50 sm:mb-4 sm:text-base"
+                  style={{ textShadow: "0 1px 0 rgba(0, 0, 0, 0.9)" }}
+                >
+                  ◈ 0
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* House rules printed on the felt, riding just above the
             console so it never covers them, whatever its height. */}
         <FeltMarkings
@@ -914,28 +926,7 @@ const playerCardStyle = (
               )}
             </div>
           </div>
-        ) : (
-          <div className="mb-2 flex min-h-6 items-center justify-center gap-3 text-[11px] text-white/50">
-            <span>
-              {canBet ? "Next bet" : "Hands"} · ◈{" "}
-              {money(
-                canBet
-                  ? s.bet * spots
-                  : s.hands.reduce((sum, hand) => sum + hand.bet, 0)
-              )}
-            </span>
-
-            {canBet && (
-              <button
-  type="button"
-  onClick={() => setEditBet(true)}
-  className={`${control} ${neutral} h-8 px-3 text-[11px]`}
->
-  Edit bet · ◈ {money(s.bet)}
-</button>
-            )}
-          </div>
-        )}
+        ) : null}
 
         {s.phase === "insurance" ? (
           // The InsuranceModal (mounted at the Blackjack parent) owns
@@ -952,6 +943,16 @@ const playerCardStyle = (
             }`}
           >
             {primaryAction("min-w-0 flex-1 sm:min-h-10")}
+
+            {!bettingOpen && (
+              <button
+                type="button"
+                onClick={() => setEditBet(true)}
+                className={`${control} ${neutral} shrink-0 px-3 sm:min-h-10`}
+              >
+                Edit bet
+              </button>
+            )}
 
             {bettingOpen && s.phase === "settled" && (
               <button
