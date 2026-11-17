@@ -1097,3 +1097,123 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .bulb-bank, .bulb-wave, .glass-sweep::after { animation: none !important; }
 }
+
+/* ===== Slots · SPIN dome ===== */
+.spin-dome {
+  --size: 5.25rem;
+  --glass-hi: #ffd1ea;
+  --glass: #ff2e88;
+  --glass-lo: #7a0d45;
+  --halo: rgba(255, 79, 163, 0.75);
+  --ink: #fff;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  width: var(--size);
+  height: var(--size);
+  flex-shrink: 0;
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+  margin-block: -0.65rem; /* overhangs the deck like a physical button */
+  transition: transform 0.18s cubic-bezier(0.2, 0.9, 0.2, 1.2), filter 0.25s;
+}
+.spin-dome--classic {
+  --glass-hi: #ffd2c2;
+  --glass: #e0221f;
+  --glass-lo: #5e0606;
+  --halo: rgba(255, 200, 90, 0.7);
+}
+.spin-dome > span { position: absolute; border-radius: 9999px; }
+
+/* Halo behind everything */
+.spin-dome__halo { inset: -10px; z-index: -2; background: radial-gradient(circle, var(--halo) 0%, transparent 68%); opacity: 0.45; transition: opacity 0.3s; }
+.spin-dome.is-ready .spin-dome__halo { animation: dome-breathe 2.6s ease-in-out infinite; }
+@keyframes dome-breathe { 0%, 100% { opacity: 0.35; transform: scale(0.96); } 50% { opacity: 0.95; transform: scale(1.06); } }
+
+/* Knurled gold bezel */
+.spin-dome__bezel {
+  inset: 0;
+  background:
+    repeating-conic-gradient(from 0deg, rgba(0, 0, 0, 0.22) 0deg 2deg, rgba(255, 255, 255, 0.12) 2deg 4deg),
+    conic-gradient(from 210deg, #8a6526, #fff3c4, #c99a3f, #6b4f1d, #e9c56e, #fff8dc, #b8873a, #8a6526);
+  box-shadow:
+    0 7px 0 #000,
+    0 12px 22px rgba(0, 0, 0, 0.65),
+    inset 0 1px 1px rgba(255, 255, 255, 0.7),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.5);
+}
+/* Spark orbiting the bezel while the reels turn */
+.spin-dome__spark {
+  inset: 0;
+  opacity: 0;
+  background: conic-gradient(from 0deg, transparent 0deg 300deg, rgba(255, 255, 255, 0.95) 340deg, transparent 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+}
+.spin-dome.is-busy .spin-dome__spark { opacity: 1; animation: dome-orbit 0.9s linear infinite; }
+@keyframes dome-orbit { to { transform: rotate(360deg); } }
+
+/* Black seat between bezel and glass */
+.spin-dome__gap { inset: 7px; background: radial-gradient(circle, #000 60%, #1a1419 100%); box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.9); }
+
+/* Coloured glass dome */
+.spin-dome__glass {
+  inset: 9px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 50% 118%, rgba(255, 255, 255, 0.45) 0%, transparent 38%),
+    radial-gradient(circle at 50% 38%, var(--glass-hi) 0%, var(--glass) 46%, var(--glass-lo) 100%);
+  box-shadow:
+    inset 0 -6px 12px rgba(0, 0, 0, 0.45),
+    inset 0 3px 6px rgba(255, 255, 255, 0.35),
+    0 0 0 1px rgba(0, 0, 0, 0.6);
+  transition: filter 0.25s;
+}
+.spin-dome__gloss {
+  position: absolute;
+  left: 16%;
+  right: 16%;
+  top: 6%;
+  height: 42%;
+  border-radius: 50% 50% 45% 45% / 70% 70% 30% 30%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.05));
+  pointer-events: none;
+}
+.spin-dome__sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 0 !important;
+  background: linear-gradient(110deg, transparent 38%, rgba(255, 255, 255, 0.55) 50%, transparent 62%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+.spin-dome.is-ready .spin-dome__sweep { animation: dome-sweep 4.5s ease-in-out infinite; }
+@keyframes dome-sweep { 0%, 70% { transform: translateX(-120%); } 88%, 100% { transform: translateX(120%); } }
+
+.spin-dome__label {
+  position: relative;
+  z-index: 1;
+  font-weight: 900;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35), 0 0 10px rgba(255, 255, 255, 0.35);
+}
+.spin-dome.is-busy .spin-dome__icon { animation: dome-orbit 0.7s linear infinite; }
+.spin-dome.is-fs .spin-dome__label { color: #fff8dc; }
+
+/* Interaction */
+.spin-dome:enabled:hover { transform: translateY(-2px) scale(1.04); }
+.spin-dome:enabled:hover .spin-dome__glass { filter: brightness(1.12) saturate(1.1); }
+.spin-dome:enabled:active { transform: translateY(3px) scale(0.95); }
+.spin-dome:enabled:active .spin-dome__bezel { box-shadow: 0 3px 0 #000, 0 6px 12px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.6); }
+.spin-dome:disabled { cursor: not-allowed; }
+.spin-dome:disabled:not(.is-busy):not(.is-fs) .spin-dome__glass { filter: grayscale(0.6) brightness(0.6); }
+.spin-dome.is-busy .spin-dome__glass { filter: brightness(0.85); }
+.spin-dome:focus-visible .spin-dome__bezel { box-shadow: 0 0 0 3px #fff, 0 7px 0 #000; }
+
+@media (prefers-reduced-motion: reduce) {
+  .spin-dome, .spin-dome * { animation: none !important; transition: none !important; }
+}

@@ -101,6 +101,62 @@ function meterSize(v: number) {
   return n <= 8 ? "text-[22px]" : n <= 10 ? "text-[20px]" : n <= 12 ? "text-[17px]" : "text-[15px]";
 }
 
+/**
+ * The cabinet's SPIN: a coloured glass dome set in a knurled gold bezel.
+ * Ready: breathing halo and a light sweep on the glass. Spinning: a spark
+ * runs round the bezel and the spin icon turns.
+ */
+function SpinDome({
+  onClick,
+  disabled,
+  busy,
+  ready,
+  variant,
+  fs,
+}: {
+  onClick: () => void;
+  disabled: boolean;
+  busy: boolean;
+  ready: boolean;
+  variant: SkinId;
+  fs: { played: number; total: number } | null;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      aria-label="Spin"
+      title="Space"
+      className={`spin-dome spin-dome--${variant} ${ready ? "is-ready" : ""} ${busy ? "is-busy" : ""} ${fs ? "is-fs" : ""}`}
+    >
+      <span aria-hidden="true" className="spin-dome__halo" />
+      <span aria-hidden="true" className="spin-dome__bezel" />
+      <span aria-hidden="true" className="spin-dome__spark" />
+      <span aria-hidden="true" className="spin-dome__gap" />
+      <span className="spin-dome__glass">
+        <span aria-hidden="true" className="spin-dome__sweep" />
+        <span aria-hidden="true" className="spin-dome__gloss" />
+        {fs ? (
+          <span className="spin-dome__label flex flex-col items-center leading-none">
+            <span className="text-[8px] tracking-[0.3em] opacity-90">FREE</span>
+            <span className="mt-0.5 text-[15px] tabular-nums tracking-normal">
+              {fs.played}/{fs.total}
+            </span>
+          </span>
+        ) : (
+          <span className="spin-dome__label flex flex-col items-center leading-none">
+            <svg viewBox="0 0 24 24" className="spin-dome__icon h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M20 12a8 8 0 1 1-2.34-5.66" />
+              <path d="M20 4v5h-5" />
+            </svg>
+            <span className="mt-0.5 text-[13px] tracking-[0.22em]">SPIN</span>
+          </span>
+        )}
+      </span>
+    </button>
+  );
+}
+
 /* Crisp line icons for the cabinet keys */
 const icon = "h-[18px] w-[18px]";
 const IconInfo = () => (
@@ -1064,16 +1120,14 @@ useEffect(() => {
                     >
                       −
                     </button>
-                    <button
+                    <SpinDome
                       onClick={() => playWithSound(1)}
                       disabled={!canSpin}
-                      aria-label="Spin"
-                      title="Space"
-                      className={`spin-btn relative flex h-[4.75rem] w-[4.75rem] shrink-0 items-center justify-center rounded-full text-base font-black tracking-[0.18em] outline-none focus-visible:ring-4 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-60 [text-shadow:0_1px_0_rgba(0,0,0,0.35)] ${skin.spinBtn} ${s.busy ? "is-busy" : canSpin ? "is-ready" : ""} ${s.fs ? "!opacity-100" : ""}`}
-                      style={{ boxShadow: "inset 0 2px 3px rgba(255,255,255,0.35), inset 0 -6px 10px rgba(0,0,0,0.35)" }}
-                    >
-                      {spinLabel}
-                    </button>
+                      busy={s.busy}
+                      ready={canSpin && !s.busy}
+                      variant={skinId}
+                      fs={s.fs ? { played: Math.min(s.fs.played, s.fs.total), total: s.fs.total } : null}
+                    />
                     <button
                       onClick={() => setBetIdx(s.betIdx + 1)}
                       disabled={s.busy || s.betIdx === BET_LEVELS.length - 1 || BET_LEVELS[s.betIdx + 1] > balance}
