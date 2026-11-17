@@ -23,11 +23,14 @@ export default function ChipRail({
   onPick,
   disabledFor,
   size = "md",
+  tight = false,
 }: {
   visibleCount: number;
   onPick: (value: number) => void;
   disabledFor: (value: number) => boolean;
-  size?: "sm" | "md";
+  size?: "xs" | "sm" | "md";
+  /** Phones: slimmer arrows and gaps so 4 chips fit a narrow column. */
+  tight?: boolean;
 }) {
   const [start, setStart] = useState(0);
   const maxStart = Math.max(0, CHIPS.length - visibleCount);
@@ -38,10 +41,10 @@ export default function ChipRail({
   // Shared premium arrow pill — gradient glass body, inset top
   // highlight, gold hover + press-down 1px. Disabled state dims.
   const arrowClass =
-    "flex h-9 w-7 shrink-0 items-center justify-center rounded-full border border-[#d7b45b]/25 bg-gradient-to-b from-[#1a2219] to-[#0e1310] text-[11px] font-black text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.12),0_1px_0_rgba(0,0,0,0.5)] outline-none transition-[filter,transform,border-color] hover:border-[#d7b45b]/70 hover:brightness-110 enabled:active:translate-y-px focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-25";
+    `flex ${tight ? "h-8 w-5" : "h-9 w-7"} shrink-0 items-center justify-center rounded-full border border-[#d7b45b]/25 bg-gradient-to-b from-[#1a2219] to-[#0e1310] text-[11px] font-black text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.12),0_1px_0_rgba(0,0,0,0.5)] outline-none transition-[filter,transform,border-color] hover:border-[#d7b45b]/70 hover:brightness-110 enabled:active:translate-y-px focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-25`;
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div className={`flex items-center ${tight ? "gap-1" : "gap-1.5"}`}>
       <button
         type="button"
         onClick={() => setStart(Math.max(0, start - 1))}

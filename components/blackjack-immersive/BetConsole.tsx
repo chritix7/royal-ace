@@ -163,7 +163,7 @@ export default function BetConsole({
           Width-capped to 640px; on narrower screens it stays full-
           width with inset margins. */}
       <footer
-        className={`${className} rounded-[22px] border border-[#d7b45b]/45 bg-gradient-to-b from-[#17130e]/95 via-[#0f0d0a]/95 to-[#080706]/95 px-2.5 pt-2.5 shadow-[0_24px_60px_rgba(0,0,0,0.65),0_0_0_1px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(245,215,120,0.18)] backdrop-blur-md sm:px-4 lg:px-5 lg:pt-3`}
+        className={`${className} rounded-[22px] border border-[#d7b45b]/45 bg-gradient-to-b from-[#17130e]/95 via-[#0f0d0a]/95 to-[#080706]/95 px-2.5 pt-2.5 shadow-[0_24px_60px_rgba(0,0,0,0.65),0_0_0_1px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(245,215,120,0.18)] lg:backdrop-blur-md sm:px-4 lg:px-5 lg:pt-3`}
         style={{
           paddingBottom: "max(env(safe-area-inset-bottom), 0.625rem)",
         }}
@@ -245,7 +245,99 @@ export default function BetConsole({
         <SmoothHeight>
           <div key={mode} className="console-swap">
         {bettingOpen ? (
-          <div className="relative mx-auto mb-2 max-w-xl max-sm:grid max-sm:grid-cols-5 max-sm:gap-x-1 max-sm:gap-y-2 lg:mb-0 lg:grid lg:max-w-none lg:grid-cols-[auto_minmax(0,1fr)_auto_auto] lg:items-stretch lg:gap-5">
+          <>
+          {/* Phones and tablets: the desktop console, compacted — bet puck,
+              chips over the quick bets, a tall Deal key, side bets below. */}
+          <div className="mx-auto mb-0.5 max-w-xl lg:hidden">
+            <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_4.5rem] items-stretch gap-1.5 sm:grid-cols-[3.25rem_minmax(0,1fr)_6rem] sm:gap-3">
+              {/* Bet puck */}
+              <div className="flex flex-col items-center justify-center gap-1">
+                <div
+                  className="relative flex h-11 w-11 items-end justify-center overflow-visible rounded-full sm:h-12 sm:w-12"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 50% 30%, rgba(229, 199, 121, 0.22) 0%, rgba(5, 10, 7, 0.75) 55%, rgba(5, 10, 7, 0.9) 100%)",
+                    boxShadow: [
+                      "inset 0 0 0 1px rgba(229, 199, 121, 0.85)",
+                      "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
+                      "inset 0 0 0 4px rgba(229, 199, 121, 0.35)",
+                      "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
+                      "0 0 16px rgba(229, 199, 121, 0.2)",
+                    ].join(", "),
+                  }}
+                >
+                  {pileAmount > 0 ? (
+                    <div className="mb-1 flex origin-bottom scale-[0.72] items-end justify-center">
+                      <ChipStack amount={pileAmount} />
+                    </div>
+                  ) : (
+                    <p className="mb-[15px] text-[8px] font-black uppercase tracking-[0.2em] text-[#e5c779]/75">
+                      Bet
+                    </p>
+                  )}
+                </div>
+                <p className="max-w-full truncate text-[10px] font-black tabular-nums leading-none text-[#f5d778]">
+                  ◈ {money(s.bet * spots)}
+                </p>
+              </div>
+
+              {/* Chips over the quick bets */}
+              <div className="flex min-w-0 flex-col justify-center gap-1.5">
+                <div className="sm:hidden">
+                  <ChipRail
+                    visibleCount={4}
+                    size="xs"
+                    tight
+                    onPick={(value) => addChip(value)}
+                    disabledFor={(value) => !canBet || (s.bet + value) * spots + sides > s.balance}
+                  />
+                </div>
+                <div className="hidden sm:block">
+                  <ChipRail
+                    visibleCount={5}
+                    size="sm"
+                    onPick={(value) => addChip(value)}
+                    disabledFor={(value) => !canBet || (s.bet + value) * spots + sides > s.balance}
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-1">
+                  <button type="button" onClick={() => setBetTo(s.lastBet)} className={`${quickBet} !h-6 !min-h-0 !px-1 !text-[9px] !tracking-[0.1em]`}>
+                    Rebet
+                  </button>
+                  <button type="button" onClick={() => setBetTo(s.bet * 2)} disabled={s.bet === 0} className={`${quickBet} !h-6 !min-h-0 !px-1 !text-[9px] !tracking-[0.1em]`}>
+                    ×2
+                  </button>
+                  <button type="button" onClick={() => setBetTo(0)} disabled={s.bet === 0} className={`${quickBet} !h-6 !min-h-0 !px-1 !text-[9px] !tracking-[0.1em]`}>
+                    Clear
+                  </button>
+                </div>
+              </div>
+
+              {/* Tall Deal key */}
+              <div className="flex flex-col gap-1">
+                {primaryAction("!min-h-0 flex-1 flex-col gap-0 !rounded-2xl !px-1 !py-1 leading-tight", true)}
+                {s.phase === "settled" && (
+                  <button type="button" onClick={() => setEditBet(false)} className={`${quickBet} !h-5 !min-h-0 !text-[8px]`}>
+                    Done
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Side bets */}
+            <div className="mt-2 grid grid-cols-2 gap-1.5 border-t border-[#d7b45b]/15 pt-2">
+              <div className="relative">
+                <ImmersiveSidePill label="PP" amount={s.ppBet} disabled={!canBet} onOpen={() => onOpenSide("pp")} heat={heat.pp} />
+                {roundBreakdown && <SideWinBadge net={roundBreakdown.perfectPairs} />}
+              </div>
+              <div className="relative">
+                <ImmersiveSidePill label="21+3" amount={s.t3Bet} disabled={!canBet} onOpen={() => onOpenSide("t3")} heat={heat.t3} />
+                {roundBreakdown && <SideWinBadge net={roundBreakdown.twentyOnePlusThree} />}
+              </div>
+            </div>
+          </div>
+
+          <div className="relative mx-auto hidden lg:grid lg:max-w-none lg:grid-cols-[auto_minmax(0,1fr)_auto_auto] lg:items-stretch lg:gap-5">
             {/* Bet puck — desktop only: the chip pile grows in a gold
                 ring at the left of the console, total underneath. */}
             <div className="hidden lg:flex lg:flex-col lg:items-center lg:justify-center lg:gap-1.5">
@@ -367,6 +459,7 @@ export default function BetConsole({
               )}
             </div>
           </div>
+          </>
         ) : null}
 
         {s.phase === "insurance" ? (
@@ -378,11 +471,8 @@ export default function BetConsole({
             className="mx-auto h-10 max-w-xl sm:h-11"
           />
         ) : canBet ? (
-          <div
-            className={`mx-auto flex max-w-xl justify-center gap-2 ${
-              bettingOpen ? "lg:hidden" : ""
-            }`}
-          >
+          bettingOpen ? null : (
+          <div className="mx-auto flex max-w-xl justify-center gap-2">
             {primaryAction("min-w-0 flex-1 sm:min-h-10")}
 
             {!bettingOpen && (
@@ -395,16 +485,8 @@ export default function BetConsole({
               </button>
             )}
 
-            {bettingOpen && s.phase === "settled" && (
-              <button
-                type="button"
-                onClick={() => setEditBet(false)}
-                className={`${control} ${neutral}`}
-              >
-                Done
-              </button>
-            )}
           </div>
+          )
         ) : (
           <div className="mx-auto grid max-w-4xl grid-cols-5 gap-1.5 sm:gap-3">
             <button

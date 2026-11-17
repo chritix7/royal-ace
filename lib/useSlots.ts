@@ -284,12 +284,7 @@ function bonusContinue() {
 
       if (st.total > 0) {
   wallet.add(st.total);
-  
-  window.dispatchEvent(
-  new CustomEvent("royalace:chip-fly", {
-    detail: { count: st.total >= b * 10 ? 10 : 6 },
-  }),
-);
+  // No flying chips: the WIN / CREDIT jewels pop and glow on their own.
 
   spinTotal += st.total;
   const ratio = st.total / b;

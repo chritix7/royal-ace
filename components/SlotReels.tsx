@@ -43,26 +43,8 @@ export function SymbolCell({ sym, skin, win, dim = false }: { sym: Sym; skin: Sk
   );
 }
 
-/**
- * Symbol that only flashes past while a reel travels: just the picture,
- * no tile, halo, tags or labels. Keeps the spin start light on phones
- * (a reel strip holds dozens of these).
- */
-function FillerCell({ sym, skin }: { sym: Sym; skin: Skin }) {
-  return (
-    <div className="flex h-[var(--cell)] items-center justify-center" aria-hidden="true">
-      {skin.art ? (
-        <img src={skin.art[sym]} alt="" draggable={false} decoding="async" className="h-[74%] w-[74%] select-none object-contain" />
-      ) : (
-        <span className="inline-block text-[1.8rem] leading-none sm:text-[2.5rem] lg:text-[calc(var(--cell)*0.55)]">{skin.emoji[sym]}</span>
-      )}
-    </div>
-  );
-}
-
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 const MS_PER_CELL = 45;
-const MS_PER_CELL_PHONE = 80;
 const LAND_CELLS = 8;
 
 export function Reel({
@@ -83,10 +65,7 @@ export function Reel({
     if (spinId === 0 || held) return;
     const total = Math.max(600, stopAt);
     const land = Math.min(landMs, total * 0.6);
-    // Phones: fewer travelling symbols (each one is a node to build and
-    // move); the strip still looks just as fast.
-    const msPerCell = typeof window !== "undefined" && window.innerWidth < 1024 ? MS_PER_CELL_PHONE : MS_PER_CELL;
-    const filler = Math.max(LAND_CELLS, Math.round((total - land) / msPerCell) + LAND_CELLS - ROWS);
+    const filler = Math.max(LAND_CELLS, Math.round((total - land) / MS_PER_CELL) + LAND_CELLS - ROWS);
     job.current = { total, land };
     setStrip([...target, ...Array.from({ length: filler }, randomSym), ...prev]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,13 +94,9 @@ export function Reel({
     <div className={`reel-layer relative h-[calc(var(--cell)*4)] w-[var(--cell-w)] overflow-hidden border-r last:border-r-0 ${skin.divider} ${skin.reel}`}>
       <div className={!spinning && spinId > 0 ? "reel-land" : ""}>
         <div ref={stripEl} className={spinning ? "reel-moving" : ""} style={{ willChange: "transform" }}>
-          {strip.map((sym, i) =>
-            i >= ROWS && i < strip.length - ROWS ? (
-              <FillerCell key={i} sym={sym} skin={skin} />
-            ) : (
-              <SymbolCell key={i} sym={sym} skin={skin} win={!spinning && i < ROWS && !!cells?.[i]} dim={anyWin && !spinning && i < ROWS && !cells?.[i]} />
-            ),
-          )}
+          {strip.map((sym, i) => (
+            <SymbolCell key={i} sym={sym} skin={skin} win={!spinning && i < ROWS && !!cells?.[i]} dim={anyWin && !spinning && i < ROWS && !cells?.[i]} />
+          ))}
         </div>
       </div>
       {full && !spinning && (

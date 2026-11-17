@@ -23,15 +23,7 @@ import JackpotPill from "./JackpotPill";
 import LuckyRound from "./LuckyRound";
 import CountUp from "./CountUp";
 import ShoeMeter from "./ShoeMeter";
-import MobileBetZone from "./MobileBetZone";
 import BetConsole from "./blackjack-immersive/BetConsole";
-
-// Premium action button base — used across Hit / Stand / Double / Split /
-// Surrender / Deal. Common shape (border, radius, size, focus ring), with
-// tone + gradient layered on per button.
-const mobileAction =
-  "inline-flex h-10 w-full items-center justify-center rounded-xl border px-1 text-center text-[11px] font-bold uppercase tracking-wide leading-none outline-none shadow-[0_2px_0_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.08)] transition-[filter,transform,background,color,border-color] focus-visible:ring-2 focus-visible:ring-[#e5c779] focus-visible:ring-offset-2 focus-visible:ring-offset-[#101713] enabled:active:translate-y-px enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 lg:h-11 sm:text-sm";
-
 
 function getShoeStatus(g: Game): {
   label: string;
@@ -86,7 +78,6 @@ function getShoeStatus(g: Game): {
   useEffect(() => {
     if (g.s.phase !== "settled") setEditBet(false);
   }, [g.s.phase]);
-  const mobileBetOpen = g.s.phase === "betting" || (g.s.phase === "settled" && editBet);
   // Which side-bet staking modal is open (Perfect Pairs / 21+3 / none).
   // Tapping either felt pill opens the shared SideBetModal.
   const [sideBetOpen, setSideBetOpen] = useState<"pp" | "t3" | null>(null);
@@ -486,7 +477,7 @@ function getShoeStatus(g: Game): {
               (Hit / Stand / Double / Split / Surrender) are rendered
               INSIDE this slot, on top of the engraved arcs — no height
               is wasted below the table. */}
-<div className={`relative ${mobileBetOpen ? "mt-4" : "mt-0"} lg:mt-0 lg:flex lg:min-h-[120px] lg:flex-col lg:items-center lg:justify-end lg:gap-2`}>
+<div className={`relative mt-3 lg:mt-0 lg:flex lg:min-h-[120px] lg:flex-col lg:items-center lg:justify-end lg:gap-2`}>
   {/* Outer betting-area arc engraved in the felt */}
   <div
     aria-hidden="true"
@@ -505,106 +496,17 @@ function getShoeStatus(g: Game): {
         "inset 0 0 0 1px rgba(229, 199, 121, 0.1), inset 0 1px 0 rgba(0, 0, 0, 0.4)",
     }}
   />
-{/* Phones and tablets: printed betting layout (see MobileBetZone). */}
-{mobileBetOpen && (
-  <MobileBetZone
-    bet={s.bet}
-    pileAmount={pileAmount}
-    ppBet={s.ppBet}
-    t3Bet={s.t3Bet}
-    heat={g.heat}
-    busy={s.busy}
-    spots={s.settings.spots}
-    canAddChip={(value) => canBet && (s.bet + value) * spots + sides <= s.balance}
-    onAddChip={(value) => addChip(value)}
-    onClearBet={() => setBetTo(0)}
-    onOpenSide={(which) => setSideBetOpen(which)}
-  />
-)}
-
-{/* Desktop: the official betting console, the same one as in Focus */}
+{/* The official betting console, the same one as in Focus (all sizes) */}
 <BetConsole
   g={g}
   bettingOpen={canBet && (editBet || s.phase === "betting")}
   setEditBet={setEditBet}
   onOpenSide={setSideBetOpen}
-  className="relative z-10 mx-auto hidden w-[min(800px,100%)] lg:block"
+  className="relative z-10 mx-auto w-[min(640px,100%)] lg:w-[min(800px,100%)]"
 />
 </div>
         </div>
 
-        {/* Sticky bottom action bar — MOBILE / TABLET only (lg:hidden).
-            On lg:+ the same controls live inside the felt's bet-zone
-            slot so the table has a single flat bottom edge, aligned
-            with the sidebar. */}
-        <div className="sticky bottom-0 z-20 border-t border-white/10 bg-[#101713]/95 px-2 py-2 backdrop-blur sm:px-7 sm:py-3 lg:hidden">
-          {s.phase === "insurance" ? (
-            // The InsuranceModal (mounted at the Blackjack parent) owns
-            // this decision now — keep the slot visually empty here.
-            <div aria-hidden="true" className="h-10 sm:h-11" />
-          ) : canBet ? (
-            <div className="flex flex-col items-center gap-2">
-              {outOfChips ? (
-                <button onClick={refill} className={`${mobileAction} border-[#d7b45b]/60 bg-gradient-to-b from-[#e5c779] to-[#c89a3f] text-[#10130e] sm:w-auto sm:px-4`}>
-                  Out of chips · take a ◈ {REFILL} refill
-                </button>
-              ) : (
-                <div className="flex w-full max-w-md items-stretch gap-1.5">
-                  {mobileBetOpen ? (
-                    <button
-                      onClick={() => setBetTo(s.lastBet)}
-                      className={`${mobileAction} !w-auto shrink-0 border-white/15 bg-white/[0.04] px-3 text-white/85`}
-                    >
-                      Rebet
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => setEditBet(true)}
-                      className={`${mobileAction} !w-auto shrink-0 border-white/15 bg-white/[0.04] px-3 text-white/85`}
-                    >
-                      Change bet
-                    </button>
-                  )}
-                  <button
-                    onClick={deal}
-                    disabled={s.bet < MIN_BET || stake > s.balance}
-                    className={`${mobileAction} min-w-0 flex-1 border-[#d7b45b]/70 bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e] ${
-                      s.bet >= MIN_BET && stake <= s.balance ? "animate-deal-ready" : ""
-                    }`}
-                  >
-                    {s.phase === "settled" ? "Deal again" : "Deal"} · ◈ {money(stake)}
-                  </button>
-                  <button
-                    onClick={() => setBetTo(s.bet * 2)}
-                    disabled={s.bet === 0}
-                    className={`${mobileAction} !w-auto shrink-0 border-white/15 bg-white/[0.04] px-3.5 text-white/85`}
-                  >
-                    ×2
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="grid grid-cols-5 gap-1.5">
-              <button onClick={hit} disabled={!playing} className={`${mobileAction} border-[#d7b45b]/60 bg-gradient-to-b from-[#e5c779] to-[#c89a3f] text-[#10130e] sm:w-auto sm:px-4`}>
-                Hit
-              </button>
-              <button onClick={stand} disabled={!playing} className={`${mobileAction} border-white/15 bg-white/[0.04] text-white hover:border-[#d7b45b]/50 hover:text-[#e5c779] sm:w-auto sm:px-4`}>
-                Stand
-              </button>
-              <button onClick={double} disabled={!canDouble} className={`${mobileAction} border-[#d7b45b]/50 bg-[#d7b45b]/10 text-[#e5c779] hover:bg-[#d7b45b]/20 sm:w-auto sm:px-4`}>
-                Double
-              </button>
-              <button onClick={split} disabled={!canSplit} className={`${mobileAction} border-amber-400/40 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 sm:w-auto sm:px-4`}>
-                Split
-              </button>
-              <button onClick={surrender} disabled={!canSurrender} className={`${mobileAction} border-white/10 bg-white/[0.02] text-white/60 hover:border-red-300/40 hover:text-red-200 sm:w-auto sm:px-4`}>
-                <span className="lg:hidden">Surr.</span>
-                <span className="hidden lg:inline">Surrender</span>
-              </button>
-            </div>
-          )}
-        </div>
       </section>
       <MobileResultModal
         open={resultOpen && s.phase === "settled"}

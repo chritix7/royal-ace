@@ -170,7 +170,7 @@ export default function ChipButton({
   value: number;
   disabled?: boolean;
   onClick: () => void;
-  size?: "sm" | "md";
+  size?: "xs" | "sm" | "md";
 }) {
   const ringRef = useRef<HTMLSpanElement>(null);
 
@@ -186,7 +186,7 @@ export default function ChipButton({
 
   // md is the sidebar size — slim enough that all 5 denominations fit
   // on a single row inside a 300px sidebar column.
-  const dims = size === "sm" ? "h-9 w-9" : "h-11 w-11";
+  const dims = size === "xs" ? "h-8 w-8" : size === "sm" ? "h-9 w-9" : "h-11 w-11";
 
   return (
     <button
