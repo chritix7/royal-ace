@@ -95,6 +95,12 @@ const towerStyle = {
 const consoleKey = "cab-key";
 
 
+/** Display digits shrink with the amount so nothing is ever cut. */
+function meterSize(v: number) {
+  const n = Math.round(v).toLocaleString("en-US").length;
+  return n <= 8 ? "text-[22px]" : n <= 10 ? "text-[20px]" : n <= 12 ? "text-[17px]" : "text-[15px]";
+}
+
 /* Crisp line icons for the cabinet keys */
 const icon = "h-[18px] w-[18px]";
 const IconInfo = () => (
@@ -911,7 +917,7 @@ useEffect(() => {
                   keys · credit · bet | (−) SPIN (+) | win · gamble · buy */}
               <div ref={consoleRef} className="deck relative z-40 -mx-6 hidden lg:block lg:shrink-0">
                 <span aria-hidden="true" className="deck-chevron" />
-                <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-5 px-6 pb-2.5 pt-3.5">
+                <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1.35fr)_auto_minmax(0,1fr)] items-center gap-4 px-6 pb-2.5 pt-3.5">
                   {/* Left wing */}
                   <div className="flex min-w-0 items-center justify-end gap-3">
                     <div className="flex shrink-0 items-center gap-1.5">
@@ -992,9 +998,9 @@ useEffect(() => {
                         <span className="text-[8px] font-black tracking-[0.15em] opacity-75">TURBO</span>
                       </button>
                     </div>
-                    <div className="jewel flex h-14 min-w-0 flex-1 flex-col justify-center px-4">
+                    <div className="jewel flex h-14 min-w-[8.5rem] flex-1 flex-col justify-center px-3.5">
                       <span className="text-[9px] font-black tracking-[0.3em] text-[#d7b45b]/80">CREDIT</span>
-                      <span className="gold-text truncate font-mono text-[22px] font-black leading-7 tabular-nums">
+                      <span className={`gold-text whitespace-nowrap font-mono font-black leading-7 tabular-nums ${meterSize(balance)}`}>
                         <span className="mr-1 text-base">◈</span>
                         <span className={flash ? "balance-flash-pink" : ""}>
                           <Counter value={balance} />
@@ -1011,7 +1017,7 @@ useEffect(() => {
                         className="jewel flex h-14 w-[7.5rem] flex-col items-center justify-center outline-none transition enabled:hover:brightness-125 focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-70"
                       >
                         <span className="text-[9px] font-black tracking-[0.3em] text-[#d7b45b]/80">BET ▾</span>
-                        <span className="gold-text font-mono text-[22px] font-black leading-7 tabular-nums">
+                        <span className={`gold-text whitespace-nowrap font-mono font-black leading-7 tabular-nums ${meterSize(bet)}`}>
                           <span className="mr-1 text-base">◈</span>{money(bet)}
                         </span>
                       </button>
@@ -1081,10 +1087,10 @@ useEffect(() => {
 
                   {/* Right wing */}
                   <div className="flex min-w-0 items-center justify-start gap-3">
-                    <div className={`jewel flex h-14 min-w-0 flex-1 flex-col items-end justify-center px-4 ${s.lastWin > 0 && !spinningNow ? "jewel--hot" : ""}`}>
+                    <div className={`jewel flex h-14 w-[10.5rem] shrink-0 flex-col items-end justify-center px-3.5 xl:w-[13rem] ${s.lastWin > 0 && !spinningNow ? "jewel--hot" : ""}`}>
                       <span className="text-[9px] font-black tracking-[0.3em] text-[#d7b45b]/80">WIN</span>
                       <span
-                        className={`max-w-full truncate font-mono text-[22px] font-black leading-7 tabular-nums ${s.lastWin > 0 && !spinningNow ? "meter-hit text-[#fff8dc]" : "gold-text"}`}
+                        className={`whitespace-nowrap font-mono font-black leading-7 tabular-nums ${meterSize(s.lastWin)} ${s.lastWin > 0 && !spinningNow ? "meter-hit text-[#fff8dc]" : "gold-text"}`}
                         style={s.lastWin > 0 && !spinningNow ? { textShadow: "0 0 16px rgba(255,209,102,0.7)" } : undefined}
                       >
                         <span className="mr-1 text-base opacity-70">◈</span>
@@ -1326,9 +1332,9 @@ useEffect(() => {
             role="dialog"
             aria-modal="true"
             aria-label="Game info"
-            className="animate-[drawerIn_.22s_ease-out] absolute right-0 top-0 flex h-full w-[380px] flex-col border-l border-white/10 bg-[#0b0f0d] shadow-[-20px_0_60px_rgba(0,0,0,0.6)]"
+            className="animate-[drawerIn_.22s_ease-out] absolute right-0 top-0 flex h-full w-[min(680px,94vw)] flex-col border-l border-white/10 bg-[#0b0f0d] shadow-[-20px_0_60px_rgba(0,0,0,0.6)]"
           >
-            <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-3">
               <p className="text-[11px] font-black uppercase tracking-[0.25em] text-[#e5c779]">Game info</p>
               <button
                 onClick={() => setInfoOpen(false)}
@@ -1338,7 +1344,7 @@ useEffect(() => {
                 ✕
               </button>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:thin]">
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-3 [scrollbar-width:thin]">
       <SlotsSidePanel
         initialTab={infoTab}
         fullscreen={false}

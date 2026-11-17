@@ -85,11 +85,11 @@ export default function SlotsSidePanel({
   ];
   const current = tabs.some((t) => t.id === tab) ? tab : "pay";
 
-  const card = "rounded-2xl border border-white/[0.08] bg-[#101713] p-4";
-  const rule = "flex gap-3 rounded-xl border border-white/[0.06] bg-black/25 p-3 text-[12.5px] leading-5 text-white/70";
+  const card = "rounded-2xl border border-white/[0.08] bg-[#101713] p-4 lg:p-3";
+  const rule = "flex gap-3 rounded-xl border border-white/[0.06] bg-black/25 p-3 text-[12.5px] leading-5 text-white/70 lg:p-2.5 lg:text-[12px] lg:leading-[1.45]";
 
   return (
-    <aside className={`flex flex-col gap-4 lg:min-h-0 ${fullscreen ? "hidden" : ""}`}>
+    <aside className={`flex flex-col gap-4 lg:min-h-0 lg:gap-3 ${fullscreen ? "hidden" : ""}`}>
       {rankToast && (
         <div role="status" className="animate-pop fixed right-4 top-4 z-50 rounded-2xl border border-[#ff4fa3]/70 bg-[#1a0d2e] px-5 py-3 text-sm font-semibold text-[#ff9fd0] shadow-2xl">
           ★ {rankToast}
@@ -97,7 +97,7 @@ export default function SlotsSidePanel({
       )}
 
       {/* Theme */}
-      <div className={`${card} flex items-center justify-between gap-3`}>
+      <div className={`${card} flex items-center justify-between gap-3 lg:py-2`}>
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#d7b45b]/80">Theme</p>
         <div className="flex gap-1.5" role="group" aria-label="Machine theme">
           {Object.values(SKINS).map((k) => (
@@ -148,14 +148,14 @@ export default function SlotsSidePanel({
             <tbody>
               {PAY_ROWS.map((sym) => (
                 <tr key={sym} className="border-t border-white/5">
-                  <td className="py-1.5" title={skin.names[sym]}>
+                  <td className="py-1.5 lg:py-1" title={skin.names[sym]}>
                     <span className="flex items-center gap-2">
-                      <Glyph sym={sym} skin={skin} className="h-8 w-8" />
+                      <Glyph sym={sym} skin={skin} className="h-8 w-8 lg:h-7 lg:w-7" />
                       <span className="text-[11px] text-white/60">{skin.names[sym]}</span>
                     </span>
                   </td>
                   {PAYS[sym].map((p, i) => (
-                    <td key={i} className="py-1.5 text-right font-mono font-bold text-[#e5c779]">
+                    <td key={i} className="py-1.5 text-right font-mono font-bold text-[#e5c779] lg:py-1">
                       {p}
                       <span className="block text-[10px] font-normal text-white/35">◈ {money(p * lineBet)}</span>
                     </td>
@@ -171,7 +171,7 @@ export default function SlotsSidePanel({
       )}
 
       {current === "features" && (
-        <div className="space-y-2">
+        <div className="space-y-2 lg:grid lg:grid-cols-2 lg:gap-2 lg:space-y-0">
           <div className={rule}>
             <Glyph sym="wild" skin={skin} className="h-8 w-8 shrink-0" />
             <p><b className="text-white">Wild · {skin.names.wild}.</b> Replaces every symbol except the scatter. Lands on reels 2, 3 and 4, expands to fill the reel and gives a free re-spin (up to 3 in a row).</p>
@@ -214,11 +214,11 @@ export default function SlotsSidePanel({
             Empire value = everything you have won on this machine: ◈ {money(stats.won)}
             {rank.next ? `. ${rank.next.name} at ◈ ${money(rank.next.min)}.` : ". You own the skyline."}
           </p>
-          <ol className="mt-3 space-y-1.5">
+          <ol className="mt-3 space-y-1.5 lg:mt-2 lg:space-y-1">
             {RANKS.map((r, i) => (
               <li
                 key={r.name}
-                className={`flex items-center justify-between rounded-lg px-3 py-2 text-[12px] ${
+                className={`flex items-center justify-between rounded-lg px-3 py-2 text-[12px] lg:py-1.5 ${
                   i === rank.index ? "bg-[#ff4fa3]/15 text-[#ffc2e0]" : i < rank.index ? "text-[#ff9fd0]" : "text-white/35"
                 }`}
               >
@@ -234,7 +234,8 @@ export default function SlotsSidePanel({
       )}
 
       {current === "session" && (
-        <div className="space-y-3">
+        <div className="space-y-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-3 lg:space-y-0">
+          <div className="space-y-3">
           <div className={card}>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#d7b45b]/80">Today</p>
             <dl className="mt-2 grid grid-cols-3 gap-2 text-center">
@@ -252,7 +253,7 @@ export default function SlotsSidePanel({
           </div>
           <div className={card}>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#d7b45b]/80">All time</p>
-            <dl className="mt-2 grid grid-cols-2 gap-y-1.5 text-[12.5px] text-white/55">
+            <dl className="mt-2 grid grid-cols-2 gap-y-1.5 text-[12.5px] text-white/55 lg:gap-y-1">
               <dt>Spins</dt><dd className="text-right text-white">{money(stats.spins)}</dd>
               <dt>Wagered</dt><dd className="text-right text-white">◈ {money(stats.wagered)}</dd>
               <dt>Won</dt><dd className="text-right text-white">◈ {money(stats.won)}</dd>
@@ -280,6 +281,7 @@ export default function SlotsSidePanel({
                 ))}
               </div>
             )}
+          </div>
           </div>
           {challenges.length > 0 && (
             <div className={card}>
