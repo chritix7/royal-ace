@@ -745,3 +745,8 @@ body {
   animation: shoe-new-card-enter 420ms cubic-bezier(0.22, 0.8, 0.24, 1) both;
 }
 @keyframes drawerIn { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Vault teaser: a slow golden glint so players notice it exists */
+@keyframes vaultGlint { 0%, 86%, 100% { filter: none; transform: none; } 90% { filter: drop-shadow(0 0 6px #ffd166) brightness(1.4); transform: scale(1.25) rotate(-8deg); } 94% { filter: drop-shadow(0 0 3px #ffd166); transform: scale(1.1); } }
+.vault-glint { display: inline-block; animation: vaultGlint 7s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .vault-glint { animation: none; } }

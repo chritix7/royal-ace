@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GAMBLE_MAX_ROUNDS, type CardColor } from "../lib/gamble";
 import { money } from "../lib/game";
 import type { GambleState } from "../lib/useSlots";
@@ -25,7 +25,7 @@ function Card3D({
           className="absolute inset-0 flex items-center justify-center rounded-xl border border-[#d7b45b]/70 text-5xl font-black text-[#d7b45b] [backface-visibility:hidden] sm:h-48 sm:w-36 sm:text-6xl"
           style={{
             background:
-              "repeating-linear-gradient(45deg, #12261f 0 8px, #1b3d33 8px 16px)",
+              "radial-gradient(circle at 50% 50%, rgba(240,211,139,0.18), transparent 60%), repeating-linear-gradient(45deg, #1a1410 0 8px, #2a2018 8px 16px)",
             boxShadow:
               "0 12px 30px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12)",
           }}
@@ -66,6 +66,32 @@ export default function GamblePanel({
   onClose: () => void;
 }) {
     const canContinue = g.won === true && g.rounds < GAMBLE_MAX_ROUNDS;
+  // Cards drawn while this panel is open (newest last, max 5).
+  const [seen, setSeen] = useState<NonNullable<GambleState["card"]>[]>([]);
+  const lastCard = useRef<GambleState["card"]>(null);
+  useEffect(() => {
+    if (g.phase === "result" && g.card && g.card !== lastCard.current) {
+      lastCard.current = g.card;
+      const c = g.card;
+      setSeen((v) => [...v, c].slice(-5));
+    }
+  }, [g.phase, g.card]);
+  const chooseRef = useRef(onChoose);
+  chooseRef.current = onChoose;
+  useEffect(() => {
+    if (g.phase !== "choose") return;
+    const onKey = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase();
+      if (k === "r") chooseRef.current("red");
+      else if (k === "b") chooseRef.current("black");
+      else if (k === "c") {
+        collectRef.current();
+        closeRef.current();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [g.phase]);
   const collectRef = useRef(onCollect);
   const closeRef = useRef(onClose);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -112,12 +138,10 @@ export default function GamblePanel({
 
             <div
         ref={panelRef}
-        className="relative w-full max-w-sm rounded-2xl border border-white/20 p-4 text-center sm:p-6"
+        className="animate-pop relative w-full max-w-sm rounded-2xl border border-[#d7b45b]/45 p-4 text-center sm:p-6"
         style={{
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.04), transparent 25%), linear-gradient(135deg, #292b35 0%, #171923 45%, #10121a 100%)",
-          boxShadow:
-            "0 18px 45px rgba(0,0,0,0.60), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.50)",
+          background: "linear-gradient(180deg, rgba(255,236,170,0.06), transparent 30%), linear-gradient(135deg, #221b14 0%, #120e0b 50%, #0b0908 100%)",
+          boxShadow: "0 24px 70px rgba(0,0,0,0.7), 0 0 60px rgba(240,211,139,0.12), inset 0 1px 0 rgba(255,236,170,0.2)",
         }}
       >
         <div
@@ -129,15 +153,15 @@ export default function GamblePanel({
           }}
         />
 
-        <p className="text-[9px] uppercase tracking-[0.25em] text-white/40">
-          Private collection
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#d7b45b]/80">
+          Double or nothing
         </p>
 
         <h3
           id="gamble-title"
-          className="mt-2 text-xl font-black tracking-[0.16em] text-[#ead5a3] sm:text-2xl"
+          className="font-display mt-2 text-2xl font-bold tracking-[0.16em] text-[#f0d38b] sm:text-3xl"
         >
-          X2 GAMBLE
+          GAMBLE ×2
         </h3>
 
         <p className="mt-1 text-[10px] font-bold tracking-[0.18em] text-white/45">
@@ -146,9 +170,9 @@ export default function GamblePanel({
 
         {/* Afficheur du montant */}
         <div
-          className="mt-4 rounded-xl border border-white/10 px-3 py-3"
+          className="mt-4 rounded-xl border border-[#d7b45b]/20 px-3 py-3"
           style={{
-            background: "linear-gradient(180deg, #10131c 0%, #080b12 100%)",
+            background: "linear-gradient(180deg, #0d0b09 0%, #060504 100%)",
             boxShadow:
               "inset 0 2px 5px rgba(0,0,0,0.65), inset 0 -1px 0 rgba(255,255,255,0.04)",
           }}
@@ -166,7 +190,22 @@ export default function GamblePanel({
           </p>
         </div>
 
-        <div className="mt-5 flex justify-center">
+        {/* Last cards drawn, newest on the right */}
+        <div className="mt-3 flex h-7 items-center justify-center gap-1.5" aria-label="Previous cards">
+          <span className="mr-1 text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">Last</span>
+          {seen.length === 0 && <span className="text-[10px] text-white/25">—</span>}
+          {seen.map((c, i) => (
+            <span
+              key={i}
+              className={`flex h-7 w-5 items-center justify-center rounded-[3px] border border-black/30 text-xs font-black ${c.color === "red" ? "text-[#c81e3a]" : "text-[#111]"}`}
+              style={{ background: "linear-gradient(180deg,#fffaf0,#e9e2d0)" }}
+            >
+              {c.suit}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-3 flex justify-center">
           <Card3D
             card={g.card}
             flipped={
@@ -213,6 +252,18 @@ export default function GamblePanel({
                 <span className="text-white/70">♠♣</span> BLACK
               </button>
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                onCollect();
+                onClose();
+              }}
+              className="mt-3 h-11 w-full rounded-xl border border-[#f0d38b] text-sm font-black tracking-widest text-[#1b1305] outline-none transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-white active:translate-y-px"
+              style={{ background: "linear-gradient(180deg, #fff1bf 0%, #e9c56e 45%, #b8873a 100%)", boxShadow: "0 3px 0 #6b4f1d" }}
+            >
+              COLLECT ◈ {money(g.amount)}
+            </button>
+            <p className="mt-2 hidden text-[10px] text-white/40 sm:block">Keys: R red · B black · C collect</p>
           </>
         )}
 

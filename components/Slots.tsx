@@ -32,6 +32,7 @@ import { useBalanceFlash } from "../hooks/useBalanceFlash";
 import { useSession } from "../lib/sessionStore";
 import SlotsSidePanel from "./slots/SlotsSidePanel";
 import KingpinRoom from "./slots/KingpinRoom";
+import ClassicRoom from "./slots/ClassicRoom";
 import BonusResultModal from "./slots/BonusResultModal";
 import BuyBonusModal from "./slots/BuyBonusModal";
 
@@ -296,6 +297,11 @@ useEffect(() => {
           }`}
           style={fullscreen ? { paddingTop: "max(env(safe-area-inset-top), 1rem)" } : undefined}
         >
+          {skinId === "classic" && (
+            <div className="hidden lg:block">
+              <ClassicRoom party={s.fs !== null} />
+            </div>
+          )}
           {skinId === "miami" && (
             <>
               <div className="lg:hidden">
@@ -442,19 +448,29 @@ useEffect(() => {
 
           {collectionRewardOpen && (
   <div className="absolute inset-0 z-[70] flex items-center justify-center bg-black/70 px-4">
-    <div className="w-full max-w-sm rounded-2xl border border-[#e5c779]/40 bg-[#10150f] p-5 text-center shadow-2xl">
-      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#e5c779]">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Crown collection reward"
+      className="animate-pop w-full max-w-sm rounded-2xl border border-[#d7b45b]/45 p-6 text-center"
+      style={{
+        background: "linear-gradient(180deg, rgba(255,236,170,0.06), transparent 30%), linear-gradient(135deg, #221b14 0%, #120e0b 50%, #0b0908 100%)",
+        boxShadow: "0 24px 70px rgba(0,0,0,0.7), 0 0 60px rgba(240,211,139,0.15), inset 0 1px 0 rgba(255,236,170,0.2)",
+      }}
+    >
+      <p className="text-3xl" aria-hidden="true">👑</p>
+      <p className="mt-1 text-[10px] font-black uppercase tracking-[0.3em] text-[#d7b45b]/80">
         Crown collection complete
       </p>
 
-      <h4 className="mt-2 text-xl font-black text-white">
+      <h4 className="font-display mt-2 text-2xl font-bold text-[#f0d38b]">
         Choose your reward
       </h4>
 
       <div className="mt-5 grid grid-cols-2 gap-3">
         <button
           onClick={() => claimCollectionReward("spins")}
-          className="rounded-xl border border-[#e5c779]/50 bg-[#1a1f16] px-3 py-4 text-sm font-bold text-white transition hover:border-[#e5c779] hover:bg-[#22281d]"
+          className="rounded-xl border border-[#d7b45b]/40 bg-[linear-gradient(180deg,#2a2420,#120e0b)] px-3 py-4 text-sm font-bold text-[#f0d99a] transition hover:-translate-y-0.5 hover:border-[#f0d38b] hover:shadow-[0_0_18px_rgba(240,211,139,0.3)]"
         >
           <span className="block text-2xl">🎰</span>
           5 Free Spins
@@ -462,7 +478,7 @@ useEffect(() => {
 
         <button
           onClick={() => claimCollectionReward("chips")}
-          className="rounded-xl border border-[#e5c779]/50 bg-[#1a1f16] px-3 py-4 text-sm font-bold text-white transition hover:border-[#e5c779] hover:bg-[#22281d]"
+          className="rounded-xl border border-[#d7b45b]/40 bg-[linear-gradient(180deg,#2a2420,#120e0b)] px-3 py-4 text-sm font-bold text-[#f0d99a] transition hover:-translate-y-0.5 hover:border-[#f0d38b] hover:shadow-[0_0_18px_rgba(240,211,139,0.3)]"
         >
           <span className="block text-2xl">◈</span>
           {money(bet * COLLECTION_CHIP_MULT)} Chips
@@ -736,6 +752,15 @@ useEffect(() => {
                   </div>
                   <div className="flex min-w-0 items-center gap-2">
                   {crownMeter}
+                  <button
+                    type="button"
+                    onClick={() => openInfo("features")}
+                    title="The vault: every paid spin has a 1 in 250 chance to open it and reveal a jackpot"
+                    className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-[#d7b45b]/30 bg-black/55 px-2.5 text-[9px] font-black uppercase tracking-[0.15em] text-[#e5c779]/85 outline-none transition hover:border-[#f0d38b] focus-visible:ring-2 focus-visible:ring-[#e5c779]"
+                  >
+                    <span aria-hidden="true" className="vault-glint text-[11px] leading-none">🔐</span>
+                    Vault
+                  </button>
                   <div
                     className="flex h-9 min-w-0 flex-1 items-center justify-center gap-3 overflow-hidden rounded-md border border-white/[0.07] bg-black/70 px-4 text-sm shadow-[inset_0_2px_6px_rgba(0,0,0,0.8)]"
                     role="status"

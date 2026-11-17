@@ -27,19 +27,17 @@ export default function VaultGame({
 
   return (
     <div
-      className="absolute inset-0 z-40 overflow-y-auto bg-black/90 px-3 py-6 backdrop-blur-sm"
+      className="absolute inset-0 z-40 overflow-y-auto bg-black/90 px-3 py-6 backdrop-blur-sm lg:flex lg:items-center lg:justify-center lg:py-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="vault-title"
     >
       <div
   ref={panelRef}
-  className="relative mx-auto max-w-xl rounded-2xl border border-white/20 p-3 text-center sm:p-5"
+  className="animate-pop relative mx-auto max-w-xl rounded-2xl border border-[#d7b45b]/45 p-3 text-center sm:p-5 lg:max-w-2xl"
         style={{
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.04), transparent 25%), linear-gradient(135deg, #292b35 0%, #171923 45%, #10121a 100%)",
-          boxShadow:
-            "0 18px 45px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.50)",
+          background: "linear-gradient(180deg, rgba(255,236,170,0.06), transparent 30%), linear-gradient(135deg, #221b14 0%, #120e0b 50%, #0b0908 100%)",
+          boxShadow: "0 24px 70px rgba(0,0,0,0.7), 0 0 60px rgba(240,211,139,0.12), inset 0 1px 0 rgba(255,236,170,0.2)",
         }}
       >
         {/* Reflet sur le bord du coffre */}
@@ -52,13 +50,13 @@ export default function VaultGame({
           }}
         />
 
-        <p className="text-[9px] uppercase tracking-[0.25em] text-white/40">
-          Private collection
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#d7b45b]/80">
+          Vault bonus
         </p>
 
         <h3
           id="vault-title"
-          className="mt-2 text-2xl font-black tracking-[0.16em] text-[#ead5a3] sm:text-3xl"
+          className="font-display mt-2 text-2xl font-bold tracking-[0.16em] text-[#f0d38b] sm:text-4xl"
         >
           THE VAULT
         </h3>
@@ -75,10 +73,10 @@ export default function VaultGame({
 
         {/* Compartiments du coffre */}
         <div
-          className="mt-4 grid grid-cols-4 gap-2 rounded-xl border border-white/10 p-2 sm:mt-5 sm:gap-3 sm:p-3"
+          className="mt-4 grid grid-cols-4 gap-2 rounded-xl border border-[#d7b45b]/20 p-2 sm:mt-5 sm:gap-3 sm:p-3"
           style={{
             background:
-              "linear-gradient(180deg, #090c13 0%, #11141d 100%)",
+              "linear-gradient(180deg, #0d0b09 0%, #060504 100%)",
             boxShadow:
               "inset 0 2px 7px rgba(0,0,0,0.65), inset 0 -1px 0 rgba(255,255,255,0.04)",
           }}
@@ -105,21 +103,21 @@ export default function VaultGame({
                       }${value} chips${opened ? ", selected" : ", not selected"}`
                     : `Open case ${i + 1}`
                 }
-                className={`relative flex aspect-square min-w-0 items-center justify-center rounded-lg border p-1 outline-none transition-[transform,border-color] duration-150 focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-default motion-reduce:transition-none ${
+                className={`relative flex aspect-square min-w-0 lg:aspect-[5/4] items-center justify-center rounded-lg border p-1 outline-none transition-[transform,border-color] duration-150 focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-default motion-reduce:transition-none ${
                   opened
                     ? label
                       ? "border-[#d7b45b]/80"
                       : "border-emerald-300/50"
                     : done
                       ? "border-white/10"
-                      : "border-white/20 enabled:hover:border-[#d7b45b]/70 enabled:active:translate-y-px"
+                      : "border-[#d7b45b]/25 enabled:hover:-translate-y-0.5 enabled:hover:border-[#f0d38b] enabled:hover:shadow-[0_0_18px_rgba(240,211,139,0.3)] enabled:active:translate-y-px"
                 }`}
                 style={{
                   background: opened
                     ? label
                       ? "linear-gradient(180deg, #373021 0%, #191712 100%)"
                       : "linear-gradient(180deg, #1b2c29 0%, #101a19 100%)"
-                    : "linear-gradient(180deg, #30323c 0%, #20222c 40%, #151720 100%)",
+                    : "linear-gradient(180deg, #2a2420 0%, #17130f 55%, #0d0b09 100%)",
                   boxShadow: opened
                     ? "inset 0 2px 5px rgba(0,0,0,0.55), inset 0 -1px 0 rgba(255,255,255,0.05)"
                     : "0 2px 0 #06080d, inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 4px rgba(0,0,0,0.30)",
@@ -164,12 +162,12 @@ export default function VaultGame({
         </div>
 
         {done && (
-          <div className="mt-5">
+          <div className="mt-5 lg:mt-4 lg:grid lg:grid-cols-[1fr_200px] lg:items-stretch lg:gap-3">
             <div
-              className="rounded-xl border border-white/10 px-3 py-3"
+              className="rounded-xl border border-[#d7b45b]/25 px-3 py-3"
               style={{
                 background:
-                  "linear-gradient(180deg, #10131c 0%, #080b12 100%)",
+                  "linear-gradient(180deg, #0d0b09 0%, #060504 100%)",
                 boxShadow:
                   "inset 0 2px 5px rgba(0,0,0,0.65), inset 0 -1px 0 rgba(255,255,255,0.04)",
               }}
@@ -178,7 +176,7 @@ export default function VaultGame({
                 Total vault win
               </p>
 
-              <p className="mt-1 break-words font-mono text-2xl font-black tabular-nums text-[#f0dfb7] sm:text-3xl">
+              <p className="mt-1 break-words font-mono text-2xl font-black tabular-nums text-[#fff1bf] [text-shadow:0_0_18px_rgba(240,211,139,0.45)] sm:text-3xl">
                 <span className="text-[#bfa76e]">◈</span>{" "}
                 <RollingNumber
                   value={result.total}
@@ -197,10 +195,9 @@ export default function VaultGame({
             <button
               type="button"
               onClick={onCollect}
-              className={`${machineSmall} mt-4 w-full py-3 !border-[#d7b45b]/70 !text-[#f0dfb7]`}
+              className={`${machineSmall} mt-4 w-full !rounded-xl py-3 text-sm font-black tracking-widest !border-[#f0d38b] !text-[#1b1305] lg:mt-0`}
               style={{
-                background:
-                  "linear-gradient(180deg, #49402d 0%, #302a20 50%, #211e19 100%)",
+                background: "linear-gradient(180deg, #fff1bf 0%, #e9c56e 45%, #b8873a 100%)",
               }}
             >
               COLLECT
