@@ -88,3 +88,8 @@ export function exitFullscreenQuietly() {
 
 /** How long a Focus view takes to dissolve before leaving fullscreen. */
 export const FOCUS_OUT_MS = 260;
+
+/** Phones and small tablets: Focus opens and closes with no animation. */
+export function isNarrowScreen() {
+  return typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(max-width: 1023px)").matches;
+}

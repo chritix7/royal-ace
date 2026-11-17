@@ -29,6 +29,8 @@ let installed = false;
 
 function eligible(el: Element) {
   if (el.closest("[data-exit-ghost]")) return false;
+  // Focus views animate (or not, on phones) by themselves.
+  if (el.hasAttribute("data-no-exit")) return false;
   if (el.matches(ROOT_SELECTOR)) return true;
   // Overlay wrapper (fixed, full screen) holding a dialog.
   const cls = typeof el.className === "string" ? el.className : "";

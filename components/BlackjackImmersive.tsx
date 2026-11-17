@@ -6,7 +6,7 @@ import { handValue, isBlackjack } from "../lib/blackjack";
 import { tableBg, money } from "../lib/game";
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import { useSession } from "../lib/sessionStore";
-import { FOCUS_OUT_MS, exitFullscreenQuietly, exitFullscreenSettled, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
+import { FOCUS_OUT_MS, exitFullscreenQuietly, exitFullscreenSettled, isNarrowScreen, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
 import { Counter } from "./ui";
 import PlayingCard from "./PlayingCard";
 import CardFlight from "./CardFlight";
@@ -89,7 +89,9 @@ export default function BlackjackImmersive({
 
   const rootRef = useRef<HTMLDivElement>(null);
   // pending: dark while fullscreen switches · in: entrance · out: leaving
-  const [stage, setStage] = useState<"pending" | "in" | "out">("pending");
+  // Phones: no Focus animation at all ("still"), it froze some devices.
+  const [narrow] = useState(isNarrowScreen);
+  const [stage, setStage] = useState<"pending" | "in" | "out" | "still">(() => (isNarrowScreen() ? "still" : "pending"));
   // Leaving by the Exit key: dissolve first, then leave fullscreen while
   // the screen is dark, then hand back to the table.
   const leavingRef = useRef(false);
@@ -98,6 +100,11 @@ export default function BlackjackImmersive({
   const requestClose = () => {
     if (leavingRef.current) return;
     leavingRef.current = true;
+    // Phones: close at once (fullscreen is left by the effect cleanup).
+    if (narrow) {
+      closeRef.current();
+      return;
+    }
     setStage("out");
     // Fade out, leave fullscreen while dark, and only hand back to the
     // table once the viewport has stopped resizing (phones).
@@ -145,7 +152,9 @@ export default function BlackjackImmersive({
     const wasFullscreen = Boolean(document.fullscreenElement);
     // Stay dark while the browser swaps to fullscreen (its toolbars jump
     // instantly), then play the entrance once the switch has settled.
-    const cancelFs = requestFullscreenSettled(() => setStage("in"));
+    const cancelFs = requestFullscreenSettled(() => {
+      if (!isNarrowScreen()) setStage("in");
+    });
 
     // Esc in fullscreen is swallowed by the browser (no keydown), so
     // leaving fullscreen is our only signal the player wants out:
@@ -157,6 +166,10 @@ export default function BlackjackImmersive({
         // Left by the browser (Esc, back gesture): fade out while the
         // page resizes, then hand back to the table.
         leavingRef.current = true;
+        if (isNarrowScreen()) {
+          closeRef.current();
+          return;
+        }
         setStage("out");
         whenViewportStable(() => closeRef.current());
       }
@@ -229,8 +242,8 @@ const playerCardStyle = (
     <div
       ref={rootRef}
       tabIndex={-1}
-      data-exit={stage === "out" ? undefined : ""}
-      className={`${stage === "pending" ? "focus-pending" : stage === "out" ? "slots-focus-out" : "slots-focus-in"} fixed inset-0 z-[80] flex h-[100dvh] flex-col overflow-hidden bg-[#080e0a] text-white outline-none`}
+      data-no-exit=""
+      className={`${stage === "pending" ? "focus-pending" : stage === "out" ? "slots-focus-out" : stage === "in" ? "slots-focus-in" : ""} fixed inset-0 z-[80] flex h-[100dvh] flex-col overflow-hidden bg-[#080e0a] text-white outline-none`}
     >
       <header
         className="flex shrink-0 items-center justify-between gap-2 border-b border-[#d7b45b]/20 px-3 pb-2 sm:px-5"

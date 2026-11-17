@@ -1370,9 +1370,11 @@ body {
 /* Phones: no double-tap zoom delay on game keys */
 .spin-dome, .cab-key, .bet-key, .lux-btn, .jewel { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 
-/* Phones: a slightly longer Focus entrance so it reads after the relayout */
+/* Phones: Focus opens and closes instantly (no animation, no layers
+   kept alive while playing). */
 @media (max-width: 1023px) {
-  .slots-focus-in > * { animation-duration: 0.5s; }
+  .focus-pending > * { opacity: 1 !important; }
+  .slots-focus-in > *, .slots-focus-out > *, .slots-view-in { animation: none !important; will-change: auto !important; }
 }
 
 /* Phones: no orbiting spark on the SPIN bezel while the reels turn */

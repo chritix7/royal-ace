@@ -13,7 +13,7 @@ import SlotReels from "./SlotReels";
 import { Counter, machineSmall } from "./ui";
 import { money } from "../lib/game";
 import { wallet } from "../lib/wallet";
-import { exitFullscreenSettled, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
+import { exitFullscreenSettled, isNarrowScreen, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
 import { SKINS, rankOf, type SkinId } from "../lib/skins";
 import { useSlots } from "../lib/useSlots";
 import {
@@ -265,13 +265,20 @@ export default function Slots({
     }
     // Entering: stay dark until the browser has finished its fullscreen
     // switch (set below), then play the entrance.
-    setFocusAnim(focus ? "focus-pending" : "slots-view-in");
+    // Phones: no Focus animation at all (too heavy there).
+    if (isNarrowScreen()) setFocusAnim("");
+    else setFocusAnim(focus ? "focus-pending" : "slots-view-in");
   }, [focus]);
   // Exit key: dissolve first, leave fullscreen while dark, then close.
   const focusLeaving = useRef(false);
   const requestFocusExit = () => {
     if (focusLeaving.current) return;
     focusLeaving.current = true;
+    // Phones: close at once (fullscreen is left by the effect cleanup).
+    if (isNarrowScreen()) {
+      onFocusChange?.(false);
+      return;
+    }
     setFocusAnim("slots-focus-out");
     let closed = false;
     const done = () => {
@@ -302,9 +309,9 @@ export default function Slots({
     // orbit is rebuilt): start the entrance once that work is done, or its
     // first frames are dropped and it looks instant.
     let entranceTimer = 0;
-    const narrow = typeof window.matchMedia === "function" && window.matchMedia("(max-width: 1023px)").matches;
+    const narrow = isNarrowScreen();
     const cancelFs = requestFullscreenSettled(() => {
-      entranceTimer = window.setTimeout(() => setFocusAnim("slots-focus-in"), narrow ? 150 : 0);
+      if (!narrow) setFocusAnim("slots-focus-in");
     });
     // Esc in fullscreen only exits fullscreen (no keydown): close Focus with it.
     let entered = false;
@@ -315,6 +322,10 @@ export default function Slots({
         // Left by the browser (Esc, back gesture): fade out while the
         // page resizes, then close.
         focusLeaving.current = true;
+        if (narrow) {
+          close();
+          return;
+        }
         setFocusAnim("slots-focus-out");
         whenViewportStable(close);
       }
@@ -582,7 +593,7 @@ useEffect(() => {
           aria-label="Exit focus mode"
           title="Exit focus (Esc)"
           style={{ top: "max(1rem, calc(env(safe-area-inset-top) + 0.5rem))" }}
-          className="fixed right-4 z-[61] flex h-9 items-center gap-1.5 rounded-full border border-[#d7b45b]/50 bg-black/70 px-3 text-[11px] font-bold uppercase tracking-wider text-[#e5c779] backdrop-blur hover:border-[#e5c779]"
+          className="fixed right-4 z-[61] flex h-9 items-center gap-1.5 rounded-full border border-[#d7b45b]/50 bg-black/85 px-3 text-[11px] font-bold uppercase tracking-wider text-[#e5c779] touch-manipulation lg:bg-black/70 lg:backdrop-blur hover:border-[#e5c779]"
         >
           ✕ <span>Exit</span>
         </button>
