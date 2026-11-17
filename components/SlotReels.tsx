@@ -31,6 +31,9 @@ export function SymbolCell({ sym, skin, win, dim = false }: { sym: Sym; skin: Sk
       ) : (
         <span className={`inline-block text-[1.8rem] leading-none drop-shadow-sm sm:text-[2.5rem] lg:text-[calc(var(--cell)*0.55)] ${win ? `anim-${sym}` : ""}`}>{skin.emoji[sym]}</span>
       )}
+      {(sym === "wild" || sym === "scatter") && !win && (
+        <span aria-hidden="true" className="sym-halo" style={{ ["--halo-c" as string]: sym === "wild" ? "rgba(255,79,163,0.55)" : "rgba(34,211,238,0.55)" }} />
+      )}
       {/* Soft tile behind each symbol */}
       <span aria-hidden="true" className="pointer-events-none absolute inset-[4px] hidden rounded-xl bg-[radial-gradient(ellipse_at_50%_35%,rgba(255,255,255,0.07),transparent_70%)] ring-1 ring-inset ring-white/[0.05] lg:block" />
       {win && <span aria-hidden="true" className="win-frame" />}
@@ -88,7 +91,7 @@ export function Reel({
   }, [strip]);
 
   return (
-    <div className={`relative h-[calc(var(--cell)*4)] w-[var(--cell-w)] overflow-hidden border-r last:border-r-0 ${skin.divider} ${skin.reel}`}>
+    <div className={`reel-layer relative h-[calc(var(--cell)*4)] w-[var(--cell-w)] overflow-hidden border-r last:border-r-0 ${skin.divider} ${skin.reel}`}>
       <div className={!spinning && spinId > 0 ? "reel-land" : ""}>
         <div ref={stripEl} className={spinning ? "reel-moving" : ""} style={{ willChange: "transform" }}>
           {strip.map((sym, i) => (
@@ -131,6 +134,8 @@ export function Reel({
       "linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0.16) 45%, transparent)",
   }}
 />
+      {/* Motion-blur look while travelling (off during the landing bounce) */}
+      <div aria-hidden="true" className={`reel-speed ${spinning && !anticipate ? "is-on" : ""}`} />
       {anticipate && spinning && (
         <div className="pointer-events-none absolute inset-0 z-[8] animate-pulse ring-4 ring-inset ring-[#ffd166] shadow-[inset_0_0_34px_rgba(255,209,102,0.55)]">
           <div className="absolute inset-0 bg-gradient-to-b from-[#ffd166]/0 via-[#ffd166]/15 to-[#ffd166]/0" />
@@ -169,7 +174,7 @@ function OrbitRing({ color, mood }: { color: string; mood: "idle" | "win" | "jac
       ? `M ${cx} ${y} H ${x + W - r} A ${r} ${r} 0 0 1 ${x + W} ${y + r} V ${y + H - r} A ${r} ${r} 0 0 1 ${x + W - r} ${y + H} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + H - r} V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`
       : "";
   const per = 2 * (W + H - 4 * r) + 2 * Math.PI * r;
-  const n = W > 0 ? Math.max(12, Math.round(per / 30)) : 0;
+  const n = W > 0 ? Math.max(12, Math.round(per / 40)) : 0;
   const LAP = 26000; // ms per lap at idle speed
   const rate = mood === "jackpot" ? 6 : mood === "win" ? 2.6 : 1;
 
@@ -192,12 +197,12 @@ function OrbitRing({ color, mood }: { color: string; mood: "idle" | "win" | "jac
       if (reduced) a.pause();
       list.push(a);
     });
-    const trail = root.querySelector<SVGPathElement>("[data-trail]");
-    if (trail && typeof trail.animate === "function") {
+    (Array.from(root.querySelectorAll("[data-trail]")) as SVGPathElement[]).forEach((trail) => {
+      if (typeof trail.animate !== "function") return;
       const a = trail.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: -100 }], { duration: LAP / 2.2, iterations: Infinity, easing: "linear" });
       if (reduced) a.pause();
       list.push(a);
-    }
+    });
     anims.current = list;
     return () => list.forEach((a) => a.cancel());
   }, [d, n]);
@@ -219,18 +224,27 @@ function OrbitRing({ color, mood }: { color: string; mood: "idle" | "win" | "jac
             <path d={d} fill="none" stroke="#000" strokeOpacity={0.75} strokeWidth={9} />
             <path d={d} fill="none" stroke="#d7b45b" strokeOpacity={0.35} strokeWidth={1} />
             {/* Light trail sweeping with the jewels */}
-            <path
-              data-trail
-              d={d}
-              fill="none"
-              pathLength={100}
-              stroke={mood === "idle" ? "#ffd98a" : hot}
-              strokeOpacity={mood === "idle" ? 0.35 : 0.6}
-              strokeWidth={10}
-              strokeLinecap="round"
-              strokeDasharray="14 36"
-              style={{ filter: "blur(5px)" }}
-            />
+            {/* Stacked strokes fake a soft glow without a per-frame blur */}
+            <g data-trail-group>
+              {[
+                [12, 0.1],
+                [7, 0.16],
+                [3, 0.35],
+              ].map(([w, o]) => (
+                <path
+                  key={w}
+                  data-trail
+                  d={d}
+                  fill="none"
+                  pathLength={100}
+                  stroke={mood === "idle" ? "#ffd98a" : hot}
+                  strokeOpacity={mood === "idle" ? o : Math.min(1, o * 1.7)}
+                  strokeWidth={w}
+                  strokeLinecap="round"
+                  strokeDasharray="14 36"
+                />
+              ))}
+            </g>
           </svg>
           {Array.from({ length: n }, (_, i) => {
             const star = i % 5 === 0;
