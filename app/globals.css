@@ -1340,3 +1340,12 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .focus-zoom-in, .view-in { animation: none; }
 }
+
+/* ===== Focus staging around the browser's fullscreen switch ===== */
+.focus-pending > * { opacity: 0 !important; }
+.focus-stage-in > * { animation: focus-zoom-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.focus-out > * { animation: focus-out 0.34s cubic-bezier(0.4, 0, 1, 1) forwards; }
+@keyframes focus-out { to { opacity: 0; filter: blur(12px); transform: scale(1.03); } }
+@media (prefers-reduced-motion: reduce) {
+  .focus-stage-in > *, .focus-out > * { animation: none; }
+}

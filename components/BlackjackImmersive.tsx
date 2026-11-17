@@ -6,6 +6,7 @@ import { handValue, isBlackjack } from "../lib/blackjack";
 import { tableBg, money } from "../lib/game";
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import { useSession } from "../lib/sessionStore";
+import { FOCUS_OUT_MS, exitFullscreenQuietly, requestFullscreenSettled } from "../lib/fullscreen";
 import { Counter } from "./ui";
 import PlayingCard from "./PlayingCard";
 import CardFlight from "./CardFlight";
@@ -87,6 +88,18 @@ export default function BlackjackImmersive({
     canBet && (editBet || s.phase === "betting");
 
   const rootRef = useRef<HTMLDivElement>(null);
+  // pending: dark while fullscreen switches · in: entrance · out: leaving
+  const [stage, setStage] = useState<"pending" | "in" | "out">("pending");
+  // Leaving by the Exit key: dissolve first, then leave fullscreen while
+  // the screen is dark, then hand back to the table.
+  const requestClose = () => {
+    if (stage === "out") return;
+    setStage("out");
+    window.setTimeout(() => {
+      exitFullscreenQuietly();
+      onClose();
+    }, FOCUS_OUT_MS);
+  };
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -116,13 +129,9 @@ export default function BlackjackImmersive({
     //     on, since Focus mode is itself triggered by a click.
     // We don't exit if the user was already fullscreen before entering.
     const wasFullscreen = Boolean(document.fullscreenElement);
-    if (!wasFullscreen && document.documentElement.requestFullscreen) {
-      document.documentElement
-        .requestFullscreen({ navigationUI: "hide" })
-        .catch(() => {
-          /* fullscreen denied — not fatal, Focus mode still renders */
-        });
-    }
+    // Stay dark while the browser swaps to fullscreen (its toolbars jump
+    // instantly), then play the entrance once the switch has settled.
+    const cancelFs = requestFullscreenSettled(() => setStage("in"));
 
     // Esc in fullscreen is swallowed by the browser (no keydown), so
     // leaving fullscreen is our only signal the player wants out:
@@ -135,6 +144,7 @@ export default function BlackjackImmersive({
     document.addEventListener("fullscreenchange", onFsChange);
 
     return () => {
+      cancelFs();
       document.removeEventListener("fullscreenchange", onFsChange);
       document.body.style.overflow = previousOverflow;
       root.style.scrollbarGutter = previousGutter;
@@ -157,13 +167,13 @@ export default function BlackjackImmersive({
 
       if (resultOpen) setResultOpen(false);
       else if (menuOpen) setMenuOpen(false);
-      else onClose();
+      else requestClose();
     };
 
     window.addEventListener("keydown", onKey);
 
     return () => window.removeEventListener("keydown", onKey);
-  }, [menuOpen, resultOpen, onClose]);
+  });
 
   const tableStyle = {
   "--bj-card-h": compact
@@ -197,8 +207,8 @@ const playerCardStyle = (
     <div
       ref={rootRef}
       tabIndex={-1}
-      data-exit
-      className="focus-zoom-in fixed inset-0 z-[80] flex h-[100dvh] flex-col overflow-hidden bg-[#080e0a] text-white outline-none"
+      data-exit={stage === "out" ? undefined : ""}
+      className={`${stage === "pending" ? "focus-pending" : stage === "out" ? "focus-out" : "focus-stage-in"} fixed inset-0 z-[80] flex h-[100dvh] flex-col overflow-hidden bg-[#080e0a] text-white outline-none`}
     >
       <header
         className="flex shrink-0 items-center justify-between gap-2 border-b border-[#d7b45b]/20 px-3 pb-2 sm:px-5"
@@ -259,7 +269,7 @@ const playerCardStyle = (
 
           <button
             type="button"
-            onClick={onClose}
+            onClick={requestClose}
             className={`${control} ${neutral} w-10`}
             aria-label="Exit immersive mode"
           >

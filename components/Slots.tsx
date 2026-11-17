@@ -14,6 +14,7 @@ import SlotReels from "./SlotReels";
 import { Counter, machineSmall } from "./ui";
 import { money } from "../lib/game";
 import { wallet } from "../lib/wallet";
+import { FOCUS_OUT_MS, exitFullscreenQuietly, requestFullscreenSettled } from "../lib/fullscreen";
 import { SKINS, rankOf, type SkinId } from "../lib/skins";
 import { useSlots } from "../lib/useSlots";
 import {
@@ -250,8 +251,19 @@ export default function Slots({
       firstFocus.current = false;
       return;
     }
-    setFocusAnim(focus ? "focus-zoom-in" : "view-in");
+    // Entering: stay dark until the browser has finished its fullscreen
+    // switch (set below), then play the entrance.
+    setFocusAnim(focus ? "focus-pending" : "view-in");
   }, [focus]);
+  // Exit key: dissolve first, leave fullscreen while dark, then close.
+  const requestFocusExit = () => {
+    if (focusAnim === "focus-out") return;
+    setFocusAnim("focus-out");
+    window.setTimeout(() => {
+      exitFullscreenQuietly();
+      onFocusChange?.(false);
+    }, FOCUS_OUT_MS);
+  };
   // Focus = true browser fullscreen, like the blackjack Focus view.
   const focusCloseRef = useRef(onFocusChange);
   focusCloseRef.current = onFocusChange;
@@ -268,11 +280,7 @@ export default function Slots({
     (document.activeElement as HTMLElement | null)?.blur?.();
 
     const wasFullscreen = Boolean(document.fullscreenElement);
-    if (!wasFullscreen && root.requestFullscreen) {
-      root.requestFullscreen({ navigationUI: "hide" }).catch(() => {
-        /* denied: Focus still fills the window */
-      });
-    }
+    const cancelFs = requestFullscreenSettled(() => setFocusAnim("focus-stage-in"));
     // Esc in fullscreen only exits fullscreen (no keydown): close Focus with it.
     let entered = false;
     const onFsChange = () => {
@@ -286,6 +294,7 @@ export default function Slots({
     document.addEventListener("fullscreenchange", onFsChange);
     window.addEventListener("keydown", onKey);
     return () => {
+      cancelFs();
       document.removeEventListener("fullscreenchange", onFsChange);
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = previousOverflow;
@@ -452,7 +461,7 @@ useEffect(() => {
       {focus && (
         <button
           type="button"
-          onClick={() => onFocusChange?.(false)}
+          onClick={requestFocusExit}
           aria-label="Exit focus mode"
           title="Exit focus (Esc)"
           className="fixed right-4 top-4 z-[61] flex h-9 items-center gap-1.5 rounded-full border border-[#d7b45b]/50 bg-black/70 px-3 text-[11px] font-bold uppercase tracking-wider text-[#e5c779] backdrop-blur hover:border-[#e5c779]"
