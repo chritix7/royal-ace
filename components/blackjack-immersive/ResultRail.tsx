@@ -42,7 +42,7 @@ export default function ResultRail({
         {showResult ? (
           <div
             key={`result-${s.net}-${roundBreakdown.total}`}
-            className="animate-pop w-56 overflow-hidden rounded-2xl border border-[#d7b45b]/45 bg-gradient-to-b from-[#101713]/95 to-[#0a100c]/95 shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur-md"
+            className="blur-in w-56 overflow-hidden rounded-2xl border border-[#d7b45b]/45 bg-gradient-to-b from-[#101713]/95 to-[#0a100c]/95 shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur-md"
           >
             <div className="border-b border-[#d7b45b]/20 bg-[#d7b45b]/10 px-3.5 py-2.5">
               {/* The dealer's call for the round ("Dealer busts", "Push"…). */}

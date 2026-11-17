@@ -29,14 +29,14 @@ export default function BonusResultModal({
   const tier = k >= 6 ? "Legendary" : k >= 2.5 ? "Huge" : k >= 1 ? "Great" : x > 0 ? "Nice" : "Tough";
   const hot = k >= 1;
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+    <div className="backdrop-in fixed inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-sm">
       {hot && <CoinRain count={x >= 20 ? 60 : 34} />}
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="bonus-result-title"
         aria-describedby="bonus-result-total"
-        className="animate-pop relative w-[min(90vw,400px)] rounded-2xl border border-[#d7b45b]/45 p-6 text-center"
+        className="blur-in relative w-[min(90vw,400px)] rounded-2xl border border-[#d7b45b]/45 p-6 text-center"
         style={{
           background: "linear-gradient(180deg, rgba(255,236,170,0.06), transparent 30%), linear-gradient(135deg, #221b14 0%, #120e0b 50%, #0b0908 100%)",
           boxShadow: "0 24px 70px rgba(0,0,0,0.7), 0 0 60px rgba(240,211,139,0.12), inset 0 1px 0 rgba(255,236,170,0.2)",

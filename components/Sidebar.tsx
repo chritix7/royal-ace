@@ -260,7 +260,7 @@ export default function Sidebar({ g }: { g: Game }) {
                 </span>
               </span>
             </summary>
-            <div className="border-t border-[#d7b45b]/10 px-5 py-4">
+            <div className="blur-in-fast border-t border-[#d7b45b]/10 px-5 py-4">
           <div>
             <p className={`${eyebrow} mb-1.5`}>Decks</p>
             <div className="flex gap-1.5" role="group" aria-label="Number of decks">

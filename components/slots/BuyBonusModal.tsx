@@ -36,14 +36,14 @@ export default function BuyBonusModal({
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/75 backdrop-blur-sm"
+      className="backdrop-in fixed inset-0 z-[80] flex items-center justify-center bg-black/75 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="buy-bonus-title"
-        className="relative w-[min(88vw,340px)] rounded-2xl border border-white/20 p-6 text-center"
+        className="blur-in relative w-[min(88vw,340px)] rounded-2xl border border-white/20 p-6 text-center"
         style={{
           background:
             "linear-gradient(180deg, rgba(255,255,255,0.04), transparent 25%), linear-gradient(135deg, #292b35 0%, #171923 45%, #10121a 100%)",

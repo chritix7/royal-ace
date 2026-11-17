@@ -19,7 +19,7 @@ export default function InfoPanel({
   useModalFocus(panelRef);
 
   return (
-    <div className="absolute inset-0 z-50 flex justify-end bg-black/65 backdrop-blur-sm">
+    <div className="backdrop-in absolute inset-0 z-50 flex justify-end bg-black/65 backdrop-blur-sm">
       <button
         type="button"
         className="absolute inset-0 cursor-default"
@@ -34,7 +34,7 @@ export default function InfoPanel({
         aria-modal="true"
         aria-labelledby="bj-panel-title"
         tabIndex={-1}
-        className="relative flex h-full w-full max-w-md flex-col border-l border-[#d7b45b]/25 bg-[#0d140f] shadow-2xl"
+        className="relative flex h-full w-full max-w-md flex-col border-l [animation:drawerIn_.4s_cubic-bezier(0.22,1,0.36,1)_both] border-[#d7b45b]/25 bg-[#0d140f] shadow-2xl"
       >
         <div
           className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 pb-3"

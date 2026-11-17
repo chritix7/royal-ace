@@ -698,7 +698,7 @@ useEffect(() => {
       role="dialog"
       aria-modal="true"
       aria-label="Crown collection reward"
-      className="animate-pop w-full max-w-sm rounded-2xl border border-[#d7b45b]/45 p-6 text-center"
+      className="blur-in w-full max-w-sm rounded-2xl border border-[#d7b45b]/45 p-6 text-center"
       style={{
         background: "linear-gradient(180deg, rgba(255,236,170,0.06), transparent 30%), linear-gradient(135deg, #221b14 0%, #120e0b 50%, #0b0908 100%)",
         boxShadow: "0 24px 70px rgba(0,0,0,0.7), 0 0 60px rgba(240,211,139,0.15), inset 0 1px 0 rgba(255,236,170,0.2)",
@@ -843,7 +843,7 @@ useEffect(() => {
         <div
           role="menu"
           aria-label="Auto spins"
-          className="absolute bottom-full left-1/2 z-[60] mb-3 -translate-x-1/2 rounded-xl border border-white/15 bg-[#11131c] px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]"
+          className="blur-in-fast absolute bottom-full left-1/2 z-[60] mb-3 -translate-x-1/2 rounded-xl border border-white/15 bg-[#11131c] px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]"
         >
           <p className="mb-1.5 text-center text-[8px] uppercase tracking-[0.2em] text-white/50">Auto spins</p>
           <div className="flex gap-2">
@@ -987,7 +987,7 @@ useEffect(() => {
                           <div
                             role="menu"
                             aria-label="Auto spins"
-                            className="absolute bottom-full left-0 z-[60] mb-2 rounded-xl border border-white/15 bg-[#11131c] p-2 shadow-[0_8px_24px_rgba(0,0,0,0.55)]"
+                            className="blur-in-fast absolute bottom-full left-0 z-[60] mb-2 rounded-xl border border-white/15 bg-[#11131c] p-2 shadow-[0_8px_24px_rgba(0,0,0,0.55)]"
                           >
                             <p className="mb-1.5 text-center text-[8px] uppercase tracking-[0.2em] text-white/50">Auto spins</p>
                             <div className="flex gap-1.5">
@@ -1077,7 +1077,7 @@ useEffect(() => {
                           <div
                             role="dialog"
                             aria-label="Choose a bet"
-                            className="absolute bottom-full left-1/2 z-[60] mb-3 w-[22rem] -translate-x-1/2 rounded-xl border border-[#d7b45b]/40 p-3"
+                            className="blur-in-fast absolute bottom-full left-1/2 z-[60] mb-3 w-[22rem] -translate-x-1/2 rounded-xl border border-[#d7b45b]/40 p-3"
                             style={{ background: "linear-gradient(180deg,#1b1620,#0b090c)", boxShadow: "0 16px 40px rgba(0,0,0,0.7)" }}
                           >
                             <p className="mb-2 text-center text-[9px] font-black uppercase tracking-[0.3em] text-[#d7b45b]/80">Total bet</p>
@@ -1374,13 +1374,13 @@ useEffect(() => {
         </div>
       )}
       {infoOpen && (
-        <div className="fixed inset-0 z-[90] hidden lg:block">
+        <div className="backdrop-in fixed inset-0 z-[90] hidden lg:block">
           <button aria-label="Close game info" className="absolute inset-0 cursor-default bg-black/60 backdrop-blur-[2px]" onClick={() => setInfoOpen(false)} />
           <div
             role="dialog"
             aria-modal="true"
             aria-label="Game info"
-            className="animate-[drawerIn_.22s_ease-out] absolute right-0 top-0 flex h-full w-[min(680px,94vw)] flex-col border-l border-white/10 bg-[#0b0f0d] shadow-[-20px_0_60px_rgba(0,0,0,0.6)]"
+            className="[animation:drawerIn_.4s_cubic-bezier(0.22,1,0.36,1)_both] absolute right-0 top-0 flex h-full w-[min(680px,94vw)] flex-col border-l border-white/10 bg-[#0b0f0d] shadow-[-20px_0_60px_rgba(0,0,0,0.6)]"
           >
             <div className="flex items-center justify-between border-b border-white/10 px-5 py-3">
               <p className="text-[11px] font-black uppercase tracking-[0.25em] text-[#e5c779]">Game info</p>

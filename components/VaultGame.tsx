@@ -33,7 +33,7 @@ export default function VaultGame({
     >
       <div
   ref={panelRef}
-  className="animate-pop relative mx-auto max-w-xl rounded-2xl border border-[#d7b45b]/45 p-3 text-center sm:p-5 lg:max-w-2xl"
+  className="blur-in relative mx-auto max-w-xl rounded-2xl border border-[#d7b45b]/45 p-3 text-center sm:p-5 lg:max-w-2xl"
         style={{
           background: "linear-gradient(180deg, rgba(255,236,170,0.06), transparent 30%), linear-gradient(135deg, #221b14 0%, #120e0b 50%, #0b0908 100%)",
           boxShadow: "0 24px 70px rgba(0,0,0,0.7), 0 0 60px rgba(240,211,139,0.12), inset 0 1px 0 rgba(255,236,170,0.2)",
