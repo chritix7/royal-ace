@@ -1101,10 +1101,11 @@ body {
 /* ===== Slots · SPIN dome ===== */
 .spin-dome {
   --size: 5.25rem;
-  --glass-hi: #ffd1ea;
-  --glass: #ff2e88;
-  --glass-lo: #7a0d45;
-  --halo: rgba(255, 79, 163, 0.75);
+  /* Miami: smoked black-to-graphite glass */
+  --glass-hi: #8a8a92;
+  --glass: #2c2c33;
+  --glass-lo: #050506;
+  --halo: rgba(240, 211, 139, 0.55);
   --ink: #fff;
   position: relative;
   isolation: isolate;

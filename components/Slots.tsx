@@ -144,13 +144,7 @@ function SpinDome({
             </span>
           </span>
         ) : (
-          <span className="spin-dome__label flex flex-col items-center leading-none">
-            <svg viewBox="0 0 24 24" className="spin-dome__icon h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M20 12a8 8 0 1 1-2.34-5.66" />
-              <path d="M20 4v5h-5" />
-            </svg>
-            <span className="mt-0.5 text-[13px] tracking-[0.22em]">SPIN</span>
-          </span>
+          <span className="spin-dome__label pl-[0.22em] text-[15px] leading-none tracking-[0.22em]">SPIN</span>
         )}
       </span>
     </button>
