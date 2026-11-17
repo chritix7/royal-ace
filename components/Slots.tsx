@@ -241,6 +241,17 @@ export default function Slots({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [infoOpen]);
+  // Entering Focus zooms the machine out of a blur; leaving brings the
+  // normal view back into focus.
+  const [focusAnim, setFocusAnim] = useState("");
+  const firstFocus = useRef(true);
+  useEffect(() => {
+    if (firstFocus.current) {
+      firstFocus.current = false;
+      return;
+    }
+    setFocusAnim(focus ? "focus-zoom-in" : "view-in");
+  }, [focus]);
   // Focus = true browser fullscreen, like the blackjack Focus view.
   const focusCloseRef = useRef(onFocusChange);
   focusCloseRef.current = onFocusChange;
@@ -430,7 +441,7 @@ useEffect(() => {
 
   return (
     <div
-      className={`grid gap-6 ${
+      className={`grid gap-6 ${focusAnim} ${
         fullscreen
           ? "fixed inset-0 z-50 overflow-y-auto bg-black"
           : focus

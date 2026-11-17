@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { installExitAnimations } from "../lib/exitAnimations";
 import AchievementsPanel from "../components/AchievementsPanel";
 import AudioControls from "../components/AudioControls";
 import Blackjack from "../components/Blackjack";
@@ -92,6 +93,8 @@ export default function Home() {
   // from <Blackjack> so the toggle button can live in the top toolbar
   // on the same line as the game tabs and the audio controls.
   const [focusMode, setFocusMode] = useState(false);
+  // Closing animations for every panel, dialog and menu (blur-out).
+  useEffect(() => installExitAnimations(), []);
   // Clear focus whenever the user switches game.
   useEffect(() => {
     setFocusMode(false);

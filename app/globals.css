@@ -1317,3 +1317,26 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .blur-in, .blur-in-fast, .backdrop-in { animation: none; }
 }
+
+/* ===== Closing animations (ghost copies, see lib/exitAnimations.ts) ===== */
+@keyframes exit-fade { to { opacity: 0; filter: blur(6px); } }
+@keyframes exit-panel { to { opacity: 0; filter: blur(10px); transform: translateY(10px) scale(0.975); } }
+@keyframes exit-drawer { to { opacity: 0; filter: blur(10px); transform: translateX(48px); } }
+
+/* ===== Focus mode: entering zooms out of a blur, leaving brings the
+   table back into focus ===== */
+@keyframes focus-zoom-in {
+  0% { opacity: 0; filter: blur(14px); transform: scale(1.04); }
+  55% { opacity: 1; filter: blur(2px); }
+  100% { opacity: 1; filter: none; transform: none; }
+}
+@keyframes view-in {
+  0% { opacity: 0; filter: blur(10px); transform: scale(0.97); }
+  60% { opacity: 1; filter: blur(1px); }
+  100% { opacity: 1; filter: none; transform: none; }
+}
+.focus-zoom-in { animation: focus-zoom-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.view-in { animation: view-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .focus-zoom-in, .view-in { animation: none; }
+}
