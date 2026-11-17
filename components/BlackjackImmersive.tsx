@@ -464,7 +464,7 @@ const playerCardStyle = (
           role="status"
           aria-live="polite"
           aria-atomic="true"
-          className="flex min-h-[52px] shrink-0 flex-col items-center justify-center gap-0.5 px-3 text-center sm:min-h-[60px]"
+          className="flex h-[96px] shrink-0 flex-col items-center justify-center gap-0.5 px-3 text-center sm:h-[104px]"
         >
           <p
             key={`msg-${s.message}-${s.phase}-${s.celebrate}`}
@@ -676,66 +676,6 @@ const playerCardStyle = (
           paddingBottom: "max(env(safe-area-inset-bottom), 0.625rem)",
         }}
       >
-        {/* Bet circle (phones and tablets): rides above the console and
-            the rules line, so it is never hidden behind the console and
-            the bet is visible on the felt while chips are added. Desktop
-            has it inside the console. */}
-        {bettingOpen && (
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-8 flex -translate-x-1/2 justify-center lg:hidden"
-          >
-            <div
-              className="relative flex h-16 w-16 items-end justify-center overflow-visible rounded-full sm:h-20 sm:w-20"
-              style={{
-                background: canBet
-                  ? "radial-gradient(circle at 50% 30%, rgba(229, 199, 121, 0.22) 0%, rgba(5, 10, 7, 0.75) 55%, rgba(5, 10, 7, 0.9) 100%)"
-                  : "radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.04) 0%, rgba(5, 10, 7, 0.75) 60%, rgba(5, 10, 7, 0.9) 100%)",
-                boxShadow: canBet
-                  ? [
-                      "inset 0 0 0 1px rgba(229, 199, 121, 0.85)",
-                      "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
-                      "inset 0 0 0 4px rgba(229, 199, 121, 0.35)",
-                      "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
-                      "0 0 24px rgba(229, 199, 121, 0.25)",
-                      "0 1px 0 rgba(229, 199, 121, 0.15)",
-                    ].join(", ")
-                  : [
-                      "inset 0 0 0 1px rgba(229, 199, 121, 0.4)",
-                      "inset 0 0 0 3px rgba(0, 0, 0, 0.6)",
-                      "inset 0 0 0 4px rgba(229, 199, 121, 0.15)",
-                      "inset 0 3px 8px rgba(0, 0, 0, 0.75)",
-                      "0 1px 0 rgba(229, 199, 121, 0.08)",
-                    ].join(", "),
-              }}
-            >
-              <p
-                className="pointer-events-none absolute left-1/2 top-2 -translate-x-1/2 text-[9px] font-black uppercase tracking-[0.22em] sm:top-2.5 sm:text-[10px]"
-                style={{
-                  color: "#e5c779",
-                  textShadow:
-                    "0 0 4px rgba(229, 199, 121, 0.6), 0 1px 0 rgba(0, 0, 0, 0.9)",
-                }}
-              >
-                Bet
-              </p>
-
-              {pileAmount > 0 ? (
-                <div className="mb-2 flex items-end justify-center sm:mb-2.5">
-                  <ChipStack amount={pileAmount} />
-                </div>
-              ) : (
-                <p
-                  className="mb-3 text-sm font-black tabular-nums text-white/50 sm:mb-4 sm:text-base"
-                  style={{ textShadow: "0 1px 0 rgba(0, 0, 0, 0.9)" }}
-                >
-                  ◈ 0
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* House rules printed on the felt, riding just above the
             console so it never covers them, whatever its height. */}
         <FeltMarkings

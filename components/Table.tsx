@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { handValue, isBlackjack } from "../lib/blackjack";
 import { MIN_BET, REFILL, money, tableBg } from "../lib/game";
 import { ChipStack } from "./ui";
@@ -26,7 +26,7 @@ import LuckyRound from "./LuckyRound";
 import CountUp from "./CountUp";
 import FeltMarkings from "./FeltMarkings";
 import ShoeMeter from "./ShoeMeter";
-import ChipRail from "./ChipRail";
+import MobileBetZone from "./MobileBetZone";
 
 // Premium action button base — used across Hit / Stand / Double / Split /
 // Surrender / Deal. Common shape (border, radius, size, focus ring), with
@@ -153,6 +153,14 @@ function getShoeStatus(g: Game): {
   // felt already shows the breakdown.
   const [resultOpen, setResultOpen] = useState(false);
   const goldenShown = g.golden && g.s.phase !== "betting";
+  // Phones and tablets: during a hand (and while the result is on the
+  // felt) the betting area steps aside and the cards take the space.
+  // "Change bet" in the bar reopens it at the result.
+  const [editBet, setEditBet] = useState(false);
+  useEffect(() => {
+    if (g.s.phase !== "settled") setEditBet(false);
+  }, [g.s.phase]);
+  const mobileBetOpen = g.s.phase === "betting" || (g.s.phase === "settled" && editBet);
   // Which side-bet staking modal is open (Perfect Pairs / 21+3 / none).
   // Tapping either felt pill opens the shared SideBetModal.
   const [sideBetOpen, setSideBetOpen] = useState<"pp" | "t3" | null>(null);
@@ -192,7 +200,7 @@ function getShoeStatus(g: Game): {
   return (
     <>
       <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl lg:flex lg:h-full lg:min-h-0 lg:flex-col">
-        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 sm:px-9 sm:py-4 lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:justify-between lg:pb-7 lg:pt-14`}>
+        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 max-lg:flex max-lg:min-h-[440px] max-lg:flex-col sm:px-9 sm:py-4 sm:max-lg:min-h-[520px] lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:justify-between lg:pb-7 lg:pt-14`}>
           {/* Floating result rail — same component as the Focus view,
               positioned on the left edge of the felt. Shows the round
               breakdown and a New-round button at settle, a Hand-in-
@@ -331,7 +339,7 @@ function getShoeStatus(g: Game): {
               ResultRail on the left owns the result); on mobile the
               fused pill fills it. */}
           <div
-            className="my-2 flex min-h-[48px] flex-col items-center justify-center gap-1 sm:my-3 lg:my-0 lg:mt-6 lg:min-h-[88px]"
+            className="my-2 flex min-h-[48px] flex-col items-center justify-center gap-1 max-lg:my-auto max-lg:py-2 sm:my-3 lg:my-0 lg:mt-6 lg:min-h-[88px]"
             role="status"
             aria-live="polite"
           >
@@ -459,11 +467,11 @@ function getShoeStatus(g: Game): {
               wraps, so splitting (extra hands, spot badges, longer
               labels) can't push the bet zone and its buttons down past
               the bottom edge of the felt. */}
-          <div className="flex flex-wrap items-start justify-center gap-2 sm:gap-5 lg:mt-4 lg:h-[156px] lg:flex-nowrap lg:gap-3">
+          <div className="flex flex-wrap items-start justify-center gap-2 max-lg:mt-auto sm:gap-5 lg:mt-4 lg:h-[156px] lg:flex-nowrap lg:gap-3">
   {s.hands.length === 0 && (
     <div
       aria-hidden="true"
-      className="min-h-[152px] w-full sm:min-h-28"
+      className="hidden w-full lg:block lg:min-h-28"
     />
   )}
 
@@ -556,7 +564,7 @@ function getShoeStatus(g: Game): {
               (Hit / Stand / Double / Split / Surrender) are rendered
               INSIDE this slot, on top of the engraved arcs — no height
               is wasted below the table. */}
-<div className="relative mt-3 min-h-[118px] sm:mt-4 sm:min-h-[150px] lg:mt-0 lg:flex lg:min-h-[120px] lg:flex-col lg:items-center lg:justify-end lg:gap-2">
+<div className={`relative ${mobileBetOpen ? "mt-4" : "mt-0"} lg:mt-0 lg:flex lg:min-h-[120px] lg:flex-col lg:items-center lg:justify-end lg:gap-2`}>
   {/* Outer betting-area arc engraved in the felt */}
   <div
     aria-hidden="true"
@@ -575,8 +583,26 @@ function getShoeStatus(g: Game): {
         "inset 0 0 0 1px rgba(229, 199, 121, 0.1), inset 0 1px 0 rgba(0, 0, 0, 0.4)",
     }}
   />
-{(canBet || s.hands.length > 0) && (
-<div className={`relative flex flex-col items-center gap-2 lg:block ${canBet ? "" : "lg:hidden"}`}>
+{/* Phones and tablets: printed betting layout (see MobileBetZone). */}
+{mobileBetOpen && (
+  <MobileBetZone
+    bet={s.bet}
+    pileAmount={pileAmount}
+    ppBet={s.ppBet}
+    t3Bet={s.t3Bet}
+    heat={g.heat}
+    busy={s.busy}
+    spots={s.settings.spots}
+    canAddChip={(value) => canBet && (s.bet + value) * spots + sides <= s.balance}
+    onAddChip={(value) => addChip(value)}
+    onClearBet={() => setBetTo(0)}
+    onOpenSide={(which) => setSideBetOpen(which)}
+  />
+)}
+
+{/* Desktop: bet circle between the two side-bet pills. */}
+{canBet && (
+<div className="relative hidden lg:block">
 {/* Bet circle between the two side bets, on every screen size. */}
 <div className="relative flex w-full items-center justify-center gap-2 lg:gap-4">
 
@@ -690,22 +716,6 @@ function getShoeStatus(g: Game): {
   </div>
 </div>
 
-{/* Phones and tablets: the chips sit right here on the felt, so
-    placing a bet never needs scrolling down to the sidebar (desktop
-    keeps them in the sidebar). Rebet and ×2 are in the bar under the
-    table, beside Deal; tapping the bet circle clears the bet. */}
-{canBet && (
-<div className="w-full max-w-[340px] lg:hidden">
-  <ChipRail
-    visibleCount={5}
-    size="sm"
-    onPick={(value) => addChip(value)}
-    disabledFor={(value) =>
-      !canBet || (s.bet + value) * spots + sides > s.balance
-    }
-  />
-</div>
-)}
 </div>
 )}
 
@@ -796,12 +806,21 @@ function getShoeStatus(g: Game): {
                 </button>
               ) : (
                 <div className="flex w-full max-w-md items-stretch gap-1.5">
-                  <button
-                    onClick={() => setBetTo(s.lastBet)}
-                    className={`${mobileAction} !w-auto shrink-0 border-white/15 bg-white/[0.04] px-3 text-white/85`}
-                  >
-                    Rebet
-                  </button>
+                  {mobileBetOpen ? (
+                    <button
+                      onClick={() => setBetTo(s.lastBet)}
+                      className={`${mobileAction} !w-auto shrink-0 border-white/15 bg-white/[0.04] px-3 text-white/85`}
+                    >
+                      Rebet
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setEditBet(true)}
+                      className={`${mobileAction} !w-auto shrink-0 border-white/15 bg-white/[0.04] px-3 text-white/85`}
+                    >
+                      Change bet
+                    </button>
+                  )}
                   <button
                     onClick={deal}
                     disabled={s.bet < MIN_BET || stake > s.balance}
