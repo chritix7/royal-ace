@@ -299,9 +299,9 @@ function OrbitRing({ color, mood, paused = false }: { color: string; mood: "idle
 }
 
 export default function SlotReels({
-  s, skin, activeLine, shake = 0, large = false, mood = "idle",
+  s, skin, activeLine, shake = 0, large = false, mood = "idle", orbit = true,
 }: {
-  s: SlotsGame["s"]; skin: Skin; activeLine: LineWin | null; fast: boolean; shake?: 0 | 1 | 2 | 3; onPull: () => void; canPull: boolean; large?: boolean; mood?: "idle" | "win" | "jackpot";
+  s: SlotsGame["s"]; skin: Skin; activeLine: LineWin | null; fast: boolean; shake?: 0 | 1 | 2 | 3; onPull: () => void; canPull: boolean; large?: boolean; mood?: "idle" | "win" | "jackpot"; orbit?: boolean;
 }) {
 
   const [cycle, setCycle] = useState(0);
@@ -334,7 +334,7 @@ const shownLine =
 >
   {/* Marquee bulbs around the screen */}
   <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-    <OrbitRing color={skin.lineColor} mood={mood} paused={s.spinning.some(Boolean)} />
+    {orbit && <OrbitRing color={skin.lineColor} mood={mood} paused={s.spinning.some(Boolean)} />}
   </div>
   {/* Gold studs at the corners */}
   {["left-[5px] top-[5px]", "right-[5px] top-[5px]", "left-[5px] bottom-[5px]", "right-[5px] bottom-[5px]"].map((pos) => (

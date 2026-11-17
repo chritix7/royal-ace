@@ -257,6 +257,14 @@ export default function Slots({
   // Entering Focus zooms the machine out of a blur; leaving brings the
   // normal view back into focus.
   const [focusAnim, setFocusAnim] = useState("");
+  const [phoneScreen, setPhoneScreen] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const sync = () => setPhoneScreen(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
   const firstFocus = useRef(true);
   useEffect(() => {
     if (firstFocus.current) {
@@ -679,6 +687,8 @@ useEffect(() => {
   </div>
   <div ref={reelsBoxRef} className="relative flex justify-center">
   <SlotReels
+    // Phones in Focus: no orbiting jewels (lighter while playing).
+    orbit={!(focus && phoneScreen)}
     s={s}
     skin={skin}
     activeLine={activeLine}
