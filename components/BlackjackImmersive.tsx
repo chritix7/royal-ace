@@ -427,7 +427,7 @@ const playerCardStyle = (
 >
   <p
     aria-hidden="true"
-    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pl-[0.45em] text-[10px] font-bold uppercase tracking-[0.45em] text-white/[0.10] sm:text-xs"
+    className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 pl-[0.45em] text-[10px] font-bold uppercase tracking-[0.45em] text-white/[0.10] sm:block sm:text-xs"
   >
     Dealer
   </p>

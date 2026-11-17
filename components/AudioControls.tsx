@@ -52,7 +52,7 @@ export default function AudioControls() {
       className={`${btn} !px-2 sm:!px-3 ${a.music ? on : off}`}
     >
       <span aria-hidden="true">♪</span>
-      <span className="hidden sm:inline"> Music</span>
+      <span className="hidden lg:inline"> Music</span>
     </button>
 
     <button
@@ -63,7 +63,7 @@ export default function AudioControls() {
       className={`${btn} !px-2 sm:!px-3 ${a.sfx ? on : off}`}
     >
       <span aria-hidden="true">🔊</span>
-      <span className="hidden sm:inline"> Sounds</span>
+      <span className="hidden lg:inline"> Sounds</span>
     </button>
 
     <button
@@ -73,13 +73,14 @@ export default function AudioControls() {
         a.haptics ? on : off
       }`}
     >
-      📳 Vibration
+      <span aria-hidden="true">📳</span>
+      <span className="hidden lg:inline"> Vibration</span>
     </button>
 
     {/* Volume — framed container matching the other audio pills, with
         a label eyebrow and a gold-tinted track. */}
     <label className="flex shrink-0 items-center gap-2 rounded-full border border-white/12 bg-gradient-to-b from-[#1a2219] to-[#0e1310] px-2 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_0_rgba(0,0,0,0.45)] sm:px-3">
-      <span className="hidden text-[10px] font-black uppercase tracking-wider text-[#d7b45b]/80 sm:inline">
+      <span className="hidden text-[10px] font-black uppercase tracking-wider text-[#d7b45b]/80 lg:inline">
         Volume
       </span>
 

@@ -46,9 +46,17 @@ export default function AchievementToasts() {
 
   if (toasts.length === 0 && levelToasts.length === 0) return null;
 
+  // At most two at once (the newest), so a burst of rewards never
+  // covers the table; the rest stay counted on the header cards.
+  const shownChallenges = toasts.slice(-2);
+  const levelRoom = Math.max(0, 2 - shownChallenges.length);
+  const shownLevels = levelRoom ? levelToasts.slice(-levelRoom) : [];
+
   return (
-    <div className="fixed bottom-5 right-5 z-[60] flex w-[min(92vw,22rem)] flex-col gap-3">
-      {levelToasts.map((toast) => (
+    // Phones: top centre, where the other notifications appear, so it never
+    // covers the Deal and action keys at the bottom. Desktop: bottom right.
+    <div className="fixed left-1/2 top-4 z-[200] flex w-[min(92vw,22rem)] -translate-x-1/2 flex-col gap-3 sm:bottom-5 sm:left-auto sm:right-5 sm:top-auto sm:translate-x-0">
+      {shownLevels.map((toast) => (
         <div
           key={`level-${toast.key}`}
           className="rounded-2xl border border-[#e5c779]/50 bg-[#10150f]/95 p-4 shadow-2xl backdrop-blur"
@@ -68,7 +76,7 @@ export default function AchievementToasts() {
         </div>
       ))}
 
-      {toasts.map((toast) => (
+      {shownChallenges.map((toast) => (
         <div
           key={toast.key}
           className="rounded-2xl border border-[#e5c779]/40 bg-[#10150f]/95 p-4 shadow-2xl backdrop-blur"

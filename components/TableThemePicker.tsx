@@ -29,7 +29,7 @@ export default function TableThemePicker({ className = "" }: { className?: strin
       <p className="text-[9px] font-black uppercase tracking-[0.25em] text-[#d7b45b]/70">
         Table music
       </p>
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className="grid grid-cols-4 gap-1.5 lg:grid-cols-2">
         {THEMES.map((t) => {
           const active = t.id === current;
           return (
@@ -39,7 +39,7 @@ export default function TableThemePicker({ className = "" }: { className?: strin
               onClick={() => music.setCalmTheme(t.id)}
               aria-pressed={active}
               title={t.blurb}
-              className={`group flex items-center gap-2 rounded-xl border px-2.5 py-2 text-left outline-none transition-[background,border-color,transform] enabled:active:translate-y-px focus-visible:ring-2 focus-visible:ring-[#e5c779] ${
+              className={`group flex items-center justify-center gap-1.5 rounded-xl border px-1.5 py-2 text-left lg:justify-start lg:gap-2 lg:px-2.5 outline-none transition-[background,border-color,transform] enabled:active:translate-y-px focus-visible:ring-2 focus-visible:ring-[#e5c779] ${
                 active
                   ? "border-[#d7b45b]/60 bg-gradient-to-b from-[#d7b45b]/[0.14] to-black/20 shadow-[inset_0_1px_0_rgba(229,199,121,0.2)]"
                   : "border-white/10 bg-gradient-to-b from-black/30 to-black/10 hover:border-[#d7b45b]/40"
@@ -53,7 +53,7 @@ export default function TableThemePicker({ className = "" }: { className?: strin
               >
                 {t.glyph}
               </span>
-              <span className="min-w-0 flex-1">
+              <span className="min-w-0 lg:flex-1">
                 <p
                   className={`text-[11px] font-black tracking-wide ${
                     active ? "text-[#f5d778]" : "text-white"
@@ -61,7 +61,7 @@ export default function TableThemePicker({ className = "" }: { className?: strin
                 >
                   {t.label}
                 </p>
-                <p className="truncate text-[9px] text-white/50">{t.blurb}</p>
+                <p className="hidden truncate text-[9px] text-white/50 lg:block">{t.blurb}</p>
               </span>
             </button>
           );
@@ -83,7 +83,7 @@ export default function TableThemePicker({ className = "" }: { className?: strin
           <span className={`block text-[11px] font-black tracking-wide ${room ? "text-[#f5d778]" : "text-white"}`}>
             Casino room
           </span>
-          <span className="block truncate text-[9px] text-white/50">
+          <span className="hidden truncate text-[9px] text-white/50 lg:block">
             Crowd murmur and chips in the distance
           </span>
         </span>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useAchievementToasts } from "../lib/achievementsStore";
 import { createPortal } from "react-dom";
 
 /**
@@ -29,6 +30,9 @@ export default function AchievementToast({
   const [visible, setVisible] = useState<string | null>(null);
   const [leaving, setLeaving] = useState(false);
   const timers = useRef<number[]>([]);
+  // One notification at a time: a career badge waits while a challenge
+  // notification (often fired by the same hand) is on screen.
+  const challengeShowing = useAchievementToasts().length > 0;
 
   useEffect(() => setMounted(true), []);
 
@@ -43,6 +47,7 @@ export default function AchievementToast({
       setLeaving(false);
       return;
     }
+    if (challengeShowing) return;
 
     setVisible(toast);
     setLeaving(false);
@@ -59,7 +64,7 @@ export default function AchievementToast({
       for (const t of timers.current) window.clearTimeout(t);
       timers.current = [];
     };
-  }, [toast, onDismiss]);
+  }, [toast, onDismiss, challengeShowing]);
 
   if (!mounted || !visible) return null;
 

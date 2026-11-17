@@ -155,6 +155,9 @@ export default function Sidebar({ g }: { g: Game }) {
           {/* Two compact rows: each has an uppercase gold label and an
               inline amount, so Chips and Bet each occupy a single text
               line and the whole header is two lines tall, not four. */}
+          {/* Desktop only: on phones and tablets the header already shows
+              the chips and the Deal key shows the bet. */}
+          <div className="hidden lg:block">
           <div className="flex items-baseline justify-between gap-3">
             <p className={eyebrow}>Your chips</p>
             <p className="text-base font-black text-[#e5c779] tabular-nums leading-none">
@@ -166,6 +169,7 @@ export default function Sidebar({ g }: { g: Game }) {
             <p className="text-base font-black text-[#f5d778] tabular-nums leading-none">
               ◈ {money(s.bet)}
             </p>
+          </div>
           </div>
 
           {/* Chips, quick bets and side bets: desktop only. On phones
@@ -229,7 +233,7 @@ export default function Sidebar({ g }: { g: Game }) {
             />
           </div>
           </div>
-          <div className="mt-4">
+          <div className="lg:mt-4">
             <TableThemePicker />
           </div>
         </Panel>

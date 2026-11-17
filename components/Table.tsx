@@ -556,7 +556,7 @@ function getShoeStatus(g: Game): {
               (Hit / Stand / Double / Split / Surrender) are rendered
               INSIDE this slot, on top of the engraved arcs — no height
               is wasted below the table. */}
-<div className="relative mt-3 min-h-[170px] sm:mt-4 lg:mt-0 lg:flex lg:min-h-[120px] lg:flex-col lg:items-center lg:justify-end lg:gap-2">
+<div className="relative mt-3 min-h-[118px] sm:mt-4 sm:min-h-[150px] lg:mt-0 lg:flex lg:min-h-[120px] lg:flex-col lg:items-center lg:justify-end lg:gap-2">
   {/* Outer betting-area arc engraved in the felt */}
   <div
     aria-hidden="true"
@@ -586,8 +586,13 @@ function getShoeStatus(g: Game): {
         the circle, growing taller as the bet grows. The amount sits
         below as a small gold label. */}
     <div className="flex flex-col items-center">
-      <div
-        className="relative flex h-16 w-16 items-end justify-center overflow-visible rounded-full text-center sm:h-24 sm:w-24 lg:h-16 lg:w-16"
+      {/* Tapping the circle clears the bet (a small × shows it can). */}
+      <button
+        type="button"
+        onClick={() => setBetTo(0)}
+        disabled={!canBet || s.busy || s.bet === 0}
+        aria-label={canBet && s.bet > 0 ? `Clear bet of ${money(s.bet)}` : "Bet"}
+        className="relative flex h-16 w-16 touch-manipulation items-end justify-center overflow-visible rounded-full p-0 text-center outline-none focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:scale-[0.97] disabled:cursor-default sm:h-24 sm:w-24 lg:h-16 lg:w-16"
         style={{
           background: canBet
             ? "radial-gradient(circle at 50% 30%, rgba(229, 199, 121, 0.22) 0%, rgba(5, 10, 7, 0.75) 55%, rgba(5, 10, 7, 0.9) 100%)"
@@ -635,7 +640,15 @@ function getShoeStatus(g: Game): {
             ◈ 0
           </p>
         )}
-      </div>
+        {canBet && s.bet > 0 && !s.busy && (
+          <span
+            aria-hidden
+            className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border border-[#d7b45b]/60 bg-[#0b100e] text-[11px] font-black leading-none text-[#e5c779] shadow-[0_1px_3px_rgba(0,0,0,0.6)]"
+          >
+            ×
+          </span>
+        )}
+      </button>
 
       {/* Spot count only — the "◈ amount" that lived here was a
           duplicate of the Deal button's "DEAL · ◈ N" readout. The
@@ -677,11 +690,12 @@ function getShoeStatus(g: Game): {
   </div>
 </div>
 
-{/* Phones and tablets: the chips and quick bets sit right here on the
-    felt, so placing a bet never needs scrolling down to the sidebar
-    (desktop keeps them in the sidebar next to the table). */}
+{/* Phones and tablets: the chips sit right here on the felt, so
+    placing a bet never needs scrolling down to the sidebar (desktop
+    keeps them in the sidebar). Rebet and ×2 are in the bar under the
+    table, beside Deal; tapping the bet circle clears the bet. */}
 {canBet && (
-<div className="w-full max-w-[340px] space-y-1.5 lg:hidden">
+<div className="w-full max-w-[340px] lg:hidden">
   <ChipRail
     visibleCount={5}
     size="sm"
@@ -690,25 +704,6 @@ function getShoeStatus(g: Game): {
       !canBet || (s.bet + value) * spots + sides > s.balance
     }
   />
-  <div className="mx-auto grid w-full max-w-[300px] grid-cols-3 gap-1.5">
-    {(
-      [
-        ["Rebet", () => setBetTo(s.lastBet), false],
-        ["×2", () => setBetTo(s.bet * 2), s.bet === 0],
-        ["Clear", () => setBetTo(0), s.bet === 0],
-      ] as const
-    ).map(([label, onClick, off]) => (
-      <button
-        key={label}
-        type="button"
-        onClick={onClick}
-        disabled={off}
-        className="inline-flex h-8 w-full touch-manipulation items-center justify-center rounded-full border border-white/10 bg-black/30 px-2 text-[10px] font-black uppercase tracking-[0.18em] text-white/75 outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px enabled:active:border-[#d7b45b]/50 enabled:active:text-[#f5d778] disabled:opacity-35"
-      >
-        {label}
-      </button>
-    ))}
-  </div>
 </div>
 )}
 </div>
@@ -800,15 +795,30 @@ function getShoeStatus(g: Game): {
                   Out of chips · take a ◈ {REFILL} refill
                 </button>
               ) : (
-                <button
-                  onClick={deal}
-                  disabled={s.bet < MIN_BET || stake > s.balance}
-                  className={`${mobileAction} max-w-sm border-[#d7b45b]/70 bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e] sm:w-auto sm:px-10 ${
-                    s.bet >= MIN_BET && stake <= s.balance ? "animate-deal-ready" : ""
-                  }`}
-                >
-                  {s.phase === "settled" ? "Deal again" : "Deal"} · ◈ {money(stake)}
-                </button>
+                <div className="flex w-full max-w-md items-stretch gap-1.5">
+                  <button
+                    onClick={() => setBetTo(s.lastBet)}
+                    className={`${mobileAction} !w-auto shrink-0 border-white/15 bg-white/[0.04] px-3 text-white/85`}
+                  >
+                    Rebet
+                  </button>
+                  <button
+                    onClick={deal}
+                    disabled={s.bet < MIN_BET || stake > s.balance}
+                    className={`${mobileAction} min-w-0 flex-1 border-[#d7b45b]/70 bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e] ${
+                      s.bet >= MIN_BET && stake <= s.balance ? "animate-deal-ready" : ""
+                    }`}
+                  >
+                    {s.phase === "settled" ? "Deal again" : "Deal"} · ◈ {money(stake)}
+                  </button>
+                  <button
+                    onClick={() => setBetTo(s.bet * 2)}
+                    disabled={s.bet === 0}
+                    className={`${mobileAction} !w-auto shrink-0 border-white/15 bg-white/[0.04] px-3.5 text-white/85`}
+                  >
+                    ×2
+                  </button>
+                </div>
               )}
             </div>
           ) : (
