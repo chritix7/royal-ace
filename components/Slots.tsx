@@ -394,7 +394,7 @@ useEffect(() => {
     pools={s.pools}
     bet={bet}
     center={
-      <header className="flex flex-col items-center gap-1 pb-1 text-center lg:relative lg:z-30 lg:-mb-6 lg:px-3 lg:pb-0">
+      <header className="flex flex-col items-center gap-1 pb-1 text-center lg:relative lg:z-30 lg:-mb-5 lg:px-3 lg:pb-0">
         {/* Desktop: black-lacquer and gold pediment resting on the cabinet */}
         <div className="relative hidden lg:block">
           <span
@@ -408,7 +408,7 @@ useEffect(() => {
             style={{ background: "linear-gradient(135deg,#fff3c4,#b8873a)", boxShadow: "0 0 10px rgba(240,211,139,0.6)" }}
           />
           <div
-            className="shine-loop relative rounded-xl px-9 pb-2 pt-2.5"
+            className="shine-loop relative rounded-xl px-8 pb-1.5 pt-2"
             style={{
               background: "linear-gradient(180deg, #1b141d 0%, #0b080d 55%, #120d13 100%)",
               boxShadow:
@@ -424,7 +424,7 @@ useEffect(() => {
               </span>
             ))}
             <h3
-              className="font-display whitespace-nowrap text-[clamp(1.5rem,2.3vw,2.3rem)] font-bold uppercase leading-none tracking-[0.14em]"
+              className="font-display whitespace-nowrap text-[clamp(1.3rem,1.9vw,1.95rem)] font-bold uppercase leading-none tracking-[0.14em]"
               style={{
                 backgroundImage: "linear-gradient(180deg, #fff6d2 0%, #f0d38b 40%, #b8873a 62%, #f6dc8f 100%)",
                 WebkitBackgroundClip: "text",
@@ -435,9 +435,9 @@ useEffect(() => {
             >
               {skin.title}
             </h3>
-            <div className="mt-1.5 flex items-center justify-center gap-2">
+            <div className="mt-1 flex items-center justify-center gap-2">
               <span aria-hidden="true" className="h-px w-8 bg-gradient-to-r from-transparent to-[#d7b45b]/70" />
-              <p className="whitespace-nowrap text-[9px] uppercase leading-none tracking-[0.3em] text-[#e5c779]/75">{skin.tagline}</p>
+              <p className="whitespace-nowrap text-[8px] uppercase leading-none tracking-[0.3em] text-[#e5c779]/75">{skin.tagline}</p>
               <span aria-hidden="true" className="h-px w-8 bg-gradient-to-l from-transparent to-[#d7b45b]/70" />
             </div>
           </div>
