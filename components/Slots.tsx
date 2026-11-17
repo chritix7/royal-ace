@@ -14,7 +14,7 @@ import SlotReels from "./SlotReels";
 import { Counter, machineSmall } from "./ui";
 import { money } from "../lib/game";
 import { wallet } from "../lib/wallet";
-import { exitFullscreenQuietly, requestFullscreenSettled } from "../lib/fullscreen";
+import { exitFullscreenSettled, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
 import { SKINS, rankOf, type SkinId } from "../lib/skins";
 import { useSlots } from "../lib/useSlots";
 import {
@@ -256,13 +256,12 @@ export default function Slots({
     setFocusAnim(focus ? "focus-pending" : "slots-view-in");
   }, [focus]);
   // Exit key: dissolve first, leave fullscreen while dark, then close.
+  const focusLeaving = useRef(false);
   const requestFocusExit = () => {
-    if (focusAnim === "slots-focus-out") return;
+    if (focusLeaving.current) return;
+    focusLeaving.current = true;
     setFocusAnim("slots-focus-out");
-    window.setTimeout(() => {
-      exitFullscreenQuietly();
-      onFocusChange?.(false);
-    }, 260);
+    window.setTimeout(() => exitFullscreenSettled(() => onFocusChange?.(false)), 260);
   };
   // Focus = true browser fullscreen, like the blackjack Focus view.
   const focusCloseRef = useRef(onFocusChange);
@@ -283,9 +282,16 @@ export default function Slots({
     const cancelFs = requestFullscreenSettled(() => setFocusAnim("slots-focus-in"));
     // Esc in fullscreen only exits fullscreen (no keydown): close Focus with it.
     let entered = false;
+    focusLeaving.current = false;
     const onFsChange = () => {
       if (document.fullscreenElement) entered = true;
-      else if (entered && !wasFullscreen) close();
+      else if (entered && !wasFullscreen && !focusLeaving.current) {
+        // Left by the browser (Esc, back gesture): fade out while the
+        // page resizes, then close.
+        focusLeaving.current = true;
+        setFocusAnim("slots-focus-out");
+        whenViewportStable(close);
+      }
     };
     // Without fullscreen (denied or already fullscreen), Esc closes Focus.
     const onKey = (e: KeyboardEvent) => {

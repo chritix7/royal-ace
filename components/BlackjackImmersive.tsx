@@ -6,7 +6,7 @@ import { handValue, isBlackjack } from "../lib/blackjack";
 import { tableBg, money } from "../lib/game";
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import { useSession } from "../lib/sessionStore";
-import { FOCUS_OUT_MS, exitFullscreenQuietly, requestFullscreenSettled } from "../lib/fullscreen";
+import { FOCUS_OUT_MS, exitFullscreenSettled, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
 import { Counter } from "./ui";
 import PlayingCard from "./PlayingCard";
 import CardFlight from "./CardFlight";
@@ -92,13 +92,16 @@ export default function BlackjackImmersive({
   const [stage, setStage] = useState<"pending" | "in" | "out">("pending");
   // Leaving by the Exit key: dissolve first, then leave fullscreen while
   // the screen is dark, then hand back to the table.
+  const leavingRef = useRef(false);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
   const requestClose = () => {
-    if (stage === "out") return;
+    if (leavingRef.current) return;
+    leavingRef.current = true;
     setStage("out");
-    window.setTimeout(() => {
-      exitFullscreenQuietly();
-      onClose();
-    }, FOCUS_OUT_MS);
+    // Fade out, leave fullscreen while dark, and only hand back to the
+    // table once the viewport has stopped resizing (phones).
+    window.setTimeout(() => exitFullscreenSettled(onClose), FOCUS_OUT_MS);
   };
 
   useEffect(() => {
@@ -139,7 +142,13 @@ export default function BlackjackImmersive({
     let entered = false;
     const onFsChange = () => {
       if (document.fullscreenElement) entered = true;
-      else if (entered && !wasFullscreen) onClose();
+      else if (entered && !wasFullscreen && !leavingRef.current) {
+        // Left by the browser (Esc, back gesture): fade out while the
+        // page resizes, then hand back to the table.
+        leavingRef.current = true;
+        setStage("out");
+        whenViewportStable(() => closeRef.current());
+      }
     };
     document.addEventListener("fullscreenchange", onFsChange);
 
