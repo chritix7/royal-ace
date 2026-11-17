@@ -139,8 +139,10 @@ export default function Slots({
       const b = box.getBoundingClientRect();
       const free = con.getBoundingClientRect().top - b.bottom;
       const h = pl.offsetHeight;
-      // Not enough room for a gap on both sides: keep it on the frame edge.
-      setPlaqueTop(free >= h + 16 ? Math.round(b.height + (free - h) / 2) : null);
+      // Centred in the free band; if it is too tight, as low as possible
+      // (6 px above the console) while overlapping the frame by 20 px at most.
+      const offset = Math.max(-20, Math.min((free - h) / 2, free - h - 6));
+      setPlaqueTop(Math.round(b.height + offset));
     };
     place();
     const ro = new ResizeObserver(place);
