@@ -118,11 +118,11 @@ export default function AchievementsPanel({ open, onClose }: Props) {
 
         {/* Body */}
         <div className="relative min-h-0 flex-1 overflow-y-auto px-5 py-4 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin] sm:px-6">
-          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2">
             {views.map(({ def, progress, done, claimed }) => (
               <li
                 key={def.id}
-                className={`relative overflow-hidden rounded-2xl border p-3 transition ${
+                className={`relative overflow-hidden rounded-xl border px-3 py-2 transition sm:rounded-2xl sm:p-3 ${
                   done
                     ? "border-[#d7b45b]/60 bg-[#d7b45b]/[0.08]"
                     : "border-white/[0.07] bg-black/30"
@@ -149,7 +149,7 @@ export default function AchievementsPanel({ open, onClose }: Props) {
                   </span>
                 </div>
 
-                <div className="mt-2.5 flex items-center gap-3">
+                <div className="mt-1.5 flex items-center gap-3 sm:mt-2.5">
                   <div className="min-w-0 flex-1">
                     <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/45">
                       <div
@@ -157,13 +157,13 @@ export default function AchievementsPanel({ open, onClose }: Props) {
                         style={{ width: `${Math.round((progress / def.goal) * 100)}%` }}
                       />
                     </div>
-                    <p className="mt-1 text-[10px] tabular-nums text-white/45">
+                    <p className="mt-0.5 text-[10px] tabular-nums text-white/45 sm:mt-1">
                       {progress} / {def.goal}
                     </p>
                   </div>
 
                   {claimed ? (
-                    <span className="shrink-0 rounded-full border border-[#d7b45b]/40 bg-[#d7b45b]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-[#e5c779]/80">
+                    <span className="shrink-0 rounded-full border border-[#d7b45b]/40 bg-[#d7b45b]/10 px-3 py-1 text-[10px] sm:py-1.5 font-black uppercase tracking-wider text-[#e5c779]/80">
                       Claimed ✓
                     </span>
                   ) : (
@@ -176,7 +176,7 @@ export default function AchievementsPanel({ open, onClose }: Props) {
                           ? "Finish the round in progress to claim"
                           : undefined
                       }
-                      className={`shrink-0 rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-wider outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px disabled:cursor-not-allowed ${
+                      className={`shrink-0 rounded-full border px-3 py-1 text-[10px] font-black sm:py-1.5 uppercase tracking-wider outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px disabled:cursor-not-allowed ${
                         done
                           ? "border-[#d7b45b]/70 bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e] shadow-[0_2px_0_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.4)] enabled:hover:brightness-110 disabled:opacity-50"
                           : "border-white/10 bg-white/[0.04] text-white/35"

@@ -837,6 +837,7 @@ function getShoeStatus(g: Game): {
         open={resultOpen && s.phase === "settled"}
         onClose={() => setResultOpen(false)}
         breakdown={roundBreakdown}
+        call={s.message}
       />
       <SideBetModal
         open={sideBetOpen === "pp"}

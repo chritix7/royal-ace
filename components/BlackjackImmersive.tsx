@@ -32,6 +32,7 @@ import JackpotPill from "./JackpotPill";
 import LuckyRound from "./LuckyRound";
 import CountUp from "./CountUp";
 import FeltMarkings from "./FeltMarkings";
+import MobileResultModal from "./MobileResultModal";
 import ShoeMeter from "./ShoeMeter";
 import ImmersiveSidePill from "./blackjack-immersive/ImmersiveSidePill";
 import ResultRail from "./blackjack-immersive/ResultRail";
@@ -1013,83 +1014,12 @@ const playerCardStyle = (
         )}
       </footer>
 
-      {resultOpen && roundBreakdown && (
-  <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm md:hidden">
-    <button
-      type="button"
-      className="absolute inset-0 cursor-default"
-      aria-label="Close round details"
-      onClick={() => setResultOpen(false)}
-      tabIndex={-1}
-    />
-
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Round details"
-      className="animate-pop relative w-full max-w-sm rounded-2xl border border-[#d7b45b]/40 bg-[#0d140f] p-4 shadow-2xl"
-    >
-      <button
-        type="button"
-        onClick={() => setResultOpen(false)}
-        aria-label="Close round details"
-        className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white/80 transition hover:border-[#d7b45b] hover:text-[#e5c779]"
-      >
-        ✕
-      </button>
-
-      <p className="text-[10px] font-black uppercase tracking-widest text-[#e5c779]">
-        Round result
-      </p>
-
-      <p
-        className={`mt-1 text-3xl font-black tabular-nums ${
-          roundBreakdown.total > 0
-            ? "text-[#f5d778]"
-            : roundBreakdown.total < 0
-            ? "text-red-300"
-            : "text-white/70"
-        }`}
-      >
-        {signed(roundBreakdown.total)}
-      </p>
-
-      <dl className="mt-4 space-y-2 text-sm">
-        {[
-          ["Main hands", roundBreakdown.main],
-          ["Insurance", roundBreakdown.insurance],
-          ["Perfect Pairs", roundBreakdown.perfectPairs],
-          ["21+3", roundBreakdown.twentyOnePlusThree],
-        ].map(([label, value]) => (
-          <div
-            key={String(label)}
-            className="flex items-center justify-between gap-3"
-          >
-            <dt className="text-white/50">{label}</dt>
-            <dd className="font-semibold tabular-nums text-white/85">
-              {signed(Number(value))}
-            </dd>
-          </div>
-        ))}
-
-        <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-2">
-          <dt className="font-bold text-white">Total</dt>
-          <dd
-            className={`font-black tabular-nums ${
-              roundBreakdown.total > 0
-                ? "text-[#f5d778]"
-                : roundBreakdown.total < 0
-                ? "text-red-300"
-                : "text-white/70"
-            }`}
-          >
-            {signed(roundBreakdown.total)}
-          </dd>
-        </div>
-      </dl>
-    </div>
-  </div>
-)}
+      <MobileResultModal
+        open={resultOpen && s.phase === "settled"}
+        onClose={() => setResultOpen(false)}
+        breakdown={roundBreakdown}
+        call={s.message}
+      />
 
       {menuOpen && (
         <InfoPanel g={g} onClose={() => setMenuOpen(false)} />

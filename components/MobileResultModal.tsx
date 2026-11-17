@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import type { RoundBreakdown } from "../lib/blackjackRecovery";
 import { money } from "../lib/game";
+import CountUp from "./CountUp";
 
 /**
  * Mobile-only round-details modal. On desktop the ResultRail already
@@ -22,10 +23,13 @@ export default function MobileResultModal({
   open,
   onClose,
   breakdown,
+  call,
 }: {
   open: boolean;
   onClose: () => void;
   breakdown: RoundBreakdown | null;
+  /** The dealer's call for the round, shown as the title. */
+  call?: string;
 }) {
   // Esc closes.
   useEffect(() => {
@@ -82,23 +86,26 @@ export default function MobileResultModal({
           ×
         </button>
 
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#d7b45b]/80">
-          Round result
+        <p className="font-display pr-10 text-[11px] font-black uppercase leading-snug tracking-[0.16em] text-[#e5c779]">
+          {call ?? "Round result"}
         </p>
         <p className={`mt-1 text-3xl font-black tabular-nums ${tone}`}>
-          {signed(breakdown.total)}
+          <CountUp value={breakdown.total} format={signed} />
         </p>
 
-        <dl className="mt-4 space-y-2 text-sm">
+        {/* Same lines as the desktop result card: the main hands always,
+            the rest only when they moved chips; the total is the big
+            figure above, so it isn't repeated. */}
+        <dl className="mt-4 space-y-2 border-t border-white/10 pt-3 text-sm">
           {[
             ["Main hands", breakdown.main],
             ["Insurance", breakdown.insurance],
             ["Perfect Pairs", breakdown.perfectPairs],
             ["21+3", breakdown.twentyOnePlusThree],
-            ...(breakdown.golden
-              ? [["★ Golden bonus", breakdown.golden]]
-              : []),
-          ].map(([label, value]) => (
+            ["★ Golden bonus", breakdown.golden ?? 0],
+          ]
+            .filter(([, value], i) => i === 0 || value !== 0)
+            .map(([label, value]) => (
             <div
               key={String(label)}
               className="flex items-center justify-between gap-3"
@@ -110,12 +117,6 @@ export default function MobileResultModal({
             </div>
           ))}
 
-          <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-2">
-            <dt className="font-bold text-white">Total</dt>
-            <dd className={`font-black tabular-nums ${tone}`}>
-              {signed(breakdown.total)}
-            </dd>
-          </div>
         </dl>
       </div>
     </div>,

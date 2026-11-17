@@ -145,20 +145,20 @@ export default function StatsPanel({ open, onClose }: Props) {
             everything fits without scrolling. */}
         <div className="relative min-h-0 flex-1 overflow-y-auto px-5 py-4 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin] sm:px-6 lg:grid lg:grid-cols-3 lg:items-start lg:gap-5">
           {groups.map((group) => (
-            <section key={group.title} className="mb-6 last:mb-0 lg:mb-0">
+            <section key={group.title} className="mb-4 last:mb-0 sm:mb-6 lg:mb-0">
               <p className="mb-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
                 {group.title}
               </p>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2 lg:grid-cols-2">
                 {group.items.map((item) => (
                   <div
                     key={item.label}
-                    className="rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] lg:px-3 lg:py-2"
+                    className="min-w-0 rounded-xl border border-[#c8a65b]/15 bg-black/35 px-2 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] sm:rounded-2xl sm:p-3 lg:px-3 lg:py-2"
                   >
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">
+                    <p className="truncate text-[8px] font-bold uppercase tracking-wide text-white/45 sm:text-[10px] sm:tracking-wider">
                       {item.label}
                     </p>
-                    <p className="mt-1 text-lg font-black tabular-nums text-[#f0d38b] lg:mt-0.5 lg:text-base">
+                    <p className="mt-0.5 text-sm font-black tabular-nums text-[#f0d38b] sm:mt-1 sm:text-lg lg:mt-0.5 lg:text-base">
                       {item.value}
                     </p>
                   </div>
