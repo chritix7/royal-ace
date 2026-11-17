@@ -189,8 +189,8 @@ const shownLine =
       className={`mx-auto flex w-fit items-stretch gap-1.5 sm:gap-3 ${
         large
           ? "[--cell:4.2rem] sm:[--cell:5rem] lg:[--cell:5.2rem]"
-          : "[--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:clamp(4.25rem,min(calc((100dvh_-_var(--slots-top,10rem)_-_252px)_/_4),calc((100vw_-_8rem)_/_7)),10rem)]"
-      } [--cell-w:var(--cell)] lg:[--cell-w:calc(var(--cell)*1.4)] ${shake ? `shake-${shake}` : ""}`}
+          : "[--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:clamp(4.25rem,min(calc((100dvh_-_var(--slots-top,10rem)_-_196px)_/_4),calc((100vw_-_8rem_-_430px)_/_6.5)),10rem)]"
+      } [--cell-w:var(--cell)] lg:[--cell-w:calc(var(--cell)*1.3)] ${shake ? `shake-${shake}` : ""}`}
     >
 
       <div

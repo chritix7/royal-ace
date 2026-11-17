@@ -5,7 +5,7 @@ import BetBar from "./BetBar";
 import Confetti from "./Confetti";
 import CoinRain from "./CoinRain";
 import GamblePanel from "./GamblePanel";
-import JackpotBar from "./JackpotBar";
+import JackpotBar, { JackpotLadder } from "./JackpotBar";
 import VaultGame from "./VaultGame";
 import RollingNumber from "./RollingNumber";
 import Glyph from "./Glyph";
@@ -86,15 +86,21 @@ function Led({
   );
 }
 
+const towerCard = "w-full rounded-xl border border-[#d7b45b]/20 px-3 py-2.5 text-left outline-none transition hover:border-[#f0d38b]/60 focus-visible:ring-2 focus-visible:ring-[#e5c779]";
+const towerStyle = {
+  background: "linear-gradient(180deg, #17131a 0%, #0a080c 55%, #120e13 100%)",
+  boxShadow: "inset 0 1px 0 rgba(255,236,170,0.08), 0 6px 14px rgba(0,0,0,0.45)",
+} as const;
+
 const consoleKey =
   "flex h-12 items-center justify-center rounded-lg border border-white/12 bg-[linear-gradient(180deg,#26262c_0%,#141418_55%,#0b0b0e_100%)] text-white/75 shadow-[0_3px_0_#000,inset_0_1px_0_rgba(255,255,255,0.08)] outline-none transition-[transform,border-color,color,filter] enabled:hover:border-[#d7b45b]/60 enabled:hover:text-[#f0d99a] enabled:active:translate-y-px focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-35";
 
 function ConsoleValue({ label, children, align, on }: { label: string; children: ReactNode; align: "left" | "right"; on?: boolean }) {
   return (
-    <div className={`flex min-w-0 items-baseline gap-2.5 ${align === "right" ? "justify-end" : ""}`}>
-      <span className="text-[10px] font-black tracking-[0.25em] text-[#d7b45b]/80">{label}</span>
+    <div className={`flex min-w-0 flex-col justify-center px-4 ${align === "right" ? "items-end" : "items-start"}`}>
+      <span className="text-[9px] font-black tracking-[0.25em] text-[#d7b45b]/80">{label}</span>
       <span
-        className="truncate font-mono text-2xl font-black tabular-nums"
+        className="max-w-full truncate font-mono text-xl font-black leading-6 tabular-nums"
         style={{
           color: on ? "#fff4c9" : "#f0d99a",
           textShadow: on ? "0 0 14px rgba(255,209,102,0.55)" : "0 0 6px rgba(240,211,139,0.15)",
@@ -121,6 +127,7 @@ export default function Slots({
   const [gambleScreen, setGambleScreen] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [betOpen, setBetOpen] = useState(false);
   const [infoTab, setInfoTab] = useState<"pay" | "features">("pay");
   const openInfo = (t: "pay" | "features" = "pay") => {
     setInfoTab(t);
@@ -253,6 +260,23 @@ useEffect(() => {
           </span>
         </button>
   );
+  // Text of the gold message plaque under the reels (desktop).
+  const messageContent = s.fs ? (
+    <>
+      <span className="font-black tracking-widest text-[#ffd166]">{skin.labels.freeSpins} ×{FS_MULT}</span>
+      <span className="tabular-nums text-[#ffd166]/85">Spin {Math.min(s.fs.played, s.fs.total)} / {s.fs.total}</span>
+      <span className="tabular-nums text-[#ffd166]/85">Won ◈ {money(s.fs.win)}</span>
+    </>
+  ) : activeLine ? (
+    <span className="truncate text-[#ffe9b0]">
+      Line {activeLine.line} · {activeLine.count}× <Glyph sym={activeLine.sym} skin={skin} /> · +◈ {money(activeLine.pay * lineBet)}
+      {s.lineWins.length > 1 && <span className="text-white/50"> · {s.lineWins.length} lines</span>}
+    </span>
+  ) : balance < bet && !s.busy && balance >= BET_LEVELS[0] ? (
+    <span className="truncate text-red-300">Not enough chips for this bet. Pick a lower one.</span>
+  ) : (
+    <span className="truncate text-white/85">{s.message}</span>
+  );
   // During free spins the button shows the count instead of a bare "…".
   const spinLabel = s.fs ? (
     <span className="relative flex flex-col items-center leading-none">
@@ -276,7 +300,7 @@ useEffect(() => {
           ? "fixed inset-0 z-50 overflow-y-auto bg-black"
           : focus
             ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black [--slots-top:0rem]"
-            : "lg:h-[calc(100dvh-10rem)] lg:min-h-[600px] lg:items-stretch lg:gap-4 lg:overflow-hidden"
+            : "lg:h-[calc(100dvh-10rem)] lg:min-h-[540px] lg:items-stretch lg:gap-4 lg:overflow-hidden"
       }`}
     >
       {focus && (
@@ -403,7 +427,12 @@ useEffect(() => {
   />
 </div>
 
-          <div className="relative mt-1 lg:mt-0 lg:flex lg:min-h-0 lg:flex-1 lg:items-center lg:justify-center lg:pb-2">
+          <div className="relative mt-1 lg:mt-0 lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center lg:gap-5 lg:pb-[1.6rem]">
+  {/* Left tower: the jackpot ladder */}
+  <div className="hidden justify-self-end lg:flex lg:w-[180px]">
+    <JackpotLadder pools={s.pools} bet={bet} />
+  </div>
+  <div className="relative lg:flex lg:justify-center">
   <SlotReels
     s={s}
     skin={skin}
@@ -421,6 +450,71 @@ useEffect(() => {
           : "idle"
     }
   />
+  {/* Gold message plaque resting on the bottom edge of the cabinet */}
+  <div
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    className={`absolute -bottom-4 left-1/2 z-30 hidden h-9 w-[min(78%,620px)] -translate-x-1/2 items-center justify-center gap-3 overflow-hidden rounded-lg px-5 text-sm lg:flex`}
+    style={{
+      background: s.fs ? "linear-gradient(180deg,#2a1d0c,#120b04)" : "linear-gradient(180deg, #1b141d 0%, #0b080d 60%, #120d13 100%)",
+      boxShadow: "0 0 0 1px #f0d38b, 0 0 0 3px #0a0709, 0 0 0 4px rgba(215,180,91,0.5), 0 10px 22px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,243,196,0.2)",
+    }}
+  >
+    {messageContent}
+  </div>
+  </div>
+  {/* Right tower: crowns, vault, last spins */}
+  <div className="hidden justify-self-start lg:flex lg:w-[180px] lg:flex-col lg:gap-2">
+    <p className="text-center text-[9px] font-black uppercase tracking-[0.35em] text-[#d7b45b]/80">Bonuses</p>
+    <button
+      type="button"
+      onClick={() => openInfo("features")}
+      title={`Every scatter adds a crown (per bet). At ${collection.target}: 5 free spins or ${COLLECTION_CHIP_MULT}× your bet.`}
+      className={towerCard}
+      style={towerStyle}
+    >
+      <span className="flex items-center justify-between">
+        <span className="text-[9px] font-black tracking-[0.25em] text-[#e5c779]/80">👑 CROWNS</span>
+        <span className="font-mono text-sm font-black tabular-nums text-[#f0d99a]">{collection.crowns}/{collection.target}</span>
+      </span>
+      <span className="mt-2 flex gap-[3px]">
+        {Array.from({ length: collection.target }, (_, i) => (
+          <span key={i} className={`h-2 flex-1 rounded-sm ${i < collection.crowns ? "bg-gradient-to-b from-[#fff1bf] to-[#c89a3f] shadow-[0_0_6px_rgba(240,211,139,0.5)]" : "bg-white/10"}`} />
+        ))}
+      </span>
+    </button>
+    <button
+      type="button"
+      onClick={() => openInfo("features")}
+      title="Every paid spin has a 1 in 250 chance to open the vault and reveal a jackpot"
+      className={towerCard}
+      style={towerStyle}
+    >
+      <span className="flex items-center justify-between">
+        <span className="text-[9px] font-black tracking-[0.25em] text-[#e5c779]/80"><span className="vault-glint">🔐</span> VAULT</span>
+        <span className="text-[10px] text-white/45">1 in 250</span>
+      </span>
+      <span className="mt-1 block text-[11px] leading-4 text-white/60">Any spin can open it: pick 3 cases, win a jackpot.</span>
+    </button>
+    <div className={towerCard} style={towerStyle}>
+      <span className="text-[9px] font-black tracking-[0.25em] text-[#e5c779]/80">LAST SPINS</span>
+      <span className="mt-2 grid grid-cols-4 gap-1">
+        {s.history.length === 0 && <span className="col-span-4 text-[11px] text-white/35">No spins yet</span>}
+        {s.history.slice(-8).map((r, i) => (
+          <span
+            key={`${s.history.length}-${i}`}
+            title={`${r.toFixed(1)}× the bet`}
+            className={`flex h-6 items-center justify-center rounded font-mono text-[10px] font-bold ${
+              r >= 20 ? "bg-[#e5c779] text-black" : r >= 1 ? "bg-emerald-500/25 text-emerald-200" : r > 0 ? "bg-white/10 text-white/60" : "bg-white/[0.04] text-white/25"
+            }`}
+          >
+            {r === 0 ? "–" : r >= 10 ? `${Math.round(r)}×` : `${r.toFixed(1)}×`}
+          </span>
+        ))}
+      </span>
+    </div>
+  </div>
 </div>
 
           {s.banner && (
@@ -717,90 +811,26 @@ useEffect(() => {
             </div>
           ) : (
             <>
-              {/* ── Desktop: full-width cabinet console, Amusnet / EGT layout ──
-                  Row 1: credit · message · win.  Row 2: menu, auto, turbo,
-                  five bet buttons (each one spins at its stake), gamble, spin. */}
+              {/* ── Desktop: single-row cabinet console ──
+                  keys · [credit | bet −/+ | win] display · buy, gamble, spin */}
               <div
-                className="relative z-20 -mx-6 hidden border-t border-[#d7b45b]/35 lg:block lg:shrink-0"
+                className="relative z-40 -mx-6 hidden border-t border-[#d7b45b]/35 lg:block lg:shrink-0"
                 style={{
-                  background: "linear-gradient(180deg, #121014 0%, #070608 38%, #000 100%)",
-                  boxShadow: "0 -1px 0 rgba(0,0,0,0.8), 0 -14px 30px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,236,170,0.12)",
+                  background: "linear-gradient(180deg, #16131a 0%, #08070a 45%, #000 100%)",
+                  boxShadow: "0 -14px 30px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,236,170,0.12)",
                 }}
               >
-                {/* Row 1 */}
-                <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)] items-center gap-4 px-6 pt-2">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <ConsoleValue label="CREDIT" align="left">
-                      <span className={flash ? "balance-flash-pink" : ""}>
-                        <Counter value={balance} />
-                      </span>
-                    </ConsoleValue>
-                    {/* Last spins, newest on the right, as multiples of the bet */}
-                    <div className="hidden min-w-0 items-center gap-1 overflow-hidden xl:flex" aria-label="Last spins">
-                      {s.history.slice(-6).map((r, i) => (
-                        <span
-                          key={`${s.history.length}-${i}`}
-                          title={`${r.toFixed(1)}× the bet`}
-                          className={`flex h-5 min-w-5 shrink-0 items-center justify-center rounded px-1 font-mono text-[9px] font-bold ${
-                            r >= 20 ? "bg-[#e5c779] text-black" : r >= 1 ? "bg-emerald-500/25 text-emerald-200" : r > 0 ? "bg-white/10 text-white/60" : "bg-white/[0.04] text-white/25"
-                          }`}
-                        >
-                          {r === 0 ? "–" : r >= 10 ? `${Math.round(r)}×` : `${r.toFixed(1)}×`}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex min-w-0 items-center gap-2">
-                  {crownMeter}
-                  <button
-                    type="button"
-                    onClick={() => openInfo("features")}
-                    title="The vault: every paid spin has a 1 in 250 chance to open it and reveal a jackpot"
-                    className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-[#d7b45b]/30 bg-black/55 px-2.5 text-[9px] font-black uppercase tracking-[0.15em] text-[#e5c779]/85 outline-none transition hover:border-[#f0d38b] focus-visible:ring-2 focus-visible:ring-[#e5c779]"
-                  >
-                    <span aria-hidden="true" className="vault-glint text-[11px] leading-none">🔐</span>
-                    Vault
-                  </button>
-                  <div
-                    className="flex h-9 min-w-0 flex-1 items-center justify-center gap-3 overflow-hidden rounded-md border border-white/[0.07] bg-black/70 px-4 text-sm shadow-[inset_0_2px_6px_rgba(0,0,0,0.8)]"
-                    role="status"
-                    aria-live="polite"
-                    aria-atomic="true"
-                  >
-                    {s.fs ? (
-                      <>
-                        <span className="font-black tracking-widest text-[#ffd166]">{skin.labels.freeSpins} ×{FS_MULT}</span>
-                        <span className="tabular-nums text-[#ffd166]/85">Spin {Math.min(s.fs.played, s.fs.total)} / {s.fs.total}</span>
-                        <span className="tabular-nums text-[#ffd166]/85">Won ◈ {money(s.fs.win)}</span>
-                      </>
-                    ) : activeLine ? (
-                      <span className="truncate text-[#ead19a]">
-                        Line {activeLine.line} · {activeLine.count}× <Glyph sym={activeLine.sym} skin={skin} /> · +◈ {money(activeLine.pay * lineBet)}
-                        {s.lineWins.length > 1 && <span className="text-white/50"> · {s.lineWins.length} winning lines</span>}
-                      </span>
-                    ) : balance < bet && !s.busy && !outOfChips ? (
-                      <span className="truncate text-red-300">Not enough chips for this bet. Pick a lower one.</span>
-                    ) : (
-                      <span className="truncate text-white/80">{s.message}</span>
-                    )}
-                  </div>
-                  </div>
-                  <ConsoleValue label="WIN" align="right" on={s.lastWin > 0 && !spinningNow}>
-                    <RollingNumber value={s.lastWin} />
-                  </ConsoleValue>
-                </div>
-
-                {/* Row 2 */}
-                <div className="mx-auto flex max-w-6xl items-center gap-3 px-6 pb-3 pt-2">
+                <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-2.5">
+                  {/* Keys */}
                   <div className="flex shrink-0 items-center gap-1.5">
                     <button
                       onClick={() => openInfo("pay")}
                       aria-label="Paytable and game info"
                       title="Paytable, features, rank and session"
-                      className={`${consoleKey} min-w-[3.25rem] flex-col px-2 leading-none`}
+                      className={`${consoleKey} w-12 flex-col leading-none`}
                     >
                       <span className="text-base">☰</span>
-                      <span className="mt-0.5 text-[8px] font-black tracking-[0.18em] opacity-70">INFO</span>
+                      <span className="mt-0.5 text-[8px] font-black tracking-[0.15em] opacity-70">INFO</span>
                     </button>
                     <div className="relative">
                       {autoOpen && !auto && (
@@ -852,54 +882,110 @@ useEffect(() => {
                         disabled={!!s.fs || (!auto && !canSpin)}
                         aria-haspopup="menu"
                         aria-expanded={autoOpen}
-                        className={`${consoleKey} min-w-[4.75rem] flex-col px-3 leading-none ${auto ? "!border-red-400/70 !text-red-200" : ""}`}
+                        className={`${consoleKey} w-14 flex-col leading-none ${auto ? "!border-red-400/70 !text-red-200" : ""}`}
                       >
                         <span className="text-[11px] font-black tracking-wider">{auto ? "STOP" : "AUTO"}</span>
-                        <span className="mt-1 text-[9px] font-semibold tabular-nums opacity-60">{auto ? `${s.autoLeft} left` : `× ${autoCount}`}</span>
+                        <span className="mt-1 text-[9px] font-semibold tabular-nums opacity-60">{auto ? s.autoLeft : `×${autoCount}`}</span>
                       </button>
                     </div>
                     <button
                       onClick={toggleTurbo}
                       aria-pressed={s.turbo}
                       title="Turbo (T)"
-                      className={`${consoleKey} w-11 text-sm ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
+                      className={`${consoleKey} w-12 flex-col leading-none ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
                     >
-                      ⚡
+                      <span className="text-sm">⚡</span>
+                      <span className="mt-0.5 text-[8px] font-black tracking-[0.15em] opacity-70">TURBO</span>
                     </button>
                   </div>
 
-                  {/* Bet buttons: a window of five stakes around the current one */}
-                  <div className="flex min-w-0 flex-1 items-center justify-center gap-2" role="group" aria-label="Bet and spin">
-                    {betWindow.map((i) => {
-                      const v = BET_LEVELS[i];
-                      const selected = i === s.betIdx;
-                      return (
-                        <button
-                          key={v}
-                          onClick={() => spinAt(i)}
-                          disabled={s.busy || v > balance}
-                          aria-pressed={selected}
-                          title={`Spin at ◈ ${money(v)} (${money(v / PAYLINES.length)} per line)`}
-                          className={`relative flex h-12 min-w-0 max-w-[7.5rem] flex-1 flex-col items-center justify-center rounded-lg border leading-none outline-none transition-[transform,filter,border-color] enabled:hover:brightness-125 enabled:active:translate-y-px focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-35 ${
-                            selected ? "border-[#f0d38b] text-[#1b1305]" : "border-[#d7b45b]/30 text-[#f0d99a]"
-                          }`}
-                          style={{
-                            background: selected
-                              ? "linear-gradient(180deg, #fff1bf 0%, #e9c56e 45%, #b8873a 100%)"
-                              : "linear-gradient(180deg, #2a2420 0%, #17130f 55%, #0d0b09 100%)",
-                            boxShadow: selected
-                              ? "0 3px 0 #6b4f1d, 0 0 18px rgba(240,211,139,0.35), inset 0 1px 0 rgba(255,255,255,0.6)"
-                              : "0 3px 0 #000, inset 0 1px 0 rgba(255,236,170,0.12)",
-                          }}
-                        >
-                          <span className="text-[8px] font-bold tracking-[0.2em] opacity-70">BET</span>
-                          <span className="mt-1 font-mono text-base font-black tabular-nums">{money(v)}</span>
-                        </button>
-                      );
-                    })}
+                  {/* Display: credit | bet | win */}
+                  <div
+                    className="grid h-14 min-w-0 flex-1 grid-cols-[1fr_auto_1fr] items-stretch overflow-visible rounded-xl border border-[#d7b45b]/25"
+                    style={{ background: "linear-gradient(180deg, #050405 0%, #0c0a0d 100%)", boxShadow: "inset 0 3px 8px rgba(0,0,0,0.9), 0 1px 0 rgba(255,236,170,0.08)" }}
+                  >
+                    <ConsoleValue label="CREDIT" align="left">
+                      <span className={flash ? "balance-flash-pink" : ""}>
+                        <Counter value={balance} />
+                      </span>
+                    </ConsoleValue>
+
+                    <div className="relative flex items-center gap-2 border-x border-[#d7b45b]/15 px-3">
+                      <button
+                        onClick={() => setBetIdx(s.betIdx - 1)}
+                        disabled={s.busy || s.betIdx === 0}
+                        aria-label="Lower bet"
+                        className={`${consoleKey} !h-9 w-9 text-lg`}
+                      >
+                        −
+                      </button>
+                      <button
+                        onClick={() => setBetOpen((v) => !v)}
+                        disabled={s.busy}
+                        aria-haspopup="dialog"
+                        aria-expanded={betOpen}
+                        title="Choose a bet"
+                        className="flex min-w-[7.5rem] flex-col items-center rounded-lg px-2 py-1 outline-none transition enabled:hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-60"
+                      >
+                        <span className="text-[9px] font-black tracking-[0.25em] text-[#d7b45b]/80">BET ▾</span>
+                        <span className="font-mono text-xl font-black leading-6 tabular-nums text-[#fff1bf]">
+                          <span className="mr-1 text-base opacity-55">◈</span>{money(bet)}
+                        </span>
+                        <span className="text-[9px] text-white/40">{money(lineBet)} per line</span>
+                      </button>
+                      <button
+                        onClick={() => setBetIdx(s.betIdx + 1)}
+                        disabled={s.busy || s.betIdx === BET_LEVELS.length - 1 || BET_LEVELS[s.betIdx + 1] > balance}
+                        aria-label="Raise bet"
+                        className={`${consoleKey} !h-9 w-9 text-lg`}
+                      >
+                        +
+                      </button>
+                      {betOpen && (
+                        <>
+                          <button aria-label="Close bet picker" className="fixed inset-0 z-[59] cursor-default" onClick={() => setBetOpen(false)} />
+                          <div
+                            role="dialog"
+                            aria-label="Choose a bet"
+                            className="absolute bottom-full left-1/2 z-[60] mb-3 w-[22rem] -translate-x-1/2 rounded-xl border border-[#d7b45b]/40 p-3"
+                            style={{ background: "linear-gradient(180deg,#1b1620,#0b090c)", boxShadow: "0 16px 40px rgba(0,0,0,0.7)" }}
+                          >
+                            <p className="mb-2 text-center text-[9px] font-black uppercase tracking-[0.3em] text-[#d7b45b]/80">Total bet</p>
+                            <div className="grid grid-cols-5 gap-1.5">
+                              {BET_LEVELS.map((v, i) => (
+                                <button
+                                  key={v}
+                                  onClick={() => {
+                                    setBetIdx(i);
+                                    setBetOpen(false);
+                                  }}
+                                  disabled={v > balance}
+                                  aria-pressed={i === s.betIdx}
+                                  className={`h-10 rounded-lg border font-mono text-sm font-black tabular-nums outline-none transition disabled:opacity-30 ${
+                                    i === s.betIdx
+                                      ? "border-[#f0d38b] text-[#1b1305]"
+                                      : "border-[#d7b45b]/25 text-[#f0d99a] enabled:hover:border-[#f0d38b]"
+                                  }`}
+                                  style={{
+                                    background: i === s.betIdx ? "linear-gradient(180deg,#fff1bf,#e9c56e 45%,#b8873a)" : "linear-gradient(180deg,#2a2420,#0d0b09)",
+                                  }}
+                                >
+                                  {money(v)}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    <ConsoleValue label="WIN" align="right" on={s.lastWin > 0 && !spinningNow}>
+                      <RollingNumber value={s.lastWin} />
+                    </ConsoleValue>
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-2">
+                  {/* Actions */}
+                  <div className="flex shrink-0 items-center gap-1.5">
                     {outOfChips ? (
                       <button onClick={refill} className={`rounded-full px-5 py-2.5 text-xs font-bold ${skin.betOn}`}>
                         Take a ◈ 1,000 refill
@@ -910,9 +996,9 @@ useEffect(() => {
                           onClick={() => setBuyOpen(true)}
                           disabled={s.busy || !!s.fs || balance < bonusPrice}
                           title="Start the free spins right away"
-                          className={`${consoleKey} flex-col px-3 leading-none ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
+                          className={`${consoleKey} w-[4.5rem] flex-col leading-none`}
                         >
-                          <span className="text-[10px] font-black tracking-wider">{s.confirmBuy ? "CONFIRM?" : "BUY BONUS"}</span>
+                          <span className="text-[10px] font-black tracking-wider">BUY</span>
                           <span className="mt-1 text-[9px] font-semibold tabular-nums opacity-70">◈ {money(bonusPrice)}</span>
                         </button>
                         <button
@@ -920,7 +1006,7 @@ useEffect(() => {
                           disabled={!s.gamble}
                           aria-label="Open double or nothing"
                           title="Double or nothing on your last win"
-                          className={`${consoleKey} flex-col px-3 leading-none ${
+                          className={`${consoleKey} w-[4.5rem] flex-col leading-none ${
                             s.gamble ? "!border-[#ffd166] !text-[#1b1305] shadow-[0_0_18px_rgba(255,209,102,0.4)]" : ""
                           }`}
                           style={s.gamble ? { background: "linear-gradient(180deg,#ffe08a,#d7a83f)" } : undefined}
@@ -935,10 +1021,10 @@ useEffect(() => {
                       disabled={!canSpin}
                       aria-label="Spin"
                       title="Space"
-                      className={`relative ml-1 flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center rounded-full text-sm font-black tracking-widest outline-none transition active:scale-95 focus-visible:ring-4 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn} ${s.fs ? "!opacity-100" : ""}`}
+                      className={`relative -my-3 ml-2 flex h-[4.75rem] w-[4.75rem] shrink-0 items-center justify-center rounded-full text-sm font-black tracking-widest outline-none transition active:scale-95 focus-visible:ring-4 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn} ${s.fs ? "!opacity-100" : ""}`}
                       style={{
                         boxShadow:
-                          "0 0 0 3px #000, 0 0 0 5px rgba(215,180,91,0.55), 0 6px 0 #000, 0 10px 18px rgba(0,0,0,0.6), inset 0 2px 3px rgba(255,255,255,0.3), inset 0 -4px 7px rgba(0,0,0,0.28)",
+                          "0 0 0 3px #000, 0 0 0 5px rgba(215,180,91,0.6), 0 6px 0 #000, 0 10px 18px rgba(0,0,0,0.6), inset 0 2px 3px rgba(255,255,255,0.3), inset 0 -4px 7px rgba(0,0,0,0.28)",
                       }}
                     >
                       {spinLabel}

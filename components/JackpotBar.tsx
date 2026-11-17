@@ -61,7 +61,7 @@ export default function JackpotBar({
   const tile = (t: JackpotTier) => (
     <div
       key={t}
-      className={`relative min-w-0 rounded-lg border px-1 py-1.5 text-center ${STYLE[t]}`}
+      className={`relative min-w-0 rounded-lg border px-1 py-1.5 text-center lg:hidden ${STYLE[t]}`}
       style={{
         background: "linear-gradient(180deg, #151822 0%, #090c14 55%, #10121b 100%)",
         boxShadow:
@@ -92,7 +92,7 @@ export default function JackpotBar({
   const [a, b, c, d] = JACKPOT_TIERS;
   return (
     <div
-      className="mx-auto mb-3 grid w-full max-w-3xl lg:max-w-5xl grid-cols-4 items-center gap-1.5 sm:mb-4 sm:gap-2 lg:mb-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_minmax(0,1fr)_minmax(0,1fr)] lg:gap-3"
+      className="mx-auto mb-3 grid w-full max-w-3xl lg:max-w-5xl grid-cols-4 items-center gap-1.5 sm:mb-4 sm:gap-2 lg:mb-0 lg:flex lg:justify-center"
       role="group"
       aria-label="Progressive jackpots"
     >
@@ -101,6 +101,48 @@ export default function JackpotBar({
       {center && <div className="order-first col-span-4 lg:order-none lg:col-span-1">{center}</div>}
       {tile(c)}
       {tile(d)}
+    </div>
+  );
+}
+
+/**
+ * Desktop jackpot ladder beside the reels, Kingpin on top like the
+ * jackpot tower of a casino cabinet.
+ */
+export function JackpotLadder({ pools, bet }: { pools: Pools; bet: number }) {
+  const order: JackpotTier[] = ["kingpin", "major", "minor", "mini"];
+  return (
+    <div className="flex w-full flex-col gap-2" role="group" aria-label="Progressive jackpots">
+      <p className="text-center text-[9px] font-black uppercase tracking-[0.35em] text-[#d7b45b]/80">Jackpots</p>
+      {order.map((t, i) => (
+        <div
+          key={t}
+          className={`relative flex items-center gap-3 rounded-xl border px-3 ${i === 0 ? "py-3" : "py-2"} ${STYLE[t]}`}
+          style={{
+            background: "linear-gradient(180deg, #17131a 0%, #0a080c 55%, #120e13 100%)",
+            boxShadow:
+              i === 0
+                ? "0 0 0 1px rgba(240,211,139,0.35), 0 0 26px rgba(255,79,163,0.25), inset 0 1px 0 rgba(255,236,170,0.15), 0 8px 18px rgba(0,0,0,0.5)"
+                : "inset 0 2px 5px rgba(0,0,0,0.6), 0 6px 14px rgba(0,0,0,0.45)",
+          }}
+        >
+          <span
+            aria-hidden="true"
+            className={`flex shrink-0 items-center justify-center rounded-[5px] border border-black/30 leading-none shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
+              i === 0 ? "h-12 w-9 text-2xl" : "h-10 w-7 text-lg"
+            } ${SUIT[t].red ? "text-[#c81e3a]" : "text-[#111]"}`}
+            style={{ background: "linear-gradient(180deg,#fffaf0,#e9e2d0)" }}
+          >
+            {SUIT[t].glyph}
+          </span>
+          <span className="min-w-0 flex-1 text-left">
+            <span className="block text-[9px] font-black tracking-[0.25em] opacity-70">{JACKPOTS[t].label}</span>
+            <span className={`block truncate font-mono font-black tabular-nums ${i === 0 ? "text-xl" : "text-base"}`}>
+              <span className="opacity-60">◈</span> <GrowingValue value={Math.round(pools[t] * bet)} />
+            </span>
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
