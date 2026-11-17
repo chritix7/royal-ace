@@ -94,20 +94,38 @@ const towerStyle = {
 
 const consoleKey = "cab-key";
 
-function ConsoleValue({ label, children, align, on }: { label: string; children: ReactNode; align: "left" | "right"; on?: boolean }) {
-  return (
-    <div className={`flex min-w-0 flex-col justify-center px-4 ${align === "right" ? "items-end" : "items-start"}`}>
-      <span className="text-[9px] font-black tracking-[0.25em] text-[#d7b45b]/80">{label}</span>
-      <span
-        className={`max-w-full truncate font-mono text-[22px] font-black leading-7 tabular-nums ${on ? "meter-hit text-[#fff8dc]" : "gold-text"}`}
-        style={on ? { textShadow: "0 0 16px rgba(255,209,102,0.7)" } : undefined}
-      >
-        <span className="mr-1 text-base opacity-60">◈</span>
-        {children}
-      </span>
-    </div>
-  );
-}
+
+/* Crisp line icons for the cabinet keys */
+const icon = "h-[18px] w-[18px]";
+const IconInfo = () => (
+  <svg viewBox="0 0 24 24" className={icon} fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 11v6M12 7.5v.5" strokeLinecap="round" />
+  </svg>
+);
+const IconAuto = () => (
+  <svg viewBox="0 0 24 24" className={icon} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M20 12a8 8 0 1 1-2.34-5.66" />
+    <path d="M20 4v5h-5" />
+  </svg>
+);
+const IconBolt = () => (
+  <svg viewBox="0 0 24 24" className={icon} fill="currentColor" aria-hidden="true">
+    <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z" />
+  </svg>
+);
+const IconCards = () => (
+  <svg viewBox="0 0 24 24" className={icon} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="5" width="11" height="15" rx="2" transform="rotate(-10 8.5 12.5)" />
+    <rect x="10" y="4" width="11" height="15" rx="2" transform="rotate(8 15.5 11.5)" />
+  </svg>
+);
+const IconTicket = () => (
+  <svg viewBox="0 0 24 24" className={icon} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
+    <path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z" />
+    <path d="M14 7v10" strokeDasharray="2 2" />
+  </svg>
+);
 
 export default function Slots({
   active = true,
@@ -488,9 +506,9 @@ useEffect(() => {
   />
 </div>
 
-          <div className="relative mt-1 lg:mt-0 lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center lg:gap-5 lg:pb-[1.6rem]">
+          <div className="relative mt-1 lg:mt-0 lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-start lg:gap-5 lg:pb-[1.6rem]">
   {/* Left tower: the jackpot ladder */}
-  <div className="hidden justify-self-end lg:flex lg:w-[180px]">
+  <div className="hidden justify-self-end lg:flex lg:w-[180px] lg:self-center">
     <JackpotLadder pools={s.pools} bet={bet} />
   </div>
   <div ref={reelsBoxRef} className="relative lg:flex lg:justify-center">
@@ -532,7 +550,7 @@ useEffect(() => {
   </div>
   </div>
   {/* Right tower: crowns, vault, last spins */}
-  <div className="hidden justify-self-start lg:flex lg:w-[180px] lg:flex-col lg:gap-2">
+  <div className="hidden justify-self-start lg:flex lg:w-[180px] lg:flex-col lg:gap-2 lg:self-center">
     <p className="flex items-center justify-center gap-2"><span aria-hidden="true" className="h-px w-6 bg-gradient-to-r from-transparent to-[#d7b45b]/70" /><span className="font-display gold-text text-[12px] font-bold uppercase tracking-[0.3em]">Bonuses</span><span aria-hidden="true" className="h-px w-6 bg-gradient-to-l from-transparent to-[#d7b45b]/70" /></p>
     <button
       type="button"
@@ -642,7 +660,7 @@ useEffect(() => {
       <div className="mt-5 grid grid-cols-2 gap-3">
         <button
           onClick={() => claimCollectionReward("spins")}
-          className="rounded-xl border border-[#d7b45b]/40 bg-[linear-gradient(180deg,#2a2420,#120e0b)] px-3 py-4 text-sm font-bold text-[#f0d99a] transition hover:-translate-y-0.5 hover:border-[#f0d38b] hover:shadow-[0_0_18px_rgba(240,211,139,0.3)]"
+          className="lux-btn flex-col px-3 py-4 text-sm"
         >
           <span className="block text-2xl">🎰</span>
           5 Free Spins
@@ -650,7 +668,7 @@ useEffect(() => {
 
         <button
           onClick={() => claimCollectionReward("chips")}
-          className="rounded-xl border border-[#d7b45b]/40 bg-[linear-gradient(180deg,#2a2420,#120e0b)] px-3 py-4 text-sm font-bold text-[#f0d99a] transition hover:-translate-y-0.5 hover:border-[#f0d38b] hover:shadow-[0_0_18px_rgba(240,211,139,0.3)]"
+          className="lux-btn flex-col px-3 py-4 text-sm"
         >
           <span className="block text-2xl">◈</span>
           {money(bet * COLLECTION_CHIP_MULT)} Chips
@@ -889,29 +907,24 @@ useEffect(() => {
             </div>
           ) : (
             <>
-              {/* ── Desktop: single-row cabinet console ──
-                  keys · [credit | bet −/+ | win] display · buy, gamble, spin */}
-              <div
-                ref={consoleRef}
-                className="relative z-40 -mx-6 hidden border-t border-[#d7b45b]/35 lg:block lg:shrink-0"
-                style={{
-                  background: "linear-gradient(180deg, #16131a 0%, #08070a 45%, #000 100%)",
-                  boxShadow: "0 -14px 30px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,236,170,0.12)",
-                }}
-              >
-                <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-2.5">
-                  {/* Keys */}
-                  <div className="flex shrink-0 items-center gap-1.5">
-                    <button
-                      onClick={() => openInfo("pay")}
-                      aria-label="Paytable and game info"
-                      title="Paytable, features, rank and session"
-                      className={`${consoleKey} w-12 flex-col leading-none`}
-                    >
-                      <span className="text-base">☰</span>
-                      <span className="mt-0.5 text-[8px] font-black tracking-[0.15em] opacity-70">INFO</span>
-                    </button>
-                    <div className="relative">
+              {/* ── Desktop: lacquer & brass cabinet deck ──
+                  keys · credit · bet | (−) SPIN (+) | win · gamble · buy */}
+              <div ref={consoleRef} className="deck relative z-40 -mx-6 hidden lg:block lg:shrink-0">
+                <span aria-hidden="true" className="deck-chevron" />
+                <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-5 px-6 pb-2.5 pt-3.5">
+                  {/* Left wing */}
+                  <div className="flex min-w-0 items-center justify-end gap-3">
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <button
+                        onClick={() => openInfo("pay")}
+                        aria-label="Paytable and game info"
+                        title="Paytable, features, rank and session"
+                        className="cab-key w-12 flex-col gap-0.5 leading-none"
+                      >
+                        <IconInfo />
+                        <span className="text-[8px] font-black tracking-[0.15em] opacity-75">INFO</span>
+                      </button>
+                      <div className="relative">
                       {autoOpen && !auto && (
                         <>
                           <button aria-label="Close auto spin menu" className="fixed inset-0 z-[59] cursor-default" onClick={() => setAutoOpen(false)} />
@@ -928,7 +941,8 @@ useEffect(() => {
                                   role="menuitem"
                                   onClick={() => startAuto(n)}
                                   disabled={!canSpin}
-                                  className={`${machineSmall} h-9 w-11 !py-0 text-xs ${n === autoCount ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
+                                  aria-pressed={n === autoCount}
+                                  className="lux-btn h-9 w-11 text-xs"
                                 >
                                   {n}
                                 </button>
@@ -956,69 +970,50 @@ useEffect(() => {
                           </div>
                         </>
                       )}
+                        <button
+                          onClick={() => (auto ? stopAuto() : setAutoOpen((v) => !v))}
+                          disabled={!!s.fs || (!auto && !canSpin)}
+                          aria-haspopup="menu"
+                          aria-expanded={autoOpen}
+                          title="Auto spins"
+                          className={`cab-key w-12 flex-col gap-0.5 leading-none ${auto ? "cab-key--stop" : ""}`}
+                        >
+                          {auto ? <span className="text-[11px] font-black">{s.autoLeft}</span> : <IconAuto />}
+                          <span className="text-[8px] font-black tracking-[0.15em] opacity-75">{auto ? "STOP" : `AUTO ${autoCount}`}</span>
+                        </button>
+                      </div>
                       <button
-                        onClick={() => (auto ? stopAuto() : setAutoOpen((v) => !v))}
-                        disabled={!!s.fs || (!auto && !canSpin)}
-                        aria-haspopup="menu"
-                        aria-expanded={autoOpen}
-                        className={`${consoleKey} w-14 flex-col leading-none ${auto ? "cab-key--stop" : ""}`}
+                        onClick={toggleTurbo}
+                        aria-pressed={s.turbo}
+                        title="Turbo (T)"
+                        className="cab-key w-12 flex-col gap-0.5 leading-none"
                       >
-                        <span className="text-[11px] font-black tracking-wider">{auto ? "STOP" : "AUTO"}</span>
-                        <span className="mt-1 text-[9px] font-semibold tabular-nums opacity-60">{auto ? s.autoLeft : `×${autoCount}`}</span>
+                        <IconBolt />
+                        <span className="text-[8px] font-black tracking-[0.15em] opacity-75">TURBO</span>
                       </button>
                     </div>
-                    <button
-                      onClick={toggleTurbo}
-                      aria-pressed={s.turbo}
-                      title="Turbo (T)"
-                      className={`${consoleKey} w-12 flex-col leading-none`}
-                    >
-                      <span className="text-sm">⚡</span>
-                      <span className="mt-0.5 text-[8px] font-black tracking-[0.15em] opacity-70">TURBO</span>
-                    </button>
-                  </div>
-
-                  {/* Display: credit | bet | win */}
-                  <div
-                    className="grid h-14 min-w-0 flex-1 grid-cols-[1fr_auto_1fr] items-stretch overflow-visible rounded-xl border border-[#d7b45b]/25"
-                    style={{ background: "linear-gradient(180deg, #050405 0%, #0c0a0d 100%)", boxShadow: "inset 0 3px 8px rgba(0,0,0,0.9), 0 1px 0 rgba(255,236,170,0.08)" }}
-                  >
-                    <ConsoleValue label="CREDIT" align="left">
-                      <span className={flash ? "balance-flash-pink" : ""}>
-                        <Counter value={balance} />
+                    <div className="jewel flex h-14 min-w-0 flex-1 flex-col justify-center px-4">
+                      <span className="text-[9px] font-black tracking-[0.3em] text-[#d7b45b]/80">CREDIT</span>
+                      <span className="gold-text truncate font-mono text-[22px] font-black leading-7 tabular-nums">
+                        <span className="mr-1 text-base">◈</span>
+                        <span className={flash ? "balance-flash-pink" : ""}>
+                          <Counter value={balance} />
+                        </span>
                       </span>
-                    </ConsoleValue>
-
-                    <div className="relative flex items-center gap-2 border-x border-[#d7b45b]/15 px-3">
-                      <button
-                        onClick={() => setBetIdx(s.betIdx - 1)}
-                        disabled={s.busy || s.betIdx === 0}
-                        aria-label="Lower bet"
-                        className={`${consoleKey} !h-9 w-9 text-lg`}
-                      >
-                        −
-                      </button>
+                    </div>
+                    <div className="relative shrink-0">
                       <button
                         onClick={() => setBetOpen((v) => !v)}
                         disabled={s.busy}
                         aria-haspopup="dialog"
                         aria-expanded={betOpen}
                         title="Choose a bet"
-                        className="flex min-w-[7.5rem] flex-col items-center rounded-lg px-2 py-1 outline-none transition enabled:hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-60"
+                        className="jewel flex h-14 w-[7.5rem] flex-col items-center justify-center outline-none transition enabled:hover:brightness-125 focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-70"
                       >
-                        <span className="text-[9px] font-black tracking-[0.25em] text-[#d7b45b]/80">BET ▾</span>
-                        <span className="font-mono text-xl font-black leading-6 tabular-nums text-[#fff1bf]">
-                          <span className="mr-1 text-base opacity-55">◈</span>{money(bet)}
+                        <span className="text-[9px] font-black tracking-[0.3em] text-[#d7b45b]/80">BET ▾</span>
+                        <span className="gold-text font-mono text-[22px] font-black leading-7 tabular-nums">
+                          <span className="mr-1 text-base">◈</span>{money(bet)}
                         </span>
-                        <span className="text-[9px] text-white/40">{money(lineBet)} per line</span>
-                      </button>
-                      <button
-                        onClick={() => setBetIdx(s.betIdx + 1)}
-                        disabled={s.busy || s.betIdx === BET_LEVELS.length - 1 || BET_LEVELS[s.betIdx + 1] > balance}
-                        aria-label="Raise bet"
-                        className={`${consoleKey} !h-9 w-9 text-lg`}
-                      >
-                        +
                       </button>
                       {betOpen && (
                         <>
@@ -1040,14 +1035,7 @@ useEffect(() => {
                                   }}
                                   disabled={v > balance}
                                   aria-pressed={i === s.betIdx}
-                                  className={`h-10 rounded-lg border font-mono text-sm font-black tabular-nums outline-none transition disabled:opacity-30 ${
-                                    i === s.betIdx
-                                      ? "border-[#f0d38b] text-[#1b1305]"
-                                      : "border-[#d7b45b]/25 text-[#f0d99a] enabled:hover:border-[#f0d38b]"
-                                  }`}
-                                  style={{
-                                    background: i === s.betIdx ? "linear-gradient(180deg,#fff1bf,#e9c56e 45%,#b8873a)" : "linear-gradient(180deg,#2a2420,#0d0b09)",
-                                  }}
+                                  className="lux-btn h-10 font-mono text-sm tabular-nums"
                                 >
                                   {money(v)}
                                 </button>
@@ -1057,51 +1045,81 @@ useEffect(() => {
                         </>
                       )}
                     </div>
-
-                    <ConsoleValue label="WIN" align="right" on={s.lastWin > 0 && !spinningNow}>
-                      <RollingNumber value={s.lastWin} />
-                    </ConsoleValue>
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex shrink-0 items-center gap-1.5">
-                    {outOfChips ? (
-                      <button onClick={refill} className={`rounded-full px-5 py-2.5 text-xs font-bold ${skin.betOn}`}>
-                        Take a ◈ 1,000 refill
-                      </button>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => setBuyOpen(true)}
-                          disabled={s.busy || !!s.fs || balance < bonusPrice}
-                          title="Start the free spins right away"
-                          className={`${consoleKey} w-[4.5rem] flex-col leading-none`}
-                        >
-                          <span className="text-[10px] font-black tracking-wider">BUY</span>
-                          <span className="mt-1 text-[9px] font-semibold tabular-nums opacity-70">◈ {money(bonusPrice)}</span>
-                        </button>
-                        <button
-                          onClick={() => setGambleScreen(true)}
-                          disabled={!s.gamble}
-                          aria-label="Open double or nothing"
-                          title="Double or nothing on your last win"
-                          className={`${consoleKey} w-[4.5rem] flex-col leading-none ${s.gamble ? "cab-key--gold cab-key--live" : ""}`}
-                        >
-                          <span className="text-[10px] font-black tracking-wider">GAMBLE</span>
-                          <span className="mt-1 text-[9px] font-semibold opacity-70">×2</span>
-                        </button>
-                      </>
-                    )}
+                  {/* Centre: bet keys hugging the spin */}
+                  <div className="flex items-center gap-2.5">
+                    <button
+                      onClick={() => setBetIdx(s.betIdx - 1)}
+                      disabled={s.busy || s.betIdx === 0}
+                      aria-label="Lower bet"
+                      title="Lower bet (←)"
+                      className="bet-key"
+                    >
+                      −
+                    </button>
                     <button
                       onClick={() => playWithSound(1)}
                       disabled={!canSpin}
                       aria-label="Spin"
                       title="Space"
-                      className={`spin-btn relative -my-1.5 ml-3 flex h-[4.75rem] w-[4.75rem] shrink-0 items-center justify-center rounded-full text-base font-black tracking-[0.18em] outline-none focus-visible:ring-4 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-60 [text-shadow:0_1px_0_rgba(0,0,0,0.35)] ${skin.spinBtn} ${s.busy ? "is-busy" : canSpin ? "is-ready" : ""} ${s.fs ? "!opacity-100" : ""}`}
+                      className={`spin-btn relative flex h-[4.75rem] w-[4.75rem] shrink-0 items-center justify-center rounded-full text-base font-black tracking-[0.18em] outline-none focus-visible:ring-4 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-60 [text-shadow:0_1px_0_rgba(0,0,0,0.35)] ${skin.spinBtn} ${s.busy ? "is-busy" : canSpin ? "is-ready" : ""} ${s.fs ? "!opacity-100" : ""}`}
                       style={{ boxShadow: "inset 0 2px 3px rgba(255,255,255,0.35), inset 0 -6px 10px rgba(0,0,0,0.35)" }}
                     >
                       {spinLabel}
                     </button>
+                    <button
+                      onClick={() => setBetIdx(s.betIdx + 1)}
+                      disabled={s.busy || s.betIdx === BET_LEVELS.length - 1 || BET_LEVELS[s.betIdx + 1] > balance}
+                      aria-label="Raise bet"
+                      title="Raise bet (→)"
+                      className="bet-key"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  {/* Right wing */}
+                  <div className="flex min-w-0 items-center justify-start gap-3">
+                    <div className={`jewel flex h-14 min-w-0 flex-1 flex-col items-end justify-center px-4 ${s.lastWin > 0 && !spinningNow ? "jewel--hot" : ""}`}>
+                      <span className="text-[9px] font-black tracking-[0.3em] text-[#d7b45b]/80">WIN</span>
+                      <span
+                        className={`max-w-full truncate font-mono text-[22px] font-black leading-7 tabular-nums ${s.lastWin > 0 && !spinningNow ? "meter-hit text-[#fff8dc]" : "gold-text"}`}
+                        style={s.lastWin > 0 && !spinningNow ? { textShadow: "0 0 16px rgba(255,209,102,0.7)" } : undefined}
+                      >
+                        <span className="mr-1 text-base opacity-70">◈</span>
+                        <RollingNumber value={s.lastWin} />
+                      </span>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {outOfChips ? (
+                        <button onClick={refill} className="lux-btn lux-btn--gold h-12 px-4 text-xs">
+                          ◈ 1,000 refill
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => setGambleScreen(true)}
+                            disabled={!s.gamble}
+                            aria-label="Open double or nothing"
+                            title="Double or nothing on your last win"
+                            className={`cab-key w-14 flex-col gap-0.5 leading-none ${s.gamble ? "cab-key--gold cab-key--live" : ""}`}
+                          >
+                            <IconCards />
+                            <span className="text-[8px] font-black tracking-[0.12em]">GAMBLE</span>
+                          </button>
+                          <button
+                            onClick={() => setBuyOpen(true)}
+                            disabled={s.busy || !!s.fs || balance < bonusPrice}
+                            title={`Buy ${FS_AWARD[3]} free spins for ◈ ${money(bonusPrice)}`}
+                            className="cab-key w-14 flex-col gap-0.5 leading-none"
+                          >
+                            <IconTicket />
+                            <span className="text-[8px] font-black tracking-[0.12em]">BUY</span>
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1315,7 +1333,7 @@ useEffect(() => {
               <button
                 onClick={() => setInfoOpen(false)}
                 aria-label="Close"
-                className={`${machineSmall} flex h-8 w-8 items-center justify-center !py-0 text-sm`}
+                className="lux-btn h-9 w-9 text-sm"
               >
                 ✕
               </button>

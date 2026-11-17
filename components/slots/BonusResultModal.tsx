@@ -2,7 +2,6 @@
 
 import { money } from "../../lib/game";
 import { BONUS_PRICE_MULT } from "../../lib/slots";
-import { machineSmall } from "../ui";
 import CountUp from "../CountUp";
 import CoinRain from "../CoinRain";
 
@@ -81,8 +80,7 @@ export default function BonusResultModal({
           type="button"
           autoFocus
           onClick={onContinue}
-          className={`${machineSmall} mt-5 w-full py-3 text-sm font-black tracking-widest !border-[#f0d38b] !text-[#1b1305]`}
-          style={{ background: "linear-gradient(180deg, #fff1bf 0%, #e9c56e 45%, #b8873a 100%)" }}
+          className="lux-btn lux-btn--gold mt-5 w-full py-3.5 text-sm tracking-[0.2em]"
         >
           COLLECT
         </button>

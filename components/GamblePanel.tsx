@@ -227,13 +227,7 @@ export default function GamblePanel({
               <button
                 type="button"
                 onClick={() => onChoose("red")}
-                className="flex h-14 min-w-0 items-center justify-center gap-1 rounded-xl border border-red-300/25 text-sm font-black tracking-widest text-white outline-none transition-[transform,border-color] duration-150 focus-visible:ring-2 focus-visible:ring-white enabled:active:translate-y-px motion-reduce:transition-none"
-                style={{
-                  background:
-                    "linear-gradient(180deg, #6d1f22 0%, #4c1518 55%, #33100f 100%)",
-                  boxShadow:
-                    "0 2px 0 #06080d, inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.35)",
-                }}
+                className="lux-btn lux-btn--red h-14 min-w-0 text-sm tracking-widest"
               >
                 <span className="text-red-200/90">♥♦</span> RED
               </button>
@@ -241,13 +235,7 @@ export default function GamblePanel({
               <button
                 type="button"
                 onClick={() => onChoose("black")}
-                className="flex h-14 min-w-0 items-center justify-center gap-1 rounded-xl border border-white/15 text-sm font-black tracking-widest text-white outline-none transition-[transform,border-color] duration-150 focus-visible:ring-2 focus-visible:ring-white enabled:active:translate-y-px motion-reduce:transition-none"
-                style={{
-                  background:
-                    "linear-gradient(180deg, #30323c 0%, #20222c 50%, #151720 100%)",
-                  boxShadow:
-                    "0 2px 0 #06080d, inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 4px rgba(0,0,0,0.35)",
-                }}
+                className="lux-btn lux-btn--black h-14 min-w-0 text-sm tracking-widest"
               >
                 <span className="text-white/70">♠♣</span> BLACK
               </button>
@@ -258,8 +246,7 @@ export default function GamblePanel({
                 onCollect();
                 onClose();
               }}
-              className="mt-3 h-11 w-full rounded-xl border border-[#f0d38b] text-sm font-black tracking-widest text-[#1b1305] outline-none transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-white active:translate-y-px"
-              style={{ background: "linear-gradient(180deg, #fff1bf 0%, #e9c56e 45%, #b8873a 100%)", boxShadow: "0 3px 0 #6b4f1d" }}
+              className="lux-btn lux-btn--gold mt-3 h-12 w-full text-sm tracking-widest"
             >
               COLLECT ◈ {money(g.amount)}
             </button>

@@ -106,9 +106,7 @@ export default function SlotsSidePanel({
               onClick={() => !busy && setSkinId(k.id)}
               disabled={busy}
               aria-pressed={skinId === k.id}
-              className={`rounded-full border px-4 py-1.5 text-xs font-bold outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:opacity-40 ${
-                skinId === k.id ? "border-[#d7b45b] bg-[#d7b45b]/15 text-[#f0d99a]" : "border-white/10 text-white/60 hover:border-white/30"
-              }`}
+              className="lux-btn !rounded-full px-4 py-1.5 text-xs"
             >
               {k.id === "miami" ? "Miami" : "Classic"}
             </button>
@@ -295,7 +293,7 @@ export default function SlotsSidePanel({
                         <button
                           onClick={() => achievementsStore.claim(c.def.id)}
                           disabled={busy}
-                          className="shrink-0 rounded-full bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] px-3 py-1 text-[11px] font-black text-[#10130e] disabled:opacity-40"
+                          className="lux-btn lux-btn--gold shrink-0 !rounded-full px-3 py-1 text-[11px]"
                         >
                           Claim ◈ {money(c.def.reward)}
                         </button>

@@ -109,6 +109,13 @@ export default function JackpotBar({
  * Desktop jackpot ladder beside the reels, Kingpin on top like the
  * jackpot tower of a casino cabinet.
  */
+/** Shrinks long amounts (high bets: Kingpin = 500× the bet) instead of cutting them. */
+function fitSize(v: number, top: boolean) {
+  const n = v.toLocaleString("en-US").length;
+  if (top) return n <= 6 ? "text-xl" : n <= 7 ? "text-lg" : n <= 9 ? "text-base" : "text-sm";
+  return n <= 7 ? "text-base" : n <= 9 ? "text-sm" : "text-[13px]";
+}
+
 export function JackpotLadder({ pools, bet }: { pools: Pools; bet: number }) {
   const order: JackpotTier[] = ["kingpin", "major", "minor", "mini"];
   return (
@@ -137,7 +144,7 @@ export function JackpotLadder({ pools, bet }: { pools: Pools; bet: number }) {
           </span>
           <span className="min-w-0 flex-1 text-left">
             <span className="block text-[9px] font-black tracking-[0.25em] opacity-70">{JACKPOTS[t].label}</span>
-            <span className={`block truncate font-mono font-black tabular-nums ${i === 0 ? "text-xl" : "text-base"}`}>
+            <span className={`block whitespace-nowrap font-mono font-black leading-6 tabular-nums ${fitSize(Math.round(pools[t] * bet), i === 0)}`}>
               <span className="opacity-60">◈</span> <GrowingValue value={Math.round(pools[t] * bet)} />
             </span>
           </span>

@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { money } from "../../lib/game";
-import { machineSmall } from "../ui";
 
 export default function BuyBonusModal({
   open,
@@ -104,7 +103,7 @@ export default function BuyBonusModal({
           <button
             type="button"
             onClick={onClose}
-            className={`${machineSmall} flex-1 py-3`}
+            className="lux-btn flex-1 py-3 text-sm"
           >
             Cancel
           </button>
@@ -116,11 +115,7 @@ export default function BuyBonusModal({
               onBuy();
             }}
             disabled={balance < bonusPrice}
-            className={`${machineSmall} flex-1 py-3 !border-[#d7b45b]/70 !text-[#f0dfb7]`}
-            style={{
-              background:
-                "linear-gradient(180deg, #49402d 0%, #302a20 50%, #211e19 100%)",
-            }}
+            className="lux-btn lux-btn--gold flex-1 py-3 text-sm"
           >
             Confirm
           </button>

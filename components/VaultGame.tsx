@@ -5,7 +5,6 @@ import { JACKPOTS } from "../lib/jackpot";
 import { CASE_ART } from "../lib/symbolArt";
 import { VAULT_PICKS, prizeValue, settleVault } from "../lib/vault";
 import type { VaultState } from "../lib/useSlots";
-import { machineSmall } from "./ui";
 import { useRef } from "react";
 import { useModalFocus } from "./useModalFocus";
 
@@ -195,10 +194,7 @@ export default function VaultGame({
             <button
               type="button"
               onClick={onCollect}
-              className={`${machineSmall} mt-4 w-full !rounded-xl py-3 text-sm font-black tracking-widest !border-[#f0d38b] !text-[#1b1305] lg:mt-0`}
-              style={{
-                background: "linear-gradient(180deg, #fff1bf 0%, #e9c56e 45%, #b8873a 100%)",
-              }}
+              className="lux-btn lux-btn--gold mt-4 w-full py-3.5 text-sm tracking-[0.2em] lg:mt-0"
             >
               COLLECT
             </button>
