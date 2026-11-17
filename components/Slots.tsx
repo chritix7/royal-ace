@@ -141,15 +141,49 @@ export default function Slots({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [infoOpen]);
-  // Focus: Esc leaves (unless a panel is open, which closes first).
+  // Focus = true browser fullscreen, like the blackjack Focus view.
+  const focusCloseRef = useRef(onFocusChange);
+  focusCloseRef.current = onFocusChange;
   useEffect(() => {
     if (!focus) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !document.querySelector("[role=dialog][aria-modal=true]")) onFocusChange?.(false);
+    const close = () => focusCloseRef.current?.(false);
+    const root = document.documentElement;
+    const previousOverflow = document.body.style.overflow;
+    const previousGutter = root.style.scrollbarGutter;
+    document.body.style.overflow = "hidden";
+    // The page keeps a scrollbar gutter; release it or a strip shows on the right.
+    root.style.scrollbarGutter = "auto";
+    // The Focus button keeps keyboard focus otherwise; Space must spin.
+    (document.activeElement as HTMLElement | null)?.blur?.();
+
+    const wasFullscreen = Boolean(document.fullscreenElement);
+    if (!wasFullscreen && root.requestFullscreen) {
+      root.requestFullscreen({ navigationUI: "hide" }).catch(() => {
+        /* denied: Focus still fills the window */
+      });
+    }
+    // Esc in fullscreen only exits fullscreen (no keydown): close Focus with it.
+    let entered = false;
+    const onFsChange = () => {
+      if (document.fullscreenElement) entered = true;
+      else if (entered && !wasFullscreen) close();
     };
+    // Without fullscreen (denied or already fullscreen), Esc closes Focus.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !document.fullscreenElement && !document.querySelector("[role=dialog][aria-modal=true]")) close();
+    };
+    document.addEventListener("fullscreenchange", onFsChange);
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [focus, onFocusChange]);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFsChange);
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+      root.style.scrollbarGutter = previousGutter;
+      if (!wasFullscreen && document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+    };
+  }, [focus]);
   const skin = SKINS[skinId];
   const {
   s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, setAutoStops, refill,
