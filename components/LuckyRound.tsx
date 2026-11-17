@@ -11,7 +11,14 @@ import { money } from "../lib/game";
  * part of the round's net (`roundBreakdown.golden`). This component
  * only displays it, from the deal until the table returns to betting.
  */
-export default function LuckyRound({ g }: { g: Game }) {
+export default function LuckyRound({
+  g,
+  position = "left-3 top-[86px] sm:left-1/2 sm:top-2 sm:-translate-x-1/2",
+}: {
+  g: Game;
+  /** Where the banner sits: the jackpot pill's slot, which it replaces. */
+  position?: string;
+}) {
   if (!g.golden || g.s.phase === "betting") return null;
 
   const bonus = g.roundBreakdown?.golden ?? 0;
@@ -21,7 +28,7 @@ export default function LuckyRound({ g }: { g: Game }) {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none absolute left-3 top-[86px] z-20 animate-insurance-slide-in whitespace-nowrap sm:left-1/2 sm:top-2 sm:-translate-x-1/2"
+      className={`pointer-events-none absolute z-20 animate-insurance-slide-in whitespace-nowrap ${position}`}
     >
       <div
         className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.16em] sm:px-3 sm:py-1 sm:tracking-[0.2em] shadow-[0_6px_20px_rgba(229,199,121,0.35),inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-sm sm:text-[11px] ${

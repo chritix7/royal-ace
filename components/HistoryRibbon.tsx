@@ -225,6 +225,9 @@ export default function HistoryRibbon({
           const isLatest = i === recent.length - 1;
           // Rounds saved before the replay existed carry no cards.
           const canReplay = Boolean(round.hands?.length);
+          // Phones show the last 5 only, so the ribbon stays clear of
+          // the dealer's cards.
+          const phoneHidden = i < recent.length - 5;
           return (
             <button
               key={`${i}-${round.net}-${round.bj ? "b" : "r"}`}
@@ -233,7 +236,9 @@ export default function HistoryRibbon({
               onClick={() => setReplay(round)}
               aria-label={`${label} ${round.net > 0 ? "+" : ""}${round.net}${canReplay ? " — view the hand" : ""}`}
               title={canReplay ? "View this hand" : undefined}
-              className="group flex h-4 w-3 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:cursor-pointer"
+              className={`group h-4 w-3 items-center justify-center rounded-full outline-none ${
+                phoneHidden ? "hidden sm:flex" : "flex"
+              } focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:cursor-pointer`}
             >
               <span
                 className={`block h-2 w-2 rounded-full transition-transform group-enabled:group-hover:scale-150 ${bg} ${

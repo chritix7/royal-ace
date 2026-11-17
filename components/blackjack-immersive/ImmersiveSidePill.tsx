@@ -28,7 +28,7 @@ export default function ImmersiveSidePill({
       aria-label={`${label} — stake ${amount}`}
       disabled={disabled}
       onClick={onOpen}
-      className={`group flex w-full min-w-0 items-center justify-between gap-1.5 rounded-full border px-2.5 py-1.5 outline-none transition-[background,border-color,transform] enabled:active:translate-y-px focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-40 ${
+      className={`group flex w-full min-w-0 items-center justify-between gap-1.5 rounded-full border px-2.5 py-1.5 outline-none max-sm:gap-1 max-sm:px-2 max-sm:py-0.5 transition-[background,border-color,transform] enabled:active:translate-y-px focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-40 ${
         active
           ? "border-[#e5c779]/60 bg-[#e5c779]/12 shadow-[inset_0_1px_0_rgba(229,199,121,0.18),0_0_12px_rgba(229,199,121,0.18)]"
           : "border-white/15 bg-black/25 hover:border-[#d7b45b]/40"
@@ -56,13 +56,20 @@ export default function ImmersiveSidePill({
             active ? "text-[#f5d778]" : "text-white/70"
           }`}
         >
-          {amount > 0 ? `◈ ${money(amount)}` : "Tap to stake"}
+          {amount > 0 ? (
+            `◈ ${money(amount)}`
+          ) : (
+            <>
+              <span className="sm:hidden">Stake</span>
+              <span className="hidden sm:inline">Tap to stake</span>
+            </>
+          )}
         </p>
       </div>
 
       <span
         aria-hidden
-        className={`shrink-0 text-[11px] ${
+        className={`shrink-0 text-[11px] max-sm:hidden ${
           active ? "text-[#e5c779]" : "text-white/35 group-hover:text-[#d7b45b]"
         }`}
       >

@@ -175,7 +175,7 @@ export default function BlackjackImmersive({
 
   // Slim ghost key for the quick bets (Rebet / ×2 / Clear / Done).
   const quickBet =
-    "inline-flex h-7 w-full items-center justify-center rounded-full border border-white/10 bg-white/[0.03] px-2 text-[10px] font-black uppercase tracking-[0.18em] text-white/70 outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-[color,border-color,background] focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:hover:border-[#d7b45b]/50 enabled:hover:bg-[#d7b45b]/[0.08] enabled:hover:text-[#f5d778] disabled:cursor-not-allowed disabled:opacity-35";
+    "inline-flex h-7 w-full items-center justify-center rounded-full border border-white/10 bg-white/[0.03] px-2 text-[10px] font-black uppercase tracking-[0.18em] max-sm:h-full max-sm:min-h-7 max-sm:px-1 max-sm:tracking-[0.1em] text-white/70 outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-[color,border-color,background] focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:hover:border-[#d7b45b]/50 enabled:hover:bg-[#d7b45b]/[0.08] enabled:hover:text-[#f5d778] disabled:cursor-not-allowed disabled:opacity-35";
 
   // Deal (or Refill when out of chips). `stacked` puts the amount on
   // its own line for the tall desktop key.
@@ -340,7 +340,9 @@ const playerCardStyle = (
     as the classic view. Shoe shows live card count with a thin
     gold progress fill; Clock shows the viewer's local HH:MM. */}
 <ShoeMeter g={g} className="absolute left-3 top-3 z-10 sm:left-5 sm:top-5" />
-<TableClock className="absolute left-3 top-[52px] z-10 sm:left-5 sm:top-[58px]" />
+{/* Phones: the left stack is three short rows — shoe; clock and
+    jackpot; last hands and streak — so it stays clear of the cards. */}
+<TableClock className="absolute left-3 top-[46px] z-10 sm:left-5 sm:top-[58px]" />
 
 {/* Streak + history ribbon — same upper-left stack as the Shoe
     and Clock. Focus mode has more real estate than the classic
@@ -348,19 +350,22 @@ const playerCardStyle = (
 <StreakBadge
   wins={s.streak}
   history={s.history}
-  className="absolute left-3 top-[120px] z-10 inline-flex sm:left-5 sm:top-[94px]"
+  className="absolute left-[124px] top-[78px] z-10 inline-flex sm:left-5 sm:top-[94px]"
 />
 <HistoryRibbon
   history={s.history}
   back={back}
-  className="absolute left-3 top-[148px] z-10 inline-flex sm:left-5 sm:top-[122px]"
+  className="absolute left-3 top-[78px] z-10 inline-flex sm:left-5 sm:top-[122px]"
 />
 {/* Progressive jackpot — top center on the felt. */}
 {!goldenShown && (
-  <JackpotPill className="absolute left-3 top-[86px] z-10 sm:left-1/2 sm:top-2 sm:-translate-x-1/2" />
+  <JackpotPill className="absolute left-[104px] top-[46px] z-10 sm:left-1/2 sm:top-2 sm:-translate-x-1/2" />
 )}
 {/* Golden Round banner — same component as the classic table. */}
-<LuckyRound g={g} />
+<LuckyRound
+  g={g}
+  position="left-[104px] top-[46px] sm:left-1/2 sm:top-2 sm:-translate-x-1/2"
+/>
 
 <DealerShoe
   className="absolute -right-[38px] -top-[14px] z-0 hidden md:block"
@@ -806,7 +811,7 @@ const playerCardStyle = (
         />
 
         {bettingOpen ? (
-          <div className="relative mx-auto mb-2 max-w-xl lg:mb-0 lg:grid lg:max-w-none lg:grid-cols-[auto_minmax(0,1fr)_auto_auto] lg:items-stretch lg:gap-5">
+          <div className="relative mx-auto mb-2 max-w-xl max-sm:grid max-sm:grid-cols-5 max-sm:gap-x-1 max-sm:gap-y-2 lg:mb-0 lg:grid lg:max-w-none lg:grid-cols-[auto_minmax(0,1fr)_auto_auto] lg:items-stretch lg:gap-5">
             {/* Bet puck — desktop only: the chip pile grows in a gold
                 ring at the left of the console, total underneath. */}
             <div className="hidden lg:flex lg:flex-col lg:items-center lg:justify-center lg:gap-1.5">
@@ -839,9 +844,11 @@ const playerCardStyle = (
               </p>
             </div>
 
-            {/* Chips and quick bets */}
-            <div className="flex min-w-0 flex-col justify-center gap-2">
-              <div className="mx-auto w-full max-w-[320px]">
+            {/* Chips and quick bets. On phones this wrapper dissolves
+                into the console grid: chips on a full row, then the three
+                quick bets and the two side bets share the second row. */}
+            <div className="flex min-w-0 flex-col justify-center gap-2 max-sm:contents">
+              <div className="mx-auto w-full max-w-[320px] max-sm:col-span-5">
                 {/* Scrollable chip ladder — 5 denominations visible at
                     a time, arrows slide through the 10 → 50,000 range. */}
                 <ChipRail
@@ -855,7 +862,7 @@ const playerCardStyle = (
                 />
               </div>
 
-              <div className="mx-auto grid w-full max-w-[300px] grid-cols-3 gap-1.5">
+              <div className="mx-auto grid w-full max-w-[300px] grid-cols-3 gap-1.5 max-sm:col-span-3 max-sm:max-w-none max-sm:gap-1">
                 <button
                   type="button"
                   onClick={() => setBetTo(s.lastBet)}
@@ -883,7 +890,7 @@ const playerCardStyle = (
             </div>
 
             {/* Side bets — side by side on phones, stacked on desktop */}
-            <div className="mt-2 grid grid-cols-2 gap-1.5 lg:mt-0 lg:w-[158px] lg:grid-cols-1 lg:content-center lg:gap-2 lg:border-l lg:border-[#d7b45b]/15 lg:pl-5">
+            <div className="mt-2 grid grid-cols-2 gap-1.5 max-sm:col-span-2 max-sm:mt-0 max-sm:gap-1 lg:mt-0 lg:w-[158px] lg:grid-cols-1 lg:content-center lg:gap-2 lg:border-l lg:border-[#d7b45b]/15 lg:pl-5">
               <div className="relative">
                 <ImmersiveSidePill
                   label="PP"
