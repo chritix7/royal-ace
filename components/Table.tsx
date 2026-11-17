@@ -269,7 +269,7 @@ function getShoeStatus(g: Game): {
           />
           {s.shuffling && <ShuffleAnimation />}
           {/* Croupier — zone gravée dans le tapis */}
-<div className="relative mt-14 flex min-h-[88px] items-center justify-center sm:mt-1.5 sm:min-h-28 lg:mt-0 lg:min-h-[96px]">
+<div className="relative mt-[76px] flex min-h-[88px] items-center justify-center sm:mt-1.5 sm:min-h-28 lg:mt-0 lg:min-h-[96px]">
 
   {/* Score du croupier — ne prend aucune hauteur */}
 {s.dealer.length > 0 && (
@@ -339,7 +339,7 @@ function getShoeStatus(g: Game): {
               ResultRail on the left owns the result); on mobile the
               fused pill fills it. */}
           <div
-            className="my-2 flex min-h-[48px] flex-col items-center justify-center gap-1 max-lg:my-auto max-lg:py-2 sm:my-3 lg:my-0 lg:mt-6 lg:min-h-[88px]"
+            className="my-2 flex min-h-[48px] flex-col items-center justify-center gap-1 max-lg:my-auto max-lg:pb-1 max-lg:pt-5 sm:my-3 lg:my-0 lg:mt-6 lg:min-h-[88px]"
             role="status"
             aria-live="polite"
           >
