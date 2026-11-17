@@ -52,4 +52,4 @@ export function exitFullscreenQuietly() {
 }
 
 /** How long a Focus view takes to dissolve before leaving fullscreen. */
-export const FOCUS_OUT_MS = 340;
+export const FOCUS_OUT_MS = 260;

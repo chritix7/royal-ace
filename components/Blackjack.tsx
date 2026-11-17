@@ -62,7 +62,7 @@ export default function Blackjack({
            expanded, etc.) exceeds the grid height; Table lives inside
            a flex column that distributes the felt + actions up to the
            same line. */
-        <div className="view-in grid gap-4 lg:grid-cols-[1fr_300px] lg:h-[calc(100dvh-10rem)] lg:items-stretch lg:overflow-hidden">
+        <div className="slots-view-in grid gap-4 lg:grid-cols-[1fr_300px] lg:h-[calc(100dvh-10rem)] lg:items-stretch lg:overflow-hidden">
           <Table g={g} />
           <Sidebar g={g} />
         </div>

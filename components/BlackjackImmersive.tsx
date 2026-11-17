@@ -208,7 +208,7 @@ const playerCardStyle = (
       ref={rootRef}
       tabIndex={-1}
       data-exit={stage === "out" ? undefined : ""}
-      className={`${stage === "pending" ? "focus-pending" : stage === "out" ? "focus-out" : "focus-stage-in"} fixed inset-0 z-[80] flex h-[100dvh] flex-col overflow-hidden bg-[#080e0a] text-white outline-none`}
+      className={`${stage === "pending" ? "focus-pending" : stage === "out" ? "slots-focus-out" : "slots-focus-in"} fixed inset-0 z-[80] flex h-[100dvh] flex-col overflow-hidden bg-[#080e0a] text-white outline-none`}
     >
       <header
         className="flex shrink-0 items-center justify-between gap-2 border-b border-[#d7b45b]/20 px-3 pb-2 sm:px-5"
