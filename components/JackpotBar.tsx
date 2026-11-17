@@ -55,7 +55,7 @@ export default function JackpotBar({
   const [a, b, c, d] = JACKPOT_TIERS;
   return (
     <div
-      className="mx-auto mb-3 grid w-full max-w-3xl grid-cols-4 items-center gap-1.5 sm:mb-4 sm:gap-2 lg:mb-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_minmax(0,1fr)_minmax(0,1fr)] lg:gap-3"
+      className="mx-auto mb-3 grid w-full max-w-3xl lg:max-w-5xl grid-cols-4 items-center gap-1.5 sm:mb-4 sm:gap-2 lg:mb-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_minmax(0,1fr)_minmax(0,1fr)] lg:gap-3"
       role="group"
       aria-label="Progressive jackpots"
     >

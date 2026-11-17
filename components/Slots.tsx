@@ -82,11 +82,44 @@ function Led({
   );
 }
 
+function DeckMeter({ label, children, on, accent }: { label: string; children: ReactNode; on?: boolean; accent?: boolean }) {
+  return (
+    <div
+      className="relative min-w-0 rounded-lg border border-white/12 px-3 py-1 text-center"
+      style={{
+        background: "linear-gradient(180deg, #10131c 0%, #080b12 55%, #11121b 100%)",
+        boxShadow: "inset 0 2px 5px rgba(0,0,0,0.75), 0 1px 0 rgba(255,255,255,0.08)",
+      }}
+    >
+      <p className="text-[8px] font-bold tracking-[0.25em] text-white/45">{label}</p>
+      <p
+        className="truncate whitespace-nowrap font-mono text-lg font-black leading-6 tabular-nums"
+        style={{
+          color: accent ? "#f0d99a" : on ? "#ffe4f1" : "#e5b2cf",
+          textShadow: on ? "0 0 10px rgba(244,114,182,0.45)" : "0 0 5px rgba(244,114,182,0.12)",
+        }}
+      >
+        <span className="mr-1 opacity-55">◈</span>
+        {children}
+      </p>
+    </div>
+  );
+}
+
 export default function Slots({ active = true }: { active?: boolean }) {
   const [skinId, setSkinId] = useState<SkinId>("miami");
   const [fullscreen, setFullscreen] = useState(false);
   const [gambleScreen, setGambleScreen] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
+  useEffect(() => {
+    if (!infoOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setInfoOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [infoOpen]);
   const skin = SKINS[skinId];
   const {
   s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, refill,
@@ -185,7 +218,7 @@ useEffect(() => {
 
   return (
     <div
-      className={`grid gap-6 lg:grid-cols-[1fr_320px] ${
+      className={`grid gap-6 ${
         fullscreen
           ? "fixed inset-0 z-50 overflow-y-auto bg-black"
           : "lg:h-[calc(100dvh-10rem)] lg:min-h-[600px] lg:items-stretch lg:gap-4 lg:overflow-hidden"
@@ -194,7 +227,7 @@ useEffect(() => {
       <section className={`overflow-clip border border-white/10 bg-[#101713] shadow-2xl ${fullscreen ? "rounded-none border-0" : "rounded-3xl lg:flex lg:min-h-0 lg:flex-col"}`}>
         <div
           className={`relative isolate ${skin.stage} px-2 pb-4 pt-4 sm:px-8 sm:pb-6 sm:pt-6 ${
-            fullscreen ? "min-h-[100dvh] pb-4" : "lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:px-6 lg:pb-4 lg:pt-4"
+            fullscreen ? "min-h-[100dvh] pb-4" : "lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:px-6 lg:pb-3 lg:pt-3"
           }`}
           style={fullscreen ? { paddingTop: "max(env(safe-area-inset-top), 1rem)" } : undefined}
         >
@@ -258,7 +291,7 @@ useEffect(() => {
   />
 </div>
 
-          <div className="relative mt-1 lg:mt-0 lg:flex lg:min-h-0 lg:flex-1 lg:items-center lg:justify-center lg:py-2">
+          <div className="relative mt-1 lg:mt-1.5 lg:flex lg:min-h-0 lg:flex-1 lg:items-center lg:justify-center lg:pb-2">
   <SlotReels
     s={s}
     skin={skin}
@@ -562,8 +595,195 @@ useEffect(() => {
             </div>
           ) : (
             <>
+              {/* ── Desktop: info strip + slim cabinet deck (Amusnet-style) ── */}
+              <div className="hidden lg:block lg:shrink-0">
+                <div
+                  className={`mx-auto mb-2 flex h-8 max-w-5xl items-center justify-center gap-3 overflow-hidden rounded-full border px-5 text-sm ${
+                    s.fs ? "border-[#ffd166]/50 bg-[#1d1407]/85" : "border-white/10 bg-black/60"
+                  } backdrop-blur-sm`}
+                  role="status"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
+                  {s.fs ? (
+                    <>
+                      <span className="font-black tracking-widest text-[#ffd166]">{skin.labels.freeSpins} ×{FS_MULT}</span>
+                      <span className="tabular-nums text-[#ffd166]/85">Spin {Math.min(s.fs.played, s.fs.total)} / {s.fs.total}</span>
+                      <span className="tabular-nums text-[#ffd166]/85">Won ◈ {money(s.fs.win)}</span>
+                    </>
+                  ) : activeLine ? (
+                    <span className="truncate text-[#ead19a]">
+                      Line {activeLine.line} · {activeLine.count}× <Glyph sym={activeLine.sym} skin={skin} /> · +◈ {money(activeLine.pay * lineBet)}
+                      {s.lineWins.length > 1 && <span className="text-white/50"> · {s.lineWins.length} winning lines</span>}
+                    </span>
+                  ) : balance < bet && !s.busy && !outOfChips ? (
+                    <span className="truncate text-red-300">Not enough chips for this bet. Pick a lower one.</span>
+                  ) : (
+                    <span className="truncate text-white/80">{s.message}</span>
+                  )}
+                </div>
+
+                <div
+                  className="mx-auto flex max-w-5xl items-center gap-3 rounded-2xl border border-white/12 px-3 py-2"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 22%), linear-gradient(135deg, #24252e 0%, #15161e 45%, #101119 100%)",
+                    boxShadow:
+                      "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 4px rgba(0,0,0,0.4), 0 10px 30px rgba(0,0,0,0.45)",
+                  }}
+                >
+                  {/* Left: info, auto, turbo */}
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <button
+                      onClick={() => setInfoOpen(true)}
+                      aria-label="Paytable and game info"
+                      title="Paytable, theme, rank and session"
+                      className={`${machineSmall} flex h-10 w-10 items-center justify-center !py-0 text-base`}
+                    >
+                      ☰
+                    </button>
+                    <div className="relative">
+                      {autoOpen && !auto && (
+                        <>
+                          <button aria-label="Close auto spin menu" className="fixed inset-0 z-[59] cursor-default" onClick={() => setAutoOpen(false)} />
+                          <div
+                            role="menu"
+                            aria-label="Auto spins"
+                            className="absolute bottom-full left-0 z-[60] mb-2 rounded-xl border border-white/15 bg-[#11131c] p-2 shadow-[0_8px_24px_rgba(0,0,0,0.55)]"
+                          >
+                            <p className="mb-1.5 text-center text-[8px] uppercase tracking-[0.2em] text-white/50">Auto spins</p>
+                            <div className="flex gap-1.5">
+                              {AUTO_COUNTS.map((n) => (
+                                <button
+                                  key={n}
+                                  role="menuitem"
+                                  onClick={() => startAuto(n)}
+                                  disabled={!canSpin}
+                                  className={`${machineSmall} h-9 w-11 !py-0 text-xs ${n === autoCount ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
+                                >
+                                  {n}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      <button
+                        onClick={() => (auto ? stopAuto() : setAutoOpen((v) => !v))}
+                        disabled={!!s.fs || (!auto && !canSpin)}
+                        aria-haspopup="menu"
+                        aria-expanded={autoOpen}
+                        className={`${machineSmall} flex h-10 min-w-[4.5rem] flex-col items-center justify-center !py-0 px-3 leading-none ${
+                          auto ? "!border-red-400/70 !text-red-200" : ""
+                        }`}
+                      >
+                        <span className="text-[11px] font-black tracking-wider">{auto ? "STOP" : "AUTO"}</span>
+                        <span className="mt-0.5 text-[9px] tabular-nums opacity-70">{auto ? `${s.autoLeft} left` : `× ${autoCount}`}</span>
+                      </button>
+                    </div>
+                    <button
+                      onClick={toggleTurbo}
+                      aria-pressed={s.turbo}
+                      title="Turbo"
+                      className={`${machineSmall} flex h-10 w-10 items-center justify-center !py-0 text-sm ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
+                    >
+                      ⚡
+                    </button>
+                  </div>
+
+                  <span aria-hidden="true" className="h-10 w-px shrink-0 bg-white/10" />
+
+                  {/* Meters: credit · bet stepper · win */}
+                  <div className="grid min-w-0 flex-1 grid-cols-[1fr_auto_1fr] items-center gap-3">
+                    <DeckMeter label="CREDIT">
+                      <span className={flash ? "balance-flash-pink" : ""}>
+                        <Counter value={balance} />
+                      </span>
+                    </DeckMeter>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setBetIdx(s.betIdx - 1)}
+                        disabled={s.busy || s.betIdx === 0}
+                        aria-label="Lower bet"
+                        className={`${machineSmall} flex h-9 w-9 items-center justify-center !py-0 text-lg leading-none`}
+                      >
+                        −
+                      </button>
+                      <DeckMeter label="TOTAL BET" accent>
+                        {money(bet)}
+                        <span className="ml-1.5 align-middle font-sans text-[9px] font-semibold tracking-normal text-white/45">
+                          {money(lineBet)}/line
+                        </span>
+                      </DeckMeter>
+                      <button
+                        onClick={() => setBetIdx(s.betIdx + 1)}
+                        disabled={s.busy || s.betIdx === BET_LEVELS.length - 1 || BET_LEVELS[s.betIdx + 1] > balance}
+                        aria-label="Raise bet"
+                        className={`${machineSmall} flex h-9 w-9 items-center justify-center !py-0 text-lg leading-none`}
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <DeckMeter label="WIN" on={s.lastWin > 0 && !spinningNow}>
+                      <RollingNumber value={s.lastWin} />
+                    </DeckMeter>
+                  </div>
+
+                  <span aria-hidden="true" className="h-10 w-px shrink-0 bg-white/10" />
+
+                  {/* Right: gamble, max bet, buy bonus, spin */}
+                  <div className="flex shrink-0 items-center gap-2">
+                    {outOfChips ? (
+                      <button onClick={refill} className={`rounded-full px-5 py-2.5 text-xs font-bold ${skin.betOn}`}>
+                        Take a ◈ 1,000 refill
+                      </button>
+                    ) : (
+                      <>
+                        {s.gamble && (
+                          <button
+                            onClick={() => setGambleScreen(true)}
+                            className="flex h-10 items-center justify-center rounded-full border border-[#ffd166]/70 bg-[linear-gradient(180deg,#ffd166,#d7b45b)] px-3 text-xs font-black text-[#10130e] shadow-[0_0_18px_rgba(255,209,102,.35)] transition hover:brightness-110 active:scale-95"
+                            aria-label="Open double or nothing"
+                          >
+                            ×2
+                          </button>
+                        )}
+                        <div className="flex flex-col gap-1">
+                          <button onClick={maxBet} disabled={s.busy} className={`${machineSmall} h-7 !py-0 px-3 text-[11px]`}>
+                            Max bet
+                          </button>
+                          <button
+                            onClick={buyBonus}
+                            disabled={s.busy || !!s.fs || balance < bonusPrice}
+                            title="Start the free spins right away"
+                            className={`${machineSmall} h-7 whitespace-nowrap !py-0 px-3 text-[11px] ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
+                          >
+                            {s.confirmBuy ? "Confirm?" : "Buy bonus"} ◈ {money(bonusPrice)}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                    <button
+                      onClick={() => playWithSound(1)}
+                      disabled={!canSpin}
+                      aria-label="Spin"
+                      title="Space"
+                      className={`relative ml-1 flex h-[4.25rem] w-[4.25rem] shrink-0 items-center justify-center rounded-full text-sm font-black tracking-widest outline-none transition active:scale-95 focus-visible:ring-4 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn} ${s.fs ? "!opacity-100" : ""}`}
+                      style={{
+                        boxShadow:
+                          "0 0 0 3px #111219, 0 0 0 4px rgba(255,255,255,0.18), 0 6px 0 #090a10, 0 10px 16px rgba(0,0,0,0.5), inset 0 2px 3px rgba(255,255,255,0.3), inset 0 -4px 7px rgba(0,0,0,0.28)",
+                      }}
+                    >
+                      {spinLabel}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Credit · message · Win: one row, aligned with the machine */}
-              <div className="mx-auto mt-3 grid w-full max-w-3xl grid-cols-2 gap-1.5 sm:mt-4 sm:gap-3 lg:mt-0 lg:shrink-0 lg:grid-cols-[minmax(0,160px)_minmax(0,1fr)_minmax(0,160px)]">
+              <div className="mx-auto mt-3 grid w-full max-w-3xl grid-cols-2 gap-1.5 sm:mt-4 sm:gap-3 lg:hidden">
                 <Led label="CREDIT" className="">
                   <span className="opacity-60">◈</span> <Counter value={balance} />
                 </Led>
@@ -611,7 +831,7 @@ useEffect(() => {
               </div>
 
               <div
-  className="sticky bottom-0 z-20 -mx-2 mt-2 border-t border-white/15 px-2 py-2 sm:-mx-8 sm:mt-3 sm:px-8 sm:py-3 lg:static lg:mx-auto lg:mt-3 lg:w-full lg:max-w-3xl lg:shrink-0 lg:rounded-2xl lg:border lg:border-white/12 lg:px-4 lg:py-3"
+  className="sticky bottom-0 z-20 -mx-2 mt-2 border-t border-white/15 px-2 py-2 sm:-mx-8 sm:mt-3 sm:px-8 sm:py-3 lg:hidden"
   style={{
     background:
       "linear-gradient(180deg, rgba(255,255,255,0.045) 0%, transparent 18%), linear-gradient(135deg, #24252e 0%, #15161e 45%, #101119 100%)",
@@ -735,6 +955,7 @@ useEffect(() => {
         </div>
       </section>
 
+      <div className="lg:hidden">
       <SlotsSidePanel
         fullscreen={fullscreen}
         rankToast={rankToast}
@@ -749,6 +970,51 @@ useEffect(() => {
         bonusPrice={bonusPrice}
         net={net}
       />
+      </div>
+      {/* Desktop: paytable, theme, rank and session in a slide-over panel */}
+      {rankToast && (
+        <div role="status" className="animate-pop fixed right-4 top-4 z-50 hidden rounded-2xl border border-[#ff4fa3]/70 bg-[#1a0d2e] px-5 py-3 text-sm font-semibold text-[#ff9fd0] shadow-2xl lg:block">
+          ★ {rankToast}
+        </div>
+      )}
+      {infoOpen && (
+        <div className="fixed inset-0 z-[90] hidden lg:block">
+          <button aria-label="Close game info" className="absolute inset-0 cursor-default bg-black/60 backdrop-blur-[2px]" onClick={() => setInfoOpen(false)} />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Game info"
+            className="animate-[drawerIn_.22s_ease-out] absolute right-0 top-0 flex h-full w-[380px] flex-col border-l border-white/10 bg-[#0b0f0d] shadow-[-20px_0_60px_rgba(0,0,0,0.6)]"
+          >
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+              <p className="text-[11px] font-black uppercase tracking-[0.25em] text-[#e5c779]">Game info</p>
+              <button
+                onClick={() => setInfoOpen(false)}
+                aria-label="Close"
+                className={`${machineSmall} flex h-8 w-8 items-center justify-center !py-0 text-sm`}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:thin]">
+      <SlotsSidePanel
+        fullscreen={false}
+        rankToast={null}
+        skinId={skinId}
+        setSkinId={setSkinId}
+        skin={skin}
+        busy={s.busy}
+        stats={s.stats}
+        history={s.history}
+        rank={rank}
+        lineBet={lineBet}
+        bonusPrice={bonusPrice}
+        net={net}
+      />
+            </div>
+          </div>
+        </div>
+      )}
 
       {s.bonusResult && (
         <BonusResultModal result={s.bonusResult} onContinue={bonusContinue} />

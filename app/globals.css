@@ -744,3 +744,4 @@ body {
 .animate-shoe-new-card-enter {
   animation: shoe-new-card-enter 420ms cubic-bezier(0.22, 0.8, 0.24, 1) both;
 }
+@keyframes drawerIn { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }

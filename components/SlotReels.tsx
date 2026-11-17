@@ -4,7 +4,6 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from
 import { PAYLINES, REELS, ROWS, STRIPS, type LineWin, type Sym } from "../lib/slots";
 import type { Skin } from "../lib/skins";
 import type { SlotsGame } from "../lib/useSlots";
-import Lever from "./Lever";
 
 const randomSym = (): Sym => {
   const strip = STRIPS[Math.floor(Math.random() * REELS)];
@@ -30,7 +29,7 @@ export function SymbolCell({ sym, skin, win }: { sym: Sym; skin: Skin; win: bool
           className={`select-none object-contain drop-shadow-[0_2px_3px_rgba(0,0,0,0.5)] ${motion} ${isSpecial ? "h-[68%] w-[68%] -translate-y-[7%]" : "h-[80%] w-[80%]"}`}
         />
       ) : (
-        <span className={`inline-block text-[1.8rem] leading-none drop-shadow-sm sm:text-[2.5rem] lg:text-5xl ${win ? `anim-${sym}` : ""}`}>{skin.emoji[sym]}</span>
+        <span className={`inline-block text-[1.8rem] leading-none drop-shadow-sm sm:text-[2.5rem] lg:text-[calc(var(--cell)*0.55)] ${win ? `anim-${sym}` : ""}`}>{skin.emoji[sym]}</span>
       )}
       {sym === "wild" && <span className={`${tag} ${skin.wildTag}`}>WILD</span>}
       {sym === "scatter" && <span className={`${tag} ${skin.scatterTag}`}>SCATTER</span>}
@@ -85,7 +84,7 @@ export function Reel({
   }, [strip]);
 
   return (
-    <div className={`relative h-[calc(var(--cell)*4)] w-[var(--cell)] overflow-hidden border-r last:border-r-0 ${skin.divider} ${skin.reel}`}>
+    <div className={`relative h-[calc(var(--cell)*4)] w-[var(--cell-w)] overflow-hidden border-r last:border-r-0 ${skin.divider} ${skin.reel}`}>
       <div className={!spinning && spinId > 0 ? "reel-land" : ""}>
         <div ref={stripEl} style={{ willChange: "transform" }}>
           {strip.map((sym, i) => (
@@ -180,7 +179,7 @@ function LineTabs({ from, to, winLines, active }: { from: number; to: number; wi
 }
 
 export default function SlotReels({
-  s, skin, activeLine, fast, shake = 0, onPull, canPull, large = false, mood = "idle",
+  s, skin, activeLine, fast, shake = 0, large = false, mood = "idle",
 }: {
   s: SlotsGame["s"]; skin: Skin; activeLine: LineWin | null; fast: boolean; shake?: 0 | 1 | 2 | 3; onPull: () => void; canPull: boolean; large?: boolean; mood?: "idle" | "win" | "jackpot";
 }) {
@@ -207,14 +206,14 @@ const shownLine =
       className={`mx-auto flex w-fit items-stretch gap-1.5 sm:gap-3 ${
         large
           ? "[--cell:4.2rem] sm:[--cell:5rem] lg:[--cell:5.2rem]"
-          : "[--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:clamp(3.4rem,calc((100dvh_-_31.5rem)_/_4),5.4rem)]"
-      } ${shake ? `shake-${shake}` : ""}`}
+          : "[--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:clamp(4.25rem,min(calc((100dvh_-_10rem_-_262px)_/_4),calc((100vw_-_15rem)_/_6.25)),10rem)]"
+      } [--cell-w:var(--cell)] lg:[--cell-w:calc(var(--cell)*1.25)] ${shake ? `shake-${shake}` : ""}`}
     >
       {/* 20 paylines: 1–10 on the left, 11–20 on the right */}
       <LineTabs from={1} to={10} winLines={winLines} active={shownLine?.line ?? null} />
 
       <div
-  className="relative rounded-[28px] p-3.5 sm:p-5"
+  className="relative rounded-[28px] p-3.5 sm:p-5 lg:rounded-[22px] lg:p-3.5"
   style={{
     background:
       "linear-gradient(135deg, rgba(255,255,255,0.07), transparent 35%, rgba(0,0,0,0.30) 75%), linear-gradient(180deg, #42444c 0%, #25262e 12%, #16171e 48%, #292a33 88%, #454650 100%)",
@@ -222,10 +221,13 @@ const shownLine =
       "0 18px 36px rgba(0,0,0,0.55), 0 4px 8px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.24), inset 0 -2px 0 rgba(0,0,0,0.70), inset 1px 0 0 rgba(255,255,255,0.08), inset -1px 0 0 rgba(0,0,0,0.50)",
   }}
 >
-  {/* Liseré lumineux discret, sans ampoules */}
+  {/* Marquee bulbs around the screen: idle chase, faster on wins */}
+  <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden lg:block">
+    <Bulbs color={skin.lineColor} fast={fast} mood={mood} />
+  </div>
   <div
     aria-hidden="true"
-    className="pointer-events-none absolute inset-[5px] rounded-[23px]"
+    className="pointer-events-none absolute inset-[5px] rounded-[23px] lg:hidden"
     style={{
       border: "1px solid rgba(244,114,182,0.28)",
       boxShadow:
@@ -303,7 +305,6 @@ const shownLine =
     </div>
 
       <LineTabs from={11} to={20} winLines={winLines} active={shownLine?.line ?? null} />
-      <Lever spinId={s.spinId} onPull={onPull} disabled={!canPull} />
     </div>
   );
 }
