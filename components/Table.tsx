@@ -200,7 +200,7 @@ function getShoeStatus(g: Game): {
   return (
     <>
       <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl lg:flex lg:h-full lg:min-h-0 lg:flex-col">
-        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 max-lg:flex max-lg:min-h-[max(440px,calc(100dvh-216px))] max-lg:flex-col sm:px-9 sm:py-4 sm:max-lg:min-h-[520px] lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:justify-between lg:pb-7 lg:pt-14`}>
+        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 max-lg:flex max-lg:min-h-[max(440px,min(calc(100dvh_-_216px),calc(440px_+_(100dvh_-_656px)_*_0.5)))] max-lg:flex-col sm:px-9 sm:py-4 sm:max-lg:min-h-[520px] lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:justify-between lg:pb-7 lg:pt-14`}>
           {/* Floating result rail — same component as the Focus view,
               positioned on the left edge of the felt. Shows the round
               breakdown and a New-round button at settle, a Hand-in-

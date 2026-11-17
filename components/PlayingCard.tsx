@@ -74,14 +74,14 @@ export default function PlayingCard({
     : compact
       ? "h-[60px] w-[42px] sm:h-24 sm:w-[68px] lg:h-20 lg:w-[56px]"
       : // Phones: the card follows the screen height (the felt fills
-        // the screen down to the action bar), 80px to 116px tall.
-        "h-[clamp(80px,12.5dvh,116px)] w-[calc(clamp(80px,12.5dvh,116px)*0.71)] sm:h-28 sm:w-20 lg:h-24 lg:w-[68px]";
+        // more of the screen on taller phones), 78px to 98px tall.
+        "h-[clamp(78px,10.8dvh,98px)] w-[calc(clamp(78px,10.8dvh,98px)*0.71)] sm:h-28 sm:w-20 lg:h-24 lg:w-[68px]";
 
   const shift = fit
     ? "-ml-[calc(var(--bj-card-h)*0.28)]"
     : compact
       ? "-ml-5 sm:-ml-8"
-      : "-ml-[calc(clamp(80px,12.5dvh,116px)*0.3)] sm:-ml-10";
+      : "-ml-[calc(clamp(78px,10.8dvh,98px)*0.3)] sm:-ml-10";
 
   // Rank typography: classical serif for every rank — readable at all sizes.
   const rankFontClass = "font-serif";
@@ -91,7 +91,7 @@ export default function PlayingCard({
     ? "text-[clamp(10px,calc(var(--bj-card-h)*0.15),20px)]"
     : compact
       ? "text-sm"
-      : "text-[clamp(16px,2.6dvh,20px)] sm:text-lg";
+      : "text-[clamp(15px,2.3dvh,18px)] sm:text-lg";
 
   const cornerSuitSize = fit
     ? "text-[clamp(8px,calc(var(--bj-card-h)*0.1),14px)]"
@@ -101,7 +101,7 @@ export default function PlayingCard({
     ? "text-[clamp(18px,calc(var(--bj-card-h)*0.32),48px)]"
     : compact
       ? "text-2xl"
-      : "text-[clamp(30px,5dvh,40px)] sm:text-4xl";
+      : "text-[clamp(28px,4.4dvh,36px)] sm:text-4xl";
 
   const cardRef = useRef<HTMLDivElement>(null);
 
