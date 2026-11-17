@@ -141,15 +141,16 @@ export function Reel({
 }
 
 /**
- * Marquee of real bulbs following the rounded bezel. Two alternating
- * banks blink like a casino sign and a soft wave of light travels around
- * the frame; everything speeds up and warms on wins.
+ * Orbit around the reel screen: gold diamonds and theme-coloured stars
+ * glide smoothly along an engraved rail (offset-path + Web Animations,
+ * compositor-driven), with a soft light trail. Speed eases up on wins
+ * and in free spins without restarting the motion.
  */
-function BulbRing({ color, mood }: { color: string; mood: "idle" | "win" | "jackpot" }) {
-  const ref = useRef<SVGSVGElement>(null);
+function OrbitRing({ color, mood }: { color: string; mood: "idle" | "win" | "jackpot" }) {
+  const host = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState({ w: 0, h: 0 });
   useIsoLayoutEffect(() => {
-    const el = ref.current?.parentElement;
+    const el = host.current?.parentElement;
     if (!el) return;
     const read = () => setBox({ w: el.clientWidth, h: el.clientHeight });
     read();
@@ -157,47 +158,94 @@ function BulbRing({ color, mood }: { color: string; mood: "idle" | "win" | "jack
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+
   const pad = 9;
-  const rad = 15;
+  const r = 15;
   const W = Math.max(0, box.w - pad * 2);
   const H = Math.max(0, box.h - pad * 2);
-  const per = 2 * (W + H - 4 * rad) + 2 * Math.PI * rad;
-  const n = Math.max(8, Math.round(per / 19));
-  const len = n * 2; // pathLength: one bulb every 2 units
-  const warm = mood === "jackpot" ? "#fff4d6" : "#ffd98a";
-  const tone = mood === "jackpot" ? "#ff4d6d" : color;
-  const blink = mood === "jackpot" ? "0.16s" : mood === "win" ? "0.32s" : "1.1s";
-  const wave = mood === "jackpot" ? "1.2s" : mood === "win" ? "2.2s" : "6s";
-  const rect = { x: pad, y: pad, width: W, height: H, rx: rad, fill: "none", pathLength: len } as const;
+  const x = pad, y = pad, cx = pad + W / 2;
+  const d =
+    W > 0
+      ? `M ${cx} ${y} H ${x + W - r} A ${r} ${r} 0 0 1 ${x + W} ${y + r} V ${y + H - r} A ${r} ${r} 0 0 1 ${x + W - r} ${y + H} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + H - r} V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`
+      : "";
+  const per = 2 * (W + H - 4 * r) + 2 * Math.PI * r;
+  const n = W > 0 ? Math.max(12, Math.round(per / 30)) : 0;
+  const LAP = 26000; // ms per lap at idle speed
+  const rate = mood === "jackpot" ? 6 : mood === "win" ? 2.6 : 1;
+
+  // Start one infinite animation per jewel, phase-shifted along the rail.
+  const anims = useRef<Animation[]>([]);
+  useEffect(() => {
+    const root = host.current;
+    if (!root || !d) return;
+    const reduced = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const items = Array.from(root.querySelectorAll("[data-orbit]")) as HTMLElement[];
+    const list: Animation[] = [];
+    items.forEach((el, i) => {
+      if (typeof el.animate !== "function") return;
+      const a = el.animate([{ offsetDistance: "0%" }, { offsetDistance: "100%" }], {
+        duration: LAP,
+        iterations: Infinity,
+        delay: -(i / items.length) * LAP,
+        easing: "linear",
+      });
+      if (reduced) a.pause();
+      list.push(a);
+    });
+    const trail = root.querySelector<SVGPathElement>("[data-trail]");
+    if (trail && typeof trail.animate === "function") {
+      const a = trail.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: -100 }], { duration: LAP / 2.2, iterations: Infinity, easing: "linear" });
+      if (reduced) a.pause();
+      list.push(a);
+    }
+    anims.current = list;
+    return () => list.forEach((a) => a.cancel());
+  }, [d, n]);
+  // Change speed smoothly when the mood changes.
+  useEffect(() => {
+    anims.current.forEach((a) => {
+      if (typeof a.updatePlaybackRate === "function") a.updatePlaybackRate(rate);
+      else a.playbackRate = rate;
+    });
+  }, [rate, d, n]);
+
+  const hot = mood === "jackpot" ? "#ff4d6d" : color;
   return (
-    <svg ref={ref} aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
-      {W > 0 && (
+    <div ref={host} aria-hidden="true" className="pointer-events-none absolute inset-0">
+      {d && (
         <>
-          {/* Sockets */}
-          <rect {...rect} stroke="#000" strokeOpacity={0.7} strokeWidth={8.5} strokeLinecap="round" strokeDasharray="0.001 2" />
-          {/* Travelling wave of light under the bulbs */}
-          <rect
-            {...rect}
-            className="bulb-wave"
-            stroke={warm}
-            strokeOpacity={mood === "idle" ? 0.22 : 0.4}
-            strokeWidth={16}
-            strokeLinecap="round"
-            strokeDasharray={`${len * 0.16} ${len * 0.84}`}
-            style={{ ["--to" as string]: `${-len}`, animationDuration: wave, filter: "blur(6px)" }}
-          />
-          {/* Bank A (warm gold) and bank B (theme colour) */}
-          <g className="bulb-bank" style={{ animationDuration: blink }}>
-            <rect {...rect} stroke={warm} strokeWidth={6} strokeLinecap="round" strokeDasharray="0.001 4" style={{ filter: `drop-shadow(0 0 4px ${warm})` }} />
-            <rect {...rect} stroke="#fff" strokeWidth={2.2} strokeLinecap="round" strokeDasharray="0.001 4" />
-          </g>
-          <g className="bulb-bank bulb-bank--b" style={{ animationDuration: blink }}>
-            <rect {...rect} stroke={tone} strokeWidth={6} strokeLinecap="round" strokeDasharray="0.001 4" strokeDashoffset={-2} style={{ filter: `drop-shadow(0 0 4px ${tone})` }} />
-            <rect {...rect} stroke="#fff" strokeOpacity={0.85} strokeWidth={2} strokeLinecap="round" strokeDasharray="0.001 4" strokeDashoffset={-2} />
-          </g>
+          <svg className="absolute inset-0 h-full w-full overflow-visible">
+            {/* Engraved rail */}
+            <path d={d} fill="none" stroke="#000" strokeOpacity={0.75} strokeWidth={9} />
+            <path d={d} fill="none" stroke="#d7b45b" strokeOpacity={0.35} strokeWidth={1} />
+            {/* Light trail sweeping with the jewels */}
+            <path
+              data-trail
+              d={d}
+              fill="none"
+              pathLength={100}
+              stroke={mood === "idle" ? "#ffd98a" : hot}
+              strokeOpacity={mood === "idle" ? 0.35 : 0.6}
+              strokeWidth={10}
+              strokeLinecap="round"
+              strokeDasharray="14 36"
+              style={{ filter: "blur(5px)" }}
+            />
+          </svg>
+          {Array.from({ length: n }, (_, i) => {
+            const star = i % 5 === 0;
+            return (
+              <span
+                key={i}
+                data-orbit
+                className={star ? "orbit-star" : "orbit-gem"}
+                style={{ offsetPath: `path('${d}')`, offsetRotate: "0deg", ["--hot" as string]: hot }}
+              />
+            );
+          })}
         </>
       )}
-    </svg>
+    </div>
   );
 }
 
@@ -237,7 +285,7 @@ const shownLine =
 >
   {/* Marquee bulbs around the screen */}
   <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden lg:block">
-    <BulbRing color={skin.lineColor} mood={mood} />
+    <OrbitRing color={skin.lineColor} mood={mood} />
   </div>
   {/* Gold studs at the corners */}
   {["left-[5px] top-[5px]", "right-[5px] top-[5px]", "left-[5px] bottom-[5px]", "right-[5px] bottom-[5px]"].map((pos) => (

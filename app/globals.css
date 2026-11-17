@@ -1218,3 +1218,35 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .spin-dome, .spin-dome * { animation: none !important; transition: none !important; }
 }
+
+/* ===== Slots · orbit around the reel screen ===== */
+.orbit-gem,
+.orbit-star {
+  position: absolute;
+  left: 0;
+  top: 0;
+  offset-anchor: center;
+  will-change: offset-distance;
+}
+.orbit-gem {
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, #fff8dc 0%, #f0d38b 40%, #a87a2e 100%);
+  box-shadow: 0 0 6px rgba(255, 217, 138, 0.9), 0 0 1px #000;
+}
+.orbit-star {
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle, #fff 0 18%, var(--hot) 40%, transparent 70%);
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+  filter: drop-shadow(0 0 5px var(--hot));
+  animation: orbit-twinkle 1.6s ease-in-out infinite;
+}
+@keyframes orbit-twinkle {
+  0%, 100% { scale: 0.85; opacity: 0.85; }
+  50% { scale: 1.2; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orbit-star { animation: none; }
+}
