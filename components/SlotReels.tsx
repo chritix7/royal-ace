@@ -31,6 +31,7 @@ export function SymbolCell({ sym, skin, win }: { sym: Sym; skin: Skin; win: bool
       ) : (
         <span className={`inline-block text-[1.8rem] leading-none drop-shadow-sm sm:text-[2.5rem] lg:text-[calc(var(--cell)*0.55)] ${win ? `anim-${sym}` : ""}`}>{skin.emoji[sym]}</span>
       )}
+      {win && <span aria-hidden="true" className="win-frame" />}
       {sym === "wild" && <span className={`${tag} ${skin.wildTag}`}>WILD</span>}
       {sym === "scatter" && <span className={`${tag} ${skin.scatterTag}`}>SCATTER</span>}
     </div>
@@ -86,7 +87,7 @@ export function Reel({
   return (
     <div className={`relative h-[calc(var(--cell)*4)] w-[var(--cell-w)] overflow-hidden border-r last:border-r-0 ${skin.divider} ${skin.reel}`}>
       <div className={!spinning && spinId > 0 ? "reel-land" : ""}>
-        <div ref={stripEl} style={{ willChange: "transform" }}>
+        <div ref={stripEl} className={spinning ? "reel-moving" : ""} style={{ willChange: "transform" }}>
           {strip.map((sym, i) => (
             <SymbolCell key={i} sym={sym} skin={skin} win={!spinning && i < ROWS && !!cells?.[i]} />
           ))}
@@ -257,6 +258,9 @@ const shownLine =
                 aria-hidden="true"
               >
                 <polyline
+                  key={`${shownLine.line}-${s.spinId}`}
+                  className="line-draw"
+                  pathLength={1}
                   points={PAYLINES[shownLine.line - 1].map((row, reel) => `${reel + 0.5},${row + 0.5}`).join(" ")}
                   fill="none"
                   stroke={skin.lineColor}

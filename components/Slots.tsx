@@ -86,27 +86,23 @@ function Led({
   );
 }
 
-const towerCard = "w-full rounded-xl border border-[#d7b45b]/20 px-3 py-2.5 text-left outline-none transition hover:border-[#f0d38b]/60 focus-visible:ring-2 focus-visible:ring-[#e5c779]";
+const towerCard = "tower-card w-full rounded-xl border border-[#d7b45b]/20 px-3 py-2.5 text-left outline-none transition hover:border-[#f0d38b]/60 focus-visible:ring-2 focus-visible:ring-[#e5c779]";
 const towerStyle = {
   background: "linear-gradient(180deg, #17131a 0%, #0a080c 55%, #120e13 100%)",
   boxShadow: "inset 0 1px 0 rgba(255,236,170,0.08), 0 6px 14px rgba(0,0,0,0.45)",
 } as const;
 
-const consoleKey =
-  "flex h-12 items-center justify-center rounded-lg border border-white/12 bg-[linear-gradient(180deg,#26262c_0%,#141418_55%,#0b0b0e_100%)] text-white/75 shadow-[0_3px_0_#000,inset_0_1px_0_rgba(255,255,255,0.08)] outline-none transition-[transform,border-color,color,filter] enabled:hover:border-[#d7b45b]/60 enabled:hover:text-[#f0d99a] enabled:active:translate-y-px focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-35";
+const consoleKey = "cab-key";
 
 function ConsoleValue({ label, children, align, on }: { label: string; children: ReactNode; align: "left" | "right"; on?: boolean }) {
   return (
     <div className={`flex min-w-0 flex-col justify-center px-4 ${align === "right" ? "items-end" : "items-start"}`}>
       <span className="text-[9px] font-black tracking-[0.25em] text-[#d7b45b]/80">{label}</span>
       <span
-        className="max-w-full truncate font-mono text-xl font-black leading-6 tabular-nums"
-        style={{
-          color: on ? "#fff4c9" : "#f0d99a",
-          textShadow: on ? "0 0 14px rgba(255,209,102,0.55)" : "0 0 6px rgba(240,211,139,0.15)",
-        }}
+        className={`max-w-full truncate font-mono text-[22px] font-black leading-7 tabular-nums ${on ? "meter-hit text-[#fff8dc]" : "gold-text"}`}
+        style={on ? { textShadow: "0 0 16px rgba(255,209,102,0.7)" } : undefined}
       >
-        <span className="mr-1 text-lg opacity-55">◈</span>
+        <span className="mr-1 text-base opacity-60">◈</span>
         {children}
       </span>
     </div>
@@ -311,6 +307,7 @@ useEffect(() => {
   ) : (
     <span className="truncate text-white/85">{s.message}</span>
   );
+  const msgKey = s.fs ? `fs-${s.fs.played}` : activeLine ? `l-${activeLine.line}` : s.message;
   // During free spins the button shows the count instead of a bare "…".
   const spinLabel = s.fs ? (
     <span className="relative flex flex-col items-center leading-none">
@@ -411,7 +408,7 @@ useEffect(() => {
             style={{ background: "linear-gradient(135deg,#fff3c4,#b8873a)", boxShadow: "0 0 10px rgba(240,211,139,0.6)" }}
           />
           <div
-            className="relative rounded-xl px-9 pb-2 pt-2.5"
+            className="shine-loop relative rounded-xl px-9 pb-2 pt-2.5"
             style={{
               background: "linear-gradient(180deg, #1b141d 0%, #0b080d 55%, #120d13 100%)",
               boxShadow:
@@ -495,12 +492,14 @@ useEffect(() => {
       boxShadow: "0 0 0 1px #f0d38b, 0 0 0 3px #0a0709, 0 0 0 4px rgba(215,180,91,0.5), 0 10px 22px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,243,196,0.2)",
     }}
   >
-    {messageContent}
+    <span key={msgKey} className="animate-msg-slide flex min-w-0 items-center justify-center gap-3">
+      {messageContent}
+    </span>
   </div>
   </div>
   {/* Right tower: crowns, vault, last spins */}
   <div className="hidden justify-self-start lg:flex lg:w-[180px] lg:flex-col lg:gap-2">
-    <p className="text-center text-[9px] font-black uppercase tracking-[0.35em] text-[#d7b45b]/80">Bonuses</p>
+    <p className="flex items-center justify-center gap-2"><span aria-hidden="true" className="h-px w-6 bg-gradient-to-r from-transparent to-[#d7b45b]/70" /><span className="font-display gold-text text-[12px] font-bold uppercase tracking-[0.3em]">Bonuses</span><span aria-hidden="true" className="h-px w-6 bg-gradient-to-l from-transparent to-[#d7b45b]/70" /></p>
     <button
       type="button"
       onClick={() => openInfo("features")}
@@ -552,23 +551,34 @@ useEffect(() => {
 </div>
 
           {s.banner && (
-            <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-black/60" role="status">
-              <p className="animate-pop px-4 text-center text-2xl font-black tracking-widest text-[#ffd166] drop-shadow-[0_0_24px_#ff2e88] sm:text-6xl">
+            <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center overflow-hidden bg-black/65 backdrop-blur-[2px]" role="status">
+              <div aria-hidden="true" className="win-rays" />
+              <p className="win-title-in font-display gold-text relative px-4 text-center text-3xl font-bold tracking-[0.12em] drop-shadow-[0_4px_0_rgba(0,0,0,0.6)] sm:text-6xl lg:text-7xl">
                 {s.banner}
               </p>
             </div>
           )}
 
           {s.winBanner && (
-            <div key={`win-${s.celebrate}`} className="pointer-events-none absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/55" role="status">
+            <div key={`win-${s.celebrate}`} className="pointer-events-none absolute inset-0 z-30 flex flex-col items-center justify-center overflow-hidden bg-black/60" role="status">
               <div className="win-flash absolute inset-0" />
+              <div aria-hidden="true" className="win-rays" />
               <CoinRain count={s.winBanner.tier === "epic" ? 64 : 38} />
-              <p className="animate-pop relative px-4 text-center text-2xl font-black tracking-widest text-[#ffd166] drop-shadow-[0_0_24px_#ff2e88] sm:text-6xl">
+              <p className="win-title-in font-display gold-text relative px-4 text-center text-3xl font-bold tracking-[0.14em] [filter:drop-shadow(0_4px_0_rgba(0,0,0,0.6))_drop-shadow(0_0_24px_rgba(255,209,102,0.45))] sm:text-6xl lg:text-8xl">
                 {s.winBanner.label}
               </p>
-              <p className="relative mt-2 font-mono text-3xl font-black text-white drop-shadow-[0_0_18px_#ffd166] sm:mt-3 sm:text-7xl">
-                ◈ <RollingNumber value={s.winBanner.amount} fromZero ms={s.winBanner.tier === "epic" ? 2800 : 1900} />
-              </p>
+              <div
+                className="win-amount-in relative mt-3 rounded-2xl px-8 py-2 sm:mt-5"
+                style={{
+                  background: "linear-gradient(180deg, rgba(27,20,29,0.9), rgba(11,8,13,0.9))",
+                  boxShadow: "0 0 0 1px #f0d38b, 0 0 0 4px rgba(10,7,9,0.9), 0 0 0 5px rgba(215,180,91,0.5), 0 0 50px rgba(255,209,102,0.35)",
+                }}
+              >
+                <p className="font-mono text-3xl font-black tabular-nums text-[#fff8dc] [text-shadow:0_0_22px_rgba(255,209,102,0.8)] sm:text-6xl lg:text-7xl">
+                  <span className="mr-2 text-[0.6em] text-[#e5c779]">◈</span>
+                  <RollingNumber value={s.winBanner.amount} fromZero ms={s.winBanner.tier === "epic" ? 2800 : 1900} />
+                </p>
+              </div>
             </div>
           )}
 
@@ -916,7 +926,7 @@ useEffect(() => {
                         disabled={!!s.fs || (!auto && !canSpin)}
                         aria-haspopup="menu"
                         aria-expanded={autoOpen}
-                        className={`${consoleKey} w-14 flex-col leading-none ${auto ? "!border-red-400/70 !text-red-200" : ""}`}
+                        className={`${consoleKey} w-14 flex-col leading-none ${auto ? "cab-key--stop" : ""}`}
                       >
                         <span className="text-[11px] font-black tracking-wider">{auto ? "STOP" : "AUTO"}</span>
                         <span className="mt-1 text-[9px] font-semibold tabular-nums opacity-60">{auto ? s.autoLeft : `×${autoCount}`}</span>
@@ -926,7 +936,7 @@ useEffect(() => {
                       onClick={toggleTurbo}
                       aria-pressed={s.turbo}
                       title="Turbo (T)"
-                      className={`${consoleKey} w-12 flex-col leading-none ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
+                      className={`${consoleKey} w-12 flex-col leading-none`}
                     >
                       <span className="text-sm">⚡</span>
                       <span className="mt-0.5 text-[8px] font-black tracking-[0.15em] opacity-70">TURBO</span>
@@ -1040,10 +1050,7 @@ useEffect(() => {
                           disabled={!s.gamble}
                           aria-label="Open double or nothing"
                           title="Double or nothing on your last win"
-                          className={`${consoleKey} w-[4.5rem] flex-col leading-none ${
-                            s.gamble ? "!border-[#ffd166] !text-[#1b1305] shadow-[0_0_18px_rgba(255,209,102,0.4)]" : ""
-                          }`}
-                          style={s.gamble ? { background: "linear-gradient(180deg,#ffe08a,#d7a83f)" } : undefined}
+                          className={`${consoleKey} w-[4.5rem] flex-col leading-none ${s.gamble ? "cab-key--gold cab-key--live" : ""}`}
                         >
                           <span className="text-[10px] font-black tracking-wider">GAMBLE</span>
                           <span className="mt-1 text-[9px] font-semibold opacity-70">×2</span>
@@ -1055,11 +1062,8 @@ useEffect(() => {
                       disabled={!canSpin}
                       aria-label="Spin"
                       title="Space"
-                      className={`relative -my-3 ml-2 flex h-[4.75rem] w-[4.75rem] shrink-0 items-center justify-center rounded-full text-sm font-black tracking-widest outline-none transition active:scale-95 focus-visible:ring-4 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-60 ${skin.spinBtn} ${s.fs ? "!opacity-100" : ""}`}
-                      style={{
-                        boxShadow:
-                          "0 0 0 3px #000, 0 0 0 5px rgba(215,180,91,0.6), 0 6px 0 #000, 0 10px 18px rgba(0,0,0,0.6), inset 0 2px 3px rgba(255,255,255,0.3), inset 0 -4px 7px rgba(0,0,0,0.28)",
-                      }}
+                      className={`spin-btn relative -my-1.5 ml-3 flex h-[4.75rem] w-[4.75rem] shrink-0 items-center justify-center rounded-full text-base font-black tracking-[0.18em] outline-none focus-visible:ring-4 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-60 [text-shadow:0_1px_0_rgba(0,0,0,0.35)] ${skin.spinBtn} ${s.busy ? "is-busy" : canSpin ? "is-ready" : ""} ${s.fs ? "!opacity-100" : ""}`}
+                      style={{ boxShadow: "inset 0 2px 3px rgba(255,255,255,0.35), inset 0 -6px 10px rgba(0,0,0,0.35)" }}
                     >
                       {spinLabel}
                     </button>

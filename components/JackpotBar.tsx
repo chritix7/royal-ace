@@ -113,11 +113,11 @@ export function JackpotLadder({ pools, bet }: { pools: Pools; bet: number }) {
   const order: JackpotTier[] = ["kingpin", "major", "minor", "mini"];
   return (
     <div className="flex w-full flex-col gap-2" role="group" aria-label="Progressive jackpots">
-      <p className="text-center text-[9px] font-black uppercase tracking-[0.35em] text-[#d7b45b]/80">Jackpots</p>
+      <p className="flex items-center justify-center gap-2"><span aria-hidden="true" className="h-px w-6 bg-gradient-to-r from-transparent to-[#d7b45b]/70" /><span className="font-display gold-text text-[12px] font-bold uppercase tracking-[0.3em]">Jackpots</span><span aria-hidden="true" className="h-px w-6 bg-gradient-to-l from-transparent to-[#d7b45b]/70" /></p>
       {order.map((t, i) => (
         <div
           key={t}
-          className={`relative flex items-center gap-3 rounded-xl border px-3 ${i === 0 ? "py-3" : "py-2"} ${STYLE[t]}`}
+          className={`relative flex items-center gap-3 rounded-xl border px-3 transition-transform duration-200 hover:-translate-y-0.5 ${i === 0 ? "shine-loop py-3" : "py-2"} ${STYLE[t]}`}
           style={{
             background: "linear-gradient(180deg, #17131a 0%, #0a080c 55%, #120e13 100%)",
             boxShadow:
