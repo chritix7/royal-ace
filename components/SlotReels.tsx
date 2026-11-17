@@ -160,30 +160,11 @@ function Bulbs({ color, fast, mood = "idle" }: { color: string; fast: boolean; m
   );
 }
 
-function LineTabs({ from, to, winLines, active }: { from: number; to: number; winLines: Set<number>; active: number | null }) {
-  const nums = Array.from({ length: to - from + 1 }, (_, i) => from + i);
-  return (
-    <div className="hidden flex-col justify-between py-[calc(var(--cell)*0.3)] sm:flex" aria-hidden="true">
-      {nums.map((n) => (
-        <span
-          key={n}
-          className={`flex h-[clamp(1.05rem,calc(var(--cell)*0.3),1.5rem)] w-6 items-center justify-center rounded text-[10px] font-black tabular-nums transition ${
-            active === n ? "scale-125 bg-white text-black" : winLines.has(n) ? "bg-[#facc15] text-black" : "bg-black/55 text-white/55 ring-1 ring-inset ring-white/10"
-          }`}
-        >
-          {n}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 export default function SlotReels({
   s, skin, activeLine, fast, shake = 0, large = false, mood = "idle",
 }: {
   s: SlotsGame["s"]; skin: Skin; activeLine: LineWin | null; fast: boolean; shake?: 0 | 1 | 2 | 3; onPull: () => void; canPull: boolean; large?: boolean; mood?: "idle" | "win" | "jackpot";
 }) {
-  const winLines = new Set(s.lineWins.map((w) => w.line));
 
   const [cycle, setCycle] = useState(0);
 
@@ -206,11 +187,9 @@ const shownLine =
       className={`mx-auto flex w-fit items-stretch gap-1.5 sm:gap-3 ${
         large
           ? "[--cell:4.2rem] sm:[--cell:5rem] lg:[--cell:5.2rem]"
-          : "[--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:clamp(4.25rem,min(calc((100dvh_-_10rem_-_262px)_/_4),calc((100vw_-_15rem)_/_6.25)),10rem)]"
+          : "[--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:clamp(4.25rem,min(calc((100dvh_-_10rem_-_262px)_/_4),calc((100vw_-_9rem)_/_6.25)),10rem)]"
       } [--cell-w:var(--cell)] lg:[--cell-w:calc(var(--cell)*1.25)] ${shake ? `shake-${shake}` : ""}`}
     >
-      {/* 20 paylines: 1–10 on the left, 11–20 on the right */}
-      <LineTabs from={1} to={10} winLines={winLines} active={shownLine?.line ?? null} />
 
       <div
   className="relative rounded-[28px] p-3.5 sm:p-5 lg:rounded-[22px] lg:p-3.5"
@@ -304,7 +283,6 @@ const shownLine =
 
     </div>
 
-      <LineTabs from={11} to={20} winLines={winLines} active={shownLine?.line ?? null} />
     </div>
   );
 }

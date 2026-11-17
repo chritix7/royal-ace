@@ -29,6 +29,7 @@ import {
 import { useBalanceFlash } from "../hooks/useBalanceFlash";
 import { useSession } from "../lib/sessionStore";
 import SlotsSidePanel from "./slots/SlotsSidePanel";
+import KingpinRoom from "./slots/KingpinRoom";
 import BonusResultModal from "./slots/BonusResultModal";
 import BuyBonusModal from "./slots/BuyBonusModal";
 
@@ -200,6 +201,24 @@ useEffect(() => {
   const activeLine = !spinningNow && s.lineWins.length ? s.lineWins[Math.min(cursor, s.lineWins.length - 1)] : null;
 
   const auto = s.autoLeft > 0;
+  const crownMeter = (
+        <div
+          className="mt-0.5 flex w-full max-w-[260px] lg:mt-0 lg:w-[230px] lg:shrink-0 items-center gap-2 rounded-full border border-white/12 bg-black/55 px-2.5 py-1 backdrop-blur-sm"
+          title={`Crown collection: fill it to ${collection.target} to pick a reward`}
+        >
+          <span aria-hidden="true" className="text-[10px] leading-none">👑</span>
+          <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-white/60">Crowns</span>
+          <span className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-white/15">
+            <span
+              className="block h-full rounded-full bg-gradient-to-r from-[#c8a65b] to-[#e5c779] transition-all"
+              style={{ width: `${(collection.crowns / collection.target) * 100}%` }}
+            />
+          </span>
+          <span className="text-[10px] font-black tabular-nums text-[#e5c779]">
+            {collection.crowns}/{collection.target}
+          </span>
+        </div>
+  );
   // During free spins the button shows the count instead of a bare "…".
   const spinLabel = s.fs ? (
     <span className="relative flex flex-col items-center leading-none">
@@ -227,11 +246,20 @@ useEffect(() => {
       <section className={`overflow-clip border border-white/10 bg-[#101713] shadow-2xl ${fullscreen ? "rounded-none border-0" : "rounded-3xl lg:flex lg:min-h-0 lg:flex-col"}`}>
         <div
           className={`relative isolate ${skin.stage} px-2 pb-4 pt-4 sm:px-8 sm:pb-6 sm:pt-6 ${
-            fullscreen ? "min-h-[100dvh] pb-4" : "lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:px-6 lg:pb-3 lg:pt-3"
+            fullscreen ? "min-h-[100dvh] pb-4" : "lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:px-6 lg:pb-3 lg:pt-5"
           }`}
           style={fullscreen ? { paddingTop: "max(env(safe-area-inset-top), 1rem)" } : undefined}
         >
-          {skinId === "miami" && <MiamiBackdrop party={s.fs !== null} />}
+          {skinId === "miami" && (
+            <>
+              <div className="lg:hidden">
+                <MiamiBackdrop party={s.fs !== null} />
+              </div>
+              <div className="hidden lg:block">
+                <KingpinRoom party={s.fs !== null} />
+              </div>
+            </>
+          )}
           {/* The skyline melts into the control deck instead of being cut */}
           {!fullscreen && (
             <div
@@ -259,39 +287,71 @@ useEffect(() => {
     pools={s.pools}
     bet={bet}
     center={
-      <header className="flex flex-col items-center gap-1 pb-1 text-center lg:px-2 lg:pb-0">
-        <div className={`inline-block max-w-full rounded-xl border-2 px-3 py-0.5 sm:px-5 ${skin.signBox}`}>
+      <header className="flex flex-col items-center gap-1 pb-1 text-center lg:relative lg:z-30 lg:-mb-6 lg:px-3 lg:pb-0">
+        {/* Desktop: black-lacquer and gold pediment resting on the cabinet */}
+        <div className="relative hidden lg:block">
+          <span
+            aria-hidden="true"
+            className="absolute -top-[9px] left-1/2 h-[10px] w-28 -translate-x-1/2 rounded-t-md border-x border-t border-[#d7b45b]/80"
+            style={{ background: "linear-gradient(180deg,#1d161f,#0b080d)" }}
+          />
+          <span
+            aria-hidden="true"
+            className="absolute -top-[15px] left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border border-[#f0d38b]"
+            style={{ background: "linear-gradient(135deg,#fff3c4,#b8873a)", boxShadow: "0 0 10px rgba(240,211,139,0.6)" }}
+          />
+          <div
+            className="relative rounded-xl px-9 pb-2 pt-2.5"
+            style={{
+              background: "linear-gradient(180deg, #1b141d 0%, #0b080d 55%, #120d13 100%)",
+              boxShadow:
+                "0 0 0 1px #f0d38b, 0 0 0 4px #0a0709, 0 0 0 5px rgba(215,180,91,0.55), 0 16px 30px rgba(0,0,0,0.65), 0 0 46px rgba(255,79,163,0.22), inset 0 1px 0 rgba(255,243,196,0.25)",
+            }}
+          >
+            {/* Art-deco wings */}
+            {["left-2.5", "right-2.5"].map((side) => (
+              <span key={side} aria-hidden="true" className={`absolute top-1/2 ${side} flex -translate-y-1/2 flex-col gap-[3px]`}>
+                <span className="block h-px w-4 bg-[#d7b45b]/80" />
+                <span className="block h-px w-3 bg-[#d7b45b]/55 [margin-inline:auto]" />
+                <span className="block h-px w-2 bg-[#d7b45b]/35 [margin-inline:auto]" />
+              </span>
+            ))}
+            <h3
+              className="font-display whitespace-nowrap text-[clamp(1.5rem,2.3vw,2.3rem)] font-bold uppercase leading-none tracking-[0.14em]"
+              style={{
+                backgroundImage: "linear-gradient(180deg, #fff6d2 0%, #f0d38b 40%, #b8873a 62%, #f6dc8f 100%)",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                color: "transparent",
+                filter: "drop-shadow(0 2px 0 rgba(0,0,0,0.7)) drop-shadow(0 0 12px rgba(240,211,139,0.25))",
+              }}
+            >
+              {skin.title}
+            </h3>
+            <div className="mt-1.5 flex items-center justify-center gap-2">
+              <span aria-hidden="true" className="h-px w-8 bg-gradient-to-r from-transparent to-[#d7b45b]/70" />
+              <p className="whitespace-nowrap text-[9px] uppercase leading-none tracking-[0.3em] text-[#e5c779]/75">{skin.tagline}</p>
+              <span aria-hidden="true" className="h-px w-8 bg-gradient-to-l from-transparent to-[#d7b45b]/70" />
+            </div>
+          </div>
+        </div>
+        <div className={`inline-block max-w-full rounded-xl border-2 px-3 py-0.5 sm:px-5 lg:hidden ${skin.signBox}`}>
           <h3
             className={`whitespace-nowrap text-lg font-black uppercase leading-tight tracking-[0.08em] sm:text-3xl sm:tracking-[0.12em] lg:text-[clamp(1.25rem,2vw,1.75rem)] ${skin.titleClass}`}
           >
             {skin.title}
           </h3>
         </div>
-        <p className="text-[8px] uppercase leading-none tracking-[0.14em] text-white/55 sm:text-[9px] sm:tracking-[0.22em] lg:[@media(max-height:820px)]:hidden">
+        <p className="text-[8px] uppercase leading-none tracking-[0.14em] text-white/55 sm:text-[9px] sm:tracking-[0.22em] lg:hidden">
           {skin.tagline}
         </p>
-        <div
-          className="mt-0.5 flex w-full max-w-[260px] items-center gap-2 rounded-full border border-white/12 bg-black/55 px-2.5 py-1 backdrop-blur-sm"
-          title={`Crown collection: fill it to ${collection.target} to pick a reward`}
-        >
-          <span aria-hidden="true" className="text-[10px] leading-none">👑</span>
-          <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-white/60">Crowns</span>
-          <span className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-white/15">
-            <span
-              className="block h-full rounded-full bg-gradient-to-r from-[#c8a65b] to-[#e5c779] transition-all"
-              style={{ width: `${(collection.crowns / collection.target) * 100}%` }}
-            />
-          </span>
-          <span className="text-[10px] font-black tabular-nums text-[#e5c779]">
-            {collection.crowns}/{collection.target}
-          </span>
-        </div>
+        <div className="flex w-full justify-center lg:hidden">{crownMeter}</div>
       </header>
     }
   />
 </div>
 
-          <div className="relative mt-1 lg:mt-1.5 lg:flex lg:min-h-0 lg:flex-1 lg:items-center lg:justify-center lg:pb-2">
+          <div className="relative mt-1 lg:mt-0 lg:flex lg:min-h-0 lg:flex-1 lg:items-center lg:justify-center lg:pb-2">
   <SlotReels
     s={s}
     skin={skin}
@@ -597,8 +657,10 @@ useEffect(() => {
             <>
               {/* ── Desktop: info strip + slim cabinet deck (Amusnet-style) ── */}
               <div className="hidden lg:block lg:shrink-0">
+                <div className="mx-auto mb-2 flex max-w-5xl items-center gap-2">
+                {crownMeter}
                 <div
-                  className={`mx-auto mb-2 flex h-8 max-w-5xl items-center justify-center gap-3 overflow-hidden rounded-full border px-5 text-sm ${
+                  className={`flex h-8 min-w-0 flex-1 items-center justify-center gap-3 overflow-hidden rounded-full border px-5 text-sm ${
                     s.fs ? "border-[#ffd166]/50 bg-[#1d1407]/85" : "border-white/10 bg-black/60"
                   } backdrop-blur-sm`}
                   role="status"
@@ -621,6 +683,7 @@ useEffect(() => {
                   ) : (
                     <span className="truncate text-white/80">{s.message}</span>
                   )}
+                </div>
                 </div>
 
                 <div
