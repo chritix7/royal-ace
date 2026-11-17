@@ -21,17 +21,22 @@ export default function LuckyRound({ g }: { g: Game }) {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none absolute left-1/2 top-2 z-20 -translate-x-1/2 animate-insurance-slide-in whitespace-nowrap"
+      className="pointer-events-none absolute left-3 top-[86px] z-20 animate-insurance-slide-in whitespace-nowrap sm:left-1/2 sm:top-2 sm:-translate-x-1/2"
     >
       <div
-        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_6px_20px_rgba(229,199,121,0.35),inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-sm sm:text-[11px] ${
+        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.16em] sm:px-3 sm:py-1 sm:tracking-[0.2em] shadow-[0_6px_20px_rgba(229,199,121,0.35),inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-sm sm:text-[11px] ${
           paid
             ? "border-[#d7b45b] bg-gradient-to-b from-[#f5d778] to-[#c89a3f] text-[#10130e]"
             : "border-[#d7b45b]/70 bg-gradient-to-b from-[#d7b45b]/30 to-[#d7b45b]/10 text-[#f5d778]"
         }`}
       >
         <span aria-hidden className="text-[12px]">★</span>
-        <span>
+        {/* Phones: short label in the left stack, where the jackpot
+            pill sits (it steps aside while the banner shows). */}
+        <span className="sm:hidden">
+          {paid ? `+◈ ${money(bonus)}` : "Golden"}
+        </span>
+        <span className="hidden sm:inline">
           {paid
             ? `Golden win · +◈ ${money(bonus)}`
             : g.s.phase === "settled"

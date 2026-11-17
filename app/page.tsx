@@ -38,21 +38,32 @@ function HeaderCard({
   value,
   onClick,
   highlight = false,
+  compact = false,
 }: {
   label: string;
   value: string;
   onClick: () => void;
   highlight?: boolean;
+  /** Phone version: smaller type, fills a third of the row. */
+  compact?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`group rounded-2xl border bg-gradient-to-b from-[#1a2219] to-[#101713] px-3.5 py-1.5 text-left outline-none shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 focus-visible:ring-2 focus-visible:ring-[#e5c779] active:translate-y-px ${
+      className={`group border bg-gradient-to-b from-[#1a2219] to-[#101713] text-left outline-none ${
+        compact
+          ? "min-w-0 flex-1 touch-manipulation select-none rounded-xl px-2.5 py-1"
+          : "rounded-2xl px-3.5 py-1.5"
+      } shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 focus-visible:ring-2 focus-visible:ring-[#e5c779] active:translate-y-px ${
         highlight ? "border-[#e5c779]/80" : "border-[#c8a65b]/40"
       }`}
     >
-      <span className="flex items-center gap-1.5 text-[9px] font-bold uppercase leading-none tracking-[0.2em] text-[#d7b45b]/70 transition group-hover:text-[#e5c779]">
+      <span
+        className={`flex items-center gap-1.5 font-bold uppercase leading-none text-[#d7b45b]/70 transition group-hover:text-[#e5c779] ${
+          compact ? "text-[8px] tracking-[0.16em]" : "text-[9px] tracking-[0.2em]"
+        }`}
+      >
         {label}
         {highlight && (
           <span
@@ -62,9 +73,9 @@ function HeaderCard({
         )}
       </span>
       <span
-        className={`mt-0.5 block whitespace-nowrap text-sm font-black leading-5 tabular-nums ${
-          highlight ? "text-[#f5d778]" : "text-[#e5c779]"
-        }`}
+        className={`mt-0.5 block truncate whitespace-nowrap font-black tabular-nums ${
+          compact ? "text-xs leading-4" : "text-sm leading-5"
+        } ${highlight ? "text-[#f5d778]" : "text-[#e5c779]"}`}
       >
         {value}
       </span>
@@ -101,6 +112,8 @@ export default function Home() {
 
   // Live figures for the header cards.
   const stats = useStats();
+  const rounds = stats.bjHands + stats.spins;
+  const roundsLabel = `${rounds.toLocaleString("en-US")} ${rounds === 1 ? "round" : "rounds"}`;
   const challenges = challengeView(useAchievements());
   const challengesDone = challenges.filter((c) => c.done).length;
   const challengesToClaim = challenges.filter((c) => c.done && !c.claimed).length;
@@ -130,7 +143,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#080c0b] text-white">
       <header className="sticky top-0 z-40 border-b border-[#c8a65b]/20 bg-[#0b100e] pt-[env(safe-area-inset-top)]">
-  <div className="mx-auto max-w-screen-2xl px-4 py-2.5 sm:px-8 sm:py-3">
+  <div className="mx-auto max-w-screen-2xl px-4 py-2 sm:px-8 sm:py-3">
     <div className="flex items-center gap-3">
       <h1 className="font-display header-shine truncate text-lg font-black tracking-[0.12em] sm:text-3xl">
         ROYAL{" "}
@@ -142,7 +155,7 @@ export default function Home() {
       <div className="ml-auto hidden items-stretch gap-2 sm:flex">
         <HeaderCard
           label="Statistics"
-          value={`${(stats.bjHands + stats.spins).toLocaleString("en-US")} rounds`}
+          value={roundsLabel}
           onClick={() => setStatsOpen(true)}
         />
         <HeaderCard
@@ -165,12 +178,12 @@ export default function Home() {
 
       <div
         data-chips-counter="header"
-        className={`sm:ml-2 ml-auto rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-3.5 py-1.5 text-right shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] ${
+        className={`sm:ml-2 ml-auto rounded-xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-3 py-1 text-right sm:rounded-2xl sm:px-3.5 sm:py-1.5 shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] ${
           flash ? "balance-halo-gold" : ""
         }`}
       >
-        <p className="text-[9px] font-bold uppercase tracking-[0.2em] leading-none text-[#d7b45b]/70">Chips</p>
-        <p className="mt-0.5 text-base font-black leading-tight text-[#e5c779] tabular-nums">
+        <p className="hidden text-[9px] font-bold uppercase tracking-[0.2em] leading-none text-[#d7b45b]/70 sm:block">Chips</p>
+        <p className="text-base font-black leading-tight text-[#e5c779] tabular-nums sm:mt-0.5">
           ◈{" "}
           <span className={flash ? "balance-flash" : ""}>
             <Counter value={balance} />
@@ -179,36 +192,38 @@ export default function Home() {
       </div>
     </div>
 
-    {/* Mobile quick-nav row — compact emoji chips, kept on its own line below. */}
-    <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">
-      <button
+    {/* Phone quick-nav row — the same three cards as on desktop, in a
+        compact size: a label and a live figure each. */}
+    <div className="mt-2 flex items-stretch gap-1.5 sm:hidden">
+      <HeaderCard
+        compact
+        label="Stats"
+        value={roundsLabel}
         onClick={() => setStatsOpen(true)}
-        aria-label="Open statistics"
-        className="flex h-11 flex-1 touch-manipulation select-none items-center justify-center rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] text-lg text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.12),0_2px_0_rgba(0,0,0,0.5)] transition active:translate-y-px active:scale-[0.97]"
-      >
-        📊
-      </button>
-
-      <button
+      />
+      <HeaderCard
+        compact
+        label="Challenges"
+        value={
+          challengesToClaim > 0
+            ? `${challengesToClaim} to claim`
+            : `${challengesDone} of ${challenges.length}`
+        }
+        highlight={challengesToClaim > 0}
         onClick={() => setAchievementsOpen(true)}
-        aria-label="Open daily challenges"
-        className="flex h-11 flex-1 touch-manipulation select-none items-center justify-center rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] text-lg text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.12),0_2px_0_rgba(0,0,0,0.5)] transition active:translate-y-px active:scale-[0.97]"
-      >
-        🏆
-      </button>
-
-      <button
+      />
+      <HeaderCard
+        compact
+        label="Rewards"
+        value={bonusReady ? "Bonus ready" : `Level ${progression.level}`}
+        highlight={bonusReady}
         onClick={() => setRewardsOpen(true)}
-        aria-label="Open rewards"
-        className="flex h-11 flex-1 touch-manipulation select-none items-center justify-center rounded-2xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] text-lg text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.12),0_2px_0_rgba(0,0,0,0.5)] transition active:translate-y-px active:scale-[0.97]"
-      >
-        🎁
-      </button>
+      />
     </div>
   </div>
 </header>
-      <section className="mx-auto max-w-screen-2xl px-4 pb-3 pt-3 sm:px-8">
-        <div className="mb-3 flex min-w-0 items-center gap-2 sm:gap-3">
+      <section className="mx-auto max-w-screen-2xl px-4 pb-3 pt-2 sm:px-8 sm:pt-3">
+        <div className="mb-2 flex min-w-0 items-center gap-2 sm:mb-3 sm:gap-3">
   <div
     className="flex shrink-0 items-center gap-2 sm:gap-3"
     role="tablist"
@@ -227,7 +242,7 @@ export default function Home() {
   aria-selected={selected}
   disabled={blocked}
   onClick={() => setTab(t.id)}
-  className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-xl outline-none transition-[filter,transform,background,color,border-color] focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 sm:h-auto sm:w-auto sm:px-6 sm:py-3 sm:text-[12px] sm:font-black sm:uppercase sm:tracking-wider ${
+  className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-lg outline-none transition-[filter,transform,background,color,border-color] focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 sm:h-auto sm:w-auto sm:px-6 sm:py-3 sm:text-[12px] sm:font-black sm:uppercase sm:tracking-wider ${
     selected
       ? "border-[#e5c779]/70 bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e] shadow-[0_3px_0_#765b25,inset_0_1px_0_rgba(255,255,255,0.3)]"
       : "border-white/15 bg-gradient-to-b from-[#1c2420] to-[#141a16] text-white/65 shadow-[0_3px_0_#080c0b,inset_0_1px_0_rgba(255,255,255,0.05)] hover:border-[#e5c779]/40 hover:text-white"
