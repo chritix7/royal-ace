@@ -1349,3 +1349,22 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .focus-stage-in > *, .focus-out > * { animation: none; }
 }
+
+/* Slots Focus: same zoom/fade feel without a full-screen blur — the
+   machine (backdrop, reels, orbit) is too heavy to blur every frame, so
+   these stay on the compositor (opacity + transform only). */
+@keyframes slots-focus-in {
+  0% { opacity: 0; transform: scale(1.035); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes slots-focus-out { to { opacity: 0; transform: scale(1.03); } }
+@keyframes slots-view-in {
+  0% { opacity: 0; transform: scale(0.975); }
+  100% { opacity: 1; transform: none; }
+}
+.slots-focus-in > * { animation: slots-focus-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both; will-change: opacity, transform; }
+.slots-focus-out > * { animation: slots-focus-out 0.26s cubic-bezier(0.4, 0, 1, 1) forwards; will-change: opacity, transform; }
+.slots-view-in { animation: slots-view-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .slots-focus-in > *, .slots-focus-out > *, .slots-view-in { animation: none; }
+}

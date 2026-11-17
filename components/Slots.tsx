@@ -14,7 +14,7 @@ import SlotReels from "./SlotReels";
 import { Counter, machineSmall } from "./ui";
 import { money } from "../lib/game";
 import { wallet } from "../lib/wallet";
-import { FOCUS_OUT_MS, exitFullscreenQuietly, requestFullscreenSettled } from "../lib/fullscreen";
+import { exitFullscreenQuietly, requestFullscreenSettled } from "../lib/fullscreen";
 import { SKINS, rankOf, type SkinId } from "../lib/skins";
 import { useSlots } from "../lib/useSlots";
 import {
@@ -253,16 +253,16 @@ export default function Slots({
     }
     // Entering: stay dark until the browser has finished its fullscreen
     // switch (set below), then play the entrance.
-    setFocusAnim(focus ? "focus-pending" : "view-in");
+    setFocusAnim(focus ? "focus-pending" : "slots-view-in");
   }, [focus]);
   // Exit key: dissolve first, leave fullscreen while dark, then close.
   const requestFocusExit = () => {
-    if (focusAnim === "focus-out") return;
-    setFocusAnim("focus-out");
+    if (focusAnim === "slots-focus-out") return;
+    setFocusAnim("slots-focus-out");
     window.setTimeout(() => {
       exitFullscreenQuietly();
       onFocusChange?.(false);
-    }, FOCUS_OUT_MS);
+    }, 260);
   };
   // Focus = true browser fullscreen, like the blackjack Focus view.
   const focusCloseRef = useRef(onFocusChange);
@@ -280,7 +280,7 @@ export default function Slots({
     (document.activeElement as HTMLElement | null)?.blur?.();
 
     const wasFullscreen = Boolean(document.fullscreenElement);
-    const cancelFs = requestFullscreenSettled(() => setFocusAnim("focus-stage-in"));
+    const cancelFs = requestFullscreenSettled(() => setFocusAnim("slots-focus-in"));
     // Esc in fullscreen only exits fullscreen (no keydown): close Focus with it.
     let entered = false;
     const onFsChange = () => {
