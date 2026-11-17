@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import BetBar from "./BetBar";
 import Confetti from "./Confetti";
 import CoinRain from "./CoinRain";
@@ -124,6 +124,34 @@ export default function Slots({
   const [buyOpen, setBuyOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
   const [betOpen, setBetOpen] = useState(false);
+  // The win-line plaque rests on the frame; when there is room below the
+  // reels (Focus, tall screens) it sits centred between reels and console.
+  const reelsBoxRef = useRef<HTMLDivElement>(null);
+  const plaqueRef = useRef<HTMLDivElement>(null);
+  const consoleRef = useRef<HTMLDivElement>(null);
+  const [plaqueTop, setPlaqueTop] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const place = () => {
+      const box = reelsBoxRef.current;
+      const pl = plaqueRef.current;
+      const con = consoleRef.current;
+      if (!box || !pl || !con) return;
+      const b = box.getBoundingClientRect();
+      const free = con.getBoundingClientRect().top - b.bottom;
+      const h = pl.offsetHeight;
+      // Not enough room for a gap on both sides: keep it on the frame edge.
+      setPlaqueTop(free >= h + 16 ? Math.round(b.height + (free - h) / 2) : null);
+    };
+    place();
+    const ro = new ResizeObserver(place);
+    if (reelsBoxRef.current) ro.observe(reelsBoxRef.current);
+    if (consoleRef.current) ro.observe(consoleRef.current);
+    window.addEventListener("resize", place);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", place);
+    };
+  }, [focus, skinId]);
   const [infoTab, setInfoTab] = useState<"pay" | "features">("pay");
   const openInfo = (t: "pay" | "features" = "pay") => {
     setInfoTab(t);
@@ -463,7 +491,7 @@ useEffect(() => {
   <div className="hidden justify-self-end lg:flex lg:w-[180px]">
     <JackpotLadder pools={s.pools} bet={bet} />
   </div>
-  <div className="relative lg:flex lg:justify-center">
+  <div ref={reelsBoxRef} className="relative lg:flex lg:justify-center">
   <SlotReels
     s={s}
     skin={skin}
@@ -486,8 +514,12 @@ useEffect(() => {
     role="status"
     aria-live="polite"
     aria-atomic="true"
-    className={`absolute -bottom-4 left-1/2 z-30 hidden h-9 w-[min(78%,620px)] -translate-x-1/2 items-center justify-center gap-3 overflow-hidden rounded-lg px-5 text-sm lg:flex`}
+    ref={plaqueRef}
+    className={`absolute left-1/2 z-30 hidden w-[min(78%,620px)] -translate-x-1/2 items-center justify-center gap-3 overflow-hidden rounded-lg px-5 lg:flex ${
+      plaqueTop === null ? "-bottom-4" : ""
+    } ${focus ? "h-10 text-[15px]" : "h-9 text-sm"}`}
     style={{
+      ...(plaqueTop === null ? {} : { top: plaqueTop }),
       background: s.fs ? "linear-gradient(180deg,#2a1d0c,#120b04)" : "linear-gradient(180deg, #1b141d 0%, #0b080d 60%, #120d13 100%)",
       boxShadow: "0 0 0 1px #f0d38b, 0 0 0 3px #0a0709, 0 0 0 4px rgba(215,180,91,0.5), 0 10px 22px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,243,196,0.2)",
     }}
@@ -858,6 +890,7 @@ useEffect(() => {
               {/* ── Desktop: single-row cabinet console ──
                   keys · [credit | bet −/+ | win] display · buy, gamble, spin */}
               <div
+                ref={consoleRef}
                 className="relative z-40 -mx-6 hidden border-t border-[#d7b45b]/35 lg:block lg:shrink-0"
                 style={{
                   background: "linear-gradient(180deg, #16131a 0%, #08070a 45%, #000 100%)",
