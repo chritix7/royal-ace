@@ -176,7 +176,8 @@ export function Reel({
  * compositor-driven), with a soft light trail. Speed eases up on wins
  * and in free spins without restarting the motion.
  */
-function OrbitRing({ color, mood }: { color: string; mood: "idle" | "win" | "jackpot" }) {
+function OrbitRing({ color, mood, paused = false }: { color: string; mood: "idle" | "win" | "jackpot"; paused?: boolean }) {
+  const phone = typeof window !== "undefined" && window.innerWidth < 1024;
   const host = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState({ w: 0, h: 0 });
   useIsoLayoutEffect(() => {
@@ -233,6 +234,13 @@ function OrbitRing({ color, mood }: { color: string; mood: "idle" | "win" | "jac
     anims.current = list;
     return () => list.forEach((a) => a.cancel());
   }, [d, n]);
+  // Phones: hold the orbit while the reels spin (frees the main thread).
+  useEffect(() => {
+    anims.current.forEach((a) => {
+      if (paused && phone) a.pause();
+      else if (a.playState === "paused") a.play();
+    });
+  }, [paused, phone, d, n]);
   // Change speed smoothly when the mood changes.
   useEffect(() => {
     anims.current.forEach((a) => {
@@ -252,7 +260,7 @@ function OrbitRing({ color, mood }: { color: string; mood: "idle" | "win" | "jac
             <path d={d} fill="none" stroke="#d7b45b" strokeOpacity={0.35} strokeWidth={1} />
             {/* Light trail sweeping with the jewels */}
             {/* Stacked strokes fake a soft glow without a per-frame blur */}
-            <g data-trail-group>
+            {!phone && <g data-trail-group>
               {[
                 [12, 0.1],
                 [7, 0.16],
@@ -271,7 +279,7 @@ function OrbitRing({ color, mood }: { color: string; mood: "idle" | "win" | "jac
                   strokeDasharray="14 36"
                 />
               ))}
-            </g>
+            </g>}
           </svg>
           {Array.from({ length: n }, (_, i) => {
             const star = i % 5 === 0;
@@ -326,7 +334,7 @@ const shownLine =
 >
   {/* Marquee bulbs around the screen */}
   <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-    <OrbitRing color={skin.lineColor} mood={mood} />
+    <OrbitRing color={skin.lineColor} mood={mood} paused={s.spinning.some(Boolean)} />
   </div>
   {/* Gold studs at the corners */}
   {["left-[5px] top-[5px]", "right-[5px] top-[5px]", "left-[5px] bottom-[5px]", "right-[5px] bottom-[5px]"].map((pos) => (

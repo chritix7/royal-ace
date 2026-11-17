@@ -273,7 +273,14 @@ export default function Slots({
     if (focusLeaving.current) return;
     focusLeaving.current = true;
     setFocusAnim("slots-focus-out");
-    window.setTimeout(() => exitFullscreenSettled(() => onFocusChange?.(false)), 260);
+    let closed = false;
+    const done = () => {
+      if (closed) return;
+      closed = true;
+      onFocusChange?.(false);
+    };
+    window.setTimeout(() => exitFullscreenSettled(done), 260);
+    window.setTimeout(done, 1000); // safety net
   };
   // Focus = true browser fullscreen, like the blackjack Focus view.
   const focusCloseRef = useRef(onFocusChange);

@@ -1374,3 +1374,13 @@ body {
 @media (max-width: 1023px) {
   .slots-focus-in > * { animation-duration: 0.5s; }
 }
+
+/* Phones: no orbiting spark on the SPIN bezel while the reels turn */
+@media (max-width: 1023px) {
+  .spin-dome.is-busy .spin-dome__spark { animation: none; opacity: 0; }
+}
+/* Phones: keep the room static (no sweeping beams / pulsing during free
+   spins) so the reels have the device to themselves. */
+@media (max-width: 1023px) {
+  .room-svg .beam, .room-svg .animate-pulse { animation: none; }
+}

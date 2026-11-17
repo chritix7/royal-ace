@@ -12,7 +12,10 @@ export default function KingpinRoom({ party = false }: { party?: boolean }) {
   const fanRays = Array.from({ length: 9 }, (_, i) => i);
   return (
     <svg
-      className="pointer-events-none absolute inset-0 -z-10 h-full w-full"
+      className="room-svg pointer-events-none absolute inset-0 -z-10 h-full w-full"
+      // Own GPU layer: rasterised once, never repainted when text or
+      // numbers change above it (its blur filters are costly on phones).
+      style={{ transform: "translateZ(0)", willChange: "transform" }}
       viewBox="0 0 1600 900"
       preserveAspectRatio="xMidYMid slice"
       aria-hidden="true"

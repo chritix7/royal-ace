@@ -6,7 +6,7 @@ import { handValue, isBlackjack } from "../lib/blackjack";
 import { tableBg, money } from "../lib/game";
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import { useSession } from "../lib/sessionStore";
-import { FOCUS_OUT_MS, exitFullscreenSettled, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
+import { FOCUS_OUT_MS, exitFullscreenQuietly, exitFullscreenSettled, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
 import { Counter } from "./ui";
 import PlayingCard from "./PlayingCard";
 import CardFlight from "./CardFlight";
@@ -101,7 +101,18 @@ export default function BlackjackImmersive({
     setStage("out");
     // Fade out, leave fullscreen while dark, and only hand back to the
     // table once the viewport has stopped resizing (phones).
-    window.setTimeout(() => exitFullscreenSettled(onClose), FOCUS_OUT_MS);
+    let closed = false;
+    const done = () => {
+      if (closed) return;
+      closed = true;
+      closeRef.current();
+    };
+    window.setTimeout(() => exitFullscreenSettled(done), FOCUS_OUT_MS);
+    // Safety net: whatever the browser does with fullscreen, Focus closes.
+    window.setTimeout(() => {
+      exitFullscreenQuietly();
+      done();
+    }, 1000);
   };
 
   useEffect(() => {
@@ -224,7 +235,7 @@ const playerCardStyle = (
       <header
         className="flex shrink-0 items-center justify-between gap-2 border-b border-[#d7b45b]/20 px-3 pb-2 sm:px-5"
         style={{
-          paddingTop: "max(env(safe-area-inset-top), 0.5rem)",
+          paddingTop: "max(0.5rem, calc(env(safe-area-inset-top) + 0.35rem))",
         }}
       >
         <div className="min-w-0">
@@ -281,7 +292,7 @@ const playerCardStyle = (
           <button
             type="button"
             onClick={requestClose}
-            className={`${control} ${neutral} w-10`}
+            className={`${control} ${neutral} relative w-11 touch-manipulation before:absolute before:-inset-2 before:content-['']`}
             aria-label="Exit immersive mode"
           >
             ✕
