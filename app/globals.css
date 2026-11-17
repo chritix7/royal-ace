@@ -1366,3 +1366,6 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .slots-focus-in > *, .slots-focus-out > *, .slots-view-in { animation: none; }
 }
+
+/* Phones: no double-tap zoom delay on game keys */
+.spin-dome, .cab-key, .bet-key, .lux-btn, .jewel { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }

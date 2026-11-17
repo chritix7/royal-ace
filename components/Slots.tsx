@@ -225,7 +225,8 @@ export default function Slots({
       const h = pl.offsetHeight;
       // Centred in the free band; if it is too tight, as low as possible
       // (6 px above the console) while overlapping the frame by 20 px at most.
-      const offset = Math.max(-20, Math.min((free - h) / 2, free - h - 6));
+      const minOffset = con === consoleRef.current ? -20 : -8;
+      const offset = Math.max(minOffset, Math.min((free - h) / 2, free - h - 6));
       setPlaqueTop(Math.round(b.height + offset));
     };
     place();
@@ -555,7 +556,7 @@ useEffect(() => {
     <div
       className={`grid grid-cols-[minmax(0,1fr)] gap-6 ${focusAnim} ${
         focus
-          ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black [--slots-top:0rem] [--slots-top-m:3rem] lg:[--slots-top-m:0rem]"
+          ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black [--slots-top:0rem] [--slots-top-m:calc(env(safe-area-inset-top)+3.25rem)] lg:[--slots-top-m:0rem]"
           : "[--slots-top-m:10.15rem] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px] lg:items-stretch lg:gap-4 lg:overflow-hidden"
       }`}
     >
@@ -565,15 +566,16 @@ useEffect(() => {
           onClick={requestFocusExit}
           aria-label="Exit focus mode"
           title="Exit focus (Esc)"
-          className="fixed right-4 top-4 z-[61] flex h-9 items-center gap-1.5 rounded-full border border-[#d7b45b]/50 bg-black/70 px-3 text-[11px] font-bold uppercase tracking-wider text-[#e5c779] backdrop-blur hover:border-[#e5c779]"
+          style={{ top: "max(1rem, calc(env(safe-area-inset-top) + 0.5rem))" }}
+          className="fixed right-4 z-[61] flex h-9 items-center gap-1.5 rounded-full border border-[#d7b45b]/50 bg-black/70 px-3 text-[11px] font-bold uppercase tracking-wider text-[#e5c779] backdrop-blur hover:border-[#e5c779]"
         >
           ✕ <span>Exit</span>
         </button>
       )}
       <section className={`overflow-clip border border-white/10 bg-[#101713] shadow-2xl ${focus ? "rounded-none border-0" : "rounded-3xl"} max-lg:flex max-lg:flex-col lg:flex lg:min-h-0 lg:flex-col`}>
         <div
-          className={`relative isolate ${skin.stage} flex min-h-[calc(100dvh-var(--slots-top-m))] flex-col px-2 pt-3 sm:px-8 sm:pt-5 lg:min-h-0 lg:flex-1 lg:px-6 lg:pb-0 lg:pt-5 ${focus ? "max-lg:!pt-14" : ""}`}
-          style={focus ? { paddingTop: "max(env(safe-area-inset-top), 0.75rem)" } : undefined}
+          className={`relative isolate ${skin.stage} flex min-h-[calc(100dvh-var(--slots-top-m))] flex-col px-2 pt-3 sm:px-8 sm:pt-5 lg:min-h-0 lg:flex-1 lg:px-6 lg:pb-0 lg:pt-5 ${focus ? "max-lg:flex-1" : ""}`}
+          style={focus ? { paddingTop: "max(3.5rem, calc(env(safe-area-inset-top) + 3.25rem))" } : undefined}
           data-focus={focus ? "" : undefined}
         >
           {skinId === "classic" && <ClassicRoom party={s.fs !== null} />}
@@ -644,7 +646,7 @@ useEffect(() => {
   />
 </div>
 
-          <div className="relative flex flex-1 flex-col items-center justify-center pb-6 lg:mt-0 lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-start lg:gap-5 lg:pb-[1.6rem]">
+          <div className="relative flex flex-1 flex-col items-center justify-center pb-10 lg:mt-0 lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-start lg:gap-5 lg:pb-[1.6rem]">
   {/* Left tower: the jackpot ladder */}
   <div className="hidden justify-self-end lg:flex lg:w-[180px] lg:self-center">
     <JackpotLadder pools={s.pools} bet={bet} />
@@ -1042,12 +1044,12 @@ useEffect(() => {
                 </div>
 
                 {/* Keys: info · auto | (−) SPIN (+) | gamble · buy */}
-                <div className="mx-auto mt-3 flex max-w-md items-center justify-between gap-1">
+                <div className="mx-auto mt-3 flex max-w-md items-center justify-between gap-0.5">
                   <div className="flex items-center gap-1 min-[380px]:gap-1.5">
                     <button
                       onClick={() => openInfo("pay")}
                       aria-label="Paytable and game info"
-                      className="cab-key !h-10 w-10 min-[380px]:!h-11 min-[380px]:w-11 flex-col gap-0.5 leading-none"
+                      className="cab-key !h-10 w-10 flex-col gap-0.5 leading-none"
                     >
                       <IconInfo />
                       <span className="text-[7px] font-black tracking-[0.12em] opacity-75">INFO</span>
@@ -1060,7 +1062,7 @@ useEffect(() => {
                         aria-haspopup="menu"
                         aria-expanded={autoOpen}
                         aria-label={auto ? "Stop auto spin" : "Auto spins"}
-                        className={`cab-key !h-10 w-10 min-[380px]:!h-11 min-[380px]:w-11 flex-col gap-0.5 leading-none ${auto ? "cab-key--stop" : ""} ${s.turbo ? "!border-[#ffd166]/70" : ""}`}
+                        className={`cab-key !h-10 w-10 flex-col gap-0.5 leading-none ${auto ? "cab-key--stop" : ""} ${s.turbo ? "!border-[#ffd166]/70" : ""}`}
                       >
                         {auto ? <span className="text-[11px] font-black">{s.autoLeft}</span> : <IconAuto />}
                         <span className="text-[7px] font-black tracking-[0.12em] opacity-75">{auto ? "STOP" : s.turbo ? "AUTO ⚡" : "AUTO"}</span>
@@ -1073,7 +1075,7 @@ useEffect(() => {
                       onClick={() => setBetIdx(s.betIdx - 1)}
                       disabled={s.busy || s.betIdx === 0}
                       aria-label="Lower bet"
-                      className="bet-key !h-8 !w-8 !text-base min-[380px]:!h-9 min-[380px]:!w-9"
+                      className="bet-key !h-8 !w-8 !text-base"
                     >
                       −
                     </button>
@@ -1083,14 +1085,14 @@ useEffect(() => {
                       busy={s.busy}
                       ready={canSpin && !s.busy}
                       variant={skinId}
-                      size="clamp(4rem, 19vw, 4.6rem)"
+                      size="clamp(3.9rem, 18vw, 4.4rem)"
                       fs={s.fs ? { played: Math.min(s.fs.played, s.fs.total), total: s.fs.total } : null}
                     />
                     <button
                       onClick={() => setBetIdx(s.betIdx + 1)}
                       disabled={s.busy || s.betIdx === BET_LEVELS.length - 1 || BET_LEVELS[s.betIdx + 1] > balance}
                       aria-label="Raise bet"
-                      className="bet-key !h-8 !w-8 !text-base min-[380px]:!h-9 min-[380px]:!w-9"
+                      className="bet-key !h-8 !w-8 !text-base"
                     >
                       +
                     </button>
@@ -1107,7 +1109,7 @@ useEffect(() => {
                           onClick={() => setGambleScreen(true)}
                           disabled={!s.gamble}
                           aria-label="Open double or nothing"
-                          className={`cab-key !h-10 w-10 min-[380px]:!h-11 min-[380px]:w-11 flex-col gap-0.5 leading-none ${s.gamble ? "cab-key--gold cab-key--live" : ""}`}
+                          className={`cab-key !h-10 w-10 flex-col gap-0.5 leading-none ${s.gamble ? "cab-key--gold cab-key--live" : ""}`}
                         >
                           <IconCards />
                           <span className="text-[7px] font-black tracking-[0.08em]">×2</span>
@@ -1116,7 +1118,7 @@ useEffect(() => {
                           onClick={() => setBuyOpen(true)}
                           disabled={s.busy || !!s.fs || balance < bonusPrice}
                           aria-label={`Buy ${FS_AWARD[3]} free spins for ${money(bonusPrice)}`}
-                          className="cab-key !h-10 w-10 min-[380px]:!h-11 min-[380px]:w-11 flex-col gap-0.5 leading-none"
+                          className="cab-key !h-10 w-10 flex-col gap-0.5 leading-none"
                         >
                           <IconTicket />
                           <span className="text-[7px] font-black tracking-[0.08em]">BUY</span>

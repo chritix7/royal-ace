@@ -43,6 +43,23 @@ export function SymbolCell({ sym, skin, win, dim = false }: { sym: Sym; skin: Sk
   );
 }
 
+/**
+ * Symbol that only flashes past while a reel travels: just the picture,
+ * no tile, halo, tags or labels. Keeps the spin start light on phones
+ * (a reel strip holds dozens of these).
+ */
+function FillerCell({ sym, skin }: { sym: Sym; skin: Skin }) {
+  return (
+    <div className="flex h-[var(--cell)] items-center justify-center" aria-hidden="true">
+      {skin.art ? (
+        <img src={skin.art[sym]} alt="" draggable={false} decoding="async" className="h-[74%] w-[74%] select-none object-contain" />
+      ) : (
+        <span className="inline-block text-[1.8rem] leading-none sm:text-[2.5rem] lg:text-[calc(var(--cell)*0.55)]">{skin.emoji[sym]}</span>
+      )}
+    </div>
+  );
+}
+
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 const MS_PER_CELL = 45;
 const LAND_CELLS = 8;
@@ -94,9 +111,13 @@ export function Reel({
     <div className={`reel-layer relative h-[calc(var(--cell)*4)] w-[var(--cell-w)] overflow-hidden border-r last:border-r-0 ${skin.divider} ${skin.reel}`}>
       <div className={!spinning && spinId > 0 ? "reel-land" : ""}>
         <div ref={stripEl} className={spinning ? "reel-moving" : ""} style={{ willChange: "transform" }}>
-          {strip.map((sym, i) => (
-            <SymbolCell key={i} sym={sym} skin={skin} win={!spinning && i < ROWS && !!cells?.[i]} dim={anyWin && !spinning && i < ROWS && !cells?.[i]} />
-          ))}
+          {strip.map((sym, i) =>
+            i >= ROWS && i < strip.length - ROWS ? (
+              <FillerCell key={i} sym={sym} skin={skin} />
+            ) : (
+              <SymbolCell key={i} sym={sym} skin={skin} win={!spinning && i < ROWS && !!cells?.[i]} dim={anyWin && !spinning && i < ROWS && !cells?.[i]} />
+            ),
+          )}
         </div>
       </div>
       {full && !spinning && (
@@ -290,7 +311,7 @@ const shownLine =
       className={`mx-auto flex w-fit items-stretch gap-1.5 sm:gap-3 ${
         large
           ? "[--cell:4.2rem] sm:[--cell:5rem] lg:[--cell:5.2rem]"
-          : "[--cell:min(calc(var(--cell-w)*1.12),max(46px,calc((100dvh_-_var(--slots-top-m,9.75rem)_-_322px)_/_4)))] lg:[--cell:clamp(4.25rem,min(calc((100dvh_-_var(--slots-top,10rem)_-_228px)_/_4),calc((100vw_-_8rem_-_430px)_/_6.5)),10rem)]"
+          : "[--cell:min(calc(var(--cell-w)*1.12),max(40px,calc((100dvh_-_var(--slots-top-m,9.75rem)_-_366px)_/_4)))] lg:[--cell:clamp(4.25rem,min(calc((100dvh_-_var(--slots-top,10rem)_-_228px)_/_4),calc((100vw_-_8rem_-_430px)_/_6.5)),10rem)]"
       } [--cell-w:calc((100vw_-_100px)_/_5)] sm:[--cell-w:min(6.5rem,calc((100vw_-_160px)_/_5))] lg:[--cell-w:calc(var(--cell)*1.3)] ${shake ? `shake-${shake}` : ""}`}
     >
 

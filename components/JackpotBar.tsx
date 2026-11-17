@@ -100,7 +100,7 @@ export default function JackpotBar({
     >
       {tile(a)}
       {tile(b)}
-      {center && <div className="order-last col-span-4 mt-1.5 lg:order-none lg:col-span-1 lg:mt-0">{center}</div>}
+      {center && <div className="order-last col-span-4 mt-[13px] lg:order-none lg:col-span-1 lg:mt-0">{center}</div>}
       {tile(c)}
       {tile(d)}
     </div>
