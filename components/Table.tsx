@@ -53,7 +53,7 @@ function SidePill({
   disabled,
   onOpen,
 }: SidePillProps) {
-  const active = !disabled && amount > 0;
+  const active = amount > 0;
   return (
     <button
       type="button"
@@ -69,7 +69,7 @@ function SidePill({
         boxShadow: active
           ? "inset 0 0 0 1px rgba(229, 199, 121, 0.55), inset 0 2px 5px rgba(0, 0, 0, 0.75), 0 0 14px rgba(229, 199, 121, 0.15), 0 1px 0 rgba(229, 199, 121, 0.1)"
           : "inset 0 0 0 1px rgba(229, 199, 121, 0.25), inset 0 2px 5px rgba(0, 0, 0, 0.75), 0 1px 0 rgba(229, 199, 121, 0.06)",
-        opacity: disabled ? 0.7 : 1,
+        opacity: disabled && !active ? 0.7 : 1,
       }}
     >
       <div className="min-w-0 text-left">
@@ -91,7 +91,7 @@ function SidePill({
             textShadow: "0 1px 0 rgba(0, 0, 0, 0.85)",
           }}
         >
-          {amount > 0 ? `◈ ${money(amount)}` : "Tap to stake"}
+          {amount > 0 ? `◈ ${money(amount)}` : disabled ? "No bet" : "Tap to stake"}
         </p>
       </div>
 
@@ -463,7 +463,7 @@ function getShoeStatus(g: Game): {
   {s.hands.length === 0 && (
     <div
       aria-hidden="true"
-      className="min-h-20 w-full sm:min-h-28"
+      className="min-h-[152px] w-full sm:min-h-28"
     />
   )}
 
@@ -575,8 +575,8 @@ function getShoeStatus(g: Game): {
         "inset 0 0 0 1px rgba(229, 199, 121, 0.1), inset 0 1px 0 rgba(0, 0, 0, 0.4)",
     }}
   />
-{canBet && (
-<div className="relative flex flex-col items-center gap-2 lg:block">
+{(canBet || s.hands.length > 0) && (
+<div className={`relative flex flex-col items-center gap-2 lg:block ${canBet ? "" : "lg:hidden"}`}>
 {/* Bet circle between the two side bets, on every screen size. */}
 <div className="relative flex w-full items-center justify-center gap-2 lg:gap-4">
 
@@ -680,6 +680,7 @@ function getShoeStatus(g: Game): {
 {/* Phones and tablets: the chips and quick bets sit right here on the
     felt, so placing a bet never needs scrolling down to the sidebar
     (desktop keeps them in the sidebar next to the table). */}
+{canBet && (
 <div className="w-full max-w-[340px] space-y-1.5 lg:hidden">
   <ChipRail
     visibleCount={5}
@@ -709,6 +710,7 @@ function getShoeStatus(g: Game): {
     ))}
   </div>
 </div>
+)}
 </div>
 )}
 
