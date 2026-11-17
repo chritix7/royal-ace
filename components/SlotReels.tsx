@@ -164,12 +164,12 @@ function Bulbs({ color, fast, mood = "idle" }: { color: string; fast: boolean; m
 function LineTabs({ from, to, winLines, active }: { from: number; to: number; winLines: Set<number>; active: number | null }) {
   const nums = Array.from({ length: to - from + 1 }, (_, i) => from + i);
   return (
-    <div className="hidden flex-col justify-between py-5 sm:flex" aria-hidden="true">
+    <div className="hidden flex-col justify-between py-[calc(var(--cell)*0.3)] sm:flex" aria-hidden="true">
       {nums.map((n) => (
         <span
           key={n}
-          className={`flex h-6 w-6 items-center justify-center rounded text-[10px] font-black transition ${
-            active === n ? "scale-125 bg-white text-black" : winLines.has(n) ? "bg-[#facc15] text-black" : "bg-white/10 text-white/45"
+          className={`flex h-[clamp(1.05rem,calc(var(--cell)*0.3),1.5rem)] w-6 items-center justify-center rounded text-[10px] font-black tabular-nums transition ${
+            active === n ? "scale-125 bg-white text-black" : winLines.has(n) ? "bg-[#facc15] text-black" : "bg-black/55 text-white/55 ring-1 ring-inset ring-white/10"
           }`}
         >
           {n}
@@ -203,7 +203,14 @@ const shownLine =
     : activeLine;
 
   return (
-    <div className={`mx-auto flex w-fit items-stretch gap-1.5 sm:gap-3 ${shake ? `shake-${shake}` : ""}`}>
+    <div
+      className={`mx-auto flex w-fit items-stretch gap-1.5 sm:gap-3 ${
+        large
+          ? "[--cell:4.2rem] sm:[--cell:5rem] lg:[--cell:5.2rem]"
+          : "[--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:clamp(3.4rem,calc((100dvh_-_31.5rem)_/_4),5.4rem)]"
+      } ${shake ? `shake-${shake}` : ""}`}
+    >
+      {/* 20 paylines: 1–10 on the left, 11–20 on the right */}
       <LineTabs from={1} to={10} winLines={winLines} active={shownLine?.line ?? null} />
 
       <div
@@ -240,7 +247,7 @@ const shownLine =
   <span className="h-px w-1.5 -rotate-45 bg-black/65" />
 </span>
   ))}
-        <div className={`relative rounded-xl bg-black p-1 shadow-[inset_0_0_20px_#000] sm:p-1.5 ${large ? "[--cell:4.2rem] sm:[--cell:5rem] lg:[--cell:5.2rem]" : "[--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:5.2rem]"}`}>
+        <div className="relative rounded-xl bg-black p-1 shadow-[inset_0_0_20px_#000] sm:p-1.5">
           <div className="relative flex overflow-hidden rounded-lg">
             {Array.from({ length: REELS }, (_, k) => (
               <Reel
@@ -295,7 +302,7 @@ const shownLine =
 
     </div>
 
-      <LineTabs from={1} to={10} winLines={winLines} active={shownLine?.line ?? null} />
+      <LineTabs from={11} to={20} winLines={winLines} active={shownLine?.line ?? null} />
       <Lever spinId={s.spinId} onPull={onPull} disabled={!canPull} />
     </div>
   );

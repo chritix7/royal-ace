@@ -67,7 +67,7 @@ export default function SlotsSidePanel({
   const session = useSession();
 
   return (
-    <aside className={`flex flex-col gap-5 ${fullscreen ? "hidden" : ""}`}>
+    <aside className={`flex flex-col gap-5 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:pr-1 lg:[scrollbar-width:thin] ${fullscreen ? "hidden" : ""}`}>
       {rankToast && (
         <div role="status" className="animate-pop fixed right-4 top-4 z-50 rounded-2xl border border-[#ff4fa3]/70 bg-[#1a0d2e] px-5 py-3 text-sm font-semibold text-[#ff9fd0] shadow-2xl">
           ★ {rankToast}

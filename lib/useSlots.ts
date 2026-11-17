@@ -682,10 +682,18 @@ useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!active || e.metaKey || e.ctrlKey || e.altKey) return;
       const t = e.target as HTMLElement | null;
-      if (t && t.closest("button, input, textarea, select, a, [contenteditable]")) return;
+      // Typing fields, menus and open dialogs keep their own keys.
+      if (t && t.closest("input, textarea, select, [contenteditable], [role=dialog], [role=menu]")) return;
+      if (document.querySelector("[role=dialog][aria-modal=true]")) return;
+      // A focused button (the Slots tab, Max bet…) must not swallow Space:
+      // Space always spins. Enter keeps activating the focused button.
+      const onControl = !!t?.closest("button, a, [role=tab]");
+      if (onControl && e.key === "Enter") return;
+      if (onControl && e.key.startsWith("Arrow") && t?.closest("[role=tablist]")) return;
       const a = actions.current;
       if (e.key === " " || e.key === "Enter") {
         e.preventDefault();
+        if (onControl) t?.blur();
         if (ref.current.busy) {
           if (ref.current.autoLeft > 0) a.stopAuto();
         } else a.play(1);

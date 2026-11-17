@@ -62,7 +62,12 @@ export default function BetBar({
         ref={box}
         role="group"
         aria-label="Bet amount"
-        className="relative flex w-0 flex-1 snap-x gap-1.5 overflow-x-auto scroll-smooth px-1 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="relative flex w-0 flex-1 snap-x gap-1.5 overflow-x-auto scroll-smooth px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        style={{
+          // Levels sliding out of view fade instead of being cut mid-number.
+          maskImage: "linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%)",
+          WebkitMaskImage: "linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%)",
+        }}
       >
         {levels.map((v, i) => {
           const selected = i === index;
