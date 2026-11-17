@@ -9,6 +9,14 @@ import {
   type Pools,
 } from "../lib/jackpot";
 
+/** Card-suit plaques, like the jackpot cards of a casino cabinet. */
+const SUIT: Record<JackpotTier, { glyph: string; red: boolean }> = {
+  mini: { glyph: "♣", red: false },
+  minor: { glyph: "♦", red: true },
+  major: { glyph: "♥", red: true },
+  kingpin: { glyph: "♠", red: false },
+};
+
 const STYLE: Record<JackpotTier, string> = {
   mini: "border-cyan-300/30 text-cyan-200",
   minor: "border-emerald-300/30 text-emerald-200",
@@ -45,8 +53,17 @@ export default function JackpotBar({
         className="pointer-events-none absolute inset-x-2 top-0 h-px"
         style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.20), transparent)" }}
       />
-      <p className="text-[8px] font-black tracking-[0.18em] opacity-65 sm:text-[9px]">{JACKPOTS[t].label}</p>
-      <p className="font-mono text-[11px] font-black tabular-nums sm:text-base">
+      <span
+        aria-hidden="true"
+        className={`absolute left-2 top-1/2 hidden h-9 w-7 -translate-y-1/2 items-center justify-center rounded-[4px] border border-black/30 text-lg leading-none shadow-[0_2px_4px_rgba(0,0,0,0.5)] lg:flex ${
+          SUIT[t].red ? "text-[#c81e3a]" : "text-[#111]"
+        }`}
+        style={{ background: "linear-gradient(180deg,#fffaf0,#e9e2d0)" }}
+      >
+        {SUIT[t].glyph}
+      </span>
+      <p className="text-[8px] font-black tracking-[0.18em] opacity-65 sm:text-[9px] lg:pl-8">{JACKPOTS[t].label}</p>
+      <p className="font-mono text-[11px] font-black tabular-nums sm:text-base lg:pl-8">
         <span className="opacity-60">◈</span> <RollingNumber value={Math.round(pools[t] * bet)} ms={700} />
       </p>
     </div>
