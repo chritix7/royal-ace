@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { PAYLINES, REELS, ROWS, STRIPS, type LineWin, type Sym } from "../lib/slots";
 import type { Skin } from "../lib/skins";
 import type { SlotsGame } from "../lib/useSlots";
@@ -10,14 +10,14 @@ const randomSym = (): Sym => {
   return strip[Math.floor(Math.random() * strip.length)];
 };
 
-export function SymbolCell({ sym, skin, win }: { sym: Sym; skin: Skin; win: boolean }) {
+export function SymbolCell({ sym, skin, win, dim = false }: { sym: Sym; skin: Skin; win: boolean; dim?: boolean }) {
   const special = sym === "wild" ? skin.wildBg : sym === "scatter" ? skin.scatterBg : "";
   const isSpecial = sym === "wild" || sym === "scatter";
   const motion = win ? `anim-${sym}` : sym === "wild" ? "idle-wild" : sym === "scatter" ? "idle-scatter" : "";
   const tag = "absolute inset-x-0.5 bottom-0.5 rounded-[3px] bg-gradient-to-r py-px text-center text-[7px] font-black tracking-wider shadow sm:text-[10px]";
   return (
     <div
-  className={`relative flex h-[var(--cell)] items-center justify-center ${win ? "sym-win-pop" : ""} ${skin.art ? "border-b border-white/[0.05]" : ""} ${special} ${win ? skin.win : ""}`}
+  className={`relative flex h-[var(--cell)] items-center justify-center transition-[opacity,filter] duration-300 ${dim ? "opacity-40 saturate-[0.4]" : ""} ${win ? "sym-win-pop" : ""} ${skin.art ? "border-b border-white/[0.05]" : ""} ${special} ${win ? skin.win : ""}`}
   role="img"
   aria-label={skin.names[sym]}
 >
@@ -31,6 +31,8 @@ export function SymbolCell({ sym, skin, win }: { sym: Sym; skin: Skin; win: bool
       ) : (
         <span className={`inline-block text-[1.8rem] leading-none drop-shadow-sm sm:text-[2.5rem] lg:text-[calc(var(--cell)*0.55)] ${win ? `anim-${sym}` : ""}`}>{skin.emoji[sym]}</span>
       )}
+      {/* Soft tile behind each symbol */}
+      <span aria-hidden="true" className="pointer-events-none absolute inset-[4px] hidden rounded-xl bg-[radial-gradient(ellipse_at_50%_35%,rgba(255,255,255,0.07),transparent_70%)] ring-1 ring-inset ring-white/[0.05] lg:block" />
       {win && <span aria-hidden="true" className="win-frame" />}
       {sym === "wild" && <span className={`${tag} ${skin.wildTag}`}>WILD</span>}
       {sym === "scatter" && <span className={`${tag} ${skin.scatterTag}`}>SCATTER</span>}
@@ -43,13 +45,14 @@ const MS_PER_CELL = 45;
 const LAND_CELLS = 8;
 
 export function Reel({
-  spinId, prev, target, stopAt, landMs, spinning, anticipate, cells, skin, held = false, full = false, expanding = false,
+  spinId, prev, target, stopAt, landMs, spinning, anticipate, cells, skin, held = false, full = false, expanding = false, anyWin = false,
 }: {
   spinId: number; prev: Sym[]; target: Sym[]; stopAt: number; landMs: number;
   spinning: boolean; anticipate: boolean; cells: boolean[]; skin: Skin;
   held?: boolean;
   full?: boolean;
   expanding?: boolean;
+  anyWin?: boolean;
 }) {
   const [strip, setStrip] = useState<Sym[]>(prev);
   const stripEl = useRef<HTMLDivElement>(null);
@@ -89,7 +92,7 @@ export function Reel({
       <div className={!spinning && spinId > 0 ? "reel-land" : ""}>
         <div ref={stripEl} className={spinning ? "reel-moving" : ""} style={{ willChange: "transform" }}>
           {strip.map((sym, i) => (
-            <SymbolCell key={i} sym={sym} skin={skin} win={!spinning && i < ROWS && !!cells?.[i]} />
+            <SymbolCell key={i} sym={sym} skin={skin} win={!spinning && i < ROWS && !!cells?.[i]} dim={anyWin && !spinning && i < ROWS && !cells?.[i]} />
           ))}
         </div>
       </div>
@@ -137,34 +140,69 @@ export function Reel({
   );
 }
 
-function Bulbs({ color, fast, mood = "idle" }: { color: string; fast: boolean; mood?: "idle" | "win" | "jackpot" }) {
-  const led = mood === "jackpot" ? "#ff4d4d" : mood === "win" ? "#ffd166" : color;
-  const anim = mood === "jackpot" ? "animate-[pulse_0.5s_ease-in-out_infinite]" : mood === "win" ? "animate-pulse" : "";
-  const style = { "--bulb": led } as CSSProperties;
-  const strips = [
-    { pos: "inset-x-5 top-1 h-2", v: false },
-    { pos: "inset-x-5 bottom-1 h-2", v: false },
-    { pos: "inset-y-5 left-1 w-2", v: true },
-    { pos: "inset-y-5 right-1 w-2", v: true },
-  ];
+/**
+ * Marquee of real bulbs following the rounded bezel. Two alternating
+ * banks blink like a casino sign and a soft wave of light travels around
+ * the frame; everything speeds up and warms on wins.
+ */
+function BulbRing({ color, mood }: { color: string; mood: "idle" | "win" | "jackpot" }) {
+  const ref = useRef<SVGSVGElement>(null);
+  const [box, setBox] = useState({ w: 0, h: 0 });
+  useIsoLayoutEffect(() => {
+    const el = ref.current?.parentElement;
+    if (!el) return;
+    const read = () => setBox({ w: el.clientWidth, h: el.clientHeight });
+    read();
+    const ro = new ResizeObserver(read);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const pad = 9;
+  const rad = 15;
+  const W = Math.max(0, box.w - pad * 2);
+  const H = Math.max(0, box.h - pad * 2);
+  const per = 2 * (W + H - 4 * rad) + 2 * Math.PI * rad;
+  const n = Math.max(8, Math.round(per / 19));
+  const len = n * 2; // pathLength: one bulb every 2 units
+  const warm = mood === "jackpot" ? "#fff4d6" : "#ffd98a";
+  const tone = mood === "jackpot" ? "#ff4d6d" : color;
+  const blink = mood === "jackpot" ? "0.16s" : mood === "win" ? "0.32s" : "1.1s";
+  const wave = mood === "jackpot" ? "1.2s" : mood === "win" ? "2.2s" : "6s";
+  const rect = { x: pad, y: pad, width: W, height: H, rx: rad, fill: "none", pathLength: len } as const;
   return (
-    <>
-      {strips.flatMap((st, i) =>
-        [false, true].map((alt) => (
-          <div
-            key={`${i}-${alt}`}
-            aria-hidden="true"
-            style={style}
-            className={`pointer-events-none absolute ${st.pos} ${st.v ? "bulbs-v" : "bulbs"}${alt ? " alt" : ""}${fast ? " bulbs-fast" : ""} ${anim}`}
+    <svg ref={ref} aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
+      {W > 0 && (
+        <>
+          {/* Sockets */}
+          <rect {...rect} stroke="#000" strokeOpacity={0.7} strokeWidth={8.5} strokeLinecap="round" strokeDasharray="0.001 2" />
+          {/* Travelling wave of light under the bulbs */}
+          <rect
+            {...rect}
+            className="bulb-wave"
+            stroke={warm}
+            strokeOpacity={mood === "idle" ? 0.22 : 0.4}
+            strokeWidth={16}
+            strokeLinecap="round"
+            strokeDasharray={`${len * 0.16} ${len * 0.84}`}
+            style={{ ["--to" as string]: `${-len}`, animationDuration: wave, filter: "blur(6px)" }}
           />
-        ))
+          {/* Bank A (warm gold) and bank B (theme colour) */}
+          <g className="bulb-bank" style={{ animationDuration: blink }}>
+            <rect {...rect} stroke={warm} strokeWidth={6} strokeLinecap="round" strokeDasharray="0.001 4" style={{ filter: `drop-shadow(0 0 4px ${warm})` }} />
+            <rect {...rect} stroke="#fff" strokeWidth={2.2} strokeLinecap="round" strokeDasharray="0.001 4" />
+          </g>
+          <g className="bulb-bank bulb-bank--b" style={{ animationDuration: blink }}>
+            <rect {...rect} stroke={tone} strokeWidth={6} strokeLinecap="round" strokeDasharray="0.001 4" strokeDashoffset={-2} style={{ filter: `drop-shadow(0 0 4px ${tone})` }} />
+            <rect {...rect} stroke="#fff" strokeOpacity={0.85} strokeWidth={2} strokeLinecap="round" strokeDasharray="0.001 4" strokeDashoffset={-2} />
+          </g>
+        </>
       )}
-    </>
+    </svg>
   );
 }
 
 export default function SlotReels({
-  s, skin, activeLine, fast, shake = 0, large = false, mood = "idle",
+  s, skin, activeLine, shake = 0, large = false, mood = "idle",
 }: {
   s: SlotsGame["s"]; skin: Skin; activeLine: LineWin | null; fast: boolean; shake?: 0 | 1 | 2 | 3; onPull: () => void; canPull: boolean; large?: boolean; mood?: "idle" | "win" | "jackpot";
 }) {
@@ -195,18 +233,16 @@ const shownLine =
     >
 
       <div
-  className="relative rounded-[28px] p-3.5 sm:p-5 lg:rounded-[22px] lg:p-3.5"
-  style={{
-    background:
-      "linear-gradient(135deg, rgba(255,255,255,0.07), transparent 35%, rgba(0,0,0,0.30) 75%), linear-gradient(180deg, #42444c 0%, #25262e 12%, #16171e 48%, #292a33 88%, #454650 100%)",
-    boxShadow:
-      "0 18px 36px rgba(0,0,0,0.55), 0 4px 8px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.24), inset 0 -2px 0 rgba(0,0,0,0.70), inset 1px 0 0 rgba(255,255,255,0.08), inset -1px 0 0 rgba(0,0,0,0.50)",
-  }}
+  className="cabinet-bezel relative rounded-[28px] p-3.5 sm:p-5 lg:rounded-[24px] lg:p-[18px]"
 >
-  {/* Marquee bulbs around the screen: idle chase, faster on wins */}
+  {/* Marquee bulbs around the screen */}
   <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden lg:block">
-    <Bulbs color={skin.lineColor} fast={fast} mood={mood} />
+    <BulbRing color={skin.lineColor} mood={mood} />
   </div>
+  {/* Gold studs at the corners */}
+  {["left-[5px] top-[5px]", "right-[5px] top-[5px]", "left-[5px] bottom-[5px]", "right-[5px] bottom-[5px]"].map((pos) => (
+    <span key={pos} aria-hidden="true" className={`absolute ${pos} hidden h-2.5 w-2.5 rotate-45 border border-[#fff1bf]/70 lg:block`} style={{ background: "linear-gradient(135deg,#fff3c4,#b8873a 60%,#6b4f1d)", boxShadow: "0 0 6px rgba(240,211,139,0.5)" }} />
+  ))}
   <div
     aria-hidden="true"
     className="pointer-events-none absolute inset-[5px] rounded-[23px] lg:hidden"
@@ -220,7 +256,7 @@ const shownLine =
     <span
   key={pos}
   aria-hidden="true"
-  className={`absolute ${pos} flex h-2.5 w-2.5 items-center justify-center rounded-full`}
+  className={`absolute ${pos} flex h-2.5 w-2.5 items-center justify-center rounded-full lg:hidden`}
   style={{
     background:
       "radial-gradient(circle at 35% 30%, #a1a1aa, #52525b 55%, #27272a)",
@@ -231,7 +267,7 @@ const shownLine =
   <span className="h-px w-1.5 -rotate-45 bg-black/65" />
 </span>
   ))}
-        <div className="relative rounded-xl bg-black p-1 shadow-[inset_0_0_20px_#000] sm:p-1.5">
+        <div className="relative rounded-xl bg-black p-1 shadow-[inset_0_0_20px_#000] sm:p-1.5 lg:shadow-[0_0_0_1px_rgba(240,211,139,0.55),0_0_0_3px_#000,0_0_18px_rgba(0,0,0,0.8),inset_0_0_20px_#000]">
           <div className="relative flex overflow-hidden rounded-lg">
             {Array.from({ length: REELS }, (_, k) => (
               <Reel
@@ -248,6 +284,7 @@ const shownLine =
                 held={s.held[k]}
                 full={s.grid[k].every((x) => x === "wild")}
                 expanding={s.expanding.includes(k)}
+                anyWin={s.cells.some((col) => col.some(Boolean))}
               />
             ))}
             {shownLine && (
@@ -284,6 +321,7 @@ const shownLine =
       "inset 0 2px 2px rgba(255,255,255,0.10), inset 0 0 14px rgba(0,0,0,0.48), inset 0 -2px 4px rgba(0,0,0,0.35)",
   }}
 />
+<div aria-hidden="true" className="glass-sweep pointer-events-none absolute inset-0 z-20 overflow-hidden rounded-lg" />
                   </div>
       </div>
 
