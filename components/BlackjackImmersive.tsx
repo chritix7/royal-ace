@@ -35,8 +35,6 @@ import FeltMarkings from "./FeltMarkings";
 import MobileResultModal from "./MobileResultModal";
 import ShoeMeter from "./ShoeMeter";
 import ImmersiveSidePill from "./blackjack-immersive/ImmersiveSidePill";
-import DesktopBetArea from "./DesktopBetArea";
-import { Panel, btnPill, eyebrow } from "./SidebarKit";
 import ResultRail from "./blackjack-immersive/ResultRail";
 import { getShoeStatus } from "./blackjack-immersive/getShoeStatus";
 import { control, gold, neutral, signed } from "./blackjack-immersive/styles";
@@ -331,7 +329,7 @@ const playerCardStyle = (
 
       <main
         style={tableStyle}
-        className={`felt-texture relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${bettingOpen ? "pb-[180px]" : "pb-[80px]"} lg:pb-[150px] ${tableBg(s.settings)}`}
+        className={`felt-texture relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${bettingOpen ? "pb-[180px] lg:pb-[158px]" : "pb-[80px] lg:pb-[138px]"} ${tableBg(s.settings)}`}
       >
         {s.settings.theme === "vegas" && <VegasFeltOverlay />}
         {s.celebrate > 0 && (
@@ -663,53 +661,6 @@ const playerCardStyle = (
 
         {s.shuffling && <ShuffleAnimation />}
                 <ResultRail g={g} onNewRound={deal} />
-
-        {/* Desktop: the classic table's betting area (PP · BET · 21+3 and
-            the Deal / play keys), identical look and behaviour. */}
-        <div className="absolute inset-x-0 bottom-9 z-20 hidden flex-col items-center justify-end gap-2 lg:flex lg:min-h-[120px]">
-          <DesktopBetArea g={g} onOpenSide={setSideBetOpen} />
-        </div>
-        <FeltMarkings
-          bj65={s.settings.bj65}
-          h17={s.settings.h17}
-          className="absolute bottom-2 left-1/2 z-10 hidden -translate-x-1/2 lg:block"
-        />
-
-        {/* Desktop: chip tray — the same controls as the classic sidebar */}
-        {canBet && (
-          <div className="absolute bottom-6 right-6 z-20 hidden w-[260px] lg:block">
-            <Panel>
-              <div className="flex items-baseline justify-between gap-3">
-                <p className={eyebrow}>Your chips</p>
-                <p className="text-base font-black leading-none tabular-nums text-[#e5c779]">
-                  ◈ <Counter value={s.balance} />
-                </p>
-              </div>
-              <div className="mt-1 flex items-baseline justify-between gap-3">
-                <p className={eyebrow}>Bet</p>
-                <p className="text-base font-black leading-none tabular-nums text-[#f5d778]">◈ {money(s.bet)}</p>
-              </div>
-              <div className="my-3 h-px w-full bg-gradient-to-r from-transparent via-[#d7b45b]/15 to-transparent" />
-              <ChipRail
-                visibleCount={3}
-                size="md"
-                onPick={(v) => addChip(v)}
-                disabledFor={(v) => !canBet || (s.bet + v) * spots + sides > s.balance}
-              />
-              <div className="mt-3 grid grid-cols-3 gap-1.5">
-                <button onClick={() => setBetTo(s.lastBet)} disabled={!canBet} className={btnPill}>
-                  Rebet
-                </button>
-                <button onClick={() => setBetTo(s.bet * 2)} disabled={!canBet || s.bet === 0} className={btnPill}>
-                  ×2
-                </button>
-                <button onClick={() => setBetTo(0)} disabled={!canBet || s.bet === 0} className={btnPill}>
-                  Clear
-                </button>
-              </div>
-            </Panel>
-          </div>
-        )}
       </main>
 
       {/* Floating action card — pulled out of the flex column so the
@@ -720,7 +671,7 @@ const playerCardStyle = (
           Width-capped to 640px; on narrower screens it stays full-
           width with inset margins. */}
       <footer
-        className="absolute bottom-3 left-1/2 z-20 w-[min(640px,calc(100%-1rem))] -translate-x-1/2 rounded-[22px] lg:hidden border border-[#d7b45b]/45 bg-gradient-to-b from-[#17130e]/95 via-[#0f0d0a]/95 to-[#080706]/95 px-2.5 pt-2.5 shadow-[0_24px_60px_rgba(0,0,0,0.65),0_0_0_1px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(245,215,120,0.18)] backdrop-blur-md sm:px-4 lg:w-[min(800px,calc(100%-2rem))] lg:px-5 lg:pt-3"
+        className="absolute bottom-3 left-1/2 z-20 w-[min(640px,calc(100%-1rem))] -translate-x-1/2 rounded-[22px] border border-[#d7b45b]/45 bg-gradient-to-b from-[#17130e]/95 via-[#0f0d0a]/95 to-[#080706]/95 px-2.5 pt-2.5 shadow-[0_24px_60px_rgba(0,0,0,0.65),0_0_0_1px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(245,215,120,0.18)] backdrop-blur-md sm:px-4 lg:w-[min(800px,calc(100%-2rem))] lg:px-5 lg:pt-3"
         style={{
           paddingBottom: "max(env(safe-area-inset-bottom), 0.625rem)",
         }}
