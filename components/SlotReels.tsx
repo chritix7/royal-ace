@@ -35,7 +35,7 @@ export function SymbolCell({ sym, skin, win, dim = false }: { sym: Sym; skin: Sk
         <span aria-hidden="true" className="sym-halo" style={{ ["--halo-c" as string]: sym === "wild" ? "rgba(255,79,163,0.55)" : "rgba(34,211,238,0.55)" }} />
       )}
       {/* Soft tile behind each symbol */}
-      <span aria-hidden="true" className="pointer-events-none absolute inset-[4px] hidden rounded-xl bg-[radial-gradient(ellipse_at_50%_35%,rgba(255,255,255,0.07),transparent_70%)] ring-1 ring-inset ring-white/[0.05] lg:block" />
+      <span aria-hidden="true" className="pointer-events-none absolute inset-[3px] rounded-lg bg-[radial-gradient(ellipse_at_50%_35%,rgba(255,255,255,0.07),transparent_70%)] ring-1 ring-inset ring-white/[0.05] lg:inset-[4px] lg:rounded-xl" />
       {win && <span aria-hidden="true" className="win-frame" />}
       {sym === "wild" && <span className={`${tag} ${skin.wildTag}`}>WILD</span>}
       {sym === "scatter" && <span className={`${tag} ${skin.scatterTag}`}>SCATTER</span>}
@@ -290,46 +290,22 @@ const shownLine =
       className={`mx-auto flex w-fit items-stretch gap-1.5 sm:gap-3 ${
         large
           ? "[--cell:4.2rem] sm:[--cell:5rem] lg:[--cell:5.2rem]"
-          : "[--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:clamp(4.25rem,min(calc((100dvh_-_var(--slots-top,10rem)_-_228px)_/_4),calc((100vw_-_8rem_-_430px)_/_6.5)),10rem)]"
-      } [--cell-w:var(--cell)] lg:[--cell-w:calc(var(--cell)*1.3)] ${shake ? `shake-${shake}` : ""}`}
+          : "[--cell:min(calc(var(--cell-w)*1.12),max(46px,calc((100dvh_-_var(--slots-top-m,9.75rem)_-_322px)_/_4)))] lg:[--cell:clamp(4.25rem,min(calc((100dvh_-_var(--slots-top,10rem)_-_228px)_/_4),calc((100vw_-_8rem_-_430px)_/_6.5)),10rem)]"
+      } [--cell-w:calc((100vw_-_100px)_/_5)] sm:[--cell-w:min(6.5rem,calc((100vw_-_160px)_/_5))] lg:[--cell-w:calc(var(--cell)*1.3)] ${shake ? `shake-${shake}` : ""}`}
     >
 
       <div
-  className="cabinet-bezel relative rounded-[28px] p-3.5 sm:p-5 lg:rounded-[24px] lg:p-[18px]"
+  className="cabinet-bezel relative rounded-[20px] p-4 lg:rounded-[24px] lg:p-[18px]"
 >
   {/* Marquee bulbs around the screen */}
-  <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden lg:block">
+  <div aria-hidden="true" className="pointer-events-none absolute inset-0">
     <OrbitRing color={skin.lineColor} mood={mood} />
   </div>
   {/* Gold studs at the corners */}
   {["left-[5px] top-[5px]", "right-[5px] top-[5px]", "left-[5px] bottom-[5px]", "right-[5px] bottom-[5px]"].map((pos) => (
-    <span key={pos} aria-hidden="true" className={`absolute ${pos} hidden h-2.5 w-2.5 rotate-45 border border-[#fff1bf]/70 lg:block`} style={{ background: "linear-gradient(135deg,#fff3c4,#b8873a 60%,#6b4f1d)", boxShadow: "0 0 6px rgba(240,211,139,0.5)" }} />
+    <span key={pos} aria-hidden="true" className={`absolute ${pos} block h-2.5 w-2.5 rotate-45 border border-[#fff1bf]/70`} style={{ background: "linear-gradient(135deg,#fff3c4,#b8873a 60%,#6b4f1d)", boxShadow: "0 0 6px rgba(240,211,139,0.5)" }} />
   ))}
-  <div
-    aria-hidden="true"
-    className="pointer-events-none absolute inset-[5px] rounded-[23px] lg:hidden"
-    style={{
-      border: "1px solid rgba(244,114,182,0.28)",
-      boxShadow:
-        "0 0 5px rgba(236,72,153,0.10), inset 0 0 4px rgba(236,72,153,0.06)",
-    }}
-  />
-  {["left-2 top-2", "right-2 top-2", "left-2 bottom-2", "right-2 bottom-2"].map((pos) => (
-    <span
-  key={pos}
-  aria-hidden="true"
-  className={`absolute ${pos} flex h-2.5 w-2.5 items-center justify-center rounded-full lg:hidden`}
-  style={{
-    background:
-      "radial-gradient(circle at 35% 30%, #a1a1aa, #52525b 55%, #27272a)",
-    boxShadow:
-      "0 1px 2px rgba(0,0,0,0.65), inset 0 1px 1px rgba(255,255,255,0.25)",
-  }}
->
-  <span className="h-px w-1.5 -rotate-45 bg-black/65" />
-</span>
-  ))}
-        <div className="relative rounded-xl bg-black p-1 shadow-[inset_0_0_20px_#000] sm:p-1.5 lg:shadow-[0_0_0_1px_rgba(240,211,139,0.55),0_0_0_3px_#000,0_0_18px_rgba(0,0,0,0.8),inset_0_0_20px_#000]">
+        <div className="relative rounded-xl bg-black p-1 shadow-[0_0_0_1px_rgba(240,211,139,0.55),0_0_0_3px_#000,0_0_18px_rgba(0,0,0,0.8),inset_0_0_20px_#000] lg:p-1.5">
           <div className="relative flex overflow-hidden rounded-lg">
             {Array.from({ length: REELS }, (_, k) => (
               <Reel

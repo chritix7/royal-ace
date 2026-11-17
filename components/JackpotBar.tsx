@@ -44,6 +44,12 @@ function GrowingValue({ value }: { value: number }) {
   );
 }
 
+/** Phone tiles: amounts shrink with their length instead of being cut. */
+function tileSize(v: number) {
+  const n = v.toLocaleString("en-US").length;
+  return n <= 6 ? "text-[11px]" : n <= 8 ? "text-[10px]" : "text-[9px]";
+}
+
 /**
  * The 4 progressive pools, shown as multiples of the bet.
  * `center` (the machine's sign) sits on top on small screens and between
@@ -61,7 +67,7 @@ export default function JackpotBar({
   const tile = (t: JackpotTier) => (
     <div
       key={t}
-      className={`relative min-w-0 rounded-lg border px-1 py-1.5 text-center lg:hidden ${STYLE[t]}`}
+      className={`relative flex min-w-0 items-center justify-center rounded-lg border px-1 py-1 text-center lg:hidden ${STYLE[t]}`}
       style={{
         background: "linear-gradient(180deg, #151822 0%, #090c14 55%, #10121b 100%)",
         boxShadow:
@@ -73,32 +79,28 @@ export default function JackpotBar({
         className="pointer-events-none absolute inset-x-2 top-0 h-px"
         style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.20), transparent)" }}
       />
-      <span
-        aria-hidden="true"
-        className={`absolute left-2 top-1/2 hidden h-9 w-7 -translate-y-1/2 items-center justify-center rounded-[4px] border border-black/30 text-lg leading-none shadow-[0_2px_4px_rgba(0,0,0,0.5)] lg:flex ${
-          SUIT[t].red ? "text-[#c81e3a]" : "text-[#111]"
-        }`}
-        style={{ background: "linear-gradient(180deg,#fffaf0,#e9e2d0)" }}
-      >
-        {SUIT[t].glyph}
-      </span>
-      <p className="text-[8px] font-black tracking-[0.18em] opacity-65 sm:text-[9px] lg:pl-8">{JACKPOTS[t].label}</p>
-      <p className="font-mono text-[11px] font-black tabular-nums sm:text-base lg:pl-8">
+      <span className="min-w-0 text-center">
+      <p className="whitespace-nowrap text-[7px] font-black leading-3 tracking-[0.12em] sm:text-[9px]">
+        <span className={`mr-0.5 text-[9px] ${SUIT[t].red ? "text-[#ff5a6e]" : "text-white"}`}>{SUIT[t].glyph}</span>
+        <span className="opacity-70">{JACKPOTS[t].label}</span>
+      </p>
+      <p className={`truncate font-mono font-black leading-4 tabular-nums sm:text-sm ${tileSize(Math.round(pools[t] * bet))}`}>
         <span className="opacity-60">◈</span> <GrowingValue value={Math.round(pools[t] * bet)} />
       </p>
+      </span>
     </div>
   );
 
   const [a, b, c, d] = JACKPOT_TIERS;
   return (
     <div
-      className="mx-auto mb-3 grid w-full max-w-3xl lg:max-w-5xl grid-cols-4 items-center gap-1.5 sm:mb-4 sm:gap-2 lg:mb-0 lg:flex lg:justify-center"
+      className="mx-auto mb-0 grid w-full max-w-3xl lg:max-w-5xl grid-cols-4 items-center gap-1.5 sm:gap-2 lg:mb-0 lg:flex lg:justify-center"
       role="group"
       aria-label="Progressive jackpots"
     >
       {tile(a)}
       {tile(b)}
-      {center && <div className="order-first col-span-4 lg:order-none lg:col-span-1">{center}</div>}
+      {center && <div className="order-last col-span-4 mt-1.5 lg:order-none lg:col-span-1 lg:mt-0">{center}</div>}
       {tile(c)}
       {tile(d)}
     </div>
