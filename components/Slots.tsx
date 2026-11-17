@@ -13,10 +13,12 @@ import MiamiBackdrop from "./MiamiBackdrop";
 import SlotReels from "./SlotReels";
 import { Counter, machineSmall } from "./ui";
 import { money } from "../lib/game";
+import { wallet } from "../lib/wallet";
 import { SKINS, rankOf, type SkinId } from "../lib/skins";
 import { useSlots } from "../lib/useSlots";
 import {
   BET_LEVELS,
+  FS_AWARD,
   FS_MULT,
   PAYLINES,
 } from "../lib/slots";
@@ -104,12 +106,25 @@ function ConsoleValue({ label, children, align, on }: { label: string; children:
   );
 }
 
-export default function Slots({ active = true }: { active?: boolean }) {
+export default function Slots({
+  active = true,
+  focus = false,
+  onFocusChange,
+}: {
+  active?: boolean;
+  focus?: boolean;
+  onFocusChange?: (v: boolean) => void;
+}) {
   const [skinId, setSkinId] = useState<SkinId>("miami");
   const [fullscreen, setFullscreen] = useState(false);
   const [gambleScreen, setGambleScreen] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [infoTab, setInfoTab] = useState<"pay" | "features">("pay");
+  const openInfo = (t: "pay" | "features" = "pay") => {
+    setInfoTab(t);
+    setInfoOpen(true);
+  };
   useEffect(() => {
     if (!infoOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -118,9 +133,18 @@ export default function Slots({ active = true }: { active?: boolean }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [infoOpen]);
+  // Focus: Esc leaves (unless a panel is open, which closes first).
+  useEffect(() => {
+    if (!focus) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !document.querySelector("[role=dialog][aria-modal=true]")) onFocusChange?.(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [focus, onFocusChange]);
   const skin = SKINS[skinId];
   const {
-  s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, refill,
+  s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, setAutoStops, refill,
   bonusPrice, buyBonus, vaultPick, vaultCollect, gambleChoose, gambleCollect, bonusContinue,
   collectionRewardOpen, claimCollectionReward,
 } = useSlots(active, skin.labels, gambleScreen);
@@ -179,7 +203,9 @@ useEffect(() => {
   const [rankToast, setRankToast] = useState<string | null>(null);
   useEffect(() => {
     if (s.busy && rank.index > prevRank.current) {
-      setRankToast(`Promoted: ${rank.current.name}`);
+      const bonus = "bonus" in rank.current ? (rank.current as { bonus: number }).bonus : 0;
+      if (bonus > 0) wallet.add(bonus);
+      setRankToast(`Promoted: ${rank.current.name}${bonus > 0 ? ` · +◈ ${money(bonus)}` : ""}`);
       const id = window.setTimeout(() => setRankToast(null), 4000);
       prevRank.current = rank.index;
       return () => window.clearTimeout(id);
@@ -207,9 +233,11 @@ useEffect(() => {
     playWithSound(1);
   };
   const crownMeter = (
-        <div
-          className="mt-0.5 flex w-full max-w-[260px] lg:mt-0 lg:w-[190px] lg:shrink-0 items-center gap-2 rounded-full border border-white/12 bg-black/55 px-2.5 py-1 backdrop-blur-sm"
-          title={`Crown collection: fill it to ${collection.target} to pick a reward`}
+        <button
+          type="button"
+          onClick={() => openInfo("features")}
+          className="mt-0.5 flex w-full max-w-[260px] items-center gap-2 rounded-full border border-white/12 bg-black/55 px-2.5 py-1 text-left outline-none backdrop-blur-sm transition hover:border-[#d7b45b]/50 focus-visible:ring-2 focus-visible:ring-[#e5c779] lg:mt-0 lg:w-[190px] lg:shrink-0"
+          title={`Crown collection: every scatter adds a crown (per bet). At ${collection.target}, pick 5 free spins or ${COLLECTION_CHIP_MULT}× your bet. Click for details.`}
         >
           <span aria-hidden="true" className="text-[10px] leading-none">👑</span>
           <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-white/60">Crowns</span>
@@ -222,7 +250,7 @@ useEffect(() => {
           <span className="text-[10px] font-black tabular-nums text-[#e5c779]">
             {collection.crowns}/{collection.target}
           </span>
-        </div>
+        </button>
   );
   // During free spins the button shows the count instead of a bare "…".
   const spinLabel = s.fs ? (
@@ -245,10 +273,23 @@ useEffect(() => {
       className={`grid gap-6 ${
         fullscreen
           ? "fixed inset-0 z-50 overflow-y-auto bg-black"
-          : "lg:h-[calc(100dvh-10rem)] lg:min-h-[600px] lg:items-stretch lg:gap-4 lg:overflow-hidden"
+          : focus
+            ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black [--slots-top:0rem]"
+            : "lg:h-[calc(100dvh-10rem)] lg:min-h-[600px] lg:items-stretch lg:gap-4 lg:overflow-hidden"
       }`}
     >
-      <section className={`overflow-clip border border-white/10 bg-[#101713] shadow-2xl ${fullscreen ? "rounded-none border-0" : "rounded-3xl lg:flex lg:min-h-0 lg:flex-col"}`}>
+      {focus && (
+        <button
+          type="button"
+          onClick={() => onFocusChange?.(false)}
+          aria-label="Exit focus mode"
+          title="Exit focus (Esc)"
+          className="fixed right-4 top-4 z-[61] flex h-9 items-center gap-1.5 rounded-full border border-[#d7b45b]/50 bg-black/70 px-3 text-[11px] font-bold uppercase tracking-wider text-[#e5c779] backdrop-blur hover:border-[#e5c779]"
+        >
+          ✕ <span>Exit</span>
+        </button>
+      )}
+      <section className={`overflow-clip border border-white/10 bg-[#101713] shadow-2xl ${fullscreen || focus ? "rounded-none border-0" : "rounded-3xl"} ${fullscreen ? "" : "lg:flex lg:min-h-0 lg:flex-col"}`}>
         <div
           className={`relative isolate ${skin.stage} px-2 pb-4 pt-4 sm:px-8 sm:pb-6 sm:pt-6 ${
             fullscreen ? "min-h-[100dvh] pb-4" : "lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:px-6 lg:pb-0 lg:pt-5"
@@ -672,11 +713,27 @@ useEffect(() => {
               >
                 {/* Row 1 */}
                 <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)] items-center gap-4 px-6 pt-2">
-                  <ConsoleValue label="CREDIT" align="left">
-                    <span className={flash ? "balance-flash-pink" : ""}>
-                      <Counter value={balance} />
-                    </span>
-                  </ConsoleValue>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <ConsoleValue label="CREDIT" align="left">
+                      <span className={flash ? "balance-flash-pink" : ""}>
+                        <Counter value={balance} />
+                      </span>
+                    </ConsoleValue>
+                    {/* Last spins, newest on the right, as multiples of the bet */}
+                    <div className="hidden min-w-0 items-center gap-1 overflow-hidden xl:flex" aria-label="Last spins">
+                      {s.history.slice(-6).map((r, i) => (
+                        <span
+                          key={`${s.history.length}-${i}`}
+                          title={`${r.toFixed(1)}× the bet`}
+                          className={`flex h-5 min-w-5 shrink-0 items-center justify-center rounded px-1 font-mono text-[9px] font-bold ${
+                            r >= 20 ? "bg-[#e5c779] text-black" : r >= 1 ? "bg-emerald-500/25 text-emerald-200" : r > 0 ? "bg-white/10 text-white/60" : "bg-white/[0.04] text-white/25"
+                          }`}
+                        >
+                          {r === 0 ? "–" : r >= 10 ? `${Math.round(r)}×` : `${r.toFixed(1)}×`}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                   <div className="flex min-w-0 items-center gap-2">
                   {crownMeter}
                   <div
@@ -712,12 +769,13 @@ useEffect(() => {
                 <div className="mx-auto flex max-w-6xl items-center gap-3 px-6 pb-3 pt-2">
                   <div className="flex shrink-0 items-center gap-1.5">
                     <button
-                      onClick={() => setInfoOpen(true)}
+                      onClick={() => openInfo("pay")}
                       aria-label="Paytable and game info"
-                      title="Paytable, theme, rank and session"
-                      className={`${consoleKey} w-11 text-base`}
+                      title="Paytable, features, rank and session"
+                      className={`${consoleKey} min-w-[3.25rem] flex-col px-2 leading-none`}
                     >
-                      ☰
+                      <span className="text-base">☰</span>
+                      <span className="mt-0.5 text-[8px] font-black tracking-[0.18em] opacity-70">INFO</span>
                     </button>
                     <div className="relative">
                       {autoOpen && !auto && (
@@ -742,6 +800,25 @@ useEffect(() => {
                                 </button>
                               ))}
                             </div>
+                            <div className="mt-2 space-y-1 border-t border-white/10 pt-2">
+                              {([
+                                ["autoStopBonus", "Stop on a bonus", s.autoStopBonus],
+                                ["autoStopBig", "Stop on a big win (20×+)", s.autoStopBig],
+                              ] as const).map(([k, label, on]) => (
+                                <button
+                                  key={k}
+                                  role="menuitemcheckbox"
+                                  aria-checked={on}
+                                  onClick={() => setAutoStops({ [k]: !on })}
+                                  className="flex w-full items-center justify-between gap-3 whitespace-nowrap rounded-lg px-2 py-1 text-[11px] text-white/75 hover:bg-white/5"
+                                >
+                                  {label}
+                                  <span className={`relative h-4 w-7 rounded-full transition ${on ? "bg-[#d7b45b]" : "bg-white/15"}`}>
+                                    <span className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-all ${on ? "left-3.5" : "left-0.5"}`} />
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
                           </div>
                         </>
                       )}
@@ -759,7 +836,7 @@ useEffect(() => {
                     <button
                       onClick={toggleTurbo}
                       aria-pressed={s.turbo}
-                      title="Turbo"
+                      title="Turbo (T)"
                       className={`${consoleKey} w-11 text-sm ${s.turbo ? "!border-[#ffd166] !text-[#ffd166]" : ""}`}
                     >
                       ⚡
@@ -805,7 +882,7 @@ useEffect(() => {
                     ) : (
                       <>
                         <button
-                          onClick={buyBonus}
+                          onClick={() => setBuyOpen(true)}
                           disabled={s.busy || !!s.fs || balance < bonusPrice}
                           title="Start the free spins right away"
                           className={`${consoleKey} flex-col px-3 leading-none ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
@@ -993,7 +1070,7 @@ useEffect(() => {
                         </button>
                       </div>
                       <button
-                        onClick={buyBonus}
+                        onClick={() => setBuyOpen(true)}
                         disabled={s.busy || !!s.fs || balance < bonusPrice}
                         title="Start the free spins right away"
                         className={`${machineSmall} h-8 max-w-28 !py-0 px-2 text-[10px] leading-3 sm:max-w-none sm:px-3 sm:text-xs ${s.confirmBuy ? "!border-[#ffd166] !text-[#ffd166] animate-pulse" : ""}`}
@@ -1061,6 +1138,7 @@ useEffect(() => {
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:thin]">
       <SlotsSidePanel
+        initialTab={infoTab}
         fullscreen={false}
         rankToast={null}
         skinId={skinId}
@@ -1089,7 +1167,9 @@ useEffect(() => {
         freeSpinsLabel={skin.labels.freeSpins}
         bonusPrice={bonusPrice}
         balance={balance}
-        onBuy={buyBonus}
+        onBuy={() => buyBonus(true)}
+        spins={FS_AWARD[3]}
+        mult={FS_MULT}
       />
 
       {s.gamble && gambleScreen && (

@@ -1,14 +1,22 @@
 "use client";
 
 import { money } from "../../lib/game";
+import { BONUS_PRICE_MULT } from "../../lib/slots";
 import { machineSmall } from "../ui";
+import CountUp from "../CountUp";
+import CoinRain from "../CoinRain";
 
 type BonusResult = {
   label: string;
   spins: number;
   win: number;
+  bet: number;
+  retriggers: number;
+  best: number;
+  bought: boolean;
 };
 
+/** End-of-bonus summary: total, multiple of the bet and a short recap. */
 export default function BonusResultModal({
   result,
   onContinue,
@@ -16,76 +24,67 @@ export default function BonusResultModal({
   result: BonusResult;
   onContinue: () => void;
 }) {
+  const x = result.bet > 0 ? result.win / result.bet : 0;
+  // A bought bonus is judged against its price, a natural one against the bet.
+  const k = result.bought ? x / BONUS_PRICE_MULT : x / 8;
+  const tier = k >= 6 ? "Legendary" : k >= 2.5 ? "Huge" : k >= 1 ? "Great" : x > 0 ? "Nice" : "Tough";
+  const hot = k >= 1;
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+      {hot && <CoinRain count={x >= 20 ? 60 : 34} />}
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="bonus-result-title"
         aria-describedby="bonus-result-total"
-        className="relative w-[min(88vw,360px)] rounded-2xl border border-white/20 p-6 text-center"
+        className="animate-pop relative w-[min(90vw,400px)] rounded-2xl border border-[#d7b45b]/45 p-6 text-center"
         style={{
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.04), transparent 25%), linear-gradient(135deg, #292b35 0%, #171923 45%, #10121a 100%)",
-          boxShadow:
-            "0 24px 70px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.50)",
+          background: "linear-gradient(180deg, rgba(255,236,170,0.06), transparent 30%), linear-gradient(135deg, #221b14 0%, #120e0b 50%, #0b0908 100%)",
+          boxShadow: "0 24px 70px rgba(0,0,0,0.7), 0 0 60px rgba(240,211,139,0.12), inset 0 1px 0 rgba(255,236,170,0.2)",
         }}
       >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-6 top-0 h-px"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent, rgba(255,255,255,0.30), transparent)",
-          }}
-        />
-
-        <p className="text-[10px] uppercase tracking-[0.25em] text-white/45">
-          Bonus complete
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#d7b45b]/80">
+          {result.bought ? "Bought bonus complete" : "Bonus complete"}
         </p>
-
-        <h3
-          id="bonus-result-title"
-          className="mt-2 text-xl font-black uppercase leading-tight text-[#ead5a3]"
-        >
+        <h3 id="bonus-result-title" className="font-display mt-2 text-2xl font-bold uppercase leading-tight text-[#f0d38b]">
           {result.label}
         </h3>
 
-        <p className="mt-2 text-xs text-white/55">
-          {result.spins} free spins played
-        </p>
-
         <div
           id="bonus-result-total"
-          className="mt-5 rounded-xl border border-white/10 px-4 py-4"
-          style={{
-            background:
-              "linear-gradient(180deg, #10131c 0%, #080b12 100%)",
-            boxShadow:
-              "inset 0 2px 5px rgba(0,0,0,0.65), inset 0 -1px 0 rgba(255,255,255,0.04)",
-          }}
+          className="mt-5 rounded-xl border border-[#d7b45b]/25 px-4 py-4"
+          style={{ background: "linear-gradient(180deg, #0d0b09 0%, #060504 100%)", boxShadow: "inset 0 2px 6px rgba(0,0,0,0.8)" }}
         >
-          <p className="text-[10px] uppercase tracking-[0.2em] text-white/45">
-            Total bonus win
+          <p className="text-[10px] uppercase tracking-[0.25em] text-white/45">Total bonus win</p>
+          <p className="mt-2 break-words font-mono text-4xl font-black tabular-nums text-[#fff1bf] [text-shadow:0_0_18px_rgba(240,211,139,0.45)]">
+            <span className="text-2xl text-[#bfa76e]">◈</span> <CountUp value={result.win} format={money} duration={1400} />
           </p>
-
-          <p className="mt-2 break-words font-mono text-3xl font-black tabular-nums text-[#f0dfb7]">
-            <span className="text-[#bfa76e]">◈</span>{" "}
-            {money(result.win)}
+          <p className={`mt-2 text-sm font-black uppercase tracking-[0.2em] ${hot ? "text-[#ffd166]" : "text-white/55"}`}>
+            {tier} · {x >= 10 ? Math.round(x) : x.toFixed(1)}× the bet
           </p>
         </div>
+
+        <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
+          {[
+            ["Spins", String(result.spins)],
+            ["Retriggers", String(result.retriggers)],
+            ["Best spin", `◈ ${money(result.best)}`],
+          ].map(([k, v]) => (
+            <div key={k} className="rounded-lg border border-white/[0.06] bg-black/30 px-2 py-2">
+              <dt className="text-[9px] uppercase tracking-[0.15em] text-white/40">{k}</dt>
+              <dd className="mt-0.5 font-mono text-sm font-bold text-white">{v}</dd>
+            </div>
+          ))}
+        </dl>
 
         <button
           type="button"
           autoFocus
           onClick={onContinue}
-          className={`${machineSmall} mt-5 w-full py-3 !border-[#d7b45b]/70 !text-[#f0dfb7]`}
-          style={{
-            background:
-              "linear-gradient(180deg, #49402d 0%, #302a20 50%, #211e19 100%)",
-          }}
+          className={`${machineSmall} mt-5 w-full py-3 text-sm font-black tracking-widest !border-[#f0d38b] !text-[#1b1305]`}
+          style={{ background: "linear-gradient(180deg, #fff1bf 0%, #e9c56e 45%, #b8873a 100%)" }}
         >
-          Continue
+          COLLECT
         </button>
       </div>
     </div>

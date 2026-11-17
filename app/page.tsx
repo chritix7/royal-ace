@@ -92,9 +92,9 @@ export default function Home() {
   // from <Blackjack> so the toggle button can live in the top toolbar
   // on the same line as the game tabs and the audio controls.
   const [focusMode, setFocusMode] = useState(false);
-  // Clear focus whenever the user leaves the blackjack tab.
+  // Clear focus whenever the user switches game.
   useEffect(() => {
-    if (tab !== "blackjack") setFocusMode(false);
+    setFocusMode(false);
   }, [tab]);
 
   // F-key toggle for Focus mode — the blackjack hook broadcasts a
@@ -102,7 +102,7 @@ export default function Home() {
   // state lives on this page.
   useEffect(() => {
     const onToggle = () => {
-      if (tab === "blackjack") setFocusMode((v) => !v);
+      if (tab === "blackjack" || tab === "slots") setFocusMode((v) => !v);
     };
     window.addEventListener("royal-ace:toggle-focus", onToggle as EventListener);
     return () =>
@@ -263,7 +263,7 @@ export default function Home() {
   <span
     role="status"
     className={`min-w-0 flex-1 truncate text-[10px] text-white/40 sm:text-xs ${
-      locked ? "visible" : "invisible"
+      locked && tab === "blackjack" ? "visible" : "invisible"
     }`}
   >
     Round in progress…
@@ -275,13 +275,13 @@ export default function Home() {
     {/* Focus (immersive) toggle — only meaningful on the blackjack tab.
         Lives in the top toolbar so it shares a row with the game tabs
         and the audio controls. */}
-    {tab === "blackjack" && (
+    {(tab === "blackjack" || tab === "slots") && (
       <button
         type="button"
         onClick={() => setFocusMode((v) => !v)}
         aria-pressed={focusMode}
         aria-label={focusMode ? "Exit focus mode" : "Enter focus mode"}
-        className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] outline-none transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 focus-visible:ring-2 focus-visible:ring-[#e5c779] active:translate-y-px sm:px-3"
+        className={`${tab === "slots" ? "hidden lg:inline-flex" : "inline-flex"} items-center justify-center gap-1.5 rounded-full border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] outline-none transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 focus-visible:ring-2 focus-visible:ring-[#e5c779] active:translate-y-px sm:px-3`}
       >
         <span aria-hidden="true">⛶</span>
         <span className="hidden sm:inline">Focus</span>
@@ -295,14 +295,18 @@ export default function Home() {
           <ErrorBoundary label="Blackjack">
             <Blackjack
               active={tab === "blackjack"}
-              focusMode={focusMode}
+              focusMode={tab === "blackjack" && focusMode}
               onFocusChange={setFocusMode}
             />
           </ErrorBoundary>
         </div>
         <div className={tab === "slots" ? "" : "hidden"}>
           <ErrorBoundary label="Slots">
-            <Slots active={tab === "slots"} />
+            <Slots
+              active={tab === "slots"}
+              focus={tab === "slots" && focusMode}
+              onFocusChange={setFocusMode}
+            />
           </ErrorBoundary>
         </div>
       </section>

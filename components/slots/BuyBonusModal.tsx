@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { money } from "../../lib/game";
 import { machineSmall } from "../ui";
 
@@ -10,7 +11,11 @@ export default function BuyBonusModal({
   balance,
   onClose,
   onBuy,
+  spins,
+  mult,
 }: {
+  spins: number;
+  mult: number;
   open: boolean;
   freeSpinsLabel: string;
   bonusPrice: number;
@@ -18,7 +23,17 @@ export default function BuyBonusModal({
   onClose: () => void;
   onBuy: () => void;
 }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
   if (!open) return null;
+  const short = balance < bonusPrice;
 
   return (
     <div
@@ -78,6 +93,13 @@ export default function BuyBonusModal({
           </p>
         </div>
 
+        <ul className="mt-4 space-y-1.5 text-left text-[12.5px] leading-5 text-white/70">
+          <li className="flex gap-2"><span className="text-[#e5c779]">✦</span> {spins} free spins start right away</li>
+          <li className="flex gap-2"><span className="text-[#e5c779]">✦</span> Every win is multiplied ×{mult}, retriggers included</li>
+          <li className="flex gap-2"><span className="text-[#e5c779]">✦</span> Average return about 95% of the price: results swing a lot</li>
+        </ul>
+        {short && <p className="mt-3 text-[12px] text-red-300">Not enough chips for this bonus at the current bet.</p>}
+
         <div className="mt-5 flex gap-3">
           <button
             type="button"
@@ -90,9 +112,8 @@ export default function BuyBonusModal({
           <button
             type="button"
             onClick={() => {
-              onBuy();
-              onBuy();
               onClose();
+              onBuy();
             }}
             disabled={balance < bonusPrice}
             className={`${machineSmall} flex-1 py-3 !border-[#d7b45b]/70 !text-[#f0dfb7]`}

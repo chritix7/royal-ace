@@ -128,7 +128,9 @@ export function Reel({
   }}
 />
       {anticipate && spinning && (
-        <div className="pointer-events-none absolute inset-0 animate-pulse ring-4 ring-inset ring-[#22d3ee]/80" />
+        <div className="pointer-events-none absolute inset-0 z-[8] animate-pulse ring-4 ring-inset ring-[#ffd166] shadow-[inset_0_0_34px_rgba(255,209,102,0.55)]">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#ffd166]/0 via-[#ffd166]/15 to-[#ffd166]/0" />
+        </div>
       )}
     </div>
   );
@@ -187,7 +189,7 @@ const shownLine =
       className={`mx-auto flex w-fit items-stretch gap-1.5 sm:gap-3 ${
         large
           ? "[--cell:4.2rem] sm:[--cell:5rem] lg:[--cell:5.2rem]"
-          : "[--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:clamp(4.25rem,min(calc((100dvh_-_10rem_-_252px)_/_4),calc((100vw_-_8rem)_/_7)),10rem)]"
+          : "[--cell:3.3rem] sm:[--cell:4.6rem] lg:[--cell:clamp(4.25rem,min(calc((100dvh_-_var(--slots-top,10rem)_-_252px)_/_4),calc((100vw_-_8rem)_/_7)),10rem)]"
       } [--cell-w:var(--cell)] lg:[--cell-w:calc(var(--cell)*1.4)] ${shake ? `shake-${shake}` : ""}`}
     >
 

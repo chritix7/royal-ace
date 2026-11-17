@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import RollingNumber from "./RollingNumber";
 import {
   JACKPOTS,
@@ -23,6 +23,26 @@ const STYLE: Record<JackpotTier, string> = {
   major: "border-amber-300/40 text-amber-200",
   kingpin: "border-pink-400/45 text-pink-200",
 };
+
+/** Rolling value that glows briefly each time the pot grows. */
+function GrowingValue({ value }: { value: number }) {
+  const prev = useRef(value);
+  const [glow, setGlow] = useState(false);
+  useEffect(() => {
+    if (value > prev.current) {
+      setGlow(true);
+      const id = window.setTimeout(() => setGlow(false), 650);
+      prev.current = value;
+      return () => window.clearTimeout(id);
+    }
+    prev.current = value;
+  }, [value]);
+  return (
+    <span className={`inline-block transition-[filter,transform] duration-300 ${glow ? "scale-105 brightness-150 drop-shadow-[0_0_8px_currentColor]" : ""}`}>
+      <RollingNumber value={value} ms={700} />
+    </span>
+  );
+}
 
 /**
  * The 4 progressive pools, shown as multiples of the bet.
@@ -64,7 +84,7 @@ export default function JackpotBar({
       </span>
       <p className="text-[8px] font-black tracking-[0.18em] opacity-65 sm:text-[9px] lg:pl-8">{JACKPOTS[t].label}</p>
       <p className="font-mono text-[11px] font-black tabular-nums sm:text-base lg:pl-8">
-        <span className="opacity-60">◈</span> <RollingNumber value={Math.round(pools[t] * bet)} ms={700} />
+        <span className="opacity-60">◈</span> <GrowingValue value={Math.round(pools[t] * bet)} />
       </p>
     </div>
   );

@@ -67,7 +67,9 @@ type S = {
   lastWin: number;
   autoLeft: number;
   fs: FreeSpins | null;
-  bonusResult: { win: number; spins: number; label: string } | null;
+  bonusResult: { win: number; spins: number; label: string; bet: number; retriggers: number; best: number; bought: boolean } | null;
+  autoStopBonus: boolean;
+  autoStopBig: boolean;
   banner: string | null;
   celebrate: number;
   stats: SlotStats;
@@ -110,6 +112,19 @@ const INITIAL: S = {
   stats: EMPTY_STATS,
   history: [],
   collectionRewardOpen: false,
+  autoStopBonus: true,
+  autoStopBig: true,
+};
+
+/** Croupier-style lines so the strip doesn't repeat the same sentence. */
+const LINES = {
+  idle: ["No win this time. Spin again!", "The reels keep their secrets… for now.", "Close one. The next spin could be it.", "Nothing this round. Fortune favours the bold.", "Quiet reels. The kingpin is watching."],
+  luck: ["Good luck…", "Here we go…", "Reels are rolling…", "Fortune, show your hand…"],
+  win: ["Winner! ◈ {n}", "Nice hit: ◈ {n}", "The house pays ◈ {n}", "Cash on the reels: ◈ {n}"],
+};
+const line = (k: keyof typeof LINES, n?: string) => {
+  const l = LINES[k];
+  return l[Math.floor(Math.random() * l.length)].replace("{n}", n ?? "");
 };
 
 const DEFAULT_LABELS: SlotLabels = { big: "BIG WIN", mega: "MEGA WIN", epic: "EPIC WIN", freeSpins: "FREE SPINS" };
@@ -168,6 +183,8 @@ function bonusContinue() {
           stats: { ...EMPTY_STATS, ...d.stats },
           betIdx: Math.min(Math.max(0, d.betIdx ?? 1), BET_LEVELS.length - 1),
           turbo: !!d.turbo,
+          autoStopBonus: d.autoStopBonus ?? true,
+          autoStopBig: d.autoStopBig ?? true,
           pools: sanitizePools(d.pools),
         });
       }
@@ -178,9 +195,9 @@ function bonusContinue() {
   useEffect(() => {
     if (!hydrated) return;
     try {
-      localStorage.setItem(KEY, JSON.stringify({ stats: s.stats, betIdx: s.betIdx, turbo: s.turbo, pools: s.pools }));
+      localStorage.setItem(KEY, JSON.stringify({ stats: s.stats, betIdx: s.betIdx, turbo: s.turbo, pools: s.pools, autoStopBonus: s.autoStopBonus, autoStopBig: s.autoStopBig }));
     } catch {}
-  }, [hydrated, s.stats, s.betIdx, s.turbo, s.pools]);
+  }, [hydrated, s.stats, s.betIdx, s.turbo, s.pools, s.autoStopBonus, s.autoStopBig]);
 
   const bet = BET_LEVELS[s.betIdx];
 
@@ -219,7 +236,7 @@ function bonusContinue() {
         lineWins: [],
         winBanner: null, 
         ...(respin ? {} : { lastWin: 0 }),
-        message: respin ? `Re-spin ${i}!` : free ? "Free spin…" : "Good luck…",
+        message: respin ? `Re-spin ${i}!` : free ? "Free spin…" : line("luck"),
       });
       sfx.spin();
 
@@ -285,7 +302,7 @@ function bonusContinue() {
     return { total: spinTotal, scatters: steps[0].scatters, freeSpins: steps[0].freeSpins };
   }
 
-  async function runFreeSpins(initial: number) {
+  async function runFreeSpins(initial: number, bought = false) {
     sfx.freeSpins();
     set({
       banner: `${initial} ${labelsRef.current.freeSpins}!`,
@@ -299,15 +316,19 @@ function bonusContinue() {
     let granted = initial;
     let used = 0;
     let fsWin = 0;
+    let retriggers = 0;
+    let best = 0;
     while (left > 0) {
       left--;
       used++;
       set({ fs: { left, played: used, total: granted, win: fsWin } });
       const r = await runSpin(true, FS_MULT);
       fsWin += r.total;
+      best = Math.max(best, r.total);
 
       const add = retriggerSpins(r.scatters, used, left);
       if (add > 0) {
+        retriggers++;
         left += add;
         granted += add;
         sfx.freeSpins();
@@ -326,6 +347,10 @@ function bonusContinue() {
       win: fsWin,
       spins: used,
       label: labelsRef.current.freeSpins,
+      bet: BET_LEVELS[ref.current.betIdx],
+      retriggers,
+      best,
+      bought,
     },
     message: `Bonus complete: ◈ ${fmt(fsWin)}`,
   });
@@ -430,7 +455,7 @@ if (collectionStore.isReady(b)) {
       },
       history: [...ref.current.history, ratio].slice(-14),
       lastWin: total,
-      message: total > 0 ? `You won ◈ ${fmt(total)}` : "No win this time. Spin again!",
+      message: total > 0 ? line("win", fmt(total)) : line("idle"),
     });
 
     sessionStore.recordSlots(b, total - b);
@@ -502,7 +527,8 @@ if (collectionStore.isReady(b)) {
         if (count === 1 && canGamble(r.total, b0, r.triggered || r.vault)) {
           set({ gamble: { amount: r.total, rounds: 0, phase: "choose", card: null, won: null } });
         }
-        return { stop: r.triggered || r.vault || r.ratio >= 20 };
+        const c = ref.current;
+        return { stop: (c.autoStopBonus && (r.triggered || r.vault)) || (c.autoStopBig && r.ratio >= 20) };
       },
       {
         shouldStop: () => stopRef.current,
@@ -605,7 +631,7 @@ useEffect(() => {
     wallet.setLocked(true);
     wallet.add(-price);
     sfx.lever();
-    const win = await runFreeSpins(FS_AWARD[3]);
+    const win = await runFreeSpins(FS_AWARD[3], true);
     sessionStore.recordSlots(price, win - price);
     track("bonus");
     const r = win / price;
@@ -636,9 +662,13 @@ useEffect(() => {
     wallet.setLocked(false);
     set({ busy: false });
   }
-  function buyBonus() {
+  function buyBonus(direct = false) {
     const c = ref.current;
     if (c.busy || c.fs || wallet.getBalance() < bonusPrice) return;
+    if (direct) {
+      void runBuy(bonusPrice);
+      return;
+    }
     if (!c.confirmBuy) {
       set({ confirmBuy: true });
       window.setTimeout(() => set({ confirmBuy: false }), 4000);
@@ -669,6 +699,7 @@ useEffect(() => {
     setBetIdx(idx);
   }
   const toggleTurbo = () => set({ turbo: !ref.current.turbo });
+  const setAutoStops = (patch: { autoStopBonus?: boolean; autoStopBig?: boolean }) => set(patch);
   function refill() {
     if (ref.current.busy || wallet.getBalance() >= BET_LEVELS[0]) return;
     wallet.add(1000);
@@ -676,8 +707,8 @@ useEffect(() => {
     set({ message: "Refill: ◈ 1,000 added. Good luck!" });
   }
 
-  const actions = useRef({ play, stopAuto, changeBet });
-  actions.current = { play, stopAuto, changeBet };
+  const actions = useRef({ play, stopAuto, changeBet, toggleTurbo });
+  actions.current = { play, stopAuto, changeBet, toggleTurbo };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!active || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -697,6 +728,10 @@ useEffect(() => {
         if (ref.current.busy) {
           if (ref.current.autoLeft > 0) a.stopAuto();
         } else a.play(1);
+      } else if (e.key === "f" || e.key === "F") {
+        window.dispatchEvent(new CustomEvent("royal-ace:toggle-focus"));
+      } else if (e.key === "t" || e.key === "T") {
+        a.toggleTurbo();
       } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
         e.preventDefault();
         a.changeBet(1);
@@ -731,7 +766,7 @@ useEffect(() => {
 }
 
   return {
-  s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, changeBet, maxBet, toggleTurbo, refill,
+  s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, changeBet, maxBet, toggleTurbo, setAutoStops, refill,
   bonusPrice, buyBonus, vaultPick, vaultCollect, gambleChoose, gambleCollect,
   bonusContinue,
   collectionRewardOpen,

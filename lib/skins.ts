@@ -95,12 +95,13 @@ export const SKINS: Record<SkinId, Skin> = {
 };
 
 /** Rangs de l'empire : ils montent avec le total gagné à la machine (sauvegardé). */
+/** Ranks of the Miami machine. Reaching one pays a one-time promotion bonus. */
 export const RANKS = [
-  { min: 0, name: "Dockhand" },
-  { min: 3_000, name: "Street hustler" },
-  { min: 15_000, name: "Lieutenant" },
-  { min: 60_000, name: "Boss" },
-  { min: 250_000, name: "Kingpin" },
+  { min: 0, name: "Dockhand", bonus: 0 },
+  { min: 3_000, name: "Street hustler", bonus: 1_000 },
+  { min: 15_000, name: "Lieutenant", bonus: 3_000 },
+  { min: 60_000, name: "Boss", bonus: 8_000 },
+  { min: 250_000, name: "Kingpin", bonus: 25_000 },
 ];
 
 export function rankOf(totalWon: number) {
