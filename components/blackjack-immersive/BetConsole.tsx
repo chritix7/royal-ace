@@ -1,5 +1,6 @@
 "use client";
 
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { MIN_BET, REFILL, money } from "../../lib/game";
 import type { Game } from "../../lib/useBlackjack";
 import { ChipStack } from "../ui";
@@ -8,6 +9,47 @@ import SideWinBadge from "../SideWinBadge";
 import FeltMarkings from "../FeltMarkings";
 import ImmersiveSidePill from "./ImmersiveSidePill";
 import { control, gold, neutral } from "./styles";
+
+/**
+ * Animates its height to fit the content, so the console glides between
+ * the betting, playing and result layouts instead of jumping.
+ */
+function SmoothHeight({ children }: { children: ReactNode }) {
+  const inner = useRef<HTMLDivElement>(null);
+  const outer = useRef<HTMLDivElement>(null);
+  const [h, setH] = useState<number | null>(null);
+  const ready = useRef(false);
+  useLayoutEffect(() => {
+    const el = inner.current;
+    if (!el) return;
+    const read = () => {
+      // Clip only while the height glides, so badges and focus rings
+      // that overflow the console stay visible the rest of the time.
+      if (ready.current) outer.current?.classList.add("is-gliding");
+      setH(el.offsetHeight);
+    };
+    read();
+    const ro = new ResizeObserver(read);
+    ro.observe(el);
+    const id = window.setTimeout(() => (ready.current = true), 50);
+    return () => {
+      ro.disconnect();
+      window.clearTimeout(id);
+    };
+  }, []);
+  return (
+    <div
+      ref={outer}
+      className="console-height"
+      style={{ height: h ?? undefined, transitionDuration: ready.current ? undefined : "0ms" }}
+      onTransitionEnd={(e) => {
+        if (e.target === e.currentTarget) e.currentTarget.classList.remove("is-gliding");
+      }}
+    >
+      <div ref={inner}>{children}</div>
+    </div>
+  );
+}
 
 /** Where the console sits in each view (Focus floats it over the felt). */
 export const CONSOLE_FOCUS =
@@ -56,6 +98,8 @@ export default function BetConsole({
     refill,
   } = g;
   const heat = g.heat;
+  // Which face the console shows; changing it plays the swap animation.
+  const mode = s.phase === "insurance" ? "insurance" : bettingOpen ? "betting" : canBet ? "deal" : "play";
 
   // Slim ghost key for the quick bets (Rebet / ×2 / Clear / Done).
   const quickBet =
@@ -198,6 +242,8 @@ export default function BetConsole({
           className="pointer-events-none absolute inset-[5px] rounded-[17px] border border-[#d7b45b]/[0.12]"
         />
 
+        <SmoothHeight>
+          <div key={mode} className="console-swap">
         {bettingOpen ? (
           <div className="relative mx-auto mb-2 max-w-xl max-sm:grid max-sm:grid-cols-5 max-sm:gap-x-1 max-sm:gap-y-2 lg:mb-0 lg:grid lg:max-w-none lg:grid-cols-[auto_minmax(0,1fr)_auto_auto] lg:items-stretch lg:gap-5">
             {/* Bet puck — desktop only: the chip pile grows in a gold
@@ -408,6 +454,8 @@ export default function BetConsole({
             </button>
           </div>
         )}
+          </div>
+        </SmoothHeight>
       </footer>
     </>
   );

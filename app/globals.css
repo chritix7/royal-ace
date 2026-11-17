@@ -1279,3 +1279,17 @@ body {
 }
 .reel-speed.is-on { opacity: 1; transition-duration: 0.08s; }
 .reel-layer { transform: translateZ(0); contain: layout paint; }
+
+/* ===== Blackjack · console state swap ===== */
+.console-height { transition: height 0.38s cubic-bezier(0.22, 1, 0.36, 1); }
+.console-height.is-gliding { overflow: hidden; }
+.console-swap { animation: console-swap 0.42s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes console-swap {
+  0% { opacity: 0; filter: blur(8px); transform: translateY(10px) scale(0.985); }
+  60% { opacity: 1; filter: blur(1px); }
+  100% { opacity: 1; filter: none; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .console-height { transition: none; }
+  .console-swap { animation: none; }
+}
