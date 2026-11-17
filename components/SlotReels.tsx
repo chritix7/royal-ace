@@ -62,6 +62,7 @@ function FillerCell({ sym, skin }: { sym: Sym; skin: Skin }) {
 
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 const MS_PER_CELL = 45;
+const MS_PER_CELL_PHONE = 80;
 const LAND_CELLS = 8;
 
 export function Reel({
@@ -82,7 +83,10 @@ export function Reel({
     if (spinId === 0 || held) return;
     const total = Math.max(600, stopAt);
     const land = Math.min(landMs, total * 0.6);
-    const filler = Math.max(LAND_CELLS, Math.round((total - land) / MS_PER_CELL) + LAND_CELLS - ROWS);
+    // Phones: fewer travelling symbols (each one is a node to build and
+    // move); the strip still looks just as fast.
+    const msPerCell = typeof window !== "undefined" && window.innerWidth < 1024 ? MS_PER_CELL_PHONE : MS_PER_CELL;
+    const filler = Math.max(LAND_CELLS, Math.round((total - land) / msPerCell) + LAND_CELLS - ROWS);
     job.current = { total, land };
     setStrip([...target, ...Array.from({ length: filler }, randomSym), ...prev]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -195,7 +199,9 @@ function OrbitRing({ color, mood }: { color: string; mood: "idle" | "win" | "jac
       ? `M ${cx} ${y} H ${x + W - r} A ${r} ${r} 0 0 1 ${x + W} ${y + r} V ${y + H - r} A ${r} ${r} 0 0 1 ${x + W - r} ${y + H} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + H - r} V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`
       : "";
   const per = 2 * (W + H - 4 * r) + 2 * Math.PI * r;
-  const n = W > 0 ? Math.max(12, Math.round(per / 40)) : 0;
+  // Phones: half as many jewels (offset-path motion runs on the main thread).
+  const gap = typeof window !== "undefined" && window.innerWidth < 1024 ? 72 : 40;
+  const n = W > 0 ? Math.max(10, Math.round(per / gap)) : 0;
   const LAP = 26000; // ms per lap at idle speed
   const rate = mood === "jackpot" ? 6 : mood === "win" ? 2.6 : 1;
 

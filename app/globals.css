@@ -1369,3 +1369,8 @@ body {
 
 /* Phones: no double-tap zoom delay on game keys */
 .spin-dome, .cab-key, .bet-key, .lux-btn, .jewel { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+/* Phones: a slightly longer Focus entrance so it reads after the relayout */
+@media (max-width: 1023px) {
+  .slots-focus-in > * { animation-duration: 0.5s; }
+}

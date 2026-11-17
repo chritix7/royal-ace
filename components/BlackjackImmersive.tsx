@@ -163,7 +163,9 @@ export default function BlackjackImmersive({
       }
 
       if (previousFocus instanceof HTMLElement) {
-        previousFocus.focus();
+        // preventScroll: on phones focusing the toolbar button scrolled the
+        // page up with a jump when Focus closed.
+        previousFocus.focus({ preventScroll: true });
       }
     };
   }, []);

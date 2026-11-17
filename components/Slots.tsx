@@ -291,7 +291,14 @@ export default function Slots({
     (document.activeElement as HTMLElement | null)?.blur?.();
 
     const wasFullscreen = Boolean(document.fullscreenElement);
-    const cancelFs = requestFullscreenSettled(() => setFocusAnim("slots-focus-in"));
+    // Phones relayout the whole machine when Focus opens (reels resize, the
+    // orbit is rebuilt): start the entrance once that work is done, or its
+    // first frames are dropped and it looks instant.
+    let entranceTimer = 0;
+    const narrow = typeof window.matchMedia === "function" && window.matchMedia("(max-width: 1023px)").matches;
+    const cancelFs = requestFullscreenSettled(() => {
+      entranceTimer = window.setTimeout(() => setFocusAnim("slots-focus-in"), narrow ? 150 : 0);
+    });
     // Esc in fullscreen only exits fullscreen (no keydown): close Focus with it.
     let entered = false;
     focusLeaving.current = false;
@@ -313,6 +320,7 @@ export default function Slots({
     window.addEventListener("keydown", onKey);
     return () => {
       cancelFs();
+      window.clearTimeout(entranceTimer);
       document.removeEventListener("fullscreenchange", onFsChange);
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = previousOverflow;
