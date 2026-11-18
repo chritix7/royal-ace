@@ -5,7 +5,8 @@ import { ChipFace } from "./ChipButton";
 import { Counter } from "./ui";
 import RouletteTable from "./roulette/RouletteTable";
 import RouletteRacetrack from "./roulette/RouletteRacetrack";
-import { AutoMenu, BigWin, Favourites, RoundHistory, StylePanel } from "./roulette/RoulettePanels";
+import { AutoMenu, BigWin, Favourites, RoundDetail, RoundHistory, StylePanel, THEMES } from "./roulette/RoulettePanels";
+import type { RoundRecord } from "../lib/useRoulette";
 import AchievementToast from "./AchievementToast";
 import RouletteWheel from "./roulette/RouletteWheel";
 import { money } from "../lib/game";
@@ -26,7 +27,7 @@ import {
   TABLE_MIN,
   type AnnounceKey,
 } from "../lib/roulette";
-import { ROULETTE_CHIPS, useRoulette, type RouletteGame } from "../lib/useRoulette";
+import { ROULETTE_BADGES, ROULETTE_CHIPS, useRoulette, type RouletteGame } from "../lib/useRoulette";
 import { exitFullscreenSettled, isNarrowScreen, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
 import { useSession } from "../lib/sessionStore";
 
@@ -192,6 +193,203 @@ function Trends({ g, compact = false }: { g: RouletteGame; compact?: boolean }) 
         ))}
       </div>
       )}
+    </div>
+  );
+}
+
+/* ---------- Compact tab panels (no scrolling) ---------- */
+type PanelTab = "track" | "history" | "favs" | "stats" | "style";
+
+function HistoryCompact({ g }: { g: RouletteGame }) {
+  const [open, setOpen] = useState<RoundRecord | null>(null);
+  const list = [...g.rounds].reverse().slice(0, 8);
+  if (list.length === 0) return <p className="flex h-full items-center justify-center text-[11px] text-white/35">Your rounds will appear here.</p>;
+  return (
+    <>
+      <div className="grid h-full grid-cols-4 grid-rows-2 gap-1.5">
+        {list.map((r) => {
+          const net = r.returned - r.staked;
+          return (
+            <button key={r.id} type="button" onClick={() => setOpen(r)} className="rl-tile" title={`${Object.keys(r.bets).length} bets · ◈ ${money(r.staked)}`}>
+              <span className={`${pill(r.n)} h-6 w-6 text-[10px]`}>{r.n}</span>
+              <span className={`font-mono text-[10px] font-bold leading-none ${net > 0 ? "text-emerald-300" : net < 0 ? "text-red-300/80" : "text-white/45"}`}>
+                {net > 0 ? "+" : net < 0 ? "−" : ""}
+                {Math.abs(net) >= 1000 ? `${Math.round(Math.abs(net) / 100) / 10}K` : Math.abs(net)}
+              </span>
+              {r.lucky?.length ? <span className="rl-tile__bolt">⚡</span> : null}
+            </button>
+          );
+        })}
+        {list.length < 8 &&
+          Array.from({ length: 8 - list.length }, (_, i) => <span key={`e${i}`} className="rl-tile rl-tile--empty" aria-hidden="true" />)}
+      </div>
+      {open && <RoundDetail r={open} onClose={() => setOpen(null)} />}
+    </>
+  );
+}
+
+function FavsCompact({ g, onAll }: { g: RouletteGame; onAll: () => void }) {
+  const favs = g.favourites.slice(0, 4);
+  const canSave = Object.keys(g.phase === "result" ? g.lastBets : g.bets).length > 0;
+  const saveQuick = () => g.saveFavourite(`Layout ${g.favourites.length + 1}`);
+  return (
+    <div className="grid h-full grid-cols-2 grid-rows-2 gap-1.5">
+      {favs.map((f, i) => (
+        <button key={f.name} type="button" onClick={() => g.applyFavourite(i)} disabled={g.phase === "spinning"} className="rl-fav-tile">
+          <span className="rl-fav-star" aria-hidden="true">
+            ◆
+          </span>
+          <span className="min-w-0 flex-1 text-left">
+            <span className="block truncate text-[12px] font-semibold text-white/90">{f.name}</span>
+            <span className="block font-mono text-[10px] text-white/45">
+              {Object.keys(f.bets).length} bet{Object.keys(f.bets).length > 1 ? "s" : ""} · ◈ {money(Object.values(f.bets).reduce((a, b) => a + b, 0))}
+            </span>
+          </span>
+        </button>
+      ))}
+      {favs.length < 4 && (
+        <button type="button" onClick={saveQuick} disabled={!canSave} className="rl-fav-tile rl-fav-tile--add" title={canSave ? "Save the chips on the table" : "Put chips on the table first"}>
+          <span className="text-lg leading-none">+</span>
+          <span className="text-[10.5px] font-semibold tracking-[0.08em]">{canSave ? "Save current layout" : "Chips first, then save"}</span>
+        </button>
+      )}
+      {favs.length < 3 &&
+        Array.from({ length: 3 - favs.length }, (_, i) => (
+          <button key={`m${i}`} type="button" onClick={onAll} className="rl-fav-tile rl-fav-tile--empty">
+            <span className="text-[10px] tracking-[0.12em] text-white/30">EMPTY SLOT</span>
+          </button>
+        ))}
+    </div>
+  );
+}
+
+function StatsCompact({ g }: { g: RouletteGame }) {
+  const t = useTrends(g.history);
+  if (t.total === 0) return <p className="flex h-full items-center justify-center text-center text-[11px] text-white/35">Stats appear after a few spins.</p>;
+  const mini = (label: string, values: number[], names: string[]) => (
+    <div className="min-w-0">
+      <p className="rl-mini-label">{label}</p>
+      <div className="mt-0.5 grid gap-[2px]">
+        {values.map((v, i) => (
+          <div key={i} className="flex items-center gap-1.5">
+            <span className="w-7 shrink-0 text-[9px] text-white/45">{names[i]}</span>
+            <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+              <span className="block h-full rounded-full bg-gradient-to-r from-[#9a7330] to-[#f3d995]" style={{ width: `${Math.min(100, v * 2.2)}%` }} />
+            </span>
+            <span className="w-7 shrink-0 text-right font-mono text-[9px] text-[#f0d99a]">{v}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+  const pills = (label: string, list: [number, number][], tone: string, tip: (n: number, c: number) => string) => (
+    <div className="min-w-0">
+      <p className={`rl-mini-label ${tone}`}>{label}</p>
+      <div className="mt-0.5 flex gap-1">
+        {list.map(([n, c]) => (
+          <span key={n} title={tip(n, c)} className={`${pill(n)} h-5 w-5 text-[9px]`}>
+            {n}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+  return (
+    <div className="grid h-full grid-cols-2 content-between gap-x-3 gap-y-1">
+      <div className="col-span-2">
+        <div className="flex h-1.5 overflow-hidden rounded-full bg-white/5">
+          <span className="bg-gradient-to-b from-[#c0182a] to-[#7d0c14]" style={{ width: `${t.red}%` }} />
+          <span className="bg-[#0f7a4c]" style={{ width: `${t.zero}%` }} />
+          <span className="bg-gradient-to-b from-[#3a3b40] to-[#121316]" style={{ width: `${t.black}%` }} />
+        </div>
+        <div className="mt-1 flex justify-between text-[9px] font-bold tracking-wider [@media(max-height:760px)]:hidden">
+          <span className="text-[#ff7a85]">RED {t.red}%</span>
+          <span className="text-white/45">
+            {t.run}× {t.runColor} in a row
+          </span>
+          <span className="text-white/70">BLACK {t.black}%</span>
+        </div>
+      </div>
+      {pills("Hot", t.hot, "!text-[#f5b04a]", (n, c) => `${n}: ${c}× in the last ${t.total}`)}
+      {pills("Cold", t.cold, "!text-sky-300", (n, c) => `${n}: ${c}× in the last ${t.total}`)}
+      {mini("Dozens", t.dozens, ["1st", "2nd", "3rd"])}
+      {mini("Columns", t.columns, ["C1", "C2", "C3"])}
+    </div>
+  );
+}
+
+function StyleCompact({ g }: { g: RouletteGame }) {
+  return (
+    <div className="flex h-full flex-col justify-between gap-2">
+      <div className="grid grid-cols-4 gap-1.5">
+        {THEMES.map((t) => (
+          <button key={t.id} type="button" onClick={() => g.setTheme(t.id)} aria-pressed={g.theme === t.id} title={t.note} className={`rl-theme-dot ${g.theme === t.id ? "is-on" : ""}`}>
+            <span
+              className="rl-theme-dot__swatch"
+              style={{ background: `linear-gradient(135deg, ${t.swatch[0]} 0 34%, ${t.swatch[1]} 34% 70%, ${t.swatch[2]} 70%)` }}
+            />
+            <span className="block w-full truncate text-center text-[9.5px] font-semibold tracking-[0.06em] text-white/70">{t.name}</span>
+          </button>
+        ))}
+      </div>
+      <div>
+        <p className="rl-mini-label">
+          Badges · {g.badges.length}/{ROULETTE_BADGES.length}
+        </p>
+        <div className="mt-1 flex justify-between gap-1">
+          {ROULETTE_BADGES.map((b) => (
+            <span key={b.id} title={`${b.title} — ${b.desc}`} className={`rl-medal h-6 w-6 ${g.badges.includes(b.id) ? "is-got" : ""}`} aria-label={`${b.title}${g.badges.includes(b.id) ? " (earned)" : ""}`}>
+              ★
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Side drawer with the full panels. */
+function PanelsDrawer({ g, initial, onClose }: { g: RouletteGame; initial: PanelTab; onClose: () => void }) {
+  const [tab, setTab] = useState<PanelTab>(initial === "track" ? "history" : initial);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  const tabs: [PanelTab, string][] = [
+    ["history", "History"],
+    ["favs", "Favourites"],
+    ["stats", "Stats"],
+    ["style", "Style"],
+  ];
+  return (
+    <div className="backdrop-in fixed inset-0 z-[90]">
+      <button aria-label="Close" className="absolute inset-0 cursor-default bg-black/65" onClick={onClose} />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Roulette panels"
+        className="[animation:drawerIn_.4s_cubic-bezier(0.22,1,0.36,1)_both] absolute right-0 top-0 flex h-full w-full flex-col border-l border-white/10 bg-[#0c0c0e] shadow-[-20px_0_60px_rgba(0,0,0,0.6)] sm:w-[min(480px,94vw)]"
+      >
+        <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-3">
+          <div className="rl-tabs !grid-cols-4 flex-1" role="tablist">
+            {tabs.map(([id, label]) => (
+              <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={`rl-tab ${tab === id ? "is-on" : ""}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+          <button onClick={onClose} aria-label="Close" className="lux-btn h-9 w-9 shrink-0 text-sm">
+            ✕
+          </button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:thin]">
+          {tab === "history" && <RoundHistory g={g} />}
+          {tab === "favs" && <Favourites g={g} />}
+          {tab === "stats" && <StatsFull g={g} />}
+          {tab === "style" && <StylePanel g={g} />}
+        </div>
+      </div>
     </div>
   );
 }
@@ -633,7 +831,8 @@ export default function Roulette({
   const playAnnounce = (a: AnnounceKey) => {
     if (g.placeMany(announceBets(a, g.chip), ANNOUNCES[a].label)) g.markAnnounced();
   };
-  const [tab, setTab] = useState<"track" | "history" | "favs" | "stats" | "style">("track");
+  const [tab, setTab] = useState<PanelTab>("track");
+  const [drawer, setDrawer] = useState<PanelTab | null>(null);
 
   // Close-up on the wheel while the ball drops, released after the result.
   const [closeup, setCloseup] = useState(false);
@@ -723,6 +922,11 @@ export default function Roulette({
                   <div className="min-w-0 flex-1 overflow-hidden">
                     <History history={g.history} count={10} size="sm" />
                   </div>
+                  {tab !== "track" && (
+                    <button type="button" onClick={() => setDrawer(tab)} className="rl-viewall shrink-0">
+                      {tab === "favs" ? "Manage" : "View all"} ›
+                    </button>
+                  )}
                 </div>
                 <div className="rl-tabs" role="tablist" aria-label="Roulette panels">
                   {tabs.map(([id, label, short]) => (
@@ -732,7 +936,7 @@ export default function Roulette({
                     </button>
                   ))}
                 </div>
-                <div className="h-[clamp(7.25rem,17dvh,11.5rem)] overflow-y-auto pr-0.5 [scrollbar-width:thin]">
+                <div className="h-[clamp(7.6rem,17.5dvh,11.5rem)] overflow-hidden">
                   {tab === "track" && (
                     <RouletteRacetrack
                       onNumber={playNeighbours}
@@ -747,10 +951,10 @@ export default function Roulette({
                       winning={wheelResult}
                     />
                   )}
-                  {tab === "history" && <RoundHistory g={g} />}
-                  {tab === "favs" && <Favourites g={g} />}
-                  {tab === "stats" && <StatsFull g={g} />}
-                  {tab === "style" && <StylePanel g={g} />}
+                  {tab === "history" && <HistoryCompact g={g} />}
+                  {tab === "favs" && <FavsCompact g={g} onAll={() => setDrawer("favs")} />}
+                  {tab === "stats" && <StatsCompact g={g} />}
+                  {tab === "style" && <StyleCompact g={g} />}
                 </div>
               </div>
             </div>
@@ -822,6 +1026,7 @@ export default function Roulette({
       )}
 
       {infoOpen && <InfoPanel g={g} onClose={() => setInfoOpen(false)} />}
+      {drawer && <PanelsDrawer g={g} initial={drawer} onClose={() => setDrawer(null)} />}
       <AchievementToast toast={g.badgeToast} onDismiss={g.dismissBadge} />
     </div>
   );

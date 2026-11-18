@@ -94,8 +94,8 @@ export default function RouletteRacetrack({
   const innerClip = `M${R} ${T} H${R + L} A${R - T} ${R - T} 0 0 1 ${R + L} ${H - T} H${R} A${R - T} ${R - T} 0 0 1 ${R} ${T} Z`;
 
   return (
-    <div className={`rl-racetrack ${disabled ? "is-locked" : ""}`}>
-      <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" role="group" aria-label="Racetrack" onMouseLeave={() => hover(null, null)}>
+    <div className={`rl-racetrack flex h-full flex-col ${disabled ? "is-locked" : ""}`}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="block min-h-0 w-full flex-1" role="group" aria-label="Racetrack" onMouseLeave={() => hover(null, null)}>
         <defs>
           <clipPath id="rtInner">
             <path d={innerClip} />
@@ -141,7 +141,7 @@ export default function RouletteRacetrack({
           </g>
         ))}
       </svg>
-      <div className="mt-1.5 flex items-center justify-between gap-2">
+      <div className="mt-1 flex shrink-0 items-center justify-between gap-2">
         <p className="hidden text-[9.5px] tracking-[0.14em] text-white/40 2xl:block">NUMBER = NEIGHBOURS · ZONE = ANNOUNCE</p>
         <div className="flex items-center gap-1.5" role="group" aria-label="Neighbours each side">
           <span className="rl-eyebrow !text-[9px]">

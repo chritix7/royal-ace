@@ -115,7 +115,7 @@ export function RoundHistory({ g }: { g: RouletteGame }) {
   );
 }
 
-function RoundDetail({ r, onClose }: { r: RoundRecord; onClose: () => void }) {
+export function RoundDetail({ r, onClose }: { r: RoundRecord; onClose: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);

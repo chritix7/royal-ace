@@ -1943,3 +1943,24 @@ button.ui-card:active { transform: translateY(1px); }
 }
 
 }
+
+/* ---------- Roulette compact panels ---------- */
+.rl-tile { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border-radius: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.06); transition: border-color 0.15s, background 0.15s; min-height: 0; }
+button.rl-tile:hover { border-color: rgba(240, 211, 139, 0.5); background: rgba(240, 211, 139, 0.06); }
+.rl-tile--empty { border-style: dashed; opacity: 0.4; }
+.rl-tile__bolt { position: absolute; top: 2px; right: 4px; font-size: 9px; }
+.rl-fav-tile { display: flex; min-width: 0; align-items: center; gap: 0.5rem; border-radius: 12px; padding: 0.35rem 0.6rem; text-align: left; border: 1px solid transparent;
+  background: linear-gradient(180deg, #1a1b1e, #0c0c0e) padding-box, linear-gradient(180deg, rgba(240, 211, 139, 0.45), rgba(110, 82, 32, 0.25) 55%, rgba(240, 211, 139, 0.18)) border-box; transition: filter 0.15s; }
+.rl-fav-tile:hover:not(:disabled) { filter: brightness(1.2); }
+.rl-fav-tile:disabled { opacity: 0.5; }
+.rl-fav-tile--add { flex-direction: column; justify-content: center; gap: 0.15rem; color: #e5c779; text-align: center; }
+.rl-fav-tile--empty { justify-content: center; background: transparent; border: 1px dashed rgba(255, 255, 255, 0.1); }
+.rl-mini-label { font-family: var(--font-display), Georgia, serif; font-weight: 700; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(229, 199, 121, 0.75); }
+.rl-theme-dot { display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 0.3rem; border-radius: 12px; padding: 0.35rem 0.2rem; border: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.3); transition: border-color 0.15s; }
+.rl-theme-dot:hover { border-color: rgba(240, 211, 139, 0.45); }
+.rl-theme-dot.is-on { border-color: #e5c779; box-shadow: 0 0 0 1px #e5c779, 0 0 12px rgba(240, 211, 139, 0.25); }
+.rl-theme-dot__swatch { width: 1.9rem; height: 1.9rem; border-radius: 9999px; box-shadow: 0 0 0 1.5px rgba(240, 211, 139, 0.6), 0 2px 5px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.25); }
+.rl-medal { display: flex; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 9999px; font-size: 11px; color: #1a1408; background: radial-gradient(circle at 40% 35%, #6a6a70, #2c2c31 70%); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); filter: grayscale(1); opacity: 0.5; cursor: default; }
+.rl-medal.is-got { filter: none; opacity: 1; background: radial-gradient(circle at 40% 35%, #fff3c4, #c99b42 60%, #6e5320); box-shadow: 0 0 10px rgba(240, 211, 139, 0.55); }
+.rl-viewall { font-family: var(--font-display), Georgia, serif; font-weight: 700; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(229, 199, 121, 0.75); transition: color 0.15s; }
+.rl-viewall:hover { color: #fbe7a6; }
