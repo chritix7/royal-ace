@@ -4,8 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { Theme, VegasVariant } from "../lib/game";
 import { THEME_LABELS, THEME_SWATCHES, VEGAS_VARIANTS, money } from "../lib/game";
-import { Counter, Spark, Toggle, SideBet } from "./ui";
-import ChipRail from "./ChipRail";
+import { Counter, Spark, Toggle } from "./ui";
 import { CountGauge, DeckMeter } from "./CountGauge";
 import { FairnessBar, StackedBar } from "./FairnessBar";
 import MiniSpark from "./MiniSpark";
@@ -15,7 +14,6 @@ import {
   eyebrow,
   hairline,
   btnGhost,
-  btnPill,
 } from "./SidebarKit";
 import SectionModal from "./SectionModal";
 import SideBetModal from "./SideBetModal";
@@ -172,68 +170,10 @@ export default function Sidebar({ g }: { g: Game }) {
           </div>
           </div>
 
-          {/* Chips, quick bets and side bets: desktop only. On phones
-              and tablets they sit on the felt itself (see Table), so
-              they are not repeated down here. */}
-          <div className="hidden lg:block">
-          <div className="my-3 h-px w-full bg-gradient-to-r from-transparent via-[#d7b45b]/15 to-transparent" />
-
-          {/* Scrollable chip ladder — 3 denominations visible at a
-              time, ◂ / ▸ arrows slide the window through the whole
-              10 → 50,000 range without overflowing the sidebar. */}
-          <ChipRail
-            visibleCount={3}
-            size="md"
-            onPick={(v) => addChip(v)}
-            disabledFor={(v) =>
-              !canBet || (s.bet + v) * spots + sides > s.balance
-            }
-          />
-
-          <div className="mt-3 grid grid-cols-3 gap-1.5">
-            <button
-              onClick={() => setBetTo(s.lastBet)}
-              disabled={!canBet}
-              className={btnPill}
-            >
-              Rebet
-            </button>
-            <button
-              onClick={() => setBetTo(s.bet * 2)}
-              disabled={!canBet || s.bet === 0}
-              className={btnPill}
-            >
-              ×2
-            </button>
-            <button
-              onClick={() => setBetTo(0)}
-              disabled={!canBet || s.bet === 0}
-              className={btnPill}
-            >
-              Clear
-            </button>
-          </div>
-
-          <div className="mt-3 space-y-1.5">
-            <SideBet
-              label="Perfect Pairs"
-              hint="Your first 2 cards pair · up to 25:1"
-              amount={s.ppBet}
-              disabled={!canBet}
-              onOpen={() => setOpenSideBet("pp")}
-              heat={heat.pp}
-            />
-            <SideBet
-              label="21+3"
-              hint="Your 2 cards + dealer's card · up to 100:1 · Suited Trips wins the jackpot"
-              amount={s.t3Bet}
-              disabled={!canBet}
-              onOpen={() => setOpenSideBet("t3")}
-              heat={heat.t3}
-            />
-          </div>
-          </div>
-          <div className="lg:mt-4">
+          {/* Chips, quick bets and side bets live in the betting console
+              under the felt (all sizes), so they are not repeated here. */}
+          <div className="my-3 hidden h-px w-full bg-gradient-to-r from-transparent via-[#d7b45b]/15 to-transparent lg:block" />
+          <div>
             <TableThemePicker />
           </div>
         </Panel>

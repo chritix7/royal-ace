@@ -153,7 +153,11 @@ function SpinDome({
             </span>
           </span>
         ) : (
-          <span className="spin-dome__label pl-[0.22em] text-[15px] leading-none tracking-[0.22em]">SPIN</span>
+          <span className="spin-dome__label flex flex-col items-center leading-none">
+            <span className="pl-[0.22em] text-[15px] tracking-[0.22em]">SPIN</span>
+            {/* Desktop: the keyboard shortcut */}
+            <span className="mt-1 hidden pl-[0.25em] text-[7px] tracking-[0.25em] opacity-55 lg:block">SPACE</span>
+          </span>
         )}
       </span>
     </button>
@@ -241,8 +245,8 @@ export default function Slots({
       window.removeEventListener("resize", place);
     };
   }, [focus, skinId]);
-  const [infoTab, setInfoTab] = useState<"pay" | "features">("pay");
-  const openInfo = (t: "pay" | "features" = "pay") => {
+  const [infoTab, setInfoTab] = useState<"pay" | "features" | "session">("pay");
+  const openInfo = (t: "pay" | "features" | "session" = "pay") => {
     setInfoTab(t);
     setInfoOpen(true);
   };
@@ -375,6 +379,32 @@ const collection = useCollection(bet);
   const [autoCount, setAutoCount] = useState<AutoCount>(10);
   const [autoOpen, setAutoOpen] = useState(false);
   useEffect(() => setAutoCount(loadAutoCount()), []);
+  // Esc closes the bet picker / auto menu first (and only them: it must
+  // not also close Focus or spin).
+  useEffect(() => {
+    if (!autoOpen && !betOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      setAutoOpen(false);
+      setBetOpen(false);
+    };
+    // A press anywhere else (header included) closes them too; their own
+    // toggle keys keep toggling.
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as Element | null;
+      if (t?.closest?.("[data-slots-popover], [aria-expanded]")) return;
+      setAutoOpen(false);
+      setBetOpen(false);
+    };
+    window.addEventListener("keydown", onKey, true);
+    document.addEventListener("pointerdown", onDown, true);
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      document.removeEventListener("pointerdown", onDown, true);
+    };
+  }, [autoOpen, betOpen]);
   const startAuto = (n: AutoCount) => {
     setAutoCount(n);
     saveAutoCount(n);
@@ -472,6 +502,7 @@ useEffect(() => {
                           <button aria-label="Close auto spin menu" className="fixed inset-0 z-[59] cursor-default" onClick={() => setAutoOpen(false)} />
                           <div
                             role="menu"
+                            data-slots-popover=""
                             aria-label="Auto spins"
                             className="blur-in-fast absolute bottom-full left-0 z-[60] mb-2 rounded-xl border border-white/15 bg-[#11131c] p-2 shadow-[0_8px_24px_rgba(0,0,0,0.55)]"
                           >
@@ -528,6 +559,7 @@ useEffect(() => {
                           <button aria-label="Close bet picker" className="fixed inset-0 z-[59] cursor-default" onClick={() => setBetOpen(false)} />
                           <div
                             role="dialog"
+                            data-slots-popover=""
                             aria-label="Choose a bet"
                             className="blur-in-fast absolute bottom-full left-1/2 z-[60] mb-3 w-[min(22rem,calc(100vw-1.5rem))] -translate-x-1/2 rounded-xl border border-[#d7b45b]/40 p-3"
                             style={{ background: "linear-gradient(180deg,#1b1620,#0b090c)", boxShadow: "0 16px 40px rgba(0,0,0,0.7)" }}
@@ -774,6 +806,25 @@ useEffect(() => {
         ))}
       </span>
     </div>
+    {/* Today's session at a glance: opens the Session tab */}
+    <button
+      type="button"
+      onClick={() => openInfo("session")}
+      title="Today's session — open the details"
+      className={towerCard}
+      style={towerStyle}
+    >
+      <span className="flex items-center justify-between">
+        <span className="text-[9px] font-black tracking-[0.25em] text-[#e5c779]/80">TODAY</span>
+        <span className={`font-mono text-sm font-black tabular-nums ${session.slots.net >= 0 ? "text-emerald-300" : "text-red-300"}`}>
+          {session.slots.net >= 0 ? "+" : "−"}◈ {money(Math.abs(session.slots.net))}
+        </span>
+      </span>
+      <span className="mt-1 flex items-center justify-between text-[10px] text-white/45">
+        <span>{money(session.slots.spins)} spins</span>
+        <span>Best ◈ {money(session.slots.biggest)}</span>
+      </span>
+    </button>
   </div>
 </div>
 
@@ -1025,7 +1076,7 @@ useEffect(() => {
                   {s.history.slice(-4).map((rv, k) => (
                     <span
                       key={`${s.history.length}-${k}`}
-                      className={`flex h-6 min-w-[1.6rem] items-center justify-center rounded px-0.5 font-mono text-[9px] font-bold ${
+                      className={`flex h-6 min-w-[1.6rem] items-center justify-center rounded px-0.5 font-mono text-[9px] font-bold max-[379px]:first:hidden ${
                         rv >= 20 ? "bg-[#e5c779] text-black" : rv >= 1 ? "bg-emerald-500/25 text-emerald-200" : rv > 0 ? "bg-white/10 text-white/60" : "bg-white/[0.05] text-white/25"
                       }`}
                     >
@@ -1170,7 +1221,7 @@ useEffect(() => {
 
       {/* Desktop: paytable, theme, rank and session in a slide-over panel */}
       {rankToast && (
-        <div role="status" className="blur-in fixed left-1/2 top-4 z-[95] -translate-x-1/2 rounded-2xl border border-[#ff4fa3]/70 bg-[#1a0d2e] px-5 py-3 text-sm font-semibold text-[#ff9fd0] shadow-2xl lg:left-auto lg:right-4 lg:translate-x-0">
+        <div role="status" className="blur-in pointer-events-none fixed left-1/2 top-[calc(env(safe-area-inset-top)+4.5rem)] z-[95] -translate-x-1/2 lg:top-4 rounded-2xl border border-[#ff4fa3]/70 bg-[#1a0d2e] px-5 py-3 text-sm font-semibold text-[#ff9fd0] shadow-2xl lg:left-auto lg:right-4 lg:translate-x-0">
           ★ {rankToast}
         </div>
       )}

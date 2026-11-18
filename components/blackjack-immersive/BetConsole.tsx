@@ -51,6 +51,18 @@ function SmoothHeight({ children }: { children: ReactNode }) {
   );
 }
 
+/** Keyboard shortcut hint, desktop only (phones have no keyboard). */
+function Kbd({ k }: { k: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="ml-1.5 hidden min-w-[1.1rem] items-center justify-center rounded-[4px] border border-current px-1 py-px text-[9px] font-black leading-none tracking-normal opacity-45 lg:inline-flex"
+    >
+      {k}
+    </span>
+  );
+}
+
 /** Where the console sits in each view (Focus floats it over the felt). */
 export const CONSOLE_FOCUS =
   "absolute bottom-3 left-1/2 z-20 w-[min(640px,calc(100%-1rem))] -translate-x-1/2 lg:w-[min(800px,calc(100%-2rem))]";
@@ -145,6 +157,9 @@ export default function BetConsole({
             </span>
             <span className="text-[11px] font-black tabular-nums">
               ◈ {money(stake)}
+            </span>
+            <span aria-hidden="true" className="mt-0.5 hidden text-[8px] font-black tracking-[0.25em] opacity-50 lg:block">
+              SPACE
             </span>
           </>
         ) : (
@@ -403,6 +418,7 @@ export default function BetConsole({
                   className={quickBet}
                 >
                   ×2
+                  <Kbd k="X" />
                 </button>
                 <button
                   type="button"
@@ -411,6 +427,7 @@ export default function BetConsole({
                   className={quickBet}
                 >
                   Clear
+                  <Kbd k="C" />
                 </button>
               </div>
             </div>
@@ -496,6 +513,7 @@ export default function BetConsole({
               className={`${control} ${gold} sm:min-h-10`}
             >
               Hit
+              <Kbd k="H" />
             </button>
 
             <button
@@ -505,6 +523,7 @@ export default function BetConsole({
               className={`${control} ${neutral} sm:min-h-10`}
             >
               Stand
+              <Kbd k="S" />
             </button>
 
             <button
@@ -514,6 +533,7 @@ export default function BetConsole({
               className={`${control} ${neutral} sm:min-h-10`}
             >
               Double
+              <Kbd k="D" />
             </button>
 
             <button
@@ -523,6 +543,7 @@ export default function BetConsole({
               className={`${control} ${neutral} sm:min-h-10`}
             >
               Split
+              <Kbd k="P" />
             </button>
 
             <button
@@ -533,6 +554,7 @@ export default function BetConsole({
             >
               <span className="sm:hidden">Surr.</span>
               <span className="hidden sm:inline">Surrender</span>
+              <Kbd k="R" />
             </button>
           </div>
         )}

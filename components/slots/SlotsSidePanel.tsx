@@ -59,7 +59,7 @@ export default function SlotsSidePanel({
   net,
   initialTab = "pay",
 }: {
-  initialTab?: "pay" | "features";
+  initialTab?: "pay" | "features" | "session";
   fullscreen: boolean;
   rankToast: string | null;
   skinId: SkinId;
@@ -243,6 +243,9 @@ export default function SlotsSidePanel({
                 ["Net", `${session.slots.net >= 0 ? "+" : "−"}◈ ${money(Math.abs(session.slots.net))}`, session.slots.net >= 0 ? "text-emerald-300" : "text-red-300"],
                 ["Spins", money(session.slots.spins), "text-white"],
                 ["Biggest", `◈ ${money(session.slots.biggest)}`, "text-white"],
+                ["Wagered", `◈ ${money(session.slots.wagered)}`, "text-white"],
+                ["Won", `◈ ${money(Math.max(0, session.slots.wagered + session.slots.net))}`, "text-white"],
+                ["Return", session.slots.wagered > 0 ? `${Math.round(((session.slots.wagered + session.slots.net) / session.slots.wagered) * 100)}%` : "—", "text-[#f0d99a]"],
               ].map(([k, v, c]) => (
                 <div key={k} className="rounded-xl bg-black/30 px-2 py-2">
                   <dt className="text-[10px] text-white/45">{k}</dt>

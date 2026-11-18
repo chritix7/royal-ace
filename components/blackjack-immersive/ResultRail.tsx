@@ -14,16 +14,6 @@ export default function ResultRail({
 }) {
   const { s, roundBreakdown, canBet, stake, outOfChips } = g;
   const showResult = s.phase === "settled" && roundBreakdown;
-  // The pulsing "hand is live" dot only makes sense once the hand
-  // has actually started: dealing / player / dealer / insurance.
-  // During the betting phase the rail stays empty (the player hasn't
-  // committed yet; the Deal button carries the invitation).
-  const handLive =
-    s.phase === "dealing" ||
-    s.phase === "player" ||
-    s.phase === "dealer" ||
-    s.phase === "insurance";
-
   const canStartRound =
     canBet && !outOfChips && s.bet >= MIN_BET && stake <= s.balance;
 
@@ -98,18 +88,6 @@ export default function ResultRail({
                 New round · ◈ {money(stake)}
               </button>
             </div>
-          </div>
-        ) : handLive ? (
-          // Hand is in flight (dealing → player → dealer → insurance):
-          // just a small pulsing gold dot pinned to the same spot the
-          // settled result card will land in. No label — the dot alone
-          // communicates "live", and the cards on the felt carry the
-          // narrative.
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[#d7b45b]/30 bg-black/55 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-md">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#e5c779]/60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#e5c779]" />
-            </span>
           </div>
         ) : null}
       </div>
