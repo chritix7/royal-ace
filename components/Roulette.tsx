@@ -898,7 +898,7 @@ export default function Roulette({
       setWheelOpen(true);
     }
     if (g.phase === "result") {
-      const t = window.setTimeout(() => closeWheel(), 2600);
+      const t = window.setTimeout(() => closeWheel(), 7000);
       return () => window.clearTimeout(t);
     }
   }, [g.phase, desktop]);
