@@ -48,6 +48,9 @@ const XP_BY_EVENT: Partial<Record<GameEvent, number>> = {
   bjDouble: 50,
   bjSplit: 40,
   bjCorrect: 5,
+  rouletteSpin: 10,
+  rouletteWin: 25,
+  rouletteStraight: 150,
 };
 
 let state: ProgressionState = EMPTY;
@@ -118,7 +121,7 @@ function handleEvent(event: GameEvent, amount = 1) {
     totalHands: state.totalHands + (event === "bjHand" ? amount : 0),
     totalWins:
       state.totalWins +
-      ((event === "slotWin" || event === "bjWin" || event === "gambleWin")
+      ((event === "slotWin" || event === "bjWin" || event === "gambleWin" || event === "rouletteWin")
         ? amount
         : 0),
     totalBonuses: state.totalBonuses + (event === "bonus" ? amount : 0),

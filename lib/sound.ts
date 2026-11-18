@@ -152,4 +152,25 @@ export const sfx = {
   },
   freeSpins: () => [392, 523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, "square", 0.06, i * 0.1)),
   bonus: () => [330, 415, 494, 622, 740].forEach((f, i) => tone(f, 0.25, "sawtooth", 0.05, i * 0.12)),
+  // Roulette: the croupier launches the ball, it rolls around the
+  // track and slows down (ticks spread out), then rattles into a pocket.
+  ballLaunch: () => {
+    noise(0.18, 0.08, 2200);
+    tone(620, 0.12, "triangle", 0.04, 0, 900);
+  },
+  ballRoll: (seconds: number) => {
+    let t = 0;
+    let gap = 0.055;
+    while (t < seconds) {
+      noise(0.035, 0.035 + Math.min(0.03, t * 0.004), 3200, t);
+      t += gap;
+      gap *= 1.045;
+    }
+  },
+  ballDrop: () => {
+    [0, 0.09, 0.16, 0.21, 0.25].forEach((d, i) => {
+      noise(0.04, 0.12 - i * 0.018, 1800, d);
+      tone(900 - i * 90, 0.05, "triangle", 0.05 - i * 0.008, d);
+    });
+  },
 };

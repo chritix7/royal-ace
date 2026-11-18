@@ -21,7 +21,10 @@ export type GameEvent =
   | "bjMistake" // une décision contraire à la stratégie de base
   | "pairWin" // un Perfect Pairs gagné
   | "suitedWin" // un 21+3 gagné
-  | "bjStreak"; // série actuelle de manches gagnées
+  | "bjStreak" // série actuelle de manches gagnées
+  | "rouletteSpin" // un tour de roulette joué
+  | "rouletteWin" // un tour de roulette gagnant
+  | "rouletteStraight"; // un numéro plein touché
 
 type Listener = (event: GameEvent, amount: number) => void;
 const listeners = new Set<Listener>();

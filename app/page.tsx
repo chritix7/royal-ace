@@ -7,6 +7,7 @@ import AudioControls from "../components/AudioControls";
 import Blackjack from "../components/Blackjack";
 import RewardsPanel from "../components/RewardsPanel";
 import Slots from "../components/Slots";
+import Roulette from "../components/Roulette";
 import StatsPanel from "../components/StatsPanel";
 import { Counter } from "../components/ui";
 import { achievementsStore, challengeView, useAchievements } from "../lib/achievementsStore";
@@ -23,10 +24,11 @@ import HotkeysOverlay from "../components/HotkeysOverlay";
 import { useBalanceFlash } from "../hooks/useBalanceFlash";
 import { sessionStore } from "../lib/sessionStore";
 
-type Tab = "blackjack" | "slots";
-const TABS: { id: Tab; label: string }[] = [
-  { id: "blackjack", label: "♠  Blackjack" },
-  { id: "slots", label: "🎰  Slot machine" },
+type Tab = "blackjack" | "slots" | "roulette";
+const TABS: { id: Tab; label: string; icon: string; aria: string }[] = [
+  { id: "blackjack", label: "♠  Blackjack", icon: "♠", aria: "Blackjack" },
+  { id: "slots", label: "🎰  Slot machine", icon: "🎰", aria: "Slot machine" },
+  { id: "roulette", label: "◎  Roulette", icon: "◎", aria: "Roulette" },
 ];
 
 /**
@@ -105,7 +107,7 @@ export default function Home() {
   // state lives on this page.
   useEffect(() => {
     const onToggle = () => {
-      if (tab === "blackjack" || tab === "slots") setFocusMode((v) => !v);
+      setFocusMode((v) => !v);
     };
     window.addEventListener("royal-ace:toggle-focus", onToggle as EventListener);
     return () =>
@@ -115,7 +117,7 @@ export default function Home() {
 
   // Live figures for the header cards.
   const stats = useStats();
-  const rounds = stats.bjHands + stats.spins;
+  const rounds = stats.bjHands + stats.spins + (stats.rouletteSpins ?? 0);
   const roundsLabel = `${rounds.toLocaleString("en-US")} ${rounds === 1 ? "round" : "rounds"}`;
   const challenges = challengeView(useAchievements());
   const challengesDone = challenges.filter((c) => c.done).length;
@@ -241,21 +243,21 @@ export default function Home() {
   key={t.id}
   type="button"
   role="tab"
-  aria-label={t.id === "blackjack" ? "Blackjack" : "Slot machine"}
+  aria-label={t.aria}
   aria-selected={selected}
   disabled={blocked}
   onClick={() => setTab(t.id)}
-  className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-lg outline-none transition-[filter,transform,background,color,border-color] focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 sm:h-auto sm:w-auto sm:px-6 sm:py-3 sm:text-[12px] sm:font-black sm:uppercase sm:tracking-wider ${
+  className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-lg outline-none transition-[filter,transform,background,color,border-color] focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 xl:h-auto xl:w-auto xl:px-6 xl:py-3 xl:text-[12px] xl:font-black xl:uppercase xl:tracking-wider ${
     selected
       ? "border-[#e5c779]/70 bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e] shadow-[0_3px_0_#765b25,inset_0_1px_0_rgba(255,255,255,0.3)]"
       : "border-white/15 bg-gradient-to-b from-[#1c2420] to-[#141a16] text-white/65 shadow-[0_3px_0_#080c0b,inset_0_1px_0_rgba(255,255,255,0.05)] hover:border-[#e5c779]/40 hover:text-white"
   }`}
 >
-  <span aria-hidden="true" className="sm:hidden">
-    {t.id === "blackjack" ? "♠" : "🎰"}
+  <span aria-hidden="true" className="xl:hidden">
+    {t.icon}
   </span>
 
-  <span className="hidden sm:inline">
+  <span className="hidden xl:inline">
     {t.label}
   </span>
 </button>
@@ -266,7 +268,7 @@ export default function Home() {
   <span
     role="status"
     className={`min-w-0 flex-1 truncate text-[10px] text-white/40 sm:text-xs ${
-      locked && tab === "blackjack" ? "visible" : "invisible"
+      locked && tab !== "slots" ? "visible" : "invisible"
     }`}
   >
     Round in progress…
@@ -278,7 +280,7 @@ export default function Home() {
     {/* Focus (immersive) toggle — only meaningful on the blackjack tab.
         Lives in the top toolbar so it shares a row with the game tabs
         and the audio controls. */}
-    {(tab === "blackjack" || tab === "slots") && (
+    {(
       <button
         type="button"
         onClick={() => setFocusMode((v) => !v)}
@@ -308,6 +310,15 @@ export default function Home() {
             <Slots
               active={tab === "slots"}
               focus={tab === "slots" && focusMode}
+              onFocusChange={setFocusMode}
+            />
+          </ErrorBoundary>
+        </div>
+        <div className={tab === "roulette" ? "" : "hidden"}>
+          <ErrorBoundary label="Roulette">
+            <Roulette
+              active={tab === "roulette"}
+              focus={tab === "roulette" && focusMode}
               onFocusChange={setFocusMode}
             />
           </ErrorBoundary>

@@ -47,14 +47,14 @@ function chipLabel(value: number): string {
   return String(value);
 }
 
-function ChipFace({ value }: { value: number }) {
+export function ChipFace({ value, label: forced }: { value: number; label?: string }) {
   const scheme = SCHEMES[value] ?? SCHEMES[100];
   // 8 edge pips at 45° intervals, rotated from the top.
   const pipAngles = [0, 45, 90, 135, 180, 225, 270, 315];
-  const label = chipLabel(value);
+  const label = forced ?? chipLabel(value);
   // Shrink the text slightly for 3-char labels so "10K" / "20K" / "50K"
   // don't crowd the center ring.
-  const fontSize = label.length >= 3 ? 11 : 12.5;
+  const fontSize = label.length >= 4 ? 9.5 : label.length >= 3 ? 11 : 12.5;
 
   return (
     <svg
@@ -159,6 +159,21 @@ function ChipFace({ value }: { value: number }) {
       />
     </svg>
   );
+}
+
+/**
+ * A bet sitting on a table: the colour of the biggest chip it contains
+ * and the total amount on the face (1.5K, 12K…).
+ */
+export function amountLabel(amount: number) {
+  if (amount < 1000) return String(amount);
+  const k = amount / 1000;
+  return `${k >= 10 || Number.isInteger(k) ? Math.floor(k) : k.toFixed(1)}K`;
+}
+export function TableChip({ amount }: { amount: number }) {
+  const tones = Object.keys(SCHEMES).map(Number).sort((a, b) => a - b);
+  const tone = tones.filter((v) => v <= amount).pop() ?? tones[0];
+  return <ChipFace value={tone} label={amountLabel(amount)} />;
 }
 
 export default function ChipButton({
