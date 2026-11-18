@@ -394,6 +394,66 @@ function PanelsDrawer({ g, initial, onClose }: { g: RouletteGame; initial: Panel
   );
 }
 
+/** Phones: bottom sheet holding the racetrack and the panels. */
+function MobileSheet({
+  g,
+  tab,
+  setTab,
+  onClose,
+  onRules,
+  racetrack,
+}: {
+  g: RouletteGame;
+  tab: PanelTab | "rules";
+  setTab: (t: PanelTab | "rules") => void;
+  onClose: () => void;
+  onRules: () => void;
+  racetrack: ReactNode;
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  const tabs: [PanelTab, string][] = [
+    ["track", "Track"],
+    ["history", "Rounds"],
+    ["favs", "Favs"],
+    ["stats", "Stats"],
+    ["style", "Style"],
+  ];
+  return (
+    <div className="fixed inset-0 z-[80]">
+      <button aria-label="Close" className="backdrop-in absolute inset-0 cursor-default bg-black/55" onClick={onClose} />
+      <div role="dialog" aria-modal="true" aria-label="Roulette panels" className="rl-sheet absolute inset-x-0 bottom-0 flex max-h-[78dvh] flex-col">
+        <div className="flex items-center gap-2 px-3 pb-2 pt-2.5">
+          <span aria-hidden="true" className="rl-sheet__grip" />
+          <div className="rl-tabs !grid-cols-5 flex-1" role="tablist">
+            {tabs.map(([id, label]) => (
+              <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={`rl-tab ${tab === id ? "is-on" : ""}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+          <button type="button" onClick={onRules} className="rl-icon-key" aria-label="Rules and payouts">
+            i
+          </button>
+          <button type="button" onClick={onClose} className="rl-icon-key" aria-label="Close">
+            ✕
+          </button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-3 [scrollbar-width:thin]" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.9rem)" }}>
+          {tab === "track" && <div className="h-[clamp(8.5rem,36vw,12rem)]">{racetrack}</div>}
+          {tab === "history" && <RoundHistory g={g} />}
+          {tab === "favs" && <Favourites g={g} />}
+          {tab === "stats" && <StatsFull g={g} />}
+          {tab === "style" && <StylePanel g={g} />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** Rules and payouts. */
 function InfoPanel({ onClose, g }: { onClose: () => void; g: RouletteGame }) {
   const session = useSession();
@@ -507,6 +567,26 @@ const Kbd = ({ k }: { k: string }) => (
     {k}
   </span>
 );
+
+/** Phones: the result under the wheel. */
+function MobileResult({ result }: { result: { n: number; returned: number; staked: number; winners: string[]; multiplied?: number; lucky?: { n: number; mult: number }[] | null } }) {
+  const n = result.n;
+  const c = colorOf(n);
+  const net = result.returned - result.staked;
+  const facts = n === 0 ? "Zero" : `${c === "red" ? "Red" : "Black"} · ${n % 2 ? "Odd" : "Even"} · ${n <= 18 ? "1–18" : "19–36"}`;
+  return (
+    <div className={`rl-result-card !gap-3 !px-4 !py-2.5 ${net > 0 ? "is-win" : ""}`} role="status">
+      <span className={`rl-result-num rl-pill--${c} !h-11 !w-11 !text-xl`}>{n}</span>
+      <div className="min-w-0">
+        <p className="text-[9px] font-black tracking-[0.25em] text-white/50">{facts.toUpperCase()}</p>
+        <p className={`font-display text-xl font-bold tracking-[0.06em] ${net > 0 ? "gold-text" : "text-white/80"}`}>
+          {net > 0 ? `WIN ◈ ${money(result.returned)}` : result.returned > 0 ? `◈ ${money(result.returned)} BACK` : "NO WIN"}
+        </p>
+        {result.multiplied ? <p className="text-[9px] font-black tracking-[0.2em] text-[#cfe0ff]">⚡ {result.lucky?.find((l) => l.n === n)?.mult}× STRIKE</p> : null}
+      </div>
+    </div>
+  );
+}
 
 /** Big result announcement over the table (PC). */
 function ResultBanner({
@@ -695,14 +775,87 @@ function Console({ g, onInfo, desktop }: { g: RouletteGame; onInfo: () => void; 
       </div>
     );
   }
+  // Phones: swipeable chip row, three meters, five keys, the gold Spin.
+  const net = g.phase === "result" && g.result ? g.result.returned - g.result.staked : null;
+  const autoOn = g.autoLeft > 0;
   return (
-    <div className="rl-console px-2 pb-2 pt-2.5" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.5rem)" }}>
-      {chips}
-      <div className="mt-2 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_5.25rem] gap-1.5">
-        <div className="col-span-2 grid grid-cols-2 gap-1.5">{meters}</div>
+    <div className="rl-console px-2 pb-2 pt-2" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.5rem)" }}>
+      <ChipScroller g={g} />
+      <div className="mt-1.5 grid grid-cols-[minmax(0,1fr)_5.25rem] gap-1.5">
+        <div className="grid grid-cols-3 gap-1">
+          {(
+            [
+              ["Credit", g.available, false],
+              ["Bet", g.staked, false],
+              ["Win", won, won > 0],
+            ] as const
+          ).map(([label, value, hot], i) => (
+            <div key={label} className={`rl-window rl-window--sm ${hot ? "is-hot" : ""}`}>
+              <span className="rl-window__label">{label}</span>
+              <span className="rl-window__value">
+                <span className="rl-window__cur">◈</span>
+                {compactMoney(value)}
+              </span>
+              {i === 2 && net !== null && (
+                <span className={`rl-window__net ${net > 0 ? "is-up" : net < 0 ? "is-down" : ""}`}>
+                  {net > 0 ? "+" : net < 0 ? "−" : ""}
+                  {compactMoney(Math.abs(net))}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
         <div className="row-span-2 flex">{spinKey}</div>
-        <div className="col-span-2 grid grid-cols-4 gap-1">{keys}</div>
+        <div className="relative grid grid-cols-5 gap-1">
+          {key(<>Undo</>, g.undo, !g.canUndo, "Undo last chip")}
+          {key(<>Clear</>, g.clear, spinning || g.staked === 0, "Clear bets")}
+          {key(<>Rebet</>, g.rebet, spinning || Object.keys(g.lastBets).length === 0, "Rebet")}
+          {key(<>×2</>, g.double, spinning || g.staked === 0, "Double bets")}
+          <button
+            type="button"
+            onClick={() => (autoOn ? g.stopAuto() : setAutoOpen((v) => !v))}
+            aria-expanded={autoOpen}
+            disabled={!autoOn && spinning}
+            className={`rl-key ${autoOn ? "is-on" : ""}`}
+          >
+            {autoOn ? `■ ${g.autoLeft}` : "Auto"}
+          </button>
+          {autoOpen && <AutoMenu g={g} onClose={() => setAutoOpen(false)} withQuick />}
+        </div>
       </div>
+    </div>
+  );
+}
+
+/** ◈ amounts that fit a phone meter: 1,250 · 12.5K · 1.2M */
+function compactMoney(v: number) {
+  if (v < 10000) return money(v);
+  if (v < 1000000) return `${Math.round(v / 100) / 10}K`.replace(".0K", "K");
+  return `${Math.round(v / 100000) / 10}M`.replace(".0M", "M");
+}
+
+/** Phones: a row of chips you swipe through; the chosen one centres itself. */
+function ChipScroller({ g }: { g: RouletteGame }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current?.querySelector<HTMLElement>("[aria-checked=true]");
+    el?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+  }, [g.chip]);
+  return (
+    <div ref={ref} className="rl-chip-scroll" role="radiogroup" aria-label="Chip value">
+      {ROULETTE_CHIPS.map((v) => (
+        <button
+          key={v}
+          type="button"
+          role="radio"
+          aria-checked={g.chip === v}
+          aria-label={`Chip ${v}`}
+          onClick={() => g.setChip(v)}
+          className={`rl-chip-pick relative aspect-square w-[2.55rem] shrink-0 snap-center rounded-full ${g.chip === v ? "is-selected" : ""}`}
+        >
+          <ChipFace value={v} />
+        </button>
+      ))}
     </div>
   );
 }
@@ -727,10 +880,21 @@ export default function Roulette({
     if (desktop) return;
     if (g.phase === "spinning") setWheelOpen(true);
     if (g.phase === "result") {
-      const t = window.setTimeout(() => setWheelOpen(false), 1900);
+      const t = window.setTimeout(() => setWheelOpen(false), 2600);
       return () => window.clearTimeout(t);
     }
   }, [g.phase, desktop]);
+
+  // Phones: a light close-up while the ball drops.
+  const [phoneCloseup, setPhoneCloseup] = useState(false);
+  useEffect(() => {
+    if (desktop || g.phase !== "spinning") {
+      setPhoneCloseup(false);
+      return;
+    }
+    const t = window.setTimeout(() => setPhoneCloseup(true), g.spinMs * 0.55);
+    return () => window.clearTimeout(t);
+  }, [g.phase, g.spinMs, desktop, g.spinId]);
 
   // ---- Focus (same behaviour as the slots: fullscreen, no animation on phones)
   const [focusAnim, setFocusAnim] = useState("");
@@ -833,6 +997,8 @@ export default function Roulette({
   };
   const [tab, setTab] = useState<PanelTab>("track");
   const [drawer, setDrawer] = useState<PanelTab | null>(null);
+  // Phones: bottom sheet with every panel.
+  const [sheet, setSheet] = useState<PanelTab | "rules" | null>(null);
 
   // Close-up on the wheel while the ball drops, released after the result.
   const [closeup, setCloseup] = useState(false);
@@ -988,22 +1154,34 @@ export default function Roulette({
           </div>
         ) : (
           <div className="flex min-h-0 flex-1 flex-col px-2 pt-2 sm:px-6">
-            <div className="mb-2 flex items-center gap-2">
+            <div className="mb-1.5 flex items-center gap-1.5">
               <button type="button" onClick={() => setWheelOpen(true)} aria-label="Show the wheel" className="rl-mini-wheel shrink-0">
                 <span className="rl-mini-wheel__dot" />
               </button>
               <div className="min-w-0 flex-1 overflow-hidden">
-                <History history={g.history} count={9} size="sm" />
+                <History history={g.history} count={8} size="sm" />
               </div>
-              <button type="button" onClick={() => setInfoOpen(true)} className="rl-key !h-7 shrink-0 !px-2.5" aria-label="Rules, payouts and stats">
-                Info
+              <button
+                type="button"
+                onClick={g.toggleLightning}
+                disabled={g.phase === "spinning"}
+                aria-pressed={g.lightning}
+                aria-label="Lightning mode"
+                className={`rl-icon-key ${g.lightning ? "is-bolt" : ""}`}
+              >
+                ⚡
+              </button>
+              <button type="button" onClick={() => setSheet("track")} aria-label="Racetrack, history, favourites, stats and style" className="rl-icon-key">
+                <span aria-hidden="true" className="rl-burger" />
               </button>
             </div>
             <p className="rl-message mb-1.5 text-center" role="status" aria-live="polite">
               {g.message}
             </p>
             <div className="mx-auto min-h-0 w-full max-w-md flex-1 pb-2 [--rt-zero:clamp(2rem,5.2dvh,2.75rem)]">
-              <RouletteTable g={g} vertical />
+              <div className="rl-rail rl-rail--flat h-full">
+                <RouletteTable g={g} vertical />
+              </div>
             </div>
             <div className="-mx-2 sm:-mx-6">
               <Console g={g} onInfo={() => setInfoOpen(true)} desktop={false} />
@@ -1015,18 +1193,60 @@ export default function Roulette({
 
       {/* Phones: the wheel over the table while it spins */}
       {!desktop && wheelOpen && (
-        <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center gap-5 bg-black/90 px-4" onClick={() => g.phase !== "spinning" && setWheelOpen(false)}>
+        <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center gap-4 bg-black/90 px-4" onClick={() => g.phase !== "spinning" && setWheelOpen(false)}>
           {plaque}
-          {wheel("min(88vw, 52dvh, 26rem)")}
-          <p className="rl-message text-center" role="status">
-            {g.message}
-          </p>
+          {g.lucky && (
+            <div className="flex flex-wrap justify-center gap-1.5" aria-label="Lightning strikes">
+              {g.lucky.map((l) => (
+                <span key={l.n} className="rl-strike-chip">
+                  <span className={`${pill(l.n)} h-6 w-6 text-[10px]`}>{l.n}</span>
+                  {l.mult}×
+                </span>
+              ))}
+            </div>
+          )}
+          <div className={`rl-phone-wheel ${phoneCloseup ? "is-closeup" : ""}`}>{wheel("min(84vw, 48dvh, 24rem)")}</div>
+          {g.phase === "result" && g.result ? (
+            <MobileResult result={g.result} />
+          ) : (
+            <p className="rl-message text-center" role="status">
+              {g.message}
+            </p>
+          )}
           {g.phase !== "spinning" && <p className="text-[10px] tracking-[0.25em] text-white/35">TAP TO CLOSE</p>}
         </div>
       )}
 
       {infoOpen && <InfoPanel g={g} onClose={() => setInfoOpen(false)} />}
       {drawer && <PanelsDrawer g={g} initial={drawer} onClose={() => setDrawer(null)} />}
+      {!desktop && sheet && (
+        <MobileSheet
+          g={g}
+          tab={sheet}
+          setTab={setSheet}
+          onClose={() => setSheet(null)}
+          onRules={() => {
+            setSheet(null);
+            setInfoOpen(true);
+          }}
+          racetrack={
+            <RouletteRacetrack
+              onNumber={playNeighbours}
+              onAnnounce={playAnnounce}
+              onHover={() => {}}
+              disabled={g.phase === "spinning"}
+              span={span}
+              setSpan={setSpan}
+              winning={wheelResult}
+            />
+          }
+        />
+      )}
+      {!desktop && bigWin && !wheelOpen && (
+        <div className="fixed inset-0 z-[85]">
+          <BigWin {...bigWin} light onDone={() => setBigWin(null)} />
+        </div>
+      )}
       <AchievementToast toast={g.badgeToast} onDismiss={g.dismissBadge} />
     </div>
   );

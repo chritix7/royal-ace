@@ -205,7 +205,7 @@ export function Favourites({ g }: { g: RouletteGame }) {
 }
 
 /* ---------- Autoplay menu ---------- */
-export function AutoMenu({ g, onClose }: { g: RouletteGame; onClose: () => void }) {
+export function AutoMenu({ g, onClose, withQuick = false }: { g: RouletteGame; onClose: () => void; withQuick?: boolean }) {
   const limits = [0, 10000, 50000, 100000, 500000];
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -243,6 +243,7 @@ export function AutoMenu({ g, onClose }: { g: RouletteGame; onClose: () => void 
           ))}
         </div>
         <div className="mt-2 border-t border-white/10 pt-2">
+          {withQuick && toggle("Quick spins", g.quick, g.toggleQuick)}
           {toggle("Stop on any win", g.autoStops.onWin, () => g.setAutoStops({ ...g.autoStops, onWin: !g.autoStops.onWin }))}
           {toggle("Stop on a straight up", g.autoStops.onStraight, () => g.setAutoStops({ ...g.autoStops, onStraight: !g.autoStops.onStraight }))}
           <p className="mt-1.5 text-[11px] text-white/70">Stop after losing</p>
@@ -266,7 +267,20 @@ export function AutoMenu({ g, onClose }: { g: RouletteGame; onClose: () => void 
 }
 
 /* ---------- Big win celebration ---------- */
-export function BigWin({ multiple, amount, lightning, onDone }: { multiple: number; amount: number; lightning: boolean; onDone: () => void }) {
+export function BigWin({
+  multiple,
+  amount,
+  lightning,
+  onDone,
+  light = false,
+}: {
+  multiple: number;
+  amount: number;
+  lightning: boolean;
+  onDone: () => void;
+  /** Phones: fewer coins, smaller title. */
+  light?: boolean;
+}) {
   const tier = multiple >= 100 ? "EPIC WIN" : multiple >= 25 ? "MEGA WIN" : "BIG WIN";
   useEffect(() => {
     const t = window.setTimeout(onDone, 4200);
@@ -275,9 +289,9 @@ export function BigWin({ multiple, amount, lightning, onDone }: { multiple: numb
   return (
     <div className="rl-bigwin absolute inset-0 z-40 flex cursor-pointer flex-col items-center justify-center overflow-hidden" onClick={onDone} role="status">
       <div aria-hidden="true" className="win-rays" />
-      <CoinRain count={multiple >= 100 ? 70 : multiple >= 25 ? 54 : 38} />
+      <CoinRain count={light ? 20 : multiple >= 100 ? 70 : multiple >= 25 ? 54 : 38} />
       {lightning && <p className="rl-bigwin__bolt">⚡ LIGHTNING ⚡</p>}
-      <p className="win-title-in font-display gold-text relative text-6xl font-bold tracking-[0.12em] drop-shadow-[0_6px_0_rgba(0,0,0,0.6)] xl:text-7xl">{tier}</p>
+      <p className={`win-title-in font-display gold-text relative font-bold tracking-[0.12em] drop-shadow-[0_6px_0_rgba(0,0,0,0.6)] ${light ? "text-4xl" : "text-6xl xl:text-7xl"}`}>{tier}</p>
       <p className="relative mt-3 font-display text-3xl font-bold tracking-[0.08em] text-[#fff6d8] drop-shadow-[0_0_18px_rgba(240,211,139,0.7)]">◈ {money(amount)}</p>
       <p className="relative mt-1 text-[11px] font-bold tracking-[0.3em] text-white/55">{Math.round(multiple)}× YOUR STAKE</p>
     </div>
