@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactElement } from "react";
 import { installExitAnimations } from "../lib/exitAnimations";
 import AchievementsPanel from "../components/AchievementsPanel";
 import AudioControls from "../components/AudioControls";
@@ -20,15 +20,16 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import { progressionStore, useProgression } from "../lib/progression";
 import { weeklyStore } from "../lib/weekly";
 import ChipFly from "../components/ChipFly";
+import { IconFocus, IconRoulette, IconSlot, IconSpade } from "../components/UiIcons";
 import HotkeysOverlay from "../components/HotkeysOverlay";
 import { useBalanceFlash } from "../hooks/useBalanceFlash";
 import { sessionStore } from "../lib/sessionStore";
 
 type Tab = "blackjack" | "slots" | "roulette";
-const TABS: { id: Tab; label: string; icon: string; aria: string }[] = [
-  { id: "blackjack", label: "♠  Blackjack", icon: "♠", aria: "Blackjack" },
-  { id: "slots", label: "🎰  Slot machine", icon: "🎰", aria: "Slot machine" },
-  { id: "roulette", label: "◎  Roulette", icon: "◎", aria: "Roulette" },
+const TABS: { id: Tab; label: string; Icon: (p: { className?: string }) => ReactElement; aria: string }[] = [
+  { id: "blackjack", label: "Blackjack", Icon: IconSpade, aria: "Blackjack" },
+  { id: "slots", label: "Slot machine", Icon: IconSlot, aria: "Slot machine" },
+  { id: "roulette", label: "Roulette", Icon: IconRoulette, aria: "Roulette" },
 ];
 
 /**
@@ -54,34 +55,13 @@ function HeaderCard({
     <button
       type="button"
       onClick={onClick}
-      className={`group border bg-gradient-to-b from-[#1a2219] to-[#101713] text-left outline-none ${
-        compact
-          ? "min-w-0 flex-1 touch-manipulation select-none rounded-xl px-2.5 py-1"
-          : "rounded-2xl px-3.5 py-1.5"
-      } shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 focus-visible:ring-2 focus-visible:ring-[#e5c779] active:translate-y-px ${
-        highlight ? "border-[#e5c779]/80" : "border-[#c8a65b]/40"
-      }`}
+      className={`ui-card group text-left ${compact ? "min-w-0 flex-1 touch-manipulation select-none !rounded-xl !px-2.5 !py-1" : ""} ${highlight ? "is-hot" : ""}`}
     >
-      <span
-        className={`flex items-center gap-1.5 font-bold uppercase leading-none text-[#d7b45b]/70 transition group-hover:text-[#e5c779] ${
-          compact ? "text-[8px] tracking-[0.16em]" : "text-[9px] tracking-[0.2em]"
-        }`}
-      >
+      <span className={`ui-card__label ${compact ? "!text-[8px] !tracking-[0.16em]" : ""}`}>
         {label}
-        {highlight && (
-          <span
-            aria-hidden
-            className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#f5d778] shadow-[0_0_6px_rgba(245,215,120,0.9)]"
-          />
-        )}
+        {highlight && <span aria-hidden className="ui-card__dot" />}
       </span>
-      <span
-        className={`mt-0.5 block truncate whitespace-nowrap font-black tabular-nums ${
-          compact ? "text-xs leading-4" : "text-sm leading-5"
-        } ${highlight ? "text-[#f5d778]" : "text-[#e5c779]"}`}
-      >
-        {value}
-      </span>
+      <span className={`ui-card__value ${compact ? "!text-xs !leading-4" : ""}`}>{value}</span>
     </button>
   );
 }
@@ -183,12 +163,10 @@ export default function Home() {
 
       <div
         data-chips-counter="header"
-        className={`sm:ml-2 ml-auto rounded-xl border border-[#c8a65b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-3 py-1 text-right sm:rounded-2xl sm:px-3.5 sm:py-1.5 shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] ${
-          flash ? "balance-halo-gold" : ""
-        }`}
+        className={`ui-card ui-card--chips ml-auto text-right sm:ml-2 ${flash ? "balance-halo-gold" : ""}`}
       >
-        <p className="hidden text-[9px] font-bold uppercase tracking-[0.2em] leading-none text-[#d7b45b]/70 sm:block">Chips</p>
-        <p className="text-base font-black leading-tight text-[#e5c779] tabular-nums sm:mt-0.5">
+        <p className="ui-card__label hidden justify-end sm:flex">Chips</p>
+        <p className="ui-chips-value tabular-nums">
           ◈{" "}
           <span className={flash ? "balance-flash" : ""}>
             <Counter value={balance} />
@@ -229,38 +207,24 @@ export default function Home() {
 </header>
       <section className="mx-auto max-w-screen-2xl px-4 pb-3 pt-2 sm:px-8 sm:pt-3">
         <div className="mb-2 flex min-w-0 items-center gap-2 sm:mb-3 sm:gap-3">
-  <div
-    className="flex shrink-0 items-center gap-2 sm:gap-3"
-    role="tablist"
-    aria-label="Games"
-  >
+  <div className="ui-seg shrink-0" role="tablist" aria-label="Games">
     {TABS.map((t) => {
       const blocked = locked && tab !== t.id;
       const selected = tab === t.id;
-
       return (
         <button
-  key={t.id}
-  type="button"
-  role="tab"
-  aria-label={t.aria}
-  aria-selected={selected}
-  disabled={blocked}
-  onClick={() => setTab(t.id)}
-  className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-lg outline-none transition-[filter,transform,background,color,border-color] focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 xl:h-auto xl:w-auto xl:px-6 xl:py-3 xl:text-[12px] xl:font-black xl:uppercase xl:tracking-wider ${
-    selected
-      ? "border-[#e5c779]/70 bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e] shadow-[0_3px_0_#765b25,inset_0_1px_0_rgba(255,255,255,0.3)]"
-      : "border-white/15 bg-gradient-to-b from-[#1c2420] to-[#141a16] text-white/65 shadow-[0_3px_0_#080c0b,inset_0_1px_0_rgba(255,255,255,0.05)] hover:border-[#e5c779]/40 hover:text-white"
-  }`}
->
-  <span aria-hidden="true" className="xl:hidden">
-    {t.icon}
-  </span>
-
-  <span className="hidden xl:inline">
-    {t.label}
-  </span>
-</button>
+          key={t.id}
+          type="button"
+          role="tab"
+          aria-label={t.aria}
+          aria-selected={selected}
+          disabled={blocked}
+          onClick={() => setTab(t.id)}
+          className={`ui-seg__btn ${selected ? "is-on" : ""}`}
+        >
+          <t.Icon className="h-[18px] w-[18px] shrink-0" />
+          <span className="hidden xl:inline">{t.label}</span>
+        </button>
       );
     })}
   </div>
@@ -286,9 +250,9 @@ export default function Home() {
         onClick={() => setFocusMode((v) => !v)}
         aria-pressed={focusMode}
         aria-label={focusMode ? "Exit focus mode" : "Enter focus mode"}
-        className={`inline-flex items-center justify-center gap-1.5 rounded-full border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a2219] to-[#101713] px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#e5c779] shadow-[inset_0_1px_0_rgba(229,199,121,0.15),0_2px_0_rgba(0,0,0,0.5)] outline-none transition hover:border-[#e5c779] hover:bg-[#e5c779]/10 focus-visible:ring-2 focus-visible:ring-[#e5c779] active:translate-y-px sm:px-3`}
+        className={`ui-pill ${focusMode ? "is-on" : ""}`}
       >
-        <span aria-hidden="true">⛶</span>
+        <IconFocus />
         <span className="hidden sm:inline">Focus</span>
       </button>
     )}

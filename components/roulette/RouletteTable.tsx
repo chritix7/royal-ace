@@ -156,12 +156,6 @@ export default function RouletteTable({
         {...hoverProps(key)}
       >
         <span className="rt-num__label">{n}</span>
-        {lucky.has(n) && (
-          <>
-            <span key={`b${g.spinId}`} className="rt-bolt" aria-hidden="true" />
-            <span className="rt-mult">{lucky.get(n)}×</span>
-          </>
-        )}
         {winN === n && <span className="rt-dolly" aria-hidden="true" />}
       </button>
     );
@@ -259,14 +253,14 @@ export default function RouletteTable({
         {...hoverProps(zero)}
       >
         <span className="rt-num__label">0</span>
-        {lucky.has(0) && (
-          <>
-            <span key={`b${g.spinId}`} className="rt-bolt" aria-hidden="true" />
-            <span className="rt-mult">{lucky.get(0)}×</span>
-          </>
-        )}
         {winN === 0 && <span className="rt-dolly" aria-hidden="true" />}
         {chip(zero, { left: "50%", top: "50%" })}
+        {lucky.has(0) && (
+          <span className="rt-lucky-mark" style={{ left: "50%", top: "50%", width: "100%", height: "100%" }} aria-hidden="true">
+            <span key={`b${g.spinId}`} className="rt-bolt" />
+            <span className="rt-mult">{lucky.get(0)}×</span>
+          </span>
+        )}
       </button>
 
       {cells}
@@ -307,6 +301,24 @@ export default function RouletteTable({
           return chip(insideKey([n]), at(c + 0.5, r + 0.5));
         })}
         {SPOTS.map((sp) => chip(sp.key, at(sp.u, sp.v)))}
+        {/* Lightning strikes on top of the chips, so they stay visible */}
+        {[...lucky.entries()]
+          .filter(([n]) => n > 0)
+          .map(([n, mult]) => {
+            const c = Math.floor((n - 1) / 3);
+            const r = 3 * c + 3 - n;
+            return (
+              <span
+                key={`l-${n}`}
+                className="rt-lucky-mark"
+                style={{ ...at(c + 0.5, r + 0.5), width: cell.w, height: cell.h }}
+                aria-hidden="true"
+              >
+                <span key={`b${g.spinId}`} className="rt-bolt" />
+                <span className="rt-mult">{mult}×</span>
+              </span>
+            );
+          })}
       </div>
     </div>
   );

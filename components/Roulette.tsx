@@ -5,7 +5,7 @@ import { ChipFace } from "./ChipButton";
 import { Counter } from "./ui";
 import RouletteTable from "./roulette/RouletteTable";
 import RouletteRacetrack from "./roulette/RouletteRacetrack";
-import { AutoMenu, BigWin, Favourites, RoundHistory, RoyalEmblem, StylePanel } from "./roulette/RoulettePanels";
+import { AutoMenu, BigWin, Favourites, RoundHistory, StylePanel } from "./roulette/RoulettePanels";
 import AchievementToast from "./AchievementToast";
 import RouletteWheel from "./roulette/RouletteWheel";
 import { money } from "../lib/game";
@@ -669,12 +669,10 @@ export default function Roulette({
 
   const plaque = (
     <div className="rl-plaque mx-auto flex items-center gap-3 px-6 py-1.5 text-center lg:px-8 lg:py-2">
-      {g.theme === "royal" && <RoyalEmblem className="h-9 w-9 shrink-0" />}
       <div className="flex flex-col items-center">
         <span className="font-display gold-text text-[17px] font-bold tracking-[0.32em] lg:text-[22px]">ROULETTE</span>
         <span className="text-[8px] font-bold tracking-[0.35em] text-white/45 lg:text-[9px]">{g.lightning ? "⚡ LIGHTNING · SINGLE ZERO" : "EUROPEAN · SINGLE ZERO"}</span>
       </div>
-      {g.theme === "royal" && <RoyalEmblem className="h-9 w-9 shrink-0" />}
     </div>
   );
   const tabs: [typeof tab, string, string][] = [

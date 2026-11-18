@@ -909,19 +909,10 @@ useEffect(() => {
                   keys · credit · bet | (−) SPIN (+) | win · gamble · buy */}
               <div ref={consoleRef} className="deck relative z-40 -mx-6 hidden lg:block lg:shrink-0">
                 <span aria-hidden="true" className="deck-chevron" />
-                <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1.35fr)_auto_minmax(0,1fr)] items-center gap-4 px-6 pb-2.5 pt-3.5">
+                <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 px-6 pb-2.5 pt-3.5">
                   {/* Left wing */}
                   <div className="flex min-w-0 items-center justify-end gap-3">
                     <div className="flex shrink-0 items-center gap-1.5">
-                      <button
-                        onClick={() => openInfo("pay")}
-                        aria-label="Paytable and game info"
-                        title="Paytable, features, rank and session"
-                        className="cab-key w-12 flex-col gap-0.5 leading-none"
-                      >
-                        <IconInfo />
-                        <span className="text-[8px] font-black tracking-[0.15em] opacity-75">INFO</span>
-                      </button>
                       <div className="relative">
                       {autoMenu}
                         <button
@@ -1043,6 +1034,16 @@ useEffect(() => {
                           </button>
                         </>
                       )}
+                      {/* Info sits on the right so the SPIN key is centred */}
+                      <button
+                        onClick={() => openInfo("pay")}
+                        aria-label="Paytable and game info"
+                        title="Paytable, features, rank and session"
+                        className="cab-key w-12 flex-col gap-0.5 leading-none"
+                      >
+                        <IconInfo />
+                        <span className="text-[8px] font-black tracking-[0.15em] opacity-75">INFO</span>
+                      </button>
                     </div>
                   </div>
                 </div>
