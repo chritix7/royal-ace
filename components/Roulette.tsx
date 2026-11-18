@@ -298,6 +298,27 @@ function Console({ g, onInfo, desktop }: { g: RouletteGame; onInfo: () => void; 
       </span>
     </button>
   );
+  // PC: a round Spin button — knurled gold crown, black glass dome.
+  const roundSpin = (
+    <button
+      type="button"
+      onClick={g.spin}
+      disabled={!canSpin}
+      aria-label="Spin"
+      className={`rl-round-spin ${canSpin ? "is-ready" : ""} ${spinning ? "is-spinning" : ""}`}
+    >
+      <span aria-hidden="true" className="rl-round-spin__crown" />
+      <span aria-hidden="true" className="rl-round-spin__sheen" />
+      <span className="rl-round-spin__dome">
+        <svg aria-hidden="true" viewBox="0 0 24 24" className="rl-round-spin__icon">
+          <path d="M20 12a8 8 0 1 1-2.34-5.66" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          <path d="M20 4v4.5h-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span className="rl-round-spin__label">{spinning ? "…" : rebetSpin ? "Rebet" : "Spin"}</span>
+        <span className="rl-round-spin__sub">{spinning ? "No more bets" : rebetSpin ? "& spin" : "Space"}</span>
+      </span>
+    </button>
+  );
   const meters = (
     <>
       <div className="jewel flex min-w-0 flex-col justify-center px-2.5 lg:px-3">
@@ -316,30 +337,24 @@ function Console({ g, onInfo, desktop }: { g: RouletteGame; onInfo: () => void; 
     return (
       <div className="rl-console rl-console--pc grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2.5 p-3 xl:gap-x-4 xl:p-3.5">
         {/* Display: credit · total bet · win */}
-        <div className="rl-display grid grid-cols-3">
-          <div className="rl-meter">
-            <span className="rl-meter__label">Credit</span>
-            <span className="rl-meter__value">
-              <span className="rl-meter__cur">◈</span>
-              <Counter value={credit} />
-            </span>
-          </div>
-          <div className="rl-meter rl-meter--mid">
-            <span className="rl-meter__label">Total bet</span>
-            <span className="rl-meter__value">
-              <span className="rl-meter__cur">◈</span>
-              <Counter value={g.staked} />
-            </span>
-          </div>
-          <div className={`rl-meter ${won > 0 ? "is-hot" : ""}`}>
-            <span className="rl-meter__label">{g.phase === "result" ? "Win" : "Last win"}</span>
-            <span key={won > 0 ? g.spinId : 0} className={`rl-meter__value ${won > 0 ? "meter-hit" : ""}`}>
-              <span className="rl-meter__cur">◈</span>
-              <Counter value={won} />
-            </span>
-          </div>
+        <div className="grid grid-cols-3 gap-2 xl:gap-2.5">
+          {(
+            [
+              ["Credit", credit, false],
+              ["Total bet", g.staked, false],
+              [g.phase === "result" ? "Win" : "Last win", won, won > 0],
+            ] as const
+          ).map(([label, value, hot]) => (
+            <div key={label} className={`rl-window ${hot ? "is-hot" : ""}`}>
+              <span className="rl-window__label">{label}</span>
+              <span key={hot ? `w-${g.spinId}` : label} className={`rl-window__value ${hot ? "meter-hit" : ""}`}>
+                <span className="rl-window__cur">◈</span>
+                <Counter value={value} />
+              </span>
+            </div>
+          ))}
         </div>
-        <div className="row-span-2 flex w-[7rem] xl:w-[8.5rem]">{spinKey}</div>
+        <div className="row-span-2 flex items-center justify-center">{roundSpin}</div>
         {/* Chip tray + keys */}
         <div className="flex min-w-0 items-center gap-2 xl:gap-3">
           <div className="rl-tray min-w-0 flex-1">{chips}</div>
