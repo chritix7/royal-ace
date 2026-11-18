@@ -167,6 +167,10 @@ export function ChipFace({ value, label: forced }: { value: number; label?: stri
  */
 export function amountLabel(amount: number) {
   if (amount < 1000) return String(amount);
+  if (amount >= 1000000) {
+    const m = amount / 1000000;
+    return `${Number.isInteger(m) || m >= 10 ? Math.floor(m) : m.toFixed(1)}M`;
+  }
   const k = amount / 1000;
   return `${k >= 10 || Number.isInteger(k) ? Math.floor(k) : k.toFixed(1)}K`;
 }
