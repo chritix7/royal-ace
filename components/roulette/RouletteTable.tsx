@@ -56,6 +56,7 @@ export default function RouletteTable({
   vertical,
   onHover,
   extraHot,
+  insideOnly = false,
 }: {
   g: RouletteGame;
   vertical: boolean;
@@ -63,6 +64,8 @@ export default function RouletteTable({
   onHover?: (key: string | null) => void;
   /** Numbers lit from outside (racetrack hover). */
   extraHot?: number[] | null;
+  /** Phones' zoom view: numbers, zero and columns only, bigger targets. */
+  insideOnly?: boolean;
 }) {
   const { bets, phase, result, place } = g;
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -86,8 +89,8 @@ export default function RouletteTable({
   }, [vertical]);
 
   const base = Math.min(cell.w, cell.h);
-  const chipPx = Math.max(18, Math.min(34, base * 0.62));
-  const spotPx = Math.max(14, base * 0.4);
+  const chipPx = insideOnly ? Math.max(22, Math.min(36, base * 0.62)) : Math.max(18, Math.min(34, base * 0.62));
+  const spotPx = insideOnly ? Math.max(26, base * 0.6) : Math.max(14, base * 0.4);
 
   const hot = useMemo(() => new Set(hover ? coverage(hover) : extraHot ?? []), [hover, extraHot]);
   // Lightning strikes of this round: number → multiplier.
@@ -199,7 +202,7 @@ export default function RouletteTable({
         gridTemplateRows: "repeat(3, var(--rt-row)) var(--rt-out) var(--rt-out)",
       }
     : {
-        gridTemplateColumns: "minmax(0,0.62fr) minmax(0,0.78fr) repeat(3, minmax(0,1fr))",
+        gridTemplateColumns: insideOnly ? "repeat(3, minmax(0,1fr))" : "minmax(0,0.62fr) minmax(0,0.78fr) repeat(3, minmax(0,1fr))",
         gridTemplateRows: "var(--rt-zero) repeat(12, minmax(0,1fr)) var(--rt-zero)",
       };
 
@@ -208,11 +211,13 @@ export default function RouletteTable({
     gridRow: `${row} / span ${rowSpan}`,
   });
 
+  // Phones: first number column (after the dozens and even-chance columns).
+  const vc = insideOnly ? 1 : 3;
   const cells: ReactNode[] = [];
   for (let c = 0; c < 12; c++)
     for (let r = 0; r < 3; r++) {
       const n = numAt(c, r);
-      cells.push(numberCell(n, H ? pos(c + 2, r + 1) : pos(3 + (2 - r), c + 2)));
+      cells.push(numberCell(n, H ? pos(c + 2, r + 1) : pos(vc + (2 - r), c + 2)));
     }
 
   const outsideOrder: { key: OutsideKey; node: ReactNode; extra?: string }[] = [
@@ -233,7 +238,7 @@ export default function RouletteTable({
 
   return (
     <div
-      className={`roulette-felt relative grid h-full w-full select-none ${locked ? "is-locked" : ""} ${g.lightning ? "is-lightning" : ""}`}
+      className={`roulette-felt relative grid h-full w-full select-none ${locked ? "is-locked" : ""} ${g.lightning ? "is-lightning" : ""} ${insideOnly ? "is-zoom" : ""}`}
       style={gridStyle}
       role="group"
       aria-label="Roulette betting table"
@@ -249,7 +254,7 @@ export default function RouletteTable({
         disabled={locked}
         aria-label={label(zero)}
         className={`rt-num rt-num--green ${H ? "rt-zero" : "rt-zero-v"} relative ${hot.has(0) ? "is-hot" : ""} ${winN === 0 ? "is-win" : ""} ${lucky.has(0) ? "rt-lucky" : ""}`}
-        style={H ? pos(1, 1, 1, 3) : pos(3, 1, 3, 1)}
+        style={H ? pos(1, 1, 1, 3) : pos(vc, 1, 3, 1)}
         {...hoverProps(zero)}
       >
         <span className="rt-num__label">0</span>
@@ -267,20 +272,20 @@ export default function RouletteTable({
 
       {/* Columns 2 to 1 */}
       {columns.map((k, i) =>
-        outsideCell(k, <span className={H ? "" : "rt-small"}>2:1</span>, H ? pos(14, i + 1) : pos(3 + (2 - i), 14), "rt-out--col"),
+        outsideCell(k, <span className={H ? "" : "rt-small"}>2:1</span>, H ? pos(14, i + 1) : pos(vc + (2 - i), 14), "rt-out--col"),
       )}
 
       {/* Dozens */}
-      {dozens.map((d, i) => outsideCell(d.key, vText(d.t), H ? pos(2 + i * 4, 4, 4, 1) : pos(1, 2 + i * 4, 1, 4)))}
+      {!insideOnly && dozens.map((d, i) => outsideCell(d.key, vText(d.t), H ? pos(2 + i * 4, 4, 4, 1) : pos(1, 2 + i * 4, 1, 4)))}
 
       {/* Even chances */}
-      {outsideOrder.map((o, i) => outsideCell(o.key, o.node, H ? pos(2 + i * 2, 5, 2, 1) : pos(2, 2 + i * 2, 1, 2), o.extra))}
+      {!insideOnly && outsideOrder.map((o, i) => outsideCell(o.key, o.node, H ? pos(2 + i * 2, 5, 2, 1) : pos(2, 2 + i * 2, 1, 2), o.extra))}
 
       {/* Inside bets on the lines + chips on the numbers */}
       <div
         ref={overlayRef}
         className="pointer-events-none relative z-10"
-        style={H ? pos(2, 1, 12, 3) : pos(3, 2, 3, 12)}
+        style={H ? pos(2, 1, 12, 3) : pos(vc, 2, 3, 12)}
       >
         {SPOTS.map((sp) => (
           <button

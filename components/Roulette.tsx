@@ -1015,6 +1015,23 @@ export default function Roulette({
   };
   const [tab, setTab] = useState<PanelTab>("track");
   const [drawer, setDrawer] = useState<PanelTab | null>(null);
+  // Phones: zoomed betting table (animated in and out).
+  const [zoomShown, setZoomShown] = useState(false);
+  const [zoomClosing, setZoomClosing] = useState(false);
+  const zoomTimer = useRef(0);
+  const setZoom = (on: boolean) => {
+    window.clearTimeout(zoomTimer.current);
+    if (on) {
+      setZoomClosing(false);
+      setZoomShown(true);
+      return;
+    }
+    setZoomClosing(true);
+    zoomTimer.current = window.setTimeout(() => {
+      setZoomShown(false);
+      setZoomClosing(false);
+    }, 300);
+  };
   // Phones: bottom sheet with every panel.
   const [sheet, setSheet] = useState<PanelTab | "rules" | null>(null);
 
@@ -1075,7 +1092,7 @@ export default function Roulette({
           : "h-[calc(100dvh-10.15rem)] min-h-[500px] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px]"
       }`}
     >
-      {focus && (
+      {focus && !zoomShown && (
         <button
           type="button"
           onClick={requestFocusExit}
@@ -1193,9 +1210,25 @@ export default function Roulette({
                 <span aria-hidden="true" className="rl-burger" />
               </button>
             </div>
-            <p className="rl-message mb-1.5 text-center" role="status" aria-live="polite">
-              {g.message}
-            </p>
+            <div className="mb-1.5 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+              <span />
+              <p className="rl-message truncate text-center" role="status" aria-live="polite">
+                {g.message}
+              </p>
+              <button
+                type="button"
+                onClick={() => setZoom(true)}
+                disabled={g.phase === "spinning"}
+                aria-label="Zoom the betting table"
+                className="rl-zoom-key justify-self-end"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                  <circle cx="10.5" cy="10.5" r="6.5" />
+                  <path d="M15.5 15.5L21 21M10.5 7.5v6M7.5 10.5h6" />
+                </svg>
+                Zoom
+              </button>
+            </div>
             <div className="mx-auto min-h-0 w-full max-w-md flex-1 pb-2 [--rt-zero:clamp(2rem,5.2dvh,2.75rem)]">
               <div className="rl-rail rl-rail--flat h-full">
                 <RouletteTable g={g} vertical />
@@ -1207,6 +1240,39 @@ export default function Roulette({
           </div>
         )}
         {desktop && bigWin && <BigWin {...bigWin} onDone={() => setBigWin(null)} />}
+        {!desktop && zoomShown && (
+          <div
+            data-no-exit=""
+            className={`rl-zoom absolute inset-0 z-50 flex flex-col ${zoomClosing ? "is-closing" : ""}`}
+            style={focus ? { paddingTop: "max(0.5rem, calc(env(safe-area-inset-top) + 0.25rem))" } : undefined}
+            role="dialog"
+            aria-label="Zoomed betting table"
+          >
+            <div className="flex items-center justify-between gap-2 px-3 pb-2 pt-2">
+              <p className="rl-message min-w-0 truncate">{g.phase === "spinning" ? g.message : g.refused ? g.message : "Zoom · tap the lines"}</p>
+              <p className="shrink-0 font-display text-[13px] font-bold tracking-[0.08em] text-[#f3d995]">◈ {money(g.staked)}</p>
+            </div>
+            <div className="min-h-0 flex-1 px-2 [--rt-zero:clamp(2.25rem,6dvh,3rem)]">
+              <div className="rl-rail rl-rail--flat h-full">
+                <RouletteTable g={g} vertical insideOnly />
+              </div>
+            </div>
+            <div className="rl-console mt-2 px-2 pt-1" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.5rem)" }}>
+              <ChipScroller g={g} />
+              <div className="mt-1 grid grid-cols-3 gap-1.5">
+                <button type="button" onClick={g.undo} disabled={!g.canUndo} className="rl-key">
+                  Undo
+                </button>
+                <button type="button" onClick={g.clear} disabled={g.phase === "spinning" || g.staked === 0} className="rl-key">
+                  Clear
+                </button>
+                <button type="button" onClick={() => setZoom(false)} className="rl-key is-on">
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Phones: the wheel over the table while it spins */}
