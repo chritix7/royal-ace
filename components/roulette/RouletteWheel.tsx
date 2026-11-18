@@ -202,7 +202,7 @@ export default function RouletteWheel({
   const rotorRef = useRef<HTMLDivElement>(null);
   const armRef = useRef<HTMLDivElement>(null);
   const radRef = useRef<HTMLDivElement>(null);
-  const state = useRef({ rotor: Math.random() * 360, arm: 0, played: 0 });
+  const state = useRef({ rotor: 0, arm: 0, played: 0 });
   const anims = useRef<Animation[]>([]);
   const landedRef = useRef(onLanded);
   landedRef.current = onLanded;
@@ -210,6 +210,8 @@ export default function RouletteWheel({
   // Place the ball in the last pocket on mount (or at the top).
   useLayoutEffect(() => {
     const st = state.current;
+    // Random resting angle, picked on the client (not during prerender).
+    st.rotor = Math.random() * 360;
     if (target != null) st.arm = WHEEL.indexOf(target as (typeof WHEEL)[number]) * STEP;
     if (rotorRef.current) rotorRef.current.style.transform = `rotate(${st.rotor}deg)`;
     if (armRef.current) armRef.current.style.transform = `rotate(${st.arm}deg)`;
