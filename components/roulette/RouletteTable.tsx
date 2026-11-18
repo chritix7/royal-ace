@@ -93,6 +93,17 @@ export default function RouletteTable({
   const spotPx = insideOnly ? Math.max(26, base * 0.6) : Math.max(14, base * 0.4);
 
   const hot = useMemo(() => new Set(hover ? coverage(hover) : extraHot ?? []), [hover, extraHot]);
+  // Heatmap: how often each number came out in the last 100 spins,
+  // against what chance alone would give (-1 cold … +1 hot).
+  const heat = useMemo(() => {
+    if (!g.heatmap) return null;
+    const last = g.history.slice(-100);
+    if (last.length < 10) return null;
+    const counts = new Array(37).fill(0);
+    last.forEach((n) => counts[n]++);
+    const expected = last.length / 37;
+    return counts.map((c) => Math.max(-1, Math.min(1, (c - expected) / Math.max(1.5, expected))));
+  }, [g.heatmap, g.history]);
   // Lightning strikes of this round: number → multiplier.
   const lucky = useMemo(() => new Map((g.lucky ?? []).map((l) => [l.n, l.mult])), [g.lucky]);
   const winN = phase === "result" && result ? result.n : null;
@@ -158,6 +169,7 @@ export default function RouletteTable({
         style={style}
         {...hoverProps(key)}
       >
+        {heat && <span className={`rt-heat ${heat[n] >= 0 ? "is-hot" : "is-cold"}`} style={{ opacity: Math.abs(heat[n]) }} aria-hidden="true" />}
         <span className="rt-num__label">{n}</span>
         {winN === n && <span className="rt-dolly" aria-hidden="true" />}
       </button>
@@ -257,6 +269,7 @@ export default function RouletteTable({
         style={H ? pos(1, 1, 1, 3) : pos(vc, 1, 3, 1)}
         {...hoverProps(zero)}
       >
+        {heat && <span className={`rt-heat ${heat[0] >= 0 ? "is-hot" : "is-cold"}`} style={{ opacity: Math.abs(heat[0]) }} aria-hidden="true" />}
         <span className="rt-num__label">0</span>
         {winN === 0 && <span className="rt-dolly" aria-hidden="true" />}
         {chip(zero, { left: "50%", top: "50%" })}

@@ -152,6 +152,13 @@ export const sfx = {
   },
   freeSpins: () => [392, 523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, "square", 0.06, i * 0.1)),
   bonus: () => [330, 415, 494, 622, 740].forEach((f, i) => tone(f, 0.25, "sawtooth", 0.05, i * 0.12)),
+  // Lightning: a crack and a rolling rumble, one zap per strike.
+  thunder: () => {
+    noise(0.12, 0.22, 2500);
+    noise(0.9, 0.08, 120, 0.05);
+    tone(70, 1.1, "sine", 0.12, 0.05, 40);
+    [0.35, 0.55, 0.75, 0.95, 1.15].forEach((d) => tone(1800, 0.06, "sawtooth", 0.03, d, 900));
+  },
   // Roulette: the croupier launches the ball, it rolls around the
   // track and slows down (ticks spread out), then rattles into a pocket.
   ballLaunch: () => {

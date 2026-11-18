@@ -2063,3 +2063,23 @@ button.rl-tile:hover { border-color: rgba(240, 211, 139, 0.5); background: rgba(
 .roulette-felt.is-zoom .rt-spot.is-hover, .roulette-felt.is-zoom .rt-spot:active { background: rgba(240, 211, 139, 0.4); box-shadow: 0 0 0 1.5px #f0d38b; }
 .rl-root[data-theme] .rl-zoom { isolation: isolate; }
 @media (prefers-reduced-motion: reduce) { .rl-zoom, .rl-zoom > *, .rl-zoom.is-closing, .rl-zoom.is-closing > * { animation-duration: 0.01s !important; animation-delay: 0s !important; } }
+
+/* Lightning announcement */
+.rl-strike-banner { background: radial-gradient(closest-side, rgba(10, 20, 50, 0.75), transparent); animation: rl-strike-life 2.8s ease both; }
+@keyframes rl-strike-life { 0% { opacity: 0; } 8%, 78% { opacity: 1; } 100% { opacity: 0; } }
+.rl-strike-title { font-family: var(--font-display), Georgia, serif; font-weight: 700; font-size: 20px; letter-spacing: 0.24em; text-transform: uppercase; color: #e6efff; text-shadow: 0 0 18px rgba(140, 185, 255, 0.95), 0 0 2px #fff; animation: rl-strike-flicker 0.6s steps(2) 2; }
+@keyframes rl-strike-flicker { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+.rl-strike-chip { opacity: 0; animation: rl-strike-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.4) both; }
+.rl-strike-chip--lg { padding: 0.25rem 0.9rem 0.25rem 0.25rem; font-size: 17px; }
+@keyframes rl-strike-pop { from { opacity: 0; transform: scale(0.3) translateY(-20px); filter: brightness(2.5); } to { opacity: 1; transform: none; filter: none; } }
+
+/* Heatmap */
+.rt-heat { position: absolute; inset: 0; pointer-events: none; transition: opacity 0.4s; }
+.rt-heat.is-hot { background: radial-gradient(circle, rgba(255, 170, 60, 0.75), rgba(255, 120, 30, 0.35) 70%); }
+.rt-heat.is-cold { background: radial-gradient(circle, rgba(110, 170, 255, 0.6), rgba(60, 120, 255, 0.25) 70%); }
+.rl-mini-pill { display: inline-flex; height: 1.6rem; align-items: center; gap: 0.4rem; border-radius: 9999px; padding: 0 0.7rem; border: 1px solid rgba(215, 180, 91, 0.35); background: #0d0d10; font-size: 9.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(231, 215, 166, 0.65); transition: color 0.15s, border-color 0.15s; }
+.rl-mini-pill:hover { color: #fbe7a6; border-color: rgba(240, 211, 139, 0.7); }
+.rl-mini-pill__dot { width: 7px; height: 7px; border-radius: 9999px; background: linear-gradient(90deg, #6aa8ff, #ffb347); opacity: 0.4; }
+.rl-mini-pill.is-on { color: #fbe7a6; border-color: #e5c779; }
+.rl-mini-pill.is-on .rl-mini-pill__dot { opacity: 1; box-shadow: 0 0 8px rgba(255, 180, 80, 0.8); }
+@media (prefers-reduced-motion: reduce) { .rl-strike-banner, .rl-strike-title, .rl-strike-chip { animation-duration: 0.01s; } .rl-strike-chip { opacity: 1; } }

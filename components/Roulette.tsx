@@ -127,6 +127,14 @@ function StatsFull({ g }: { g: RouletteGame }) {
   );
   return (
     <div className="space-y-2.5">
+      <button type="button" onClick={g.toggleHeatmap} aria-pressed={g.heatmap} className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-black/30 px-3 py-2 text-left">
+        <span>
+          <span className="block text-[12px] font-semibold text-white/85">Heatmap on the table</span>
+          <span className="block text-[10px] text-white/40">Hot numbers glow amber, cold ones blue (last 100 spins)</span>
+        </span>
+        <span className={`rl-switch ${g.heatmap ? "is-on" : ""}`} />
+      </button>
+      <SessionCurve rounds={g.rounds} />
       <Trends g={g} />
       {t.total > 0 && (
         <>
@@ -584,6 +592,64 @@ function MobileResult({ result }: { result: { n: number; returned: number; stake
         </p>
         {result.multiplied ? <p className="text-[9px] font-black tracking-[0.2em] text-[#cfe0ff]">⚡ {result.lucky?.find((l) => l.n === n)?.mult}× STRIKE</p> : null}
       </div>
+    </div>
+  );
+}
+
+/** Lightning: the strikes announced over the table while the ball runs. */
+function LightningBanner({ lucky }: { lucky: { n: number; mult: number }[] }) {
+  return (
+    <div className="rl-strike-banner pointer-events-none absolute inset-0 z-30 flex flex-col items-center justify-center gap-3" role="status">
+      <p className="rl-strike-title">⚡ Lightning strikes ⚡</p>
+      <div className="flex flex-wrap justify-center gap-2">
+        {lucky.map((l, i) => (
+          <span key={l.n} className="rl-strike-chip rl-strike-chip--lg" style={{ animationDelay: `${0.25 + i * 0.22}s` }}>
+            <span className={`rl-pill rl-pill--${colorOf(l.n)} flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-black`}>{l.n}</span>
+            {l.mult}×
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Session curve: running net of today's rounds. */
+function SessionCurve({ rounds }: { rounds: RoundRecord[] }) {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const today = rounds.filter((r) => r.at >= start.getTime());
+  if (today.length < 2) return <p className="text-[11px] text-white/35">Your session curve appears after a couple of spins.</p>;
+  let run = 0;
+  const pts = [0, ...today.map((r) => (run += r.returned - r.staked))];
+  const min = Math.min(0, ...pts);
+  const max = Math.max(0, ...pts);
+  const W = 300;
+  const H = 70;
+  const x = (i: number) => (i / (pts.length - 1)) * W;
+  const y = (v: number) => H - 4 - ((v - min) / Math.max(1, max - min)) * (H - 8);
+  const line = pts.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const last = pts[pts.length - 1];
+  const up = last >= 0;
+  return (
+    <div>
+      <div className="mb-1 flex items-baseline justify-between">
+        <p className="rl-eyebrow !text-[9px]">Session · {today.length} spins</p>
+        <p className={`font-mono text-[12px] font-bold ${up ? "text-emerald-300" : "text-red-300"}`}>
+          {up ? "+" : "−"}◈ {money(Math.abs(last))}
+        </p>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="block h-[70px] w-full" preserveAspectRatio="none" aria-label="Session curve">
+        <defs>
+          <linearGradient id="scFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={up ? "#7ee2a8" : "#ff8a8a"} stopOpacity="0.35" />
+            <stop offset="100%" stopColor={up ? "#7ee2a8" : "#ff8a8a"} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <line x1="0" x2={W} y1={y(0)} y2={y(0)} stroke="rgba(229,199,121,0.35)" strokeDasharray="3 4" strokeWidth="1" />
+        <polygon points={`0,${y(0)} ${line} ${W},${y(0)}`} fill="url(#scFill)" />
+        <polyline points={line} fill="none" stroke="#f0d38b" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        <circle cx={x(pts.length - 1)} cy={y(last)} r="3.5" fill="#fff3c4" />
+      </svg>
     </div>
   );
 }
@@ -1171,9 +1237,15 @@ export default function Roulette({
                   <span className="rl-announce__dot" aria-hidden="true" />
                   {hoverInfo ?? g.message}
                 </p>
-                <p className="shrink-0 text-[10px] font-bold tracking-[0.2em] text-white/35">
-                  MIN ◈ {TABLE_MIN} · MAX ◈ {money(TABLE_MAX)}
-                </p>
+                <div className="flex shrink-0 items-center gap-3">
+                  <button type="button" onClick={g.toggleHeatmap} aria-pressed={g.heatmap} className={`rl-mini-pill ${g.heatmap ? "is-on" : ""}`} title="Colour the numbers by how often they came out (last 100 spins)">
+                    <span className="rl-mini-pill__dot" aria-hidden="true" />
+                    Heatmap
+                  </button>
+                  <p className="text-[10px] font-bold tracking-[0.2em] text-white/35">
+                    MIN ◈ {TABLE_MIN} · MAX ◈ {money(TABLE_MAX)}
+                  </p>
+                </div>
               </div>
               <div className="relative">
                 <div className="rl-table3d [--rt-out:calc(var(--rt-row)*0.7)] [--rt-row:clamp(2.75rem,8.6dvh,6.25rem)]">
@@ -1183,6 +1255,7 @@ export default function Roulette({
                 </div>
                 {g.phase === "result" && g.result && <ResultBanner key={g.spinId} result={g.result} />}
                 {g.lucky && g.phase === "spinning" && <div key={`flash-${g.spinId}`} className="rl-lightning-flash" aria-hidden="true" />}
+                {g.lucky && g.phase === "spinning" && <LightningBanner key={`strike-${g.spinId}`} lucky={g.lucky} />}
               </div>
               <Console g={g} onInfo={() => setInfoOpen(true)} desktop />
             </div>
@@ -1284,13 +1357,16 @@ export default function Roulette({
         >
           {plaque}
           {g.lucky && (
-            <div className="flex flex-wrap justify-center gap-1.5" aria-label="Lightning strikes">
-              {g.lucky.map((l) => (
-                <span key={l.n} className="rl-strike-chip">
+            <div className="flex flex-col items-center gap-1.5" aria-label="Lightning strikes">
+              <p className="rl-strike-title !text-[13px]">⚡ Lightning strikes</p>
+              <div className="flex flex-wrap justify-center gap-1.5">
+              {g.lucky.map((l, i) => (
+                <span key={l.n} className="rl-strike-chip" style={{ animationDelay: `${0.2 + i * 0.18}s` }}>
                   <span className={`${pill(l.n)} h-6 w-6 text-[10px]`}>{l.n}</span>
                   {l.mult}×
                 </span>
               ))}
+              </div>
             </div>
           )}
           <div className={`rl-phone-wheel ${phoneCloseup ? "is-closeup" : ""}`}>{wheel("min(84vw, 48dvh, 24rem)")}</div>

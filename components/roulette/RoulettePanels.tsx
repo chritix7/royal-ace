@@ -156,6 +156,7 @@ export function RoundDetail({ r, onClose }: { r: RoundRecord; onClose: () => voi
 /* ---------- Favourites ---------- */
 export function Favourites({ g }: { g: RouletteGame }) {
   const [name, setName] = useState("");
+  const [editing, setEditing] = useState<number | null>(null);
   const canSave = totalOf(g.phase === "result" ? g.lastBets : g.bets) > 0;
   return (
     <div className="space-y-2">
@@ -184,6 +185,21 @@ export function Favourites({ g }: { g: RouletteGame }) {
         <ul className="space-y-1">
           {g.favourites.map((f, i) => (
             <li key={f.name} className="flex items-center gap-1.5">
+              {editing === i ? (
+                <form
+                  className="flex min-w-0 flex-1 gap-1.5"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const v = (new FormData(e.currentTarget).get("name") as string) ?? "";
+                    if (g.renameFavourite(i, v)) setEditing(null);
+                  }}
+                >
+                  <input name="name" defaultValue={f.name} maxLength={24} autoFocus className="rl-input min-w-0 flex-1" aria-label="New name" onKeyDown={(e) => e.key === "Escape" && setEditing(null)} />
+                  <button type="submit" className="rl-key">
+                    OK
+                  </button>
+                </form>
+              ) : (
               <button type="button" onClick={() => g.applyFavourite(i)} disabled={g.phase === "spinning"} className="rl-round-row min-w-0 flex-1">
                 <span className="rl-fav-star" aria-hidden="true">
                   ◆
@@ -192,6 +208,10 @@ export function Favourites({ g }: { g: RouletteGame }) {
                 <span className="shrink-0 font-mono text-[11px] text-white/45">
                   {Object.keys(f.bets).length} · ◈ {money(totalOf(f.bets as Bets))}
                 </span>
+              </button>
+              )}
+              <button type="button" onClick={() => setEditing(i)} aria-label={`Rename ${f.name}`} className="rl-mini-key">
+                ✎
               </button>
               <button type="button" onClick={() => g.deleteFavourite(i)} aria-label={`Delete ${f.name}`} className="rl-mini-key">
                 ✕

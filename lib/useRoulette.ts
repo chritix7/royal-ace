@@ -74,6 +74,7 @@ type Saved = {
   quick: boolean;
   lightning: boolean;
   theme: string;
+  heatmap: boolean;
   /** A spin whose result was drawn but not yet paid (page closed mid-spin). */
   pending?: RouletteResult | null;
 };
@@ -87,6 +88,7 @@ const EMPTY: Saved = {
   quick: false,
   lightning: false,
   theme: "carbon",
+  heatmap: false,
   pending: null,
 };
 
@@ -105,6 +107,7 @@ function load(): Saved {
         quick: Boolean(d.quick),
         lightning: Boolean(d.lightning),
         theme: typeof d.theme === "string" ? d.theme : "carbon",
+        heatmap: Boolean(d.heatmap),
         pending: d.pending ?? null,
       };
     }
@@ -127,6 +130,7 @@ export function useRoulette(active: boolean) {
   const [quick, setQuick] = useState(false);
   const [lightning, setLightningState] = useState(false);
   const [theme, setThemeState] = useState("carbon");
+  const [heatmap, setHeatmap] = useState(false);
   const [history, setHistory] = useState<number[]>([]);
   const [rounds, setRounds] = useState<RoundRecord[]>([]);
   const [favourites, setFavourites] = useState<Favourite[]>([]);
@@ -169,10 +173,26 @@ export function useRoulette(active: boolean) {
     setQuick(s.quick);
     setLightningState(s.lightning);
     setThemeState(s.theme);
+    setHeatmap(s.heatmap);
     if (s.pending) {
-      wallet.add(s.pending.returned);
-      setHistory((h) => [...h, s.pending!.n].slice(-HISTORY_MAX));
-      persist({ pending: null, history: [...s.history, s.pending.n].slice(-HISTORY_MAX) });
+      // A spin interrupted by a reload: pay it and record it like any round.
+      const p = s.pending;
+      wallet.add(p.returned);
+      const net = p.returned - p.staked;
+      sessionStore.recordRoulette(p.staked, net);
+      if (p.winners?.length) {
+        track("rouletteWin");
+        if (p.winners.some((k) => coverage(k).length === 1)) track("rouletteStraight");
+        if (p.n === 0) track("rouletteZero");
+        if (p.multiplied) track("rouletteLightning");
+        if (net >= p.staked * 10) track("rouletteBigWin");
+      }
+      const nextHistory = [...s.history, p.n].slice(-HISTORY_MAX);
+      const record: RoundRecord = { id: Date.now(), at: Date.now(), n: p.n, staked: p.staked, returned: p.returned, bets: p.bets, lucky: p.lucky ?? null };
+      const nextRounds = [...s.rounds, record].slice(-ROUNDS_MAX);
+      setHistory(nextHistory);
+      setRounds(nextRounds);
+      persist({ pending: null, history: nextHistory, rounds: nextRounds });
     }
   }, []);
 
@@ -312,6 +332,11 @@ export function useRoulette(active: boolean) {
       return !l;
     });
   };
+  const toggleHeatmap = () =>
+    setHeatmap((h) => {
+      persist({ heatmap: !h });
+      return !h;
+    });
   const setTheme = (t: string) => {
     setThemeState(t);
     persist({ theme: t });
@@ -332,6 +357,15 @@ export function useRoulette(active: boolean) {
     const f = favourites[i];
     if (!f) return false;
     return placeMany(Object.entries(f.bets), f.name);
+  };
+  const renameFavourite = (i: number, name: string) => {
+    const clean = name.trim().slice(0, 24);
+    if (!clean || !favourites[i]) return false;
+    if (favourites.some((f, k) => k !== i && f.name === clean)) return refuse("That name is already used");
+    const next = favourites.map((f, k) => (k === i ? { ...f, name: clean } : f));
+    setFavourites(next);
+    persist({ favourites: next });
+    return true;
   };
   const deleteFavourite = (i: number) => {
     const next = favourites.filter((_, k) => k !== i);
@@ -379,6 +413,7 @@ export function useRoulette(active: boolean) {
     const id = spinId + 1;
     setSpinId(id);
     runningSpin.current = { id, result: res };
+    if (strikes) sfx.thunder();
     sfx.ballLaunch();
     sfx.ballRoll(((quick ? SPIN_MS.quick : SPIN_MS.normal) / 1000) * BALL_LAND_AT);
     track("rouletteSpin");
@@ -465,8 +500,15 @@ export function useRoulette(active: boolean) {
   const stopAuto = () => setAutoLeft(0);
   const actionsRef = useRef({ spin });
   actionsRef.current = { spin };
+  // Leaving the roulette tab stops autoplay (it must not spin in the background).
   useEffect(() => {
-    if (phase !== "result" || autoLeft <= 0 || !result) return;
+    if (!active && autoLeft > 0) {
+      setAutoLeft(0);
+      setMessage("Autoplay stopped");
+    }
+  }, [active, autoLeft]);
+  useEffect(() => {
+    if (!active || phase !== "result" || autoLeft <= 0 || !result) return;
     const net = result.returned - result.staked;
     const stop =
       (autoStops.onWin && net > 0) ||
@@ -483,7 +525,7 @@ export function useRoulette(active: boolean) {
       else setAutoLeft(0);
     }, 1900);
     return () => window.clearTimeout(t);
-  }, [phase, autoLeft, result, autoStops, balance, lastBets]);
+  }, [active, phase, autoLeft, result, autoStops, balance, lastBets]);
 
   // Keyboard: Space spin · U / Backspace undo · C clear · R rebet ·
   // X double · 1–9, 0 chip · T quick spin · L lightning · F focus.
@@ -530,6 +572,7 @@ export function useRoulette(active: boolean) {
     lightning,
     lucky,
     theme,
+    heatmap,
     history,
     rounds,
     favourites,
@@ -556,6 +599,8 @@ export function useRoulette(active: boolean) {
     toggleQuick,
     toggleLightning,
     setTheme,
+    toggleHeatmap,
+    renameFavourite,
     saveFavourite,
     applyFavourite,
     deleteFavourite,
