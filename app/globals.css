@@ -1994,3 +1994,16 @@ button.rl-tile:hover { border-color: rgba(240, 211, 139, 0.5); background: rgba(
 .rl-phone-wheel { transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
 .rl-phone-wheel.is-closeup { transform: scale(1.18); }
 @media (prefers-reduced-motion: reduce) { .rl-phone-wheel { transition: none; } }
+
+/* Phones: the wheel overlay comes in and goes out */
+.rl-wheel-overlay { background: rgba(0, 0, 0, 0.9); animation: rl-ov-fade 0.35s ease-out both; }
+.rl-wheel-overlay > * { animation: rl-ov-pop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.12) both; }
+.rl-wheel-overlay > *:nth-child(2) { animation-delay: 0.04s; }
+.rl-wheel-overlay > *:nth-child(3) { animation-delay: 0.08s; }
+.rl-wheel-overlay.is-closing { animation: rl-ov-fade-out 0.34s ease-in forwards; }
+.rl-wheel-overlay.is-closing > * { animation: rl-ov-drop 0.34s cubic-bezier(0.4, 0, 1, 1) forwards; }
+@keyframes rl-ov-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rl-ov-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes rl-ov-pop { from { opacity: 0; transform: translateY(18px) scale(0.86); } to { opacity: 1; transform: none; } }
+@keyframes rl-ov-drop { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(14px) scale(0.9); } }
+@media (prefers-reduced-motion: reduce) { .rl-wheel-overlay, .rl-wheel-overlay > *, .rl-wheel-overlay.is-closing, .rl-wheel-overlay.is-closing > * { animation-duration: 0.01s; } }

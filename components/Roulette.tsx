@@ -876,11 +876,29 @@ export default function Roulette({
   // Phones: the wheel takes over the screen while it spins, then hands
   // the table back with the winning number lit.
   const [wheelOpen, setWheelOpen] = useState(false);
+  // Plays the closing animation, then removes the overlay.
+  const [wheelClosing, setWheelClosing] = useState(false);
+  const closeTimer = useRef(0);
+  const closeWheel = () => {
+    if (closeTimer.current) return;
+    setWheelClosing(true);
+    closeTimer.current = window.setTimeout(() => {
+      closeTimer.current = 0;
+      setWheelClosing(false);
+      setWheelOpen(false);
+    }, 340);
+  };
   useEffect(() => {
     if (desktop) return;
-    if (g.phase === "spinning") setWheelOpen(true);
+    if (g.phase === "spinning") {
+      // A new spin while the wheel was closing: keep it on screen.
+      window.clearTimeout(closeTimer.current);
+      closeTimer.current = 0;
+      setWheelClosing(false);
+      setWheelOpen(true);
+    }
     if (g.phase === "result") {
-      const t = window.setTimeout(() => setWheelOpen(false), 2600);
+      const t = window.setTimeout(() => closeWheel(), 2600);
       return () => window.clearTimeout(t);
     }
   }, [g.phase, desktop]);
@@ -1193,7 +1211,11 @@ export default function Roulette({
 
       {/* Phones: the wheel over the table while it spins */}
       {!desktop && wheelOpen && (
-        <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center gap-4 bg-black/90 px-4" onClick={() => g.phase !== "spinning" && setWheelOpen(false)}>
+        <div
+          data-no-exit=""
+          className={`rl-wheel-overlay fixed inset-0 z-[70] flex flex-col items-center justify-center gap-4 px-4 ${wheelClosing ? "is-closing" : ""}`}
+          onClick={() => g.phase !== "spinning" && closeWheel()}
+        >
           {plaque}
           {g.lucky && (
             <div className="flex flex-wrap justify-center gap-1.5" aria-label="Lightning strikes">
