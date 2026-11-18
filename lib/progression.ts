@@ -51,6 +51,9 @@ const XP_BY_EVENT: Partial<Record<GameEvent, number>> = {
   rouletteSpin: 10,
   rouletteWin: 25,
   rouletteStraight: 150,
+  rouletteZero: 200,
+  rouletteLightning: 400,
+  rouletteBigWin: 150,
 };
 
 let state: ProgressionState = EMPTY;

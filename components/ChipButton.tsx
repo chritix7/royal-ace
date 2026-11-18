@@ -38,6 +38,8 @@ const SCHEMES: Record<number, Scheme> = {
   10000: { body: "#0a8bba", edge: "#054b67", center: "#083d51", text: "#f5f7fa" },
   20000: { body: "#4a7a2a", edge: "#1e3310", center: "#20331a", text: "#f5f7fa" },
   50000: { body: "#8a8fa2", edge: "#3a3e4c", center: "#2d3140", text: "#1a1612" },
+  100000: { body: "#16161a", edge: "#000000", center: "#c9a24a", text: "#16120a" },
+  500000: { body: "#efe6cf", edge: "#9a8a5e", center: "#16161a", text: "#f3d995" },
 };
 
 /** Short label on the center disc. Keeps the SVG from overflowing for

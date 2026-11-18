@@ -24,7 +24,10 @@ export type GameEvent =
   | "bjStreak" // série actuelle de manches gagnées
   | "rouletteSpin" // un tour de roulette joué
   | "rouletteWin" // un tour de roulette gagnant
-  | "rouletteStraight"; // un numéro plein touché
+  | "rouletteStraight" // un numéro plein touché
+  | "rouletteZero" // gagné avec le zéro
+  | "rouletteLightning" // un multiplicateur Lightning touché
+  | "rouletteBigWin"; // un gain d'au moins 10 fois la mise
 
 type Listener = (event: GameEvent, amount: number) => void;
 const listeners = new Set<Listener>();

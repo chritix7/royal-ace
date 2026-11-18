@@ -55,11 +55,14 @@ export default function RouletteTable({
   g,
   vertical,
   onHover,
+  extraHot,
 }: {
   g: RouletteGame;
   vertical: boolean;
   /** The bet under the mouse (PC), for the info line. */
   onHover?: (key: string | null) => void;
+  /** Numbers lit from outside (racetrack hover). */
+  extraHot?: number[] | null;
 }) {
   const { bets, phase, result, place } = g;
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -86,7 +89,9 @@ export default function RouletteTable({
   const chipPx = Math.max(18, Math.min(34, base * 0.62));
   const spotPx = Math.max(14, base * 0.4);
 
-  const hot = useMemo(() => new Set(hover ? coverage(hover) : []), [hover]);
+  const hot = useMemo(() => new Set(hover ? coverage(hover) : extraHot ?? []), [hover, extraHot]);
+  // Lightning strikes of this round: number → multiplier.
+  const lucky = useMemo(() => new Map((g.lucky ?? []).map((l) => [l.n, l.mult])), [g.lucky]);
   const winN = phase === "result" && result ? result.n : null;
   const winners = new Set(phase === "result" && result ? result.winners : []);
 
@@ -146,11 +151,17 @@ export default function RouletteTable({
         onClick={() => place(key)}
         disabled={locked}
         aria-label={label(key)}
-        className={`rt-num rt-num--${colorOf(n)} ${hot.has(n) ? "is-hot" : ""} ${winN === n ? "is-win" : ""}`}
+        className={`rt-num rt-num--${colorOf(n)} ${hot.has(n) ? "is-hot" : ""} ${winN === n ? "is-win" : ""} ${lucky.has(n) ? "rt-lucky" : ""}`}
         style={style}
         {...hoverProps(key)}
       >
         <span className="rt-num__label">{n}</span>
+        {lucky.has(n) && (
+          <>
+            <span key={`b${g.spinId}`} className="rt-bolt" aria-hidden="true" />
+            <span className="rt-mult">{lucky.get(n)}×</span>
+          </>
+        )}
         {winN === n && <span className="rt-dolly" aria-hidden="true" />}
       </button>
     );
@@ -228,7 +239,7 @@ export default function RouletteTable({
 
   return (
     <div
-      className={`roulette-felt relative grid h-full w-full select-none ${locked ? "is-locked" : ""}`}
+      className={`roulette-felt relative grid h-full w-full select-none ${locked ? "is-locked" : ""} ${g.lightning ? "is-lightning" : ""}`}
       style={gridStyle}
       role="group"
       aria-label="Roulette betting table"
@@ -243,11 +254,17 @@ export default function RouletteTable({
         onClick={() => place(zero)}
         disabled={locked}
         aria-label={label(zero)}
-        className={`rt-num rt-num--green ${H ? "rt-zero" : "rt-zero-v"} relative ${hot.has(0) ? "is-hot" : ""} ${winN === 0 ? "is-win" : ""}`}
+        className={`rt-num rt-num--green ${H ? "rt-zero" : "rt-zero-v"} relative ${hot.has(0) ? "is-hot" : ""} ${winN === 0 ? "is-win" : ""} ${lucky.has(0) ? "rt-lucky" : ""}`}
         style={H ? pos(1, 1, 1, 3) : pos(3, 1, 3, 1)}
         {...hoverProps(zero)}
       >
         <span className="rt-num__label">0</span>
+        {lucky.has(0) && (
+          <>
+            <span key={`b${g.spinId}`} className="rt-bolt" aria-hidden="true" />
+            <span className="rt-mult">{lucky.get(0)}×</span>
+          </>
+        )}
         {winN === 0 && <span className="rt-dolly" aria-hidden="true" />}
         {chip(zero, { left: "50%", top: "50%" })}
       </button>

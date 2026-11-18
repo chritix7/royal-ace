@@ -99,22 +99,130 @@ const EVEN_MONEY = new Set<string>(Object.keys(OPPOSITE));
  * What the table pays for a result: stake back + winnings, per winning
  * bet. La Partage: on zero, even-money bets get half their stake back.
  */
-export function settle(bets: Bets, n: number) {
+export function settle(bets: Bets, n: number, lucky?: LuckyNumber[] | null) {
   let returned = 0;
   const winners: string[] = [];
   const halved: string[] = [];
+  let multiplied = 0;
   for (const [key, amount] of Object.entries(bets)) {
     if (amount <= 0) continue;
     if (coverage(key).includes(n)) {
-      returned += amount * (payoutOf(key) + 1);
+      let profit = payoutOf(key);
+      // Lightning: straight bets pay 29:1, or the strike's multiplier.
+      if (lucky && coverage(key).length === 1) {
+        const hit = lucky.find((l) => l.n === n);
+        profit = hit ? hit.mult : LIGHTNING_STRAIGHT;
+        if (hit) multiplied += amount;
+      }
+      returned += amount * (profit + 1);
       winners.push(key);
     } else if (n === 0 && EVEN_MONEY.has(key)) {
       returned += Math.floor(amount / 2);
       halved.push(key);
     }
   }
-  return { returned, winners, halved };
+  return { returned, winners, halved, multiplied };
 }
+
+/* ---------- Lightning ---------- */
+export type LuckyNumber = { n: number; mult: number };
+/** Straight-up payout on a Lightning round (the strikes make up for it). */
+export const LIGHTNING_STRAIGHT = 29;
+const MULTS: [number, number][] = [
+  [50, 40],
+  [100, 26],
+  [150, 14],
+  [200, 9],
+  [250, 5],
+  [300, 3],
+  [400, 2],
+  [500, 1],
+];
+function rand() {
+  try {
+    const b = new Uint32Array(1);
+    crypto.getRandomValues(b);
+    return b[0] / 0x100000000;
+  } catch {
+    return Math.random();
+  }
+}
+/** 1 to 5 lucky numbers, each with a 50× to 500× multiplier. */
+export function drawLightning(): LuckyNumber[] {
+  const count = [1, 1, 2, 2, 2, 3, 3, 4, 5][Math.floor(rand() * 9)];
+  const pool = Array.from({ length: 37 }, (_, i) => i);
+  const out: LuckyNumber[] = [];
+  const total = MULTS.reduce((a, [, w]) => a + w, 0);
+  while (out.length < count) {
+    const n = pool.splice(Math.floor(rand() * pool.length), 1)[0];
+    let r = rand() * total;
+    let mult = 50;
+    for (const [m, w] of MULTS) {
+      if ((r -= w) < 0) {
+        mult = m;
+        break;
+      }
+    }
+    out.push({ n, mult });
+  }
+  return out;
+}
+
+/* ---------- Racetrack: announced bets ---------- */
+export type AnnounceKey = "voisins" | "tiers" | "orphelins" | "zero";
+export const ANNOUNCES: Record<AnnounceKey, { label: string; short: string; units: [number[], number][] }> = {
+  voisins: {
+    label: "Voisins du zéro",
+    short: "Voisins",
+    units: [
+      [[0, 2, 3], 2],
+      [[4, 7], 1],
+      [[12, 15], 1],
+      [[18, 21], 1],
+      [[19, 22], 1],
+      [[32, 35], 1],
+      [[25, 26, 28, 29], 2],
+    ],
+  },
+  tiers: {
+    label: "Tiers du cylindre",
+    short: "Tiers",
+    units: [
+      [[5, 8], 1],
+      [[10, 11], 1],
+      [[13, 16], 1],
+      [[23, 24], 1],
+      [[27, 30], 1],
+      [[33, 36], 1],
+    ],
+  },
+  orphelins: {
+    label: "Orphelins",
+    short: "Orphelins",
+    units: [
+      [[1], 1],
+      [[6, 9], 1],
+      [[14, 17], 1],
+      [[17, 20], 1],
+      [[31, 34], 1],
+    ],
+  },
+  zero: {
+    label: "Jeu zéro",
+    short: "Zéro",
+    units: [
+      [[0, 3], 1],
+      [[12, 15], 1],
+      [[32, 35], 1],
+      [[26], 1],
+    ],
+  },
+};
+/** The bets of an announce, for a chip value per unit. */
+export const announceBets = (a: AnnounceKey, chip: number): [string, number][] =>
+  ANNOUNCES[a].units.map(([nums, u]) => [insideKey(nums), u * chip]);
+/** Numbers an announce covers (for highlighting). */
+export const announceNumbers = (a: AnnounceKey) => [...new Set(ANNOUNCES[a].units.flatMap(([n]) => n))];
 
 /** Fair draw: crypto-backed when available. */
 export function drawNumber(): number {

@@ -70,6 +70,15 @@ export const CHALLENGE_POOL: Challenge[] = [
   { id: "respin3", title: "Trigger 3 re-spins", key: "respin", mode: "count", goal: 3, reward: 1400 },
   { id: "gamble2", title: "Win 2 gambles", key: "gambleWin", mode: "count", goal: 2, reward: 1000 },
   { id: "vault1", title: "Open the vault", key: "vault", mode: "count", goal: 1, reward: 3500 },
+  // Roulette
+  { id: "rspins20", title: "Spin the roulette 20 times", key: "rouletteSpin", mode: "count", goal: 20, reward: 600 },
+  { id: "rspins50", title: "Spin the roulette 50 times", key: "rouletteSpin", mode: "count", goal: 50, reward: 1500 },
+  { id: "rwins10", title: "Win 10 roulette spins", key: "rouletteWin", mode: "count", goal: 10, reward: 1000 },
+  { id: "rstraight1", title: "Hit a straight up at roulette", key: "rouletteStraight", mode: "count", goal: 1, reward: 2000 },
+  { id: "rstraight3", title: "Hit 3 straight ups at roulette", key: "rouletteStraight", mode: "count", goal: 3, reward: 4500 },
+  { id: "rzero1", title: "Win with zero", key: "rouletteZero", mode: "count", goal: 1, reward: 3000 },
+  { id: "rlight1", title: "Win a Lightning multiplier", key: "rouletteLightning", mode: "count", goal: 1, reward: 5000 },
+  { id: "rbig1", title: "Win 10× your stake at roulette", key: "rouletteBigWin", mode: "count", goal: 1, reward: 2500 },
 ];
 
 /**

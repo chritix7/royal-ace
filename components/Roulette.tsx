@@ -4,9 +4,28 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ChipFace } from "./ChipButton";
 import { Counter } from "./ui";
 import RouletteTable from "./roulette/RouletteTable";
+import RouletteRacetrack from "./roulette/RouletteRacetrack";
+import { AutoMenu, BigWin, Favourites, RoundHistory, RoyalEmblem, StylePanel } from "./roulette/RoulettePanels";
+import AchievementToast from "./AchievementToast";
 import RouletteWheel from "./roulette/RouletteWheel";
 import { money } from "../lib/game";
-import { betName, colorOf, coverage, LIMIT_BY_SIZE, limitOf, payoutOf, TABLE_MAX, TABLE_MIN } from "../lib/roulette";
+import {
+  ANNOUNCES,
+  announceBets,
+  betName,
+  colorOf,
+  coverage,
+  insideKey,
+  LIGHTNING_STRAIGHT,
+  LIMIT_BY_SIZE,
+  limitOf,
+  neighbours,
+  OUTSIDE,
+  payoutOf,
+  TABLE_MAX,
+  TABLE_MIN,
+  type AnnounceKey,
+} from "../lib/roulette";
 import { ROULETTE_CHIPS, useRoulette, type RouletteGame } from "../lib/useRoulette";
 import { exitFullscreenSettled, isNarrowScreen, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
 import { useSession } from "../lib/sessionStore";
@@ -57,6 +76,17 @@ function useTrends(history: number[]) {
     const black = last.filter((n) => colorOf(n) === "black").length;
     const zero = last.filter((n) => n === 0).length;
     const pct = (x: number) => (last.length ? Math.round((x / last.length) * 100) : 0);
+    const share = (key: keyof typeof OUTSIDE) => pct(last.filter((n) => (OUTSIDE[key].nums as readonly number[]).includes(n)).length);
+    // Sleepers: numbers that haven't come out for the longest time.
+    const lastSeen = new Map<number, number>();
+    history.forEach((n, i) => lastSeen.set(n, i));
+    const sleepers = Array.from({ length: 37 }, (_, n) => [n, lastSeen.has(n) ? history.length - 1 - lastSeen.get(n)! : history.length] as [number, number])
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4);
+    // Current run of the same colour.
+    let run = 0;
+    const lastColor = history.length ? colorOf(history[history.length - 1]) : null;
+    for (let i = history.length - 1; i >= 0 && colorOf(history[i]) === lastColor; i--) run++;
     return {
       total: last.length,
       hot: byCount.slice(0, 4),
@@ -64,8 +94,65 @@ function useTrends(history: number[]) {
       red: pct(red),
       black: pct(black),
       zero: pct(zero),
+      dozens: [share("dz1"), share("dz2"), share("dz3")],
+      columns: [share("col1"), share("col2"), share("col3")],
+      sleepers,
+      run,
+      runColor: lastColor,
     };
   }, [history]);
+}
+
+/** Full statistics (Stats tab and info panel). */
+function StatsFull({ g }: { g: RouletteGame }) {
+  const t = useTrends(g.history);
+  const bars = (label: string, values: number[], names: string[]) => (
+    <div>
+      <p className="rl-eyebrow mb-1 !text-[9px]">{label}</p>
+      <div className="grid grid-cols-3 gap-1.5">
+        {values.map((v, i) => (
+          <div key={i} className="rounded-lg bg-black/30 px-2 py-1">
+            <div className="flex justify-between text-[10px] text-white/55">
+              <span>{names[i]}</span>
+              <span className="font-mono text-[#f0d99a]">{v}%</span>
+            </div>
+            <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/10">
+              <span className="block h-full rounded-full bg-gradient-to-r from-[#9a7330] to-[#f3d995]" style={{ width: `${Math.min(100, v * 2.2)}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+  return (
+    <div className="space-y-2.5">
+      <Trends g={g} />
+      {t.total > 0 && (
+        <>
+          {bars("Dozens", t.dozens, ["1st", "2nd", "3rd"])}
+          {bars("Columns", t.columns, ["Col 1", "Col 2", "Col 3"])}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-xl border border-white/[0.06] bg-black/30 px-2 py-1.5">
+              <p className="text-[9px] font-black tracking-[0.25em] text-white/50">SLEEPERS</p>
+              <div className="mt-1 flex gap-1">
+                {t.sleepers.map(([n, ago]) => (
+                  <span key={n} title={`${n}: not out for ${ago} spins`} className={`${pill(n)} h-6 w-6 text-[10px]`}>
+                    {n}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-xl border border-white/[0.06] bg-black/30 px-2 py-1.5">
+              <p className="text-[9px] font-black tracking-[0.25em] text-white/50">CURRENT RUN</p>
+              <p className="mt-1 text-[13px] font-bold text-white/85">
+                {t.run} × <span className={t.runColor === "red" ? "text-[#ff7a85]" : t.runColor === "green" ? "text-emerald-300" : "text-white"}>{t.runColor}</span>
+              </p>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
 function Trends({ g, compact = false }: { g: RouletteGame; compact?: boolean }) {
@@ -168,6 +255,14 @@ function InfoPanel({ onClose, g }: { onClose: () => void; g: RouletteGame }) {
               <li>Opposite even-money bets can&apos;t be played together (Red with Black, Even with Odd, 1–18 with 19–36).</li>
               <li>Two dozens and two columns at most per spin.</li>
               <li>
+                <span className="text-[#cfe0ff]">⚡ Lightning:</span> 1 to 5 numbers are struck before each spin with a 50× to 500× multiplier on straight-up bets.
+                Straight ups that aren&apos;t struck pay {LIGHTNING_STRAIGHT}:1; every other bet pays as usual.
+              </li>
+              <li>
+                Racetrack: Voisins du zéro (9 chips), Tiers du cylindre (6), Orphelins (5), Jeu zéro (4), or a number with 1 to 4 neighbours each
+                side.
+              </li>
+              <li>
                 Minimum chip ◈ {TABLE_MIN} · table maximum ◈ {money(TABLE_MAX)} per spin. Each bet has its own maximum (see payouts).
               </li>
               <li>Tap a line between numbers for a split, a corner for four numbers, the edge of a row for a street or six line.</li>
@@ -198,8 +293,8 @@ function InfoPanel({ onClose, g }: { onClose: () => void; g: RouletteGame }) {
             <p className="rl-eyebrow">Keyboard</p>
             <p className="mt-2 leading-6">
               <kbd className="rl-kbd">Space</kbd> spin · <kbd className="rl-kbd">U</kbd> undo · <kbd className="rl-kbd">C</kbd> clear ·{" "}
-              <kbd className="rl-kbd">R</kbd> rebet · <kbd className="rl-kbd">X</kbd> double · <kbd className="rl-kbd">1</kbd>–<kbd className="rl-kbd">8</kbd> chip ·{" "}
-              <kbd className="rl-kbd">T</kbd> quick spin · <kbd className="rl-kbd">F</kbd> focus
+              <kbd className="rl-kbd">R</kbd> rebet · <kbd className="rl-kbd">X</kbd> double · <kbd className="rl-kbd">1</kbd>–<kbd className="rl-kbd">0</kbd> chip ·{" "}
+              <kbd className="rl-kbd">T</kbd> quick spin · <kbd className="rl-kbd">L</kbd> Lightning · <kbd className="rl-kbd">F</kbd> focus · <kbd className="rl-kbd">Space</kbd> stops autoplay
             </p>
           </section>
           <p className="text-center text-[11px] text-white/30">Virtual chips only. No real money, deposits or cash-outs.</p>
@@ -210,13 +305,17 @@ function InfoPanel({ onClose, g }: { onClose: () => void; g: RouletteGame }) {
 }
 
 const Kbd = ({ k }: { k: string }) => (
-  <span aria-hidden="true" className="ml-1 hidden rounded-[4px] border border-current px-1 py-px text-[8px] leading-none opacity-45 xl:inline-block">
+  <span aria-hidden="true" className="ml-1 hidden rounded-[4px] border border-current px-1 py-px text-[8px] leading-none opacity-45 2xl:inline-block">
     {k}
   </span>
 );
 
 /** Big result announcement over the table (PC). */
-function ResultBanner({ result }: { result: { n: number; returned: number; staked: number; winners: string[]; halved?: string[] } }) {
+function ResultBanner({
+  result,
+}: {
+  result: { n: number; returned: number; staked: number; winners: string[]; halved?: string[]; lucky?: { n: number; mult: number }[] | null; multiplied?: number };
+}) {
   const n = result.n;
   const c = colorOf(n);
   const facts =
@@ -234,7 +333,11 @@ function ResultBanner({ result }: { result: { n: number; returned: number; stake
           <p className={`font-display text-2xl font-bold tracking-[0.08em] xl:text-3xl ${net > 0 ? "gold-text" : "text-white/80"}`}>
             {net > 0 ? `WIN ◈ ${money(result.returned)}` : result.returned > 0 ? `◈ ${money(result.returned)} BACK` : "NO WIN"}
           </p>
-          {straight && <p className="text-[10px] font-black tracking-[0.25em] text-[#f5d778]">STRAIGHT UP · 35 TO 1</p>}
+          {result.multiplied ? (
+            <p className="text-[10px] font-black tracking-[0.25em] text-[#f5d778]">⚡ LIGHTNING {result.lucky?.find((l) => l.n === n)?.mult}× STRIKE</p>
+          ) : (
+            straight && <p className="text-[10px] font-black tracking-[0.25em] text-[#f5d778]">STRAIGHT UP · {result.lucky ? LIGHTNING_STRAIGHT : 35} TO 1</p>
+          )}
         </div>
       </div>
     </div>
@@ -244,6 +347,7 @@ function ResultBanner({ result }: { result: { n: number; returned: number; stake
 /** Chip selector + quick keys + Spin. */
 function Console({ g, onInfo, desktop }: { g: RouletteGame; onInfo: () => void; desktop: boolean }) {
   const spinning = g.phase === "spinning";
+  const [autoOpen, setAutoOpen] = useState(false);
   const won = g.phase === "result" && g.result ? g.result.returned : 0;
   const canSpin = !spinning && (g.staked > 0 || (Object.keys(g.lastBets).length > 0 && g.phase !== "spinning"));
   const key = (label: ReactNode, onClick: () => void, disabled: boolean, aria: string) => (
@@ -260,9 +364,9 @@ function Console({ g, onInfo, desktop }: { g: RouletteGame; onInfo: () => void; 
           role="radio"
           aria-checked={g.chip === v}
           aria-label={`Chip ${v}`}
-          title={`Chip ${money(v)} (${i + 1})`}
+          title={`Chip ${money(v)} (${i === 9 ? 0 : i + 1})`}
           onClick={() => g.setChip(v)}
-          className={`rl-chip-pick relative aspect-square w-[clamp(1.9rem,9.6vw,2.4rem)] shrink-0 rounded-full lg:w-[clamp(1.3rem,2.05vw,2.5rem)] ${g.chip === v ? "is-selected" : ""}`}
+          className={`rl-chip-pick relative aspect-square w-[clamp(1.9rem,9.6vw,2.4rem)] shrink-0 rounded-full lg:w-[clamp(1.6rem,2.35vw,2.45rem)] ${g.chip === v ? "is-selected" : ""}`}
         >
           <ChipFace value={v} />
         </button>
@@ -330,8 +434,10 @@ function Console({ g, onInfo, desktop }: { g: RouletteGame; onInfo: () => void; 
 
   if (desktop) {
     const credit = g.available;
+    const net = g.phase === "result" && g.result ? g.result.returned - g.result.staked : null;
+    const autoOn = g.autoLeft > 0;
     return (
-      <div className="rl-console rl-console--pc grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2.5 p-3 xl:gap-x-4 xl:p-3.5">
+      <div className="rl-console rl-console--pc grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 p-3 xl:gap-x-4 xl:p-3.5">
         {/* Display: credit · total bet · win */}
         <div className="grid grid-cols-3 gap-2 xl:gap-2.5">
           {(
@@ -340,29 +446,53 @@ function Console({ g, onInfo, desktop }: { g: RouletteGame; onInfo: () => void; 
               ["Total bet", g.staked, false],
               [g.phase === "result" ? "Win" : "Last win", won, won > 0],
             ] as const
-          ).map(([label, value, hot]) => (
+          ).map(([label, value, hot], i) => (
             <div key={label} className={`rl-window ${hot ? "is-hot" : ""}`}>
               <span className="rl-window__label">{label}</span>
               <span key={hot ? `w-${g.spinId}` : label} className={`rl-window__value ${hot ? "meter-hit" : ""}`}>
                 <span className="rl-window__cur">◈</span>
                 <Counter value={value} />
               </span>
+              {i === 2 && net !== null && (
+                <span className={`rl-window__net ${net > 0 ? "is-up" : net < 0 ? "is-down" : ""}`}>
+                  {net > 0 ? "+" : net < 0 ? "−" : ""}◈ {money(Math.abs(net))} net
+                </span>
+              )}
             </div>
           ))}
         </div>
-        <div className="row-span-2 flex items-center justify-center">{roundSpin}</div>
-        {/* Chip tray + keys */}
-        <div className="flex min-w-0 items-center gap-2 xl:gap-3">
-          <div className="rl-tray min-w-0 flex-1">{chips}</div>
-          <div className="grid shrink-0 grid-cols-3 gap-1">
-            {keys}
-            <button type="button" onClick={g.toggleQuick} aria-pressed={g.quick} className={`rl-key ${g.quick ? "is-on" : ""}`}>
-              Quick<Kbd k="T" />
-            </button>
-            <button type="button" onClick={onInfo} className="rl-key hidden xl:inline-flex" aria-label="Rules and payouts">
-              Info
-            </button>
-          </div>
+        <div className="row-span-3 flex items-center justify-center">{roundSpin}</div>
+        {/* Chip tray */}
+        <div className="rl-tray min-w-0">{chips}</div>
+        {/* Keys */}
+        <div className="relative flex flex-wrap items-center justify-center gap-1">
+          {keys}
+          <button type="button" onClick={g.toggleQuick} aria-pressed={g.quick} className={`rl-key ${g.quick ? "is-on" : ""}`}>
+            Quick<Kbd k="T" />
+          </button>
+          <button
+            type="button"
+            onClick={g.toggleLightning}
+            disabled={spinning}
+            aria-pressed={g.lightning}
+            className={`rl-key rl-key--bolt ${g.lightning ? "is-on" : ""}`}
+            title="Lightning: 1 to 5 numbers struck each spin, 50× to 500× on straight ups (straight ups pay 29:1)"
+          >
+            ⚡ Lightning<Kbd k="L" />
+          </button>
+          <button
+            type="button"
+            onClick={() => (autoOn ? g.stopAuto() : setAutoOpen((v) => !v))}
+            aria-expanded={autoOpen}
+            disabled={!autoOn && spinning}
+            className={`rl-key ${autoOn ? "is-on" : ""}`}
+          >
+            {autoOn ? `Stop · ${g.autoLeft}` : "Auto"}
+          </button>
+          <button type="button" onClick={onInfo} className="rl-key" aria-label="Rules and payouts">
+            Info
+          </button>
+          {autoOpen && <AutoMenu g={g} onClose={() => setAutoOpen(false)} />}
         </div>
       </div>
     );
@@ -489,20 +619,75 @@ export default function Roulette({
     const t = window.setTimeout(() => setRefusalShown(false), 1800);
     return () => window.clearTimeout(t);
   }, [g.refused]);
-  const hoverInfo =
+  // Racetrack: neighbours each side, hovered numbers and label.
+  const [span, setSpan] = useState(2);
+  const [rtHot, setRtHot] = useState<number[] | null>(null);
+  const [rtLabel, setRtLabel] = useState<string | null>(null);
+  const playNeighbours = (n: number) => {
+    const nums = span ? neighbours(n, span) : [n];
+    g.placeMany(
+      nums.map((x) => [insideKey([x]), g.chip] as [string, number]),
+      span ? `${n} and neighbours` : `Straight ${n}`,
+    );
+  };
+  const playAnnounce = (a: AnnounceKey) => {
+    if (g.placeMany(announceBets(a, g.chip), ANNOUNCES[a].label)) g.markAnnounced();
+  };
+  const [tab, setTab] = useState<"track" | "history" | "favs" | "stats" | "style">("track");
+
+  // Close-up on the wheel while the ball drops, released after the result.
+  const [closeup, setCloseup] = useState(false);
+  useEffect(() => {
+    if (!desktop) return;
+    if (g.phase === "spinning") {
+      const t = window.setTimeout(() => setCloseup(true), g.spinMs * 0.5);
+      return () => window.clearTimeout(t);
+    }
+    if (g.phase === "result") {
+      const t = window.setTimeout(() => setCloseup(false), 1400);
+      return () => window.clearTimeout(t);
+    }
+    setCloseup(false);
+  }, [g.phase, g.spinMs, desktop, g.spinId]);
+
+  // Big win celebration (10× the stake and more, or a Lightning hit).
+  const [bigWin, setBigWin] = useState<{ multiple: number; amount: number; lightning: boolean } | null>(null);
+  useEffect(() => {
+    if (g.phase !== "result" || !g.result) return;
+    const r = g.result;
+    const multiple = r.staked ? r.returned / r.staked : 0;
+    if (multiple >= 10 || (r.multiplied ?? 0) > 0) {
+      const t = window.setTimeout(() => setBigWin({ multiple, amount: r.returned, lightning: (r.multiplied ?? 0) > 0 }), 900);
+      return () => window.clearTimeout(t);
+    }
+  }, [g.phase, g.result]);
+
+  const hoverInfo = rtLabel && g.phase !== "spinning" && !refusalShown ? rtLabel : 
     hoverKey && g.phase !== "spinning" && !refusalShown
       ? `${betName(hoverKey)} · pays ${payoutOf(hoverKey)} to 1 · max ◈ ${money(limitOf(hoverKey))}${g.bets[hoverKey] && g.phase === "betting" ? ` · ◈ ${money(g.bets[hoverKey])} on it` : ""}`
       : null;
 
   const plaque = (
-    <div className="rl-plaque mx-auto flex flex-col items-center px-6 py-1.5 text-center lg:px-8 lg:py-2">
-      <span className="font-display gold-text text-[17px] font-bold tracking-[0.32em] lg:text-[22px]">ROULETTE</span>
-      <span className="text-[8px] font-bold tracking-[0.35em] text-white/45 lg:text-[9px]">EUROPEAN · SINGLE ZERO</span>
+    <div className="rl-plaque mx-auto flex items-center gap-3 px-6 py-1.5 text-center lg:px-8 lg:py-2">
+      {g.theme === "royal" && <RoyalEmblem className="h-9 w-9 shrink-0" />}
+      <div className="flex flex-col items-center">
+        <span className="font-display gold-text text-[17px] font-bold tracking-[0.32em] lg:text-[22px]">ROULETTE</span>
+        <span className="text-[8px] font-bold tracking-[0.35em] text-white/45 lg:text-[9px]">{g.lightning ? "⚡ LIGHTNING · SINGLE ZERO" : "EUROPEAN · SINGLE ZERO"}</span>
+      </div>
+      {g.theme === "royal" && <RoyalEmblem className="h-9 w-9 shrink-0" />}
     </div>
   );
+  const tabs: [typeof tab, string, string][] = [
+    ["track", "Racetrack", "Track"],
+    ["history", "History", "History"],
+    ["favs", "Favourites", "Favs"],
+    ["stats", "Stats", "Stats"],
+    ["style", "Style", "Style"],
+  ];
 
   return (
     <div
+      data-theme={g.theme}
       className={`rl-root ${focusAnim} ${
         focus
           ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black"
@@ -531,18 +716,44 @@ export default function Roulette({
             {/* Wheel column */}
             <div className="flex min-h-0 flex-col items-center gap-3">
               {plaque}
-              <div className="flex min-h-0 w-full flex-1 items-center justify-center">
-                {wheel("min(100%, calc(100dvh - 24rem), 32rem)", true)}
+              <div className={`rl-wheel-zone flex min-h-0 w-full flex-1 items-center justify-center ${closeup ? "is-closeup" : ""}`}>
+                {wheel("min(100cqw, 114cqh, 30rem)", true)}
               </div>
-              <div className="rl-card w-full space-y-2.5">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="rl-eyebrow">Last numbers</p>
-                  <button type="button" onClick={() => setInfoOpen(true)} className="text-[10px] font-bold tracking-wider text-[#e5c779]/70 hover:text-[#e5c779]">
-                    STATS ›
-                  </button>
+              <div className="rl-card flex w-full flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <p className="rl-eyebrow shrink-0">Last</p>
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    <History history={g.history} count={10} size="sm" />
+                  </div>
                 </div>
-                <History history={g.history} count={10} />
-                <Trends g={g} compact />
+                <div className="rl-tabs" role="tablist" aria-label="Roulette panels">
+                  {tabs.map(([id, label, short]) => (
+                    <button key={id} type="button" role="tab" aria-selected={tab === id} aria-label={label} onClick={() => setTab(id)} className={`rl-tab ${tab === id ? "is-on" : ""}`}>
+                      <span className="hidden 2xl:inline">{label}</span>
+                      <span className="2xl:hidden">{short}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="h-[clamp(7.25rem,17dvh,11.5rem)] overflow-y-auto pr-0.5 [scrollbar-width:thin]">
+                  {tab === "track" && (
+                    <RouletteRacetrack
+                      onNumber={playNeighbours}
+                      onAnnounce={playAnnounce}
+                      onHover={(nums, label) => {
+                        setRtHot(nums);
+                        setRtLabel(label);
+                      }}
+                      disabled={g.phase === "spinning"}
+                      span={span}
+                      setSpan={setSpan}
+                      winning={wheelResult}
+                    />
+                  )}
+                  {tab === "history" && <RoundHistory g={g} />}
+                  {tab === "favs" && <Favourites g={g} />}
+                  {tab === "stats" && <StatsFull g={g} />}
+                  {tab === "style" && <StylePanel g={g} />}
+                </div>
               </div>
             </div>
             {/* Table column */}
@@ -564,10 +775,11 @@ export default function Roulette({
               <div className="relative">
                 <div className="rl-table3d [--rt-out:calc(var(--rt-row)*0.7)] [--rt-row:clamp(2.75rem,8.6dvh,6.25rem)]">
                   <div className="rl-rail">
-                    <RouletteTable g={g} vertical={false} onHover={setHoverKey} />
+                    <RouletteTable g={g} vertical={false} onHover={setHoverKey} extraHot={rtHot} />
                   </div>
                 </div>
                 {g.phase === "result" && g.result && <ResultBanner key={g.spinId} result={g.result} />}
+                {g.lucky && g.phase === "spinning" && <div key={`flash-${g.spinId}`} className="rl-lightning-flash" aria-hidden="true" />}
               </div>
               <Console g={g} onInfo={() => setInfoOpen(true)} desktop />
             </div>
@@ -596,6 +808,7 @@ export default function Roulette({
             </div>
           </div>
         )}
+        {desktop && bigWin && <BigWin {...bigWin} onDone={() => setBigWin(null)} />}
       </section>
 
       {/* Phones: the wheel over the table while it spins */}
@@ -611,6 +824,7 @@ export default function Roulette({
       )}
 
       {infoOpen && <InfoPanel g={g} onClose={() => setInfoOpen(false)} />}
+      <AchievementToast toast={g.badgeToast} onDismiss={g.dismissBadge} />
     </div>
   );
 }
