@@ -8,6 +8,7 @@ import Blackjack from "../components/Blackjack";
 import RewardsPanel from "../components/RewardsPanel";
 import Slots from "../components/Slots";
 import Roulette from "../components/Roulette";
+import Poker from "../components/Poker";
 import StatsPanel from "../components/StatsPanel";
 import { Counter } from "../components/ui";
 import { achievementsStore, challengeView, useAchievements } from "../lib/achievementsStore";
@@ -20,16 +21,17 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import { progressionStore, useProgression } from "../lib/progression";
 import { weeklyStore } from "../lib/weekly";
 import ChipFly from "../components/ChipFly";
-import { IconFocus, IconRoulette, IconSlot, IconSpade } from "../components/UiIcons";
+import { IconFocus, IconPoker, IconRoulette, IconSlot, IconSpade } from "../components/UiIcons";
 import HotkeysOverlay from "../components/HotkeysOverlay";
 import { useBalanceFlash } from "../hooks/useBalanceFlash";
 import { sessionStore } from "../lib/sessionStore";
 
-type Tab = "blackjack" | "slots" | "roulette";
+type Tab = "blackjack" | "slots" | "roulette" | "poker";
 const TABS: { id: Tab; label: string; Icon: (p: { className?: string }) => ReactElement; aria: string }[] = [
   { id: "blackjack", label: "Blackjack", Icon: IconSpade, aria: "Blackjack" },
   { id: "slots", label: "Slot machine", Icon: IconSlot, aria: "Slot machine" },
   { id: "roulette", label: "Roulette", Icon: IconRoulette, aria: "Roulette" },
+  { id: "poker", label: "Hold'em", Icon: IconPoker, aria: "Casino Hold'em poker" },
 ];
 
 /**
@@ -93,11 +95,20 @@ export default function Home() {
     return () =>
       window.removeEventListener("royal-ace:toggle-focus", onToggle as EventListener);
   }, [tab]);
+  // A game with a hand waiting (restored after a reload) brings its tab back.
+  useEffect(() => {
+    const onGoto = (e: Event) => {
+      const id = (e as CustomEvent<string>).detail;
+      if (TABS.some((t) => t.id === id)) setTab(id as Tab);
+    };
+    window.addEventListener("royal-ace:goto-tab", onGoto);
+    return () => window.removeEventListener("royal-ace:goto-tab", onGoto);
+  }, []);
   const balance = useBalance();
 
   // Live figures for the header cards.
   const stats = useStats();
-  const rounds = stats.bjHands + stats.spins + (stats.rouletteSpins ?? 0);
+  const rounds = stats.bjHands + stats.spins + (stats.rouletteSpins ?? 0) + (stats.pokerHands ?? 0);
   const roundsLabel = `${rounds.toLocaleString("en-US")} ${rounds === 1 ? "round" : "rounds"}`;
   const challenges = challengeView(useAchievements());
   const challengesDone = challenges.filter((c) => c.done).length;
@@ -223,7 +234,7 @@ export default function Home() {
           className={`ui-seg__btn ${selected ? "is-on" : ""}`}
         >
           <t.Icon className="h-[18px] w-[18px] shrink-0" />
-          <span className="hidden xl:inline">{t.label}</span>
+          <span className="hidden 2xl:inline">{t.label}</span>
         </button>
       );
     })}
@@ -285,6 +296,11 @@ export default function Home() {
               focus={tab === "roulette" && focusMode}
               onFocusChange={setFocusMode}
             />
+          </ErrorBoundary>
+        </div>
+        <div className={tab === "poker" ? "" : "hidden"}>
+          <ErrorBoundary label="Casino Hold'em">
+            <Poker active={tab === "poker"} focus={tab === "poker" && focusMode} onFocusChange={setFocusMode} />
           </ErrorBoundary>
         </div>
       </section>

@@ -79,6 +79,13 @@ export const CHALLENGE_POOL: Challenge[] = [
   { id: "rzero1", title: "Win with zero", key: "rouletteZero", mode: "count", goal: 1, reward: 3000 },
   { id: "rlight1", title: "Win a Lightning multiplier", key: "rouletteLightning", mode: "count", goal: 1, reward: 5000 },
   { id: "rbig1", title: "Win 10× your stake at roulette", key: "rouletteBigWin", mode: "count", goal: 1, reward: 2500 },
+  // Casino Hold'em
+  { id: "phands15", title: "Play 15 hands of Casino Hold'em", key: "pokerHand", mode: "count", goal: 15, reward: 700 },
+  { id: "phands40", title: "Play 40 hands of Casino Hold'em", key: "pokerHand", mode: "count", goal: 40, reward: 1800 },
+  { id: "pwins8", title: "Beat the dealer 8 times at Hold'em", key: "pokerWin", mode: "count", goal: 8, reward: 1200 },
+  { id: "pbonus1", title: "Win the AA Bonus", key: "pokerBonus", mode: "count", goal: 1, reward: 2000 },
+  { id: "pflush1", title: "Make a flush or better at Hold'em", key: "pokerFlush", mode: "count", goal: 1, reward: 2500 },
+  { id: "pbig1", title: "Win 10× your Ante at Hold'em", key: "pokerBigWin", mode: "count", goal: 1, reward: 3000 },
 ];
 
 /**

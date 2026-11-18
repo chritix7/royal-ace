@@ -27,7 +27,12 @@ export type GameEvent =
   | "rouletteStraight" // un numéro plein touché
   | "rouletteZero" // gagné avec le zéro
   | "rouletteLightning" // un multiplicateur Lightning touché
-  | "rouletteBigWin"; // un gain d'au moins 10 fois la mise
+  | "rouletteBigWin" // un gain d'au moins 10 fois la mise
+  | "pokerHand" // une main de Casino Hold'em jouée
+  | "pokerWin" // une main de Casino Hold'em gagnée
+  | "pokerBonus" // un AA Bonus payé
+  | "pokerFlush" // couleur ou mieux en main finale (main suivie)
+  | "pokerBigWin"; // un gain d'au moins 10 fois l'Ante
 
 type Listener = (event: GameEvent, amount: number) => void;
 const listeners = new Set<Listener>();

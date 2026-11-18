@@ -24,6 +24,8 @@ export type GlobalStats = {
   rouletteSpins: number;
   rouletteWins: number;
   rouletteStraights: number;
+  pokerHands: number;
+  pokerWins: number;
 };
 
 const EMPTY: GlobalStats = {
@@ -44,6 +46,8 @@ const EMPTY: GlobalStats = {
   rouletteSpins: 0,
   rouletteWins: 0,
   rouletteStraights: 0,
+  pokerHands: 0,
+  pokerWins: 0,
 };
 
 const KEY = "royalace:global-stats";
@@ -104,6 +108,10 @@ function handleEvent(event: GameEvent, amount = 1) {
       return add("rouletteWins", amount);
     case "rouletteStraight":
       return add("rouletteStraights", amount);
+    case "pokerHand":
+      return add("pokerHands", amount);
+    case "pokerWin":
+      return add("pokerWins", amount);
     default:
       return;
   }

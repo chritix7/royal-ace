@@ -2,10 +2,10 @@ import { useSyncExternalStore } from "react";
 import { today } from "./clock";
 
 type GameDaily = { spins: number; wagered: number; net: number; biggest: number };
-export type SessionState = { day: string; slots: GameDaily; bj: GameDaily; roulette: GameDaily };
+export type SessionState = { day: string; slots: GameDaily; bj: GameDaily; roulette: GameDaily; poker: GameDaily };
 
 const emptyGame = (): GameDaily => ({ spins: 0, wagered: 0, net: 0, biggest: 0 });
-const EMPTY: SessionState = { day: "", slots: emptyGame(), bj: emptyGame(), roulette: emptyGame() };
+const EMPTY: SessionState = { day: "", slots: emptyGame(), bj: emptyGame(), roulette: emptyGame(), poker: emptyGame() };
 
 const KEY = "royalace:session-today";
 let state: SessionState = EMPTY;
@@ -26,12 +26,12 @@ function persist() {
 function rollDayIfNeeded() {
   const day = today();
   if (state.day !== day) {
-    state = { day, slots: emptyGame(), bj: emptyGame(), roulette: emptyGame() };
+    state = { day, slots: emptyGame(), bj: emptyGame(), roulette: emptyGame(), poker: emptyGame() };
     persist();
   }
 }
 
-function record(game: "slots" | "bj" | "roulette", wagered: number, net: number) {
+function record(game: "slots" | "bj" | "roulette" | "poker", wagered: number, net: number) {
   rollDayIfNeeded();
   const g = state[game];
   state = {
@@ -73,6 +73,7 @@ export const sessionStore = {
             slots: { ...emptyGame(), ...d.slots },
             bj: { ...emptyGame(), ...d.bj },
             roulette: { ...emptyGame(), ...d.roulette },
+            poker: { ...emptyGame(), ...d.poker },
           };
         }
       }
@@ -83,6 +84,7 @@ export const sessionStore = {
   recordSlots: (wagered: number, net: number) => record("slots", wagered, net),
   recordBj: (wagered: number, net: number) => record("bj", wagered, net),
   recordRoulette: (wagered: number, net: number) => record("roulette", wagered, net),
+  recordPoker: (wagered: number, net: number) => record("poker", wagered, net),
   recordBjOnce: (id: string, wagered: number, net: number) => {
   sessionStore.hydrate();
 
@@ -98,6 +100,7 @@ export const sessionStore = {
           slots: emptyGame(),
           bj: emptyGame(),
           roulette: emptyGame(),
+          poker: emptyGame(),
         };
 
   const g = current.bj;

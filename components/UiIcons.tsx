@@ -53,3 +53,10 @@ export const IconRoulette = ({ className = "h-4 w-4" }: { className?: string }) 
     <circle cx="12" cy="12" r="1.3" fill="currentColor" />
   </svg>
 );
+export const IconPoker = ({ className = "h-4 w-4" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden="true">
+    <rect x="3.5" y="5" width="10" height="14.5" rx="1.6" transform="rotate(-12 8.5 12)" />
+    <rect x="10" y="4" width="10" height="14.5" rx="1.6" transform="rotate(10 15 11)" />
+    <path d="M15.6 9.2c.9 1 2 1.7 2 2.7a1.1 1.1 0 0 1-1.9.8l.3 1.3h-1.6l.4-1.3a1.1 1.1 0 0 1-1.9-.8c0-1 1.1-1.7 2-2.7z" fill="currentColor" stroke="none" />
+  </svg>
+);
