@@ -1596,3 +1596,78 @@ body {
   .rl-console--pc .rl-key { height: 1.7rem; padding: 0 0.4rem; font-size: 9px; letter-spacing: 0.1em; }
   .rl-tray { padding: 0.35rem 0.4rem; }
 }
+
+/* ---------- Roulette: typography & controls, luxury pass ---------- */
+/* Gold leaf text */
+.rl-gold, .rl-meter__value, .rt-out > span:not(.rt-chip), .rl-spin > span:first-of-type {
+  background: linear-gradient(180deg, #fff6d2 0%, #f3d995 30%, #d2a94f 62%, #9a7330 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* Amounts: clean lining figures, gold leaf, soft glow */
+.rl-meter__value {
+  font-family: var(--font-geist-sans), Inter, system-ui, sans-serif; font-weight: 600; letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums lining-nums; text-shadow: none;
+  filter: drop-shadow(0 0 10px rgba(240, 211, 139, 0.28));
+  font-size: clamp(1.2rem, 1.75vw, 1.85rem);
+}
+.rl-meter__cur { font-size: 0.6em; margin-right: 0.1em; }
+.rl-meter.is-hot .rl-meter__value { filter: drop-shadow(0 0 14px rgba(255, 236, 170, 0.75)); }
+.rl-meter__label { display: flex; align-items: center; gap: 0.4rem; font-family: var(--font-geist-sans), Inter, sans-serif; font-weight: 600; font-size: 8.5px; letter-spacing: 0.32em; color: rgba(215, 180, 91, 0.7); }
+.rl-meter__label::before { content: ""; width: 5px; height: 5px; transform: rotate(45deg); background: linear-gradient(135deg, #f3d995, #9a7330); }
+.rl-display { background: radial-gradient(120% 140% at 50% 0%, rgba(255, 236, 190, 0.05), transparent 60%), linear-gradient(180deg, #040405, #0c0c0f); }
+
+/* Table numbers: engraved ivory capitals */
+.rt-num__label { font-family: var(--font-display), Georgia, serif; font-weight: 700; letter-spacing: 0.02em; color: #f7f0dc; font-size: clamp(14px, 1.35vw, 22px); text-shadow: 0 1px 0 rgba(0, 0, 0, 0.85), 0 -1px 0 rgba(255, 255, 255, 0.08); }
+/* Outside bets: gold-leaf engraving */
+.rt-out { font-family: var(--font-display), Georgia, serif; font-weight: 700; font-size: clamp(11px, 0.95vw, 15px); letter-spacing: 0.14em; }
+.rt-out > span:not(.rt-chip) { filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.9)); }
+.rt-out--col { font-size: clamp(10px, 0.8vw, 13px); }
+.rt-vtext { font-size: 11px; letter-spacing: 0.16em; }
+
+/* Croupier's line */
+.rl-announce { font-family: var(--font-display), Georgia, serif; font-weight: 700; font-size: 11.5px; letter-spacing: 0.16em; color: #f1e3bb; border-color: rgba(215, 180, 91, 0.45); background: linear-gradient(180deg, #19191c, #09090b); box-shadow: inset 0 1px 0 rgba(255, 236, 190, 0.1), inset 0 0 0 3px rgba(0, 0, 0, 0.45), inset 0 0 0 4px rgba(215, 180, 91, 0.12), 0 8px 18px rgba(0, 0, 0, 0.45); }
+.rl-announce.is-hover { color: #fbe7a6; letter-spacing: 0.1em; }
+.rl-eyebrow { font-family: var(--font-display), Georgia, serif; font-weight: 700; font-size: 10px; letter-spacing: 0.24em; color: #d9bb6a; }
+.rl-message { font-family: var(--font-display), Georgia, serif; letter-spacing: 0.14em; }
+
+/* Keys: black glass with a gold hairline */
+.rl-key {
+  position: relative; border: 1px solid transparent; border-radius: 10px;
+  background:
+    linear-gradient(180deg, #1d1d21, #0b0b0d) padding-box,
+    linear-gradient(180deg, rgba(240, 211, 139, 0.55), rgba(120, 90, 35, 0.35) 55%, rgba(240, 211, 139, 0.25)) border-box;
+  font-family: var(--font-geist-sans), Inter, sans-serif; font-weight: 600; letter-spacing: 0.18em; color: #e9d9a9;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 3px 0 rgba(0, 0, 0, 0.6), 0 6px 12px rgba(0, 0, 0, 0.35);
+}
+.rl-key::after { content: ""; position: absolute; inset: 1px 1px 50% 1px; border-radius: 9px 9px 4px 4px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent); pointer-events: none; }
+.rl-key:hover:not(:disabled) { color: #fff1c4; background: linear-gradient(180deg, #26262b, #101013) padding-box, linear-gradient(180deg, #f8e3a3, #b8892f 60%, #f0d38b) border-box; border-color: transparent; }
+.rl-key:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(0, 0, 0, 0.6); }
+.rl-key:disabled { opacity: 0.32; }
+.rl-key.is-on { color: #1a1408; background: linear-gradient(180deg, #f6e1a0, #c99b42) padding-box, linear-gradient(180deg, #fff3c4, #8f6a26) border-box; }
+.rl-console--pc .rl-key { border-radius: 10px; }
+
+/* Spin key: engraved capitals on brushed gold */
+.rl-spin > span:first-of-type { font-family: var(--font-display), Georgia, serif; font-weight: 700; letter-spacing: 0.24em;
+  background: linear-gradient(180deg, #3a2a0c, #120d04); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(255, 246, 210, 0.55)); }
+.rl-spin > span:last-of-type { font-family: var(--font-geist-sans), Inter, sans-serif; font-weight: 700; letter-spacing: 0.3em; color: rgba(40, 28, 8, 0.65); }
+.rl-spin {
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 3px),
+    linear-gradient(160deg, #fbecb6 0%, #e2bd68 30%, #c1923a 62%, #8f6522 100%);
+}
+.rl-spin__icon { color: #3a2a0c; filter: drop-shadow(0 1px 0 rgba(255, 246, 210, 0.5)); }
+
+/* History coins */
+.rl-pill { border-radius: 9999px; font-family: var(--font-display), Georgia, serif; font-weight: 700; color: #fbf4e2;
+  box-shadow: inset 0 0 0 1.5px rgba(240, 211, 139, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.15), inset 0 -2px 3px rgba(0, 0, 0, 0.45), 0 2px 4px rgba(0, 0, 0, 0.55); border: none; }
+.rl-pill--latest { outline: none; box-shadow: 0 0 0 2px #0b0b0d, 0 0 0 3.5px #f0d38b, 0 0 14px rgba(240, 211, 139, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.2); }
+
+/* Cards and plaque */
+.rl-card { border: 1px solid transparent; background: linear-gradient(180deg, rgba(28, 28, 32, 0.92), rgba(11, 11, 13, 0.95)) padding-box, linear-gradient(180deg, rgba(240, 211, 139, 0.32), rgba(255, 255, 255, 0.04) 40%, rgba(240, 211, 139, 0.14)) border-box; }
+.rl-plaque { border: 1px solid transparent; background: linear-gradient(180deg, #18181b, #09090b) padding-box, linear-gradient(180deg, #f8e3a3, #8f6a26 55%, #e5c779) border-box; }
+.rl-result-card { border: 1px solid transparent; background: linear-gradient(180deg, #17171a, #08080a) padding-box, linear-gradient(180deg, #f8e3a3, #8f6a26 55%, #e5c779) border-box; }
+.rl-result-card p.font-display { letter-spacing: 0.1em; }
+.rl-console--pc { border: 1px solid transparent; background: linear-gradient(180deg, rgba(26, 27, 31, 0.98), rgba(9, 9, 11, 0.99)) padding-box, linear-gradient(180deg, rgba(248, 227, 163, 0.75), rgba(143, 106, 38, 0.45) 50%, rgba(229, 199, 121, 0.55)) border-box; }
+.rl-kbd { font-family: var(--font-geist-sans), Inter, sans-serif; border-color: rgba(240, 211, 139, 0.35); }
