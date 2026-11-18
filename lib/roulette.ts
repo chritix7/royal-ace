@@ -132,9 +132,9 @@ export function drawNumber(): number {
 
 /** Table limits: per bet, by how many numbers it covers, and in total. */
 export const TABLE_MIN = 10;
-export const TABLE_MAX = 50000;
-export const LIMIT_BY_SIZE: Record<number, number> = { 1: 1000, 2: 2000, 3: 3000, 4: 4000, 6: 6000, 12: 10000, 18: 20000 };
-export const limitOf = (key: string) => LIMIT_BY_SIZE[coverage(key).length] ?? 1000;
+export const TABLE_MAX = 500000;
+export const LIMIT_BY_SIZE: Record<number, number> = { 1: 10000, 2: 20000, 3: 30000, 4: 40000, 6: 60000, 12: 100000, 18: 200000 };
+export const limitOf = (key: string) => LIMIT_BY_SIZE[coverage(key).length] ?? 10000;
 /** Kept for labels. */
 export const MAX_STRAIGHT = LIMIT_BY_SIZE[1];
 export const MAX_OUTSIDE = LIMIT_BY_SIZE[18];

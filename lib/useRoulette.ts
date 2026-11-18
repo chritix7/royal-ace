@@ -29,7 +29,7 @@ export const BALL_LAND_AT = 0.8;
 const KEY = "royalace:roulette";
 const HISTORY_MAX = 200;
 /** Chips offered on the roulette console. */
-export const ROULETTE_CHIPS = CHIPS.slice(0, 8);
+export const ROULETTE_CHIPS = [10, 50, 100, 500, 1000, 5000, 10000, 50000].filter((v) => CHIPS.includes(v));
 
 type Saved = {
   history: number[];
