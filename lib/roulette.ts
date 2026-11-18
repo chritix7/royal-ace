@@ -84,17 +84,36 @@ export type Bets = Record<string, number>;
 
 export const totalOf = (bets: Bets) => Object.values(bets).reduce((a, b) => a + b, 0);
 
-/** What the table pays for a result: stake back + winnings, per winning bet. */
+/** Even-money bets that can't be played together (they cancel out). */
+export const OPPOSITE: Partial<Record<OutsideKey, OutsideKey>> = {
+  red: "black",
+  black: "red",
+  odd: "even",
+  even: "odd",
+  low: "high",
+  high: "low",
+};
+const EVEN_MONEY = new Set<string>(Object.keys(OPPOSITE));
+
+/**
+ * What the table pays for a result: stake back + winnings, per winning
+ * bet. La Partage: on zero, even-money bets get half their stake back.
+ */
 export function settle(bets: Bets, n: number) {
   let returned = 0;
   const winners: string[] = [];
+  const halved: string[] = [];
   for (const [key, amount] of Object.entries(bets)) {
-    if (amount > 0 && coverage(key).includes(n)) {
+    if (amount <= 0) continue;
+    if (coverage(key).includes(n)) {
       returned += amount * (payoutOf(key) + 1);
       winners.push(key);
+    } else if (n === 0 && EVEN_MONEY.has(key)) {
+      returned += Math.floor(amount / 2);
+      halved.push(key);
     }
   }
-  return { returned, winners };
+  return { returned, winners, halved };
 }
 
 /** Fair draw: crypto-backed when available. */
@@ -111,11 +130,33 @@ export function drawNumber(): number {
   }
 }
 
-/** Table limits. */
+/** Table limits: per bet, by how many numbers it covers, and in total. */
 export const TABLE_MIN = 10;
-export const MAX_STRAIGHT = 5000;
-export const MAX_OUTSIDE = 50000;
-export const limitOf = (key: string) => (key.startsWith("i:") ? MAX_STRAIGHT * Math.min(6, coverage(key).length) : MAX_OUTSIDE);
+export const TABLE_MAX = 50000;
+export const LIMIT_BY_SIZE: Record<number, number> = { 1: 1000, 2: 2000, 3: 3000, 4: 4000, 6: 6000, 12: 10000, 18: 20000 };
+export const limitOf = (key: string) => LIMIT_BY_SIZE[coverage(key).length] ?? 1000;
+/** Kept for labels. */
+export const MAX_STRAIGHT = LIMIT_BY_SIZE[1];
+export const MAX_OUTSIDE = LIMIT_BY_SIZE[18];
+
+const DOZENS = ["dz1", "dz2", "dz3"];
+const COLUMNS = ["col1", "col2", "col3"];
+
+/**
+ * Why a chip can't go on `key` with the current bets (null = allowed).
+ * Real-table rules: no opposite even-money bets, at most two dozens and
+ * two columns per spin.
+ */
+export function ruleBreak(bets: Bets, key: string): string | null {
+  const opp = OPPOSITE[key as OutsideKey];
+  if (opp && (bets[opp] ?? 0) > 0) return `Can't bet ${betName(key)} and ${betName(opp)} together`;
+  for (const group of [DOZENS, COLUMNS]) {
+    if (!group.includes(key) || (bets[key] ?? 0) > 0) continue;
+    const used = group.filter((k) => (bets[k] ?? 0) > 0).length;
+    if (used >= 2) return `Two ${group === DOZENS ? "dozens" : "columns"} at most per spin`;
+  }
+  return null;
+}
 
 /** Neighbours of a number on the wheel (for the racetrack hover / stats). */
 export function neighbours(n: number, k = 2) {

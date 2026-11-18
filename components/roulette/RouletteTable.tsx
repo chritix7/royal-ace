@@ -1,9 +1,9 @@
 "use client";
 
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent, type ReactNode } from "react";
-import { TableChip } from "../ChipButton";
+import { ChipFace, TableChip } from "../ChipButton";
 import { betName, colorOf, coverage, insideKey, payoutOf, type OutsideKey } from "../../lib/roulette";
-import type { RouletteGame } from "../../lib/useRoulette";
+import { ROULETTE_CHIPS, type RouletteGame } from "../../lib/useRoulette";
 
 /**
  * The betting layout. Numbers sit on a 12 × 3 grid in "logical" units:
@@ -38,7 +38,29 @@ function buildSpots(): Spot[] {
 }
 const SPOTS = buildSpots();
 
-export default function RouletteTable({ g, vertical }: { g: RouletteGame; vertical: boolean }) {
+/** Chips under the top one, biggest first (at most 4 more discs). */
+function stackOf(amount: number) {
+  const discs: number[] = [];
+  let rest = amount;
+  for (const v of [...ROULETTE_CHIPS].reverse()) {
+    while (rest >= v && discs.length < 5) {
+      discs.push(v);
+      rest -= v;
+    }
+  }
+  return discs.slice(0, -1);
+}
+
+export default function RouletteTable({
+  g,
+  vertical,
+  onHover,
+}: {
+  g: RouletteGame;
+  vertical: boolean;
+  /** The bet under the mouse (PC), for the info line. */
+  onHover?: (key: string | null) => void;
+}) {
   const { bets, phase, result, place } = g;
   const overlayRef = useRef<HTMLDivElement>(null);
   const [cell, setCell] = useState({ w: 60, h: 60 });
@@ -49,7 +71,9 @@ export default function RouletteTable({ g, vertical }: { g: RouletteGame; vertic
     const el = overlayRef.current;
     if (!el) return;
     const read = () => {
-      const { width, height } = el.getBoundingClientRect();
+      // Layout size (not the on-screen one: the table may be tilted in 3D).
+      const width = el.offsetWidth;
+      const height = el.offsetHeight;
       setCell(vertical ? { w: width / 3, h: height / 12 } : { w: width / 12, h: height / 3 });
     };
     read();
@@ -70,7 +94,9 @@ export default function RouletteTable({ g, vertical }: { g: RouletteGame; vertic
   const at = (u: number, v: number): CSSProperties =>
     vertical ? { top: `${(u / 12) * 100}%`, left: `${((3 - v) / 3) * 100}%` } : { left: `${(u / 12) * 100}%`, top: `${(v / 3) * 100}%` };
 
-  const chipState = (key: string) => (phase !== "result" ? "" : winners.has(key) ? "rt-chip--win" : "rt-chip--lose");
+  const halved = new Set(phase === "result" && result ? (result.halved ?? []) : []);
+  const chipState = (key: string) =>
+    phase !== "result" ? "" : winners.has(key) ? "rt-chip--win" : halved.has(key) ? "rt-chip--half" : "rt-chip--lose";
   const chip = (key: string, style?: CSSProperties) => {
     const amount = bets[key];
     if (!amount) return null;
@@ -80,17 +106,33 @@ export default function RouletteTable({ g, vertical }: { g: RouletteGame; vertic
         className={`rt-chip pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 ${chipState(key)}`}
         style={{ width: chipPx, height: chipPx, ...style }}
       >
-        <TableChip amount={amount} />
-        {phase === "result" && winners.has(key) && (
-          <span className="rt-chip-pay">×{payoutOf(key)}</span>
-        )}
+        {(() => {
+          const under = stackOf(amount);
+          return under.map((v, i) => (
+            <span key={i} className="rt-disc" style={{ transform: `translateY(${(under.length - i) * 11}%)` }}>
+              <ChipFace value={v} label="" />
+            </span>
+          ));
+        })()}
+        <span className="rt-disc rt-disc--top">
+          <TableChip amount={amount} />
+        </span>
+        {phase === "result" && winners.has(key) && <span className="rt-chip-pay">×{payoutOf(key)}</span>}
+        {phase === "result" && halved.has(key) && <span className="rt-chip-pay">½</span>}
       </span>
     );
   };
 
   const hoverProps = (key: string) => ({
-    onPointerEnter: (e: RPointerEvent) => e.pointerType === "mouse" && setHover(key),
-    onPointerLeave: () => setHover((h) => (h === key ? null : h)),
+    onPointerEnter: (e: RPointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      setHover(key);
+      onHover?.(key);
+    },
+    onPointerLeave: () => {
+      setHover((h) => (h === key ? null : h));
+      onHover?.(null);
+    },
   });
 
   const label = (key: string) => `${betName(key)} · pays ${payoutOf(key)} to 1${bets[key] ? ` · ◈ ${bets[key]} on it` : ""}`;
@@ -109,6 +151,7 @@ export default function RouletteTable({ g, vertical }: { g: RouletteGame; vertic
         {...hoverProps(key)}
       >
         <span className="rt-num__label">{n}</span>
+        {winN === n && <span className="rt-dolly" aria-hidden="true" />}
       </button>
     );
   };
@@ -189,7 +232,10 @@ export default function RouletteTable({ g, vertical }: { g: RouletteGame; vertic
       style={gridStyle}
       role="group"
       aria-label="Roulette betting table"
-      onPointerLeave={() => setHover(null)}
+      onPointerLeave={() => {
+        setHover(null);
+        onHover?.(null);
+      }}
     >
       {/* Zero */}
       <button
@@ -202,6 +248,7 @@ export default function RouletteTable({ g, vertical }: { g: RouletteGame; vertic
         {...hoverProps(zero)}
       >
         <span className="rt-num__label">0</span>
+        {winN === 0 && <span className="rt-dolly" aria-hidden="true" />}
         {chip(zero, { left: "50%", top: "50%" })}
       </button>
 

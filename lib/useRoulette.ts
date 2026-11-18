@@ -7,7 +7,7 @@ import { sfx } from "./sound";
 import { track } from "./events";
 import { sessionStore } from "./sessionStore";
 import { useBalance, wallet } from "./wallet";
-import { coverage, drawNumber, limitOf, settle, totalOf, type Bets } from "./roulette";
+import { coverage, drawNumber, limitOf, ruleBreak, settle, TABLE_MAX, totalOf, type Bets } from "./roulette";
 
 export type RoulettePhase = "betting" | "spinning" | "result";
 export type RouletteResult = {
@@ -16,6 +16,8 @@ export type RouletteResult = {
   returned: number;
   staked: number;
   winners: string[];
+  /** Even-money bets half returned on zero (La Partage). */
+  halved: string[];
   bets: Bets;
 };
 
@@ -75,6 +77,8 @@ export function useRoulette(active: boolean) {
   const [target, setTarget] = useState<number | null>(null);
   const [spinId, setSpinId] = useState(0);
   const [message, setMessage] = useState("Place your bets");
+  // Bumped when a chip is refused (rule, limit): the table shakes the message.
+  const [refused, setRefused] = useState(0);
 
   const savedRef = useRef<Saved>({ history: [], lastBets: {}, chip: ROULETTE_CHIPS[0], quick: false, pending: null });
   const persist = (patch: Partial<Saved>) => {
@@ -98,7 +102,8 @@ export function useRoulette(active: boolean) {
   }, []);
 
   const staked = totalOf(bets);
-  const available = balance - (phase === "spinning" ? 0 : staked);
+  // Chips not yet on the table (bets are only taken when the wheel spins).
+  const available = balance - (phase === "betting" ? staked : 0);
 
   /** Start a fresh round when the player acts on a finished one. */
   const freshBets = (): Bets => (phase === "result" ? {} : bets);
@@ -116,10 +121,23 @@ export function useRoulette(active: boolean) {
       const base = freshBets();
       const total = totalOf(base);
       const current = base[key] ?? 0;
-      const room = Math.min(limitOf(key) - current, balance - total);
+      const broken = ruleBreak(base, key);
+      if (broken) {
+        setMessage(broken);
+        setRefused((r) => r + 1);
+        return false;
+      }
+      const room = Math.min(limitOf(key) - current, balance - total, TABLE_MAX - total);
       const add = Math.min(amount, room);
       if (add <= 0) {
-        setMessage(balance - total <= 0 ? "Not enough chips" : "Table limit reached on this bet");
+        setMessage(
+          balance - total <= 0
+            ? "Not enough chips"
+            : total >= TABLE_MAX
+              ? `Table maximum ◈ ${TABLE_MAX.toLocaleString("en-US")} reached`
+              : `Maximum ◈ ${limitOf(key).toLocaleString("en-US")} on this bet`,
+        );
+        setRefused((r) => r + 1);
         return false;
       }
       leaveResult();
@@ -172,6 +190,10 @@ export function useRoulette(active: boolean) {
       setMessage("Not enough chips to double");
       return;
     }
+    if (total * 2 > TABLE_MAX) {
+      setMessage(`Table maximum ◈ ${TABLE_MAX.toLocaleString("en-US")}`);
+      return;
+    }
     const next: Bets = {};
     for (const [k, v] of Object.entries(base)) next[k] = Math.min(limitOf(k), v * 2);
     leaveResult();
@@ -209,8 +231,8 @@ export function useRoulette(active: boolean) {
       return;
     }
     const n = drawNumber();
-    const { returned, winners } = settle(round, n);
-    const res: RouletteResult = { n, returned, staked: total, winners, bets: round };
+    const { returned, winners, halved } = settle(round, n);
+    const res: RouletteResult = { n, returned, staked: total, winners, halved, bets: round };
     wallet.add(-total);
     wallet.setLocked(true);
     persist({ pending: res, lastBets: round });
@@ -248,11 +270,17 @@ export function useRoulette(active: boolean) {
     setResult(res);
     setPhase("result");
     if (res.returned > 0) {
-      track("rouletteWin");
+      if (res.winners.length) track("rouletteWin");
       if (res.winners.some((k) => coverage(k).length === 1)) track("rouletteStraight");
       window.setTimeout(() => (net >= res.staked * 10 ? sfx.bigWin() : sfx.win()), 250);
       haptic(net >= res.staked * 10 ? HAPTIC.big : HAPTIC.win);
-      setMessage(net > 0 ? `You win ◈ ${res.returned.toLocaleString("en-US")}` : `◈ ${res.returned.toLocaleString("en-US")} back`);
+      setMessage(
+        net > 0
+          ? `You win ◈ ${res.returned.toLocaleString("en-US")}`
+          : res.winners.length === 0 && res.halved.length
+            ? `La Partage · ◈ ${res.returned.toLocaleString("en-US")} back`
+            : `◈ ${res.returned.toLocaleString("en-US")} back`,
+      );
     } else {
       setMessage("No win this time");
     }
@@ -313,6 +341,7 @@ export function useRoulette(active: boolean) {
     target,
     spinId,
     message,
+    refused,
     canUndo: phase === "betting" && undoStack.length > 0,
     spinMs: quick ? SPIN_MS.quick : SPIN_MS.normal,
     place,

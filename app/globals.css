@@ -1429,7 +1429,7 @@ body {
     conic-gradient(from 45deg, #24262b 25%, #1f2125 0 50%, #24262b 0 75%, #1f2125 0) 0 0 / 5px 5px;
   box-shadow: 0 0 0 1px rgba(215, 180, 91, 0.55), 0 0 0 4px #0b0b0d, 0 0 0 5px rgba(215, 180, 91, 0.25), 0 18px 40px rgba(0, 0, 0, 0.55);
 }
-.roulette-felt > button { box-shadow: inset 0 0 0 0.5px rgba(215, 180, 91, 0.5); touch-action: manipulation; -webkit-tap-highlight-color: transparent; outline: none; }
+.roulette-felt > button { box-shadow: inset 0 0 0 0.75px rgba(229, 199, 121, 0.72); touch-action: manipulation; -webkit-tap-highlight-color: transparent; outline: none; }
 .roulette-felt > button:focus-visible { box-shadow: inset 0 0 0 2px #e5c779; }
 .rt-num { position: relative; display: flex; align-items: center; justify-content: center; transition: filter 0.15s; }
 .rt-num--red { background: linear-gradient(180deg, #a3121c, #760c13); }
@@ -1500,4 +1500,99 @@ body {
 @keyframes rl-ready { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
   .rl-spin.is-ready::after, .rt-num.is-win::after, .rt-chip, .roulette-result { animation: none; }
+}
+
+/* ---------- Roulette: premium 3D pass (PC) ---------- */
+/* Overhead light breathing over the table */
+.rl-stage { isolation: isolate; }
+.rl-stage::before {
+  content: ""; position: absolute; inset: -10% 0 auto 30%; height: 85%; z-index: -1; pointer-events: none;
+  background: radial-gradient(50% 55% at 50% 40%, rgba(255, 236, 190, 0.10), rgba(255, 236, 190, 0.03) 55%, transparent 75%);
+  animation: rl-breathe 7s ease-in-out infinite;
+}
+.rl-stage::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(140% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.55));
+}
+@keyframes rl-breathe { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
+
+/* Croupier's line */
+.rl-announce { display: inline-flex; min-width: 0; align-items: center; gap: 0.6rem; border-radius: 9999px; border: 1px solid rgba(215, 180, 91, 0.35); background: linear-gradient(180deg, rgba(26, 27, 31, 0.9), rgba(10, 10, 12, 0.9)); padding: 0.4rem 1rem; font-size: 11px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: #efe2bd; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 6px 16px rgba(0, 0, 0, 0.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rl-announce.is-hover { color: #f5d778; border-color: rgba(240, 211, 139, 0.6); letter-spacing: 0.1em; }
+.rl-announce__dot { width: 6px; height: 6px; flex-shrink: 0; border-radius: 9999px; background: #e5c779; box-shadow: 0 0 8px rgba(229, 199, 121, 0.9); }
+.rl-shake { animation: rl-shake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97); border-color: rgba(255, 110, 110, 0.6); color: #ffd0d0; }
+@keyframes rl-shake { 10%, 90% { transform: translateX(-1px); } 20%, 80% { transform: translateX(2px); } 30%, 50%, 70% { transform: translateX(-4px); } 40%, 60% { transform: translateX(4px); } }
+
+/* Table in perspective, set in a black leather rail with gold stitching */
+.rl-table3d { perspective: 1500px; perspective-origin: 50% 0%; }
+.rl-rail {
+  position: relative; transform: rotateX(13deg); transform-origin: 50% 100%; border-radius: 26px; padding: 14px;
+  background:
+    radial-gradient(120% 140% at 50% 0%, rgba(255, 255, 255, 0.07), transparent 50%),
+    linear-gradient(180deg, #1c1c1f, #0c0c0e);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 -2px 0 rgba(0, 0, 0, 0.6),
+    0 2px 0 #2a2418, 0 6px 0 #0a0a0b, 0 8px 0 rgba(201, 162, 74, 0.25), 0 30px 50px rgba(0, 0, 0, 0.6);
+}
+.rl-rail::before { content: ""; position: absolute; inset: 6px; border-radius: 21px; border: 1px dashed rgba(215, 180, 91, 0.45); pointer-events: none; }
+.rl-rail .roulette-felt { box-shadow: 0 0 0 1px rgba(215, 180, 91, 0.6), inset 0 0 40px rgba(0, 0, 0, 0.45); }
+
+/* Chip stacks */
+.rt-disc { position: absolute; inset: 0; display: block; }
+.rt-disc:not(.rt-disc--top) { filter: brightness(0.62); }
+.rt-disc--top { z-index: 1; }
+.rt-chip--half { opacity: 0.6; }
+.rt-chip--win .rt-disc--top { animation: rt-chip-glow 1.2s ease-in-out infinite alternate; }
+@keyframes rt-chip-glow { from { transform: translateY(0); } to { transform: translateY(-8%); } }
+
+/* The croupier's dolly on the winning number */
+.rt-dolly { position: absolute; left: 50%; top: 50%; width: 46%; aspect-ratio: 1; max-width: 2.6rem; translate: -50% -50%; border-radius: 9999px; z-index: 3; pointer-events: none;
+  background: radial-gradient(circle at 38% 30%, #fffbe6 0%, #f0d38b 30%, #b88a32 70%, #6e5320 100%);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.55), 0 0 0 3px rgba(255, 243, 196, 0.6), 0 6px 10px rgba(0, 0, 0, 0.6), 0 0 22px rgba(240, 211, 139, 0.7);
+  animation: rt-dolly-in 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.25) both; }
+.rt-dolly::after { content: ""; position: absolute; inset: 26%; border-radius: 9999px; background: radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.1) 70%); }
+@keyframes rt-dolly-in { from { opacity: 0; transform: translateY(-60%) scale(1.6); } to { opacity: 1; transform: none; } }
+
+/* Result banner over the table */
+.rl-result-banner { animation: rl-banner 3.2s ease both; }
+@keyframes rl-banner { 0% { opacity: 0; } 10%, 82% { opacity: 1; } 100% { opacity: 0; } }
+.rl-result-card { display: flex; align-items: center; gap: 1.1rem; border-radius: 22px; padding: 0.9rem 1.6rem 0.9rem 0.9rem; border: 1px solid rgba(215, 180, 91, 0.55); background: linear-gradient(180deg, #17171a, #08080a); box-shadow: inset 0 1px 0 rgba(245, 215, 120, 0.2), 0 24px 60px rgba(0, 0, 0, 0.7); animation: rl-card-in 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.rl-result-card.is-win { border-color: rgba(240, 211, 139, 0.9); box-shadow: inset 0 1px 0 rgba(245, 215, 120, 0.3), 0 0 50px rgba(240, 211, 139, 0.25), 0 24px 60px rgba(0, 0, 0, 0.7); }
+@keyframes rl-card-in { from { opacity: 0; transform: translateY(10px) scale(0.92); } to { opacity: 1; transform: none; } }
+.rl-result-num { display: flex; height: 3.6rem; width: 3.6rem; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 9999px; font-family: var(--font-display), Georgia, serif; font-size: 1.7rem; font-weight: 700; color: #fff; box-shadow: 0 0 0 2px #f0d38b, 0 0 0 5px rgba(0, 0, 0, 0.6), 0 0 22px rgba(240, 211, 139, 0.5); }
+
+/* Console (PC) */
+.rl-console--pc { position: relative; }
+.rl-display { border-radius: 14px; border: 1px solid rgba(215, 180, 91, 0.3); background: linear-gradient(180deg, #050506, #0d0d10); box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.9), inset 0 -1px 0 rgba(255, 255, 255, 0.05); overflow: hidden; }
+.rl-meter { display: flex; min-width: 0; flex-direction: column; justify-content: center; padding: 0.4rem 0.9rem; }
+.rl-meter--mid { border-left: 1px solid rgba(215, 180, 91, 0.18); border-right: 1px solid rgba(215, 180, 91, 0.18); }
+.rl-meter__label { font-size: 9px; font-weight: 900; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(215, 180, 91, 0.75); }
+.rl-meter__value { display: flex; align-items: baseline; gap: 0.3rem; white-space: nowrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; font-weight: 900; font-size: clamp(1.15rem, 1.7vw, 1.75rem); line-height: 1.15; color: #f3dc98; text-shadow: 0 0 14px rgba(240, 211, 139, 0.35); }
+.rl-meter__cur { font-size: 0.65em; opacity: 0.7; }
+.rl-meter.is-hot { background: radial-gradient(120% 120% at 50% 100%, rgba(240, 211, 139, 0.18), transparent 70%); }
+.rl-meter.is-hot .rl-meter__value { color: #fff6d8; text-shadow: 0 0 18px rgba(240, 211, 139, 0.8); }
+.rl-tray { border-radius: 9999px; padding: 0.4rem 0.6rem; background: linear-gradient(180deg, #060607, #121216); box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.9), inset 0 -1px 0 rgba(255, 255, 255, 0.06), 0 1px 0 rgba(215, 180, 91, 0.2); }
+.rl-console--pc .rl-key { height: 1.85rem; padding: 0 0.55rem; }
+.rl-spin__icon { width: 1.4rem; height: 1.4rem; margin-bottom: 0.15rem; }
+.rl-spin.is-spinning .rl-spin__icon { animation: rl-icon-spin 1s linear infinite; }
+@keyframes rl-icon-spin { to { transform: rotate(360deg); } }
+.rl-spin { background: linear-gradient(160deg, #f8e6a6 0%, #d9b05a 35%, #b8862f 70%, #8f6522 100%); }
+.rl-spin::before { content: ""; position: absolute; inset: 3px; border-radius: 13px; border: 1px solid rgba(255, 255, 255, 0.35); pointer-events: none; }
+
+/* Wheel in 3D */
+.roulette-wheel.is-3d { filter: none; }
+.roulette-wheel.is-3d .rw-scene { perspective: 1300px; perspective-origin: 50% 20%; }
+.roulette-wheel.is-3d .rw-tilt { transform: rotateX(32deg); transform-style: preserve-3d; }
+.rw-body { position: absolute; inset: 0; transform-style: preserve-3d; }
+.rw-body > span { position: absolute; inset: 0; border-radius: 9999px; background: radial-gradient(circle, #0b0b0c 60%, #1a1a1d 92%, #2c2516 100%); box-shadow: 0 0 0 1px rgba(201, 162, 74, 0.35); }
+.rw-body > span:last-child { box-shadow: 0 30px 40px rgba(0, 0, 0, 0.75); }
+.rw-idle { animation: rw-idle 90s linear infinite; }
+@keyframes rw-idle { to { transform: rotate(360deg); } }
+.roulette-wheel.is-3d::after { content: ""; position: absolute; left: 6%; right: 6%; bottom: 2%; height: 16%; z-index: -1; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, 0.7), transparent); }
+@media (prefers-reduced-motion: reduce) {
+  .rw-idle, .rl-stage::before, .rt-chip--win .rt-disc--top, .rl-spin.is-spinning .rl-spin__icon { animation: none; }
+}
+@media (max-width: 1279px) {
+  .rl-console--pc .rl-key { height: 1.7rem; padding: 0 0.4rem; font-size: 9px; letter-spacing: 0.1em; }
+  .rl-tray { padding: 0.35rem 0.4rem; }
 }

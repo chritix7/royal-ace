@@ -189,6 +189,7 @@ export default function RouletteWheel({
   spinMs,
   onLanded,
   showResult,
+  tilt = false,
 }: {
   size: number | string;
   spinId: number;
@@ -197,6 +198,8 @@ export default function RouletteWheel({
   onLanded: (id: number) => void;
   /** Number shown on the turret once the ball has landed. */
   showResult: number | null;
+  /** PC: the wheel seen at an angle, with depth, turning slowly at rest. */
+  tilt?: boolean;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const rotorRef = useRef<HTMLDivElement>(null);
@@ -320,17 +323,30 @@ export default function RouletteWheel({
   return (
     <div
       ref={rootRef}
-      className="roulette-wheel relative aspect-square select-none"
+      className={`roulette-wheel relative aspect-square select-none ${tilt ? "is-3d" : ""}`}
       style={{ width: size }}
       role="img"
       aria-label={showResult == null ? "Roulette wheel" : `Roulette wheel — ${showResult} ${color}`}
     >
-      <Bowl />
-      <div ref={rotorRef} className="absolute inset-0 will-change-transform">
-        <Rotor />
-        <div ref={armRef} className="absolute inset-0 will-change-transform">
-          <div ref={radRef} className="absolute left-1/2 top-1/2 will-change-transform">
-            <span className="roulette-ball block" />
+      <div className="rw-scene absolute inset-0">
+        <div className="rw-tilt absolute inset-0">
+          {tilt && (
+            <div className="rw-body" aria-hidden="true">
+              {Array.from({ length: 7 }, (_, i) => (
+                <span key={i} style={{ transform: `translateZ(${-(i + 1) * 3.2}px)` }} />
+              ))}
+            </div>
+          )}
+          <Bowl />
+          <div className={`absolute inset-0 ${tilt ? "rw-idle" : ""}`}>
+            <div ref={rotorRef} className="absolute inset-0 will-change-transform">
+              <Rotor />
+              <div ref={armRef} className="absolute inset-0 will-change-transform">
+                <div ref={radRef} className="absolute left-1/2 top-1/2 will-change-transform">
+                  <span className="roulette-ball block" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

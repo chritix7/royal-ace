@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ChipFace } from "./ChipButton";
+import { Counter } from "./ui";
 import RouletteTable from "./roulette/RouletteTable";
 import RouletteWheel from "./roulette/RouletteWheel";
 import { money } from "../lib/game";
-import { colorOf, MAX_OUTSIDE, MAX_STRAIGHT, TABLE_MIN } from "../lib/roulette";
+import { betName, colorOf, coverage, LIMIT_BY_SIZE, limitOf, payoutOf, TABLE_MAX, TABLE_MIN } from "../lib/roulette";
 import { ROULETTE_CHIPS, useRoulette, type RouletteGame } from "../lib/useRoulette";
 import { exitFullscreenSettled, isNarrowScreen, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
 import { useSession } from "../lib/sessionStore";
@@ -112,14 +113,14 @@ function Trends({ g, compact = false }: { g: RouletteGame; compact?: boolean }) 
 function InfoPanel({ onClose, g }: { onClose: () => void; g: RouletteGame }) {
   const session = useSession();
   const today = session.roulette;
-  const rows: [string, string, string][] = [
-    ["Straight", "1 number", "35 : 1"],
-    ["Split", "2 numbers", "17 : 1"],
-    ["Street / Trio", "3 numbers", "11 : 1"],
-    ["Corner / First four", "4 numbers", "8 : 1"],
-    ["Six line", "6 numbers", "5 : 1"],
-    ["Dozen / Column", "12 numbers", "2 : 1"],
-    ["Red · Black · Even · Odd · 1–18 · 19–36", "18 numbers", "1 : 1"],
+  const rows: [string, string, string, number][] = [
+    ["Straight", "1 number", "35 : 1", LIMIT_BY_SIZE[1]],
+    ["Split", "2 numbers", "17 : 1", LIMIT_BY_SIZE[2]],
+    ["Street / Trio", "3 numbers", "11 : 1", LIMIT_BY_SIZE[3]],
+    ["Corner / First four", "4 numbers", "8 : 1", LIMIT_BY_SIZE[4]],
+    ["Six line", "6 numbers", "5 : 1", LIMIT_BY_SIZE[6]],
+    ["Dozen / Column", "12 numbers", "2 : 1", LIMIT_BY_SIZE[12]],
+    ["Red · Black · Even · Odd · 1–18 · 19–36", "18 numbers", "1 : 1", LIMIT_BY_SIZE[18]],
   ];
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -145,12 +146,13 @@ function InfoPanel({ onClose, g }: { onClose: () => void; g: RouletteGame }) {
           <section className="rl-card">
             <p className="rl-eyebrow">Payouts</p>
             <dl className="mt-2 divide-y divide-white/[0.06] text-[12.5px]">
-              {rows.map(([bet, nums, pays]) => (
-                <div key={bet} className="flex items-center justify-between gap-3 py-1.5">
+              {rows.map(([bet, nums, pays, max]) => (
+                <div key={bet} className="grid grid-cols-[minmax(0,1fr)_auto_4.5rem] items-center gap-3 py-1.5">
                   <dt className="text-white/80">
                     {bet} <span className="text-white/35">· {nums}</span>
                   </dt>
                   <dd className="shrink-0 font-mono font-black text-[#f0d99a]">{pays}</dd>
+                  <dd className="text-right font-mono text-[11px] text-white/45">max {money(max)}</dd>
                 </div>
               ))}
             </dl>
@@ -158,10 +160,15 @@ function InfoPanel({ onClose, g }: { onClose: () => void; g: RouletteGame }) {
           <section className="rl-card text-[12.5px] leading-5 text-white/65">
             <p className="rl-eyebrow">Table rules</p>
             <ul className="mt-2 list-disc space-y-1 pl-4">
-              <li>Single zero wheel (37 pockets): house edge 2.7%.</li>
-              <li>On zero, outside bets (colours, even chances, dozens, columns) lose.</li>
+              <li>Single zero wheel (37 pockets).</li>
               <li>
-                Minimum chip ◈ {TABLE_MIN} · up to ◈ {money(MAX_STRAIGHT)} on a number · ◈ {money(MAX_OUTSIDE)} on an outside bet.
+                <span className="text-[#f0d99a]">La Partage:</span> when zero comes out, even-money bets (Red, Black, Even, Odd, 1–18, 19–36) get half their stake back. Dozens and
+                columns lose.
+              </li>
+              <li>Opposite even-money bets can&apos;t be played together (Red with Black, Even with Odd, 1–18 with 19–36).</li>
+              <li>Two dozens and two columns at most per spin.</li>
+              <li>
+                Minimum chip ◈ {TABLE_MIN} · table maximum ◈ {money(TABLE_MAX)} per spin. Each bet has its own maximum (see payouts).
               </li>
               <li>Tap a line between numbers for a split, a corner for four numbers, the edge of a row for a street or six line.</li>
             </ul>
@@ -203,10 +210,36 @@ function InfoPanel({ onClose, g }: { onClose: () => void; g: RouletteGame }) {
 }
 
 const Kbd = ({ k }: { k: string }) => (
-  <span aria-hidden="true" className="ml-1 hidden rounded-[4px] border border-current px-1 py-px text-[8px] leading-none opacity-45 lg:inline-block">
+  <span aria-hidden="true" className="ml-1 hidden rounded-[4px] border border-current px-1 py-px text-[8px] leading-none opacity-45 xl:inline-block">
     {k}
   </span>
 );
+
+/** Big result announcement over the table (PC). */
+function ResultBanner({ result }: { result: { n: number; returned: number; staked: number; winners: string[]; halved?: string[] } }) {
+  const n = result.n;
+  const c = colorOf(n);
+  const facts =
+    n === 0
+      ? ["Zero"]
+      : [c === "red" ? "Red" : "Black", n % 2 ? "Odd" : "Even", n <= 18 ? "1–18" : "19–36", `${Math.ceil(n / 12)}${["st", "nd", "rd"][Math.ceil(n / 12) - 1]} dozen`];
+  const net = result.returned - result.staked;
+  const straight = result.winners.some((k) => coverage(k).length === 1);
+  return (
+    <div className="rl-result-banner pointer-events-none absolute inset-0 z-30 flex items-center justify-center" role="status">
+      <div className={`rl-result-card ${net > 0 ? "is-win" : ""}`}>
+        <span className={`rl-result-num rl-pill--${c}`}>{n}</span>
+        <div className="min-w-0">
+          <p className="text-[10px] font-black tracking-[0.3em] text-white/50">{facts.join(" · ").toUpperCase()}</p>
+          <p className={`font-display text-2xl font-bold tracking-[0.08em] xl:text-3xl ${net > 0 ? "gold-text" : "text-white/80"}`}>
+            {net > 0 ? `WIN ◈ ${money(result.returned)}` : result.returned > 0 ? `◈ ${money(result.returned)} BACK` : "NO WIN"}
+          </p>
+          {straight && <p className="text-[10px] font-black tracking-[0.25em] text-[#f5d778]">STRAIGHT UP · 35 TO 1</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /** Chip selector + quick keys + Spin. */
 function Console({ g, onInfo, desktop }: { g: RouletteGame; onInfo: () => void; desktop: boolean }) {
@@ -219,7 +252,7 @@ function Console({ g, onInfo, desktop }: { g: RouletteGame; onInfo: () => void; 
     </button>
   );
   const chips = (
-    <div className="flex items-center justify-center gap-1 sm:gap-1.5" role="radiogroup" aria-label="Chip value">
+    <div className="flex items-center justify-center gap-1 sm:gap-1.5 lg:gap-1 xl:gap-1.5" role="radiogroup" aria-label="Chip value">
       {ROULETTE_CHIPS.map((v, i) => (
         <button
           key={v}
@@ -229,7 +262,7 @@ function Console({ g, onInfo, desktop }: { g: RouletteGame; onInfo: () => void; 
           aria-label={`Chip ${v}`}
           title={`Chip ${money(v)} (${i + 1})`}
           onClick={() => g.setChip(v)}
-          className={`rl-chip-pick relative aspect-square w-[clamp(1.9rem,9.6vw,2.4rem)] shrink-0 rounded-full lg:w-[clamp(1.6rem,2.5vw,2.5rem)] ${g.chip === v ? "is-selected" : ""}`}
+          className={`rl-chip-pick relative aspect-square w-[clamp(1.9rem,9.6vw,2.4rem)] shrink-0 rounded-full lg:w-[clamp(1.3rem,2.05vw,2.5rem)] ${g.chip === v ? "is-selected" : ""}`}
         >
           <ChipFace value={v} />
         </button>
@@ -244,17 +277,24 @@ function Console({ g, onInfo, desktop }: { g: RouletteGame; onInfo: () => void; 
       {key(<>×2<Kbd k="X" /></>, g.double, spinning || g.staked === 0, "Double bets")}
     </>
   );
+  const rebetSpin = g.staked === 0 && Object.keys(g.lastBets).length > 0 && !spinning;
   const spinKey = (
     <button
       type="button"
       onClick={g.spin}
       disabled={!canSpin}
       aria-label="Spin"
-      className={`rl-spin ${canSpin ? "is-ready" : ""}`}
+      className={`rl-spin ${canSpin ? "is-ready" : ""} ${spinning ? "is-spinning" : ""}`}
     >
-      <span className="text-[13px] tracking-[0.22em] lg:text-[15px]">{spinning ? "…" : g.staked === 0 && Object.keys(g.lastBets).length ? "REBET" : "SPIN"}</span>
+      {desktop && (
+        <svg aria-hidden="true" viewBox="0 0 24 24" className="rl-spin__icon">
+          <path d="M20 12a8 8 0 1 1-2.34-5.66" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+          <path d="M20 4v4.5h-4.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
+      <span className="text-[13px] tracking-[0.22em] lg:text-[17px]">{spinning ? "SPINNING" : rebetSpin ? "REBET" : "SPIN"}</span>
       <span className="text-[9px] font-black tracking-[0.2em] opacity-60">
-        {spinning ? "NO MORE BETS" : g.staked === 0 && Object.keys(g.lastBets).length ? "& SPIN" : desktop ? "SPACE" : `◈ ${money(g.staked)}`}
+        {spinning ? "NO MORE BETS" : rebetSpin ? "& SPIN" : desktop ? "SPACE" : `◈ ${money(g.staked)}`}
       </span>
     </button>
   );
@@ -272,19 +312,46 @@ function Console({ g, onInfo, desktop }: { g: RouletteGame; onInfo: () => void; 
   );
 
   if (desktop) {
+    const credit = g.available;
     return (
-      <div className="rl-console grid grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto] grid-rows-[auto_auto] items-center gap-x-3 gap-y-2 px-3 py-2.5 xl:gap-x-4 xl:px-4">
-        <div className="grid w-[11rem] grid-cols-2 gap-2 xl:w-[14rem]">{meters}</div>
-        <div className="min-w-0">{chips}</div>
-        <div className="row-span-2 flex h-full w-[6.5rem] xl:w-[8rem]">{spinKey}</div>
-        <div className="col-span-2 flex flex-wrap items-center justify-center gap-1.5">
-          {keys}
-          <button type="button" onClick={g.toggleQuick} aria-pressed={g.quick} className={`rl-key ${g.quick ? "is-on" : ""}`}>
-            Quick<Kbd k="T" />
-          </button>
-          <button type="button" onClick={onInfo} className="rl-key hidden xl:inline-flex" aria-label="Rules and payouts">
-            Info
-          </button>
+      <div className="rl-console rl-console--pc grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2.5 p-3 xl:gap-x-4 xl:p-3.5">
+        {/* Display: credit · total bet · win */}
+        <div className="rl-display grid grid-cols-3">
+          <div className="rl-meter">
+            <span className="rl-meter__label">Credit</span>
+            <span className="rl-meter__value">
+              <span className="rl-meter__cur">◈</span>
+              <Counter value={credit} />
+            </span>
+          </div>
+          <div className="rl-meter rl-meter--mid">
+            <span className="rl-meter__label">Total bet</span>
+            <span className="rl-meter__value">
+              <span className="rl-meter__cur">◈</span>
+              <Counter value={g.staked} />
+            </span>
+          </div>
+          <div className={`rl-meter ${won > 0 ? "is-hot" : ""}`}>
+            <span className="rl-meter__label">{g.phase === "result" ? "Win" : "Last win"}</span>
+            <span key={won > 0 ? g.spinId : 0} className={`rl-meter__value ${won > 0 ? "meter-hit" : ""}`}>
+              <span className="rl-meter__cur">◈</span>
+              <Counter value={won} />
+            </span>
+          </div>
+        </div>
+        <div className="row-span-2 flex w-[7rem] xl:w-[8.5rem]">{spinKey}</div>
+        {/* Chip tray + keys */}
+        <div className="flex min-w-0 items-center gap-2 xl:gap-3">
+          <div className="rl-tray min-w-0 flex-1">{chips}</div>
+          <div className="grid shrink-0 grid-cols-3 gap-1">
+            {keys}
+            <button type="button" onClick={g.toggleQuick} aria-pressed={g.quick} className={`rl-key ${g.quick ? "is-on" : ""}`}>
+              Quick<Kbd k="T" />
+            </button>
+            <button type="button" onClick={onInfo} className="rl-key hidden xl:inline-flex" aria-label="Rules and payouts">
+              Info
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -398,9 +465,23 @@ export default function Roulette({
   }, [focus]);
 
   const wheelResult = g.phase === "result" && g.result ? g.result.n : null;
-  const wheel = (size: string) => (
-    <RouletteWheel size={size} spinId={g.spinId} target={g.target} spinMs={g.spinMs} onLanded={g.landed} showResult={wheelResult} />
+  const wheel = (size: string, tilt = false) => (
+    <RouletteWheel size={size} spinId={g.spinId} target={g.target} spinMs={g.spinMs} onLanded={g.landed} showResult={wheelResult} tilt={tilt} />
   );
+  // PC: the bet under the mouse, described in the croupier's line.
+  const [hoverKey, setHoverKey] = useState<string | null>(null);
+  // A refused chip's reason stays readable for a moment, even under the mouse.
+  const [refusalShown, setRefusalShown] = useState(false);
+  useEffect(() => {
+    if (!g.refused) return;
+    setRefusalShown(true);
+    const t = window.setTimeout(() => setRefusalShown(false), 1800);
+    return () => window.clearTimeout(t);
+  }, [g.refused]);
+  const hoverInfo =
+    hoverKey && g.phase !== "spinning" && !refusalShown
+      ? `${betName(hoverKey)} · pays ${payoutOf(hoverKey)} to 1 · max ◈ ${money(limitOf(hoverKey))}${g.bets[hoverKey] && g.phase === "betting" ? ` · ◈ ${money(g.bets[hoverKey])} on it` : ""}`
+      : null;
 
   const plaque = (
     <div className="rl-plaque mx-auto flex flex-col items-center px-6 py-1.5 text-center lg:px-8 lg:py-2">
@@ -440,7 +521,7 @@ export default function Roulette({
             <div className="flex min-h-0 flex-col items-center gap-3">
               {plaque}
               <div className="flex min-h-0 w-full flex-1 items-center justify-center">
-                {wheel("min(100%, calc(100dvh - 26rem), 32rem)")}
+                {wheel("min(100%, calc(100dvh - 24rem), 32rem)", true)}
               </div>
               <div className="rl-card w-full space-y-2.5">
                 <div className="flex items-center justify-between gap-2">
@@ -456,15 +537,26 @@ export default function Roulette({
             {/* Table column */}
             <div className="flex min-h-0 flex-col justify-center gap-3">
               <div className="flex items-center justify-between gap-3">
-                <p className="rl-message" role="status" aria-live="polite">
-                  {g.message}
+                <p
+                  key={`m-${g.refused}`}
+                  className={`rl-announce ${refusalShown ? "rl-shake" : ""} ${hoverInfo ? "is-hover" : ""}`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  <span className="rl-announce__dot" aria-hidden="true" />
+                  {hoverInfo ?? g.message}
                 </p>
-                <p className="text-[10px] font-bold tracking-[0.2em] text-white/35">
-                  MIN ◈ {TABLE_MIN} · MAX ◈ {money(MAX_STRAIGHT)} STRAIGHT
+                <p className="shrink-0 text-[10px] font-bold tracking-[0.2em] text-white/35">
+                  MIN ◈ {TABLE_MIN} · MAX ◈ {money(TABLE_MAX)}
                 </p>
               </div>
-              <div className="[--rt-out:calc(var(--rt-row)*0.7)] [--rt-row:clamp(3rem,9.6dvh,6.75rem)]">
-                <RouletteTable g={g} vertical={false} />
+              <div className="relative">
+                <div className="rl-table3d [--rt-out:calc(var(--rt-row)*0.7)] [--rt-row:clamp(2.75rem,8.6dvh,6.25rem)]">
+                  <div className="rl-rail">
+                    <RouletteTable g={g} vertical={false} onHover={setHoverKey} />
+                  </div>
+                </div>
+                {g.phase === "result" && g.result && <ResultBanner key={g.spinId} result={g.result} />}
               </div>
               <Console g={g} onInfo={() => setInfoOpen(true)} desktop />
             </div>
