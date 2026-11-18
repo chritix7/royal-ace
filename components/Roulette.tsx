@@ -310,10 +310,6 @@ function Console({ g, onInfo, desktop }: { g: RouletteGame; onInfo: () => void; 
       <span aria-hidden="true" className="rl-round-spin__crown" />
       <span aria-hidden="true" className="rl-round-spin__sheen" />
       <span className="rl-round-spin__dome">
-        <svg aria-hidden="true" viewBox="0 0 24 24" className="rl-round-spin__icon">
-          <path d="M20 12a8 8 0 1 1-2.34-5.66" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          <path d="M20 4v4.5h-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
         <span className="rl-round-spin__label">{spinning ? "…" : rebetSpin ? "Rebet" : "Spin"}</span>
         <span className="rl-round-spin__sub">{spinning ? "No more bets" : rebetSpin ? "& spin" : "Space"}</span>
       </span>
