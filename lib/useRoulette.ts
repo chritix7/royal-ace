@@ -416,8 +416,11 @@ export function useRoulette(active: boolean) {
     if (strikes) sfx.thunder();
     sfx.ballLaunch();
     sfx.ballRoll(((quick ? SPIN_MS.quick : SPIN_MS.normal) / 1000) * BALL_LAND_AT);
-    track("rouletteSpin");
-    if (total >= 100000) unlock("highroller");
+    // Stats and badges after the opening animations.
+    window.setTimeout(() => {
+      track("rouletteSpin");
+      if (total >= 100000) unlock("highroller");
+    }, 900);
     return true;
   };
 
@@ -431,7 +434,6 @@ export function useRoulette(active: boolean) {
     wallet.add(res.returned);
     wallet.setLocked(false);
     const net = res.returned - res.staked;
-    sessionStore.recordRoulette(res.staked, net);
     const prev = savedRef.current.history[savedRef.current.history.length - 1];
     const nextHistory = [...savedRef.current.history, res.n].slice(-HISTORY_MAX);
     const record: RoundRecord = { id, at: Date.now(), n: res.n, staked: res.staked, returned: res.returned, bets: res.bets, lucky: res.lucky ?? null };
@@ -442,29 +444,36 @@ export function useRoulette(active: boolean) {
     setResult(res);
     setPhase("result");
 
-    if (prev === res.n) unlock("twice");
-    if (res.winners.length) {
-      winStreak.current += 1;
-      track("rouletteWin");
-      if (res.winners.some((k) => coverage(k).length === 1)) {
-        track("rouletteStraight");
-        unlock("straight");
+    // Stats, challenges and badges: done once the result is on screen, so
+    // the reveal animation gets the main thread to itself (phones).
+    const won = res.winners.length > 0;
+    if (won) winStreak.current += 1;
+    else winStreak.current = 0;
+    const streak = winStreak.current;
+    const ann = announced.current;
+    window.setTimeout(() => {
+      sessionStore.recordRoulette(res.staked, net);
+      if (prev === res.n) unlock("twice");
+      if (won) {
+        track("rouletteWin");
+        if (res.winners.some((k) => coverage(k).length === 1)) {
+          track("rouletteStraight");
+          unlock("straight");
+        }
+        if (res.n === 0) {
+          track("rouletteZero");
+          unlock("zero");
+        }
+        if (res.multiplied) {
+          track("rouletteLightning");
+          unlock("lightning");
+        }
+        if (ann) unlock("announce");
+        if (streak >= 3) unlock("streak3");
+        if (res.returned >= res.staked * 100) unlock("x100");
+        if (net >= res.staked * 10) track("rouletteBigWin");
       }
-      if (res.n === 0) {
-        track("rouletteZero");
-        unlock("zero");
-      }
-      if (res.multiplied) {
-        track("rouletteLightning");
-        unlock("lightning");
-      }
-      if (announced.current) unlock("announce");
-      if (winStreak.current >= 3) unlock("streak3");
-      if (res.returned >= res.staked * 100) unlock("x100");
-      if (net >= res.staked * 10) track("rouletteBigWin");
-    } else {
-      winStreak.current = 0;
-    }
+    }, 700);
     if (res.returned > 0) {
       window.setTimeout(() => (net >= res.staked * 10 ? sfx.bigWin() : sfx.win()), 250);
       haptic(net >= res.staked * 10 ? HAPTIC.big : HAPTIC.win);

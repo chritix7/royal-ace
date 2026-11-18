@@ -1996,17 +1996,19 @@ button.rl-tile:hover { border-color: rgba(240, 211, 139, 0.5); background: rgba(
 @media (prefers-reduced-motion: reduce) { .rl-phone-wheel { transition: none; } }
 
 /* Phones: the wheel overlay comes in and goes out */
-.rl-wheel-overlay { background: rgba(0, 0, 0, 0.9); animation: rl-ov-fade 0.35s ease-out both; }
-.rl-wheel-overlay > * { animation: rl-ov-pop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.12) both; }
-.rl-wheel-overlay > *:nth-child(2) { animation-delay: 0.04s; }
-.rl-wheel-overlay > *:nth-child(3) { animation-delay: 0.08s; }
-.rl-wheel-overlay.is-closing { animation: rl-ov-fade-out 0.34s ease-in forwards; }
-.rl-wheel-overlay.is-closing > * { animation: rl-ov-drop 0.34s cubic-bezier(0.4, 0, 1, 1) forwards; }
+/* Always mounted on phones (the wheel is built once), shown with .is-open. */
+.rl-wheel-overlay { background: rgba(0, 0, 0, 0.9); visibility: hidden; pointer-events: none; }
+.rl-wheel-overlay.is-open { visibility: visible; pointer-events: auto; animation: rl-ov-fade 0.35s ease-out both; }
+.rl-wheel-overlay.is-open > * { animation: rl-ov-pop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.12) both; }
+.rl-wheel-overlay.is-open > *:nth-child(2) { animation-delay: 0.04s; }
+.rl-wheel-overlay.is-open > *:nth-child(3) { animation-delay: 0.08s; }
+.rl-wheel-overlay.is-open.is-closing { animation: rl-ov-fade-out 0.34s ease-in forwards; }
+.rl-wheel-overlay.is-open.is-closing > * { animation: rl-ov-drop 0.34s cubic-bezier(0.4, 0, 1, 1) forwards; }
 @keyframes rl-ov-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes rl-ov-fade-out { from { opacity: 1; } to { opacity: 0; } }
 @keyframes rl-ov-pop { from { opacity: 0; transform: translateY(18px) scale(0.86); } to { opacity: 1; transform: none; } }
 @keyframes rl-ov-drop { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(14px) scale(0.9); } }
-@media (prefers-reduced-motion: reduce) { .rl-wheel-overlay, .rl-wheel-overlay > *, .rl-wheel-overlay.is-closing, .rl-wheel-overlay.is-closing > * { animation-duration: 0.01s; } }
+@media (prefers-reduced-motion: reduce) { .rl-wheel-overlay.is-open, .rl-wheel-overlay.is-open > *, .rl-wheel-overlay.is-open.is-closing, .rl-wheel-overlay.is-open.is-closing > * { animation-duration: 0.01s; } }
 
 /* Result reveal: the number on the turret, then the card under the wheel */
 .roulette-result { position: relative; animation: rl-medal-in 0.75s cubic-bezier(0.2, 0.9, 0.3, 1.25) both; }
@@ -2026,6 +2028,7 @@ button.rl-tile:hover { border-color: rgba(240, 211, 139, 0.5); background: rgba(
 @keyframes rl-reveal-up { from { opacity: 0; transform: translateY(16px) scale(0.9); } to { opacity: 1; transform: none; } }
 @keyframes rl-sweep { from { transform: translateX(0) skewX(-18deg); opacity: 1; } to { transform: translateX(420%) skewX(-18deg); opacity: 0; } }
 .rl-reveal.is-win .font-display { animation: rl-win-glow 1.6s ease-in-out 1s infinite alternate; }
+@media (max-width: 1023px) { .rl-reveal.is-win .font-display { animation: none; filter: drop-shadow(0 0 8px rgba(240, 211, 139, 0.6)); } }
 @keyframes rl-win-glow { from { filter: drop-shadow(0 0 0 rgba(240, 211, 139, 0)); } to { filter: drop-shadow(0 0 10px rgba(240, 211, 139, 0.75)); } }
 @media (prefers-reduced-motion: reduce) { .roulette-result, .roulette-result::after, .roulette-result::before, .rl-reveal, .rl-reveal::after, .rl-reveal.is-win .font-display { animation: none; } }
 
@@ -2069,9 +2072,9 @@ button.rl-tile:hover { border-color: rgba(240, 211, 139, 0.5); background: rgba(
 @keyframes rl-strike-life { 0% { opacity: 0; } 8%, 78% { opacity: 1; } 100% { opacity: 0; } }
 .rl-strike-title { font-family: var(--font-display), Georgia, serif; font-weight: 700; font-size: 20px; letter-spacing: 0.24em; text-transform: uppercase; color: #e6efff; text-shadow: 0 0 18px rgba(140, 185, 255, 0.95), 0 0 2px #fff; animation: rl-strike-flicker 0.6s steps(2) 2; }
 @keyframes rl-strike-flicker { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
-.rl-strike-chip { opacity: 0; animation: rl-strike-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.4) both; }
+.rl-strike-chip { opacity: 0; will-change: transform, opacity; animation: rl-strike-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.4) both; }
 .rl-strike-chip--lg { padding: 0.25rem 0.9rem 0.25rem 0.25rem; font-size: 17px; }
-@keyframes rl-strike-pop { from { opacity: 0; transform: scale(0.3) translateY(-20px); filter: brightness(2.5); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes rl-strike-pop { from { opacity: 0; transform: translateY(-14px) scale(0.4); } to { opacity: 1; transform: none; } }
 
 /* Heatmap */
 .rt-heat { position: absolute; inset: 0; pointer-events: none; transition: opacity 0.4s; }
@@ -2083,3 +2086,6 @@ button.rl-tile:hover { border-color: rgba(240, 211, 139, 0.5); background: rgba(
 .rl-mini-pill.is-on { color: #fbe7a6; border-color: #e5c779; }
 .rl-mini-pill.is-on .rl-mini-pill__dot { opacity: 1; box-shadow: 0 0 8px rgba(255, 180, 80, 0.8); }
 @media (prefers-reduced-motion: reduce) { .rl-strike-banner, .rl-strike-title, .rl-strike-chip { animation-duration: 0.01s; } .rl-strike-chip { opacity: 1; } }
+
+/* Phones: the screen under the opened wheel is hidden and frozen (see Roulette). */
+html.rl-wheel-solid body *:not(.rl-wheel-overlay, .rl-wheel-overlay *, .rl-over-wheel, .rl-over-wheel *) { visibility: hidden; animation-play-state: paused; }

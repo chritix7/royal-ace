@@ -30,14 +30,24 @@ function tone(freq: number, dur: number, type: OscillatorType = "sine", vol = 0.
   osc.stop(t + dur + 0.02);
 }
 
+/** One 2-second white-noise buffer, filled once and shared by every hit. */
+const NOISE_SECONDS = 2;
+let sharedNoise: { ctx: BaseAudioContext; buf: AudioBuffer } | null = null;
+function noiseBuffer(c: BaseAudioContext) {
+  if (sharedNoise?.ctx === c) return sharedNoise.buf;
+  const buf = c.createBuffer(1, Math.floor(c.sampleRate * NOISE_SECONDS), c.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  sharedNoise = { ctx: c, buf };
+  return buf;
+}
+
 function noise(dur: number, vol: number, highpass: number, delay = 0) {
   const a = ac();
   if (!a) return;
   const c = a.ctx;
   const t = c.currentTime + delay;
-  const buffer = c.createBuffer(1, Math.floor(c.sampleRate * dur), c.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const buffer = noiseBuffer(c);
   const src = c.createBufferSource();
   src.buffer = buffer;
   const filter = c.createBiquadFilter();
@@ -47,7 +57,9 @@ function noise(dur: number, vol: number, highpass: number, delay = 0) {
   gain.gain.setValueAtTime(vol, t);
   gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   src.connect(filter).connect(gain).connect(a.sfx);
-  src.start(t);
+  // A random slice of the shared noise: no new buffer to fill per hit.
+  const len = Math.min(dur, NOISE_SECONDS);
+  src.start(t, Math.random() * (NOISE_SECONDS - len), len);
 }
 
 export const sfx = {

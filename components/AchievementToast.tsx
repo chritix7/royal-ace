@@ -75,7 +75,7 @@ export default function AchievementToast({
 
   return createPortal(
     <div
-      className="pointer-events-none fixed left-1/2 top-[calc(env(safe-area-inset-top)+4.5rem)] z-[200] w-[min(92vw,22rem)] -translate-x-1/2 sm:left-auto sm:right-4 sm:top-4 sm:translate-x-0"
+      className="pointer-events-none rl-over-wheel fixed left-1/2 top-[calc(env(safe-area-inset-top)+4.5rem)] z-[200] w-[min(92vw,22rem)] -translate-x-1/2 sm:left-auto sm:right-4 sm:top-4 sm:translate-x-0"
       role="status"
       aria-live="polite"
     >

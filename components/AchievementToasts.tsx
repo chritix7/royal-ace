@@ -55,7 +55,7 @@ export default function AchievementToasts() {
   return (
     // Phones: top centre, just under the header (never over the Focus
     // Exit / Menu keys) and away from the Deal keys. Desktop: bottom right.
-    <div className="fixed left-1/2 top-[calc(env(safe-area-inset-top)+4.5rem)] z-[200] flex w-[min(92vw,22rem)] -translate-x-1/2 flex-col gap-3 sm:bottom-5 sm:left-auto sm:right-5 sm:top-auto sm:translate-x-0">
+    <div className="rl-over-wheel fixed left-1/2 top-[calc(env(safe-area-inset-top)+4.5rem)] z-[200] flex w-[min(92vw,22rem)] -translate-x-1/2 flex-col gap-3 sm:bottom-5 sm:left-auto sm:right-5 sm:top-auto sm:translate-x-0">
       {shownLevels.map((toast) => (
         <div
           key={`level-${toast.key}`}

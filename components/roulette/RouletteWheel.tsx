@@ -283,12 +283,27 @@ export default function RouletteWheel({
       ),
     ];
     anims.current = list;
+    // The ball lands at a fixed point of the animation. On a busy phone the
+    // animation can start a few frames after this effect, so the timer is
+    // armed once it really runs: the result then shows exactly as the ball drops.
     let fired = false;
-    const t = window.setTimeout(() => {
+    let gone = false;
+    let t = 0;
+    const fire = () => {
       fired = true;
       landedRef.current(spinId);
-    }, D * land);
+    };
+    list[1].ready.then(
+      () => {
+        if (gone) return;
+        const ct = list[1].currentTime;
+        const done = typeof ct === "number" ? ct : 0;
+        t = window.setTimeout(fire, Math.max(0, D * land - done));
+      },
+      () => {},
+    );
     return () => {
+      gone = true;
       window.clearTimeout(t);
       // Unmounted mid-spin (dev double effects…): let the next mount replay it.
       if (!fired) {

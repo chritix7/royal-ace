@@ -969,6 +969,23 @@ export default function Roulette({
     }
   }, [g.phase, desktop]);
 
+  // Open in the very render that starts the spin (no extra pass before it shows).
+  const overlayOpen = !desktop && (wheelOpen || g.phase === "spinning");
+  // Phones: once the wheel covers the screen, what is under it stops being
+  // drawn and animated, so the phone only works on the wheel and its result.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (desktop || !wheelOpen || wheelClosing) {
+      root.classList.remove("rl-wheel-solid");
+      return;
+    }
+    const t = window.setTimeout(() => root.classList.add("rl-wheel-solid"), 380);
+    return () => {
+      window.clearTimeout(t);
+      root.classList.remove("rl-wheel-solid");
+    };
+  }, [wheelOpen, wheelClosing, desktop]);
+
   // Phones: a light close-up while the ball drops.
   const [phoneCloseup, setPhoneCloseup] = useState(false);
   useEffect(() => {
@@ -1349,11 +1366,12 @@ export default function Roulette({
       </section>
 
       {/* Phones: the wheel over the table while it spins */}
-      {!desktop && wheelOpen && (
+      {!desktop && (
         <div
           data-no-exit=""
-          className={`rl-wheel-overlay fixed inset-0 z-[70] flex flex-col items-center justify-center gap-4 px-4 ${wheelClosing ? "is-closing" : ""}`}
-          onClick={() => g.phase !== "spinning" && closeWheel()}
+          aria-hidden={!overlayOpen}
+          className={`rl-wheel-overlay fixed inset-0 z-[70] flex flex-col items-center justify-center gap-4 px-4 ${overlayOpen ? "is-open" : ""} ${wheelClosing ? "is-closing" : ""}`}
+          onClick={() => overlayOpen && g.phase !== "spinning" && closeWheel()}
         >
           {plaque}
           {g.lucky && (
