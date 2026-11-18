@@ -575,7 +575,7 @@ function MobileResult({ result }: { result: { n: number; returned: number; stake
   const net = result.returned - result.staked;
   const facts = n === 0 ? "Zero" : `${c === "red" ? "Red" : "Black"} · ${n % 2 ? "Odd" : "Even"} · ${n <= 18 ? "1–18" : "19–36"}`;
   return (
-    <div className={`rl-result-card !gap-3 !px-4 !py-2.5 ${net > 0 ? "is-win" : ""}`} role="status">
+    <div className={`rl-result-card rl-reveal !gap-3 !px-4 !py-2.5 ${net > 0 ? "is-win" : ""}`} role="status">
       <span className={`rl-result-num rl-pill--${c} !h-11 !w-11 !text-xl`}>{n}</span>
       <div className="min-w-0">
         <p className="text-[9px] font-black tracking-[0.25em] text-white/50">{facts.toUpperCase()}</p>
