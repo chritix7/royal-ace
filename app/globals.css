@@ -2037,8 +2037,24 @@ button.rl-tile:hover { border-color: rgba(240, 211, 139, 0.5); background: rgba(
 .rl-zoom { background:
     radial-gradient(120% 70% at 50% -10%, rgba(255, 255, 255, 0.06), transparent 55%),
     conic-gradient(from 45deg, #121316 25%, #0c0d0f 0 50%, #121316 0 75%, #0c0d0f 0) 0 0 / 6px 6px;
-  background-color: #0b0b0d; animation: rl-zoom-in 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.05) both; transform-origin: 50% 40%; }
-.rl-zoom.is-closing { animation: rl-zoom-out 0.3s cubic-bezier(0.4, 0, 1, 1) forwards; }
+  background-color: #0b0b0d; animation: rl-zoom-bg-in 0.4s ease-out both; }
+/* Open: the table grows out of its place, header drops in, console rises */
+.rl-zoom > :nth-child(2) { transform-origin: 50% 55%; animation: rl-zoom-table-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.rl-zoom > :nth-child(1) { animation: rl-zoom-head-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both; }
+.rl-zoom > :nth-child(3) { animation: rl-zoom-foot-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both; }
+/* Close: the reverse, a little quicker */
+.rl-zoom.is-closing { animation: rl-zoom-bg-out 0.36s ease-in 0.04s forwards; }
+.rl-zoom.is-closing > :nth-child(2) { animation: rl-zoom-table-out 0.36s cubic-bezier(0.4, 0, 0.6, 1) forwards; }
+.rl-zoom.is-closing > :nth-child(1) { animation: rl-zoom-head-out 0.28s ease-in forwards; }
+.rl-zoom.is-closing > :nth-child(3) { animation: rl-zoom-foot-out 0.28s ease-in forwards; }
+@keyframes rl-zoom-bg-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rl-zoom-bg-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes rl-zoom-table-in { from { opacity: 0; transform: scale(0.78); } 60% { opacity: 1; } to { opacity: 1; transform: none; } }
+@keyframes rl-zoom-table-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(0.8); } }
+@keyframes rl-zoom-head-in { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+@keyframes rl-zoom-head-out { to { opacity: 0; transform: translateY(-12px); } }
+@keyframes rl-zoom-foot-in { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+@keyframes rl-zoom-foot-out { to { opacity: 0; transform: translateY(24px); } }
 @keyframes rl-zoom-in { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: none; } }
 @keyframes rl-zoom-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(0.92); } }
 .roulette-felt.is-zoom .rt-num__label { font-size: 20px; }
@@ -2046,4 +2062,4 @@ button.rl-tile:hover { border-color: rgba(240, 211, 139, 0.5); background: rgba(
 .roulette-felt.is-zoom .rt-spot { background: radial-gradient(circle, rgba(240, 211, 139, 0.55) 0 2.5px, transparent 3.5px); }
 .roulette-felt.is-zoom .rt-spot.is-hover, .roulette-felt.is-zoom .rt-spot:active { background: rgba(240, 211, 139, 0.4); box-shadow: 0 0 0 1.5px #f0d38b; }
 .rl-root[data-theme] .rl-zoom { isolation: isolate; }
-@media (prefers-reduced-motion: reduce) { .rl-zoom, .rl-zoom.is-closing { animation-duration: 0.01s; } }
+@media (prefers-reduced-motion: reduce) { .rl-zoom, .rl-zoom > *, .rl-zoom.is-closing, .rl-zoom.is-closing > * { animation-duration: 0.01s !important; animation-delay: 0s !important; } }

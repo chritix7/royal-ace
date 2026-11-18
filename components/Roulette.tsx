@@ -1030,7 +1030,7 @@ export default function Roulette({
     zoomTimer.current = window.setTimeout(() => {
       setZoomShown(false);
       setZoomClosing(false);
-    }, 300);
+    }, 400);
   };
   // Phones: bottom sheet with every panel.
   const [sheet, setSheet] = useState<PanelTab | "rules" | null>(null);
