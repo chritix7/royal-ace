@@ -1228,14 +1228,17 @@ export default function Roulette({
             </div>
           )}
           <div className={`rl-phone-wheel ${phoneCloseup ? "is-closeup" : ""}`}>{wheel("min(84vw, 48dvh, 24rem)")}</div>
-          {g.phase === "result" && g.result ? (
-            <MobileResult result={g.result} />
-          ) : (
-            <p className="rl-message text-center" role="status">
-              {g.message}
-            </p>
-          )}
-          {g.phase !== "spinning" && <p className="text-[10px] tracking-[0.25em] text-white/35">TAP TO CLOSE</p>}
+          {/* Fixed-height slot: the wheel never moves when the result shows */}
+          <div className="flex h-[4.6rem] w-full items-center justify-center">
+            {g.phase === "result" && g.result ? (
+              <MobileResult result={g.result} />
+            ) : (
+              <p className="rl-message text-center" role="status">
+                {g.message}
+              </p>
+            )}
+          </div>
+          <p className={`text-[10px] tracking-[0.25em] text-white/35 ${g.phase === "spinning" ? "invisible" : ""}`}>TAP TO CLOSE</p>
         </div>
       )}
 
