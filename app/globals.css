@@ -2378,3 +2378,7 @@ html.rl-wheel-solid body *:not(.rl-wheel-overlay, .rl-wheel-overlay *, .rl-over-
 
 /* PC: five labelled game tabs and the sound keys fit the content width */
 @media (min-width: 1536px) { .ui-seg__btn { padding: 0 0.95rem; } }
+
+/* Focus opens and closes instantly in every game, on PC and phones. */
+.focus-pending > * { opacity: 1 !important; }
+.focus-stage-in > *, .focus-out > *, .slots-focus-in > *, .slots-focus-out > *, .slots-view-in { animation: none !important; will-change: auto !important; }

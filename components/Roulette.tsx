@@ -1001,7 +1001,8 @@ export default function Roulette({
   const requestFocusExit = () => {
     if (focusLeaving.current) return;
     focusLeaving.current = true;
-    if (isNarrowScreen()) {
+    // Focus closes at once (no animation); fullscreen is left by the effect cleanup.
+    {
       onFocusChange?.(false);
       return;
     }
@@ -1012,7 +1013,7 @@ export default function Roulette({
       closed = true;
       closeRef.current?.(false);
     };
-    window.setTimeout(() => exitFullscreenSettled(done), 260);
+    window.setTimeout(() => exitFullscreenSettled(done), 0);
     window.setTimeout(done, 1000);
   };
   useEffect(() => {

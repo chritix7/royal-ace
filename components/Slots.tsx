@@ -287,7 +287,8 @@ export default function Slots({
     if (focusLeaving.current) return;
     focusLeaving.current = true;
     // Phones: close at once (fullscreen is left by the effect cleanup).
-    if (isNarrowScreen()) {
+    // Focus closes at once (no animation); fullscreen is left by the effect cleanup.
+    {
       onFocusChange?.(false);
       return;
     }
@@ -298,7 +299,7 @@ export default function Slots({
       closed = true;
       onFocusChange?.(false);
     };
-    window.setTimeout(() => exitFullscreenSettled(done), 260);
+    window.setTimeout(() => exitFullscreenSettled(done), 0);
     window.setTimeout(done, 1000); // safety net
   };
   // Focus = true browser fullscreen, like the blackjack Focus view.

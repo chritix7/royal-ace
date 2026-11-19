@@ -6,7 +6,7 @@ import { handValue, isBlackjack } from "../lib/blackjack";
 import { tableBg, money } from "../lib/game";
 import type { DealFlightEvent, Game } from "../lib/useBlackjack";
 import { useSession } from "../lib/sessionStore";
-import { FOCUS_OUT_MS, exitFullscreenQuietly, exitFullscreenSettled, isNarrowScreen, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
+import { exitFullscreenQuietly, exitFullscreenSettled, isNarrowScreen, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
 import { Counter } from "./ui";
 import PlayingCard from "./PlayingCard";
 import CardFlight from "./CardFlight";
@@ -101,7 +101,8 @@ export default function BlackjackImmersive({
     if (leavingRef.current) return;
     leavingRef.current = true;
     // Phones: close at once (fullscreen is left by the effect cleanup).
-    if (narrow) {
+    // Focus closes at once on every screen (no animation).
+    {
       closeRef.current();
       return;
     }
@@ -114,7 +115,7 @@ export default function BlackjackImmersive({
       closed = true;
       closeRef.current();
     };
-    window.setTimeout(() => exitFullscreenSettled(done), FOCUS_OUT_MS);
+    window.setTimeout(() => exitFullscreenSettled(done), 0);
     // Safety net: whatever the browser does with fullscreen, Focus closes.
     window.setTimeout(() => {
       exitFullscreenQuietly();
