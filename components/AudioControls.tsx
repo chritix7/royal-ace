@@ -77,7 +77,7 @@ export default function AudioControls() {
           value={a.volume}
           onChange={(e) => audio.set({ volume: Number(e.target.value) })}
           aria-label="Master volume"
-          className="ui-range w-8 min-[400px]:w-10 sm:w-20"
+          className="ui-range w-8 min-[400px]:w-10 sm:w-20 lg:w-16"
           style={{ "--v": `${Math.round(a.volume * 100)}%` } as CSSProperties}
         />
       </label>

@@ -221,7 +221,7 @@ export default function Home() {
   </div>
 </header>
       <section className="mx-auto max-w-screen-2xl px-4 pb-3 pt-2 sm:px-8 sm:pt-3">
-        <div className="mb-2 flex min-w-0 items-center gap-2 sm:mb-3 sm:gap-3">
+        <div className="mb-2 flex min-w-0 items-center gap-2 sm:mb-3 sm:gap-3 lg:gap-2">
   <div className="ui-seg shrink-0" role="tablist" aria-label="Games">
     {TABS.map((t) => {
       const blocked = locked && tab !== t.id;

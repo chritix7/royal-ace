@@ -2375,3 +2375,6 @@ html.rl-wheel-solid body *:not(.rl-wheel-overlay, .rl-wheel-overlay *, .rl-over-
 
 /* Toggle keys (Hint…): clearly on when on */
 .rl-icon-key.is-on { color: #1a1206; background: linear-gradient(180deg, #f6dd94, #c79b40) padding-box, linear-gradient(180deg, #fff3c4, #8f6a26) border-box; }
+
+/* PC: five labelled game tabs and the sound keys fit the content width */
+@media (min-width: 1536px) { .ui-seg__btn { padding: 0 0.95rem; } }
