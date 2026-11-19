@@ -2242,3 +2242,134 @@ html.rl-wheel-solid body *:not(.rl-wheel-overlay, .rl-wheel-overlay *, .rl-over-
 @media (max-width: 1023px) {
   .safe-y { padding-top: max(var(--sy, 1rem), calc(env(safe-area-inset-top) + 0.5rem)); padding-bottom: max(var(--sy, 1rem), calc(env(safe-area-inset-bottom) + 0.5rem)); }
 }
+
+/* ───────────── Craps (cr-*) — carbon black, anthracite, gold ───────────── */
+@layer components {
+  .cr-table { position: relative; border-radius: 1.6rem; padding: 6px; background: linear-gradient(180deg, #2b2b30, #0c0c0e 55%, #1d1d21);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(240, 211, 139, 0.35), 0 18px 40px rgba(0, 0, 0, 0.55); }
+  .cr-felt { position: relative; border-radius: 1.25rem; overflow: hidden;
+    background: radial-gradient(120% 90% at 40% 40%, rgba(255, 255, 255, 0.05), transparent 60%), repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.016) 0 2px, transparent 2px 6px), linear-gradient(180deg, #1a1b1e, #0e0f11);
+    box-shadow: inset 0 0 0 1px rgba(240, 211, 139, 0.18), inset 0 0 50px rgba(0, 0, 0, 0.7); }
+
+  /* Layout: every zone is a gold-lined panel */
+  .cr-layout { display: grid; height: 100%; min-height: 0; grid-template-rows: minmax(0, 2.3fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.62fr) minmax(0, 0.9fr); gap: 6px; }
+  .cr-row { display: flex; min-height: 0; gap: 6px; }
+  .cr-row--boxes .cr-dcbar { width: 11%; flex-shrink: 0; }
+  .cr-boxes { display: grid; flex: 1; min-width: 0; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+  .cr-zone, .cr-box { position: relative; display: flex; min-width: 0; min-height: 0; align-items: center; justify-content: center; border-radius: 0.6rem; border: 1px solid rgba(229, 199, 121, 0.4); background: rgba(0, 0, 0, 0.22); color: #ecd9a2; transition: background 0.15s, border-color 0.15s, box-shadow 0.25s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  .cr-zone:hover:not(:disabled), .cr-box:hover { background: rgba(229, 199, 121, 0.07); border-color: rgba(240, 211, 139, 0.75); }
+  .cr-zone:disabled { cursor: default; }
+  .cr-row--dp .cr-dp, .cr-row--pass .cr-pass { flex: 1; }
+  .cr-big { font-family: var(--font-display), Georgia, serif; font-size: clamp(14px, 1.7vw, 26px); font-weight: 700; letter-spacing: 0.3em; color: #f0d38b; }
+  .cr-mid { font-family: var(--font-display), Georgia, serif; font-size: clamp(10px, 0.95vw, 14px); font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #d9c48a; }
+  .cr-vert { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 9px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(229, 199, 121, 0.7); }
+  .cr-pass { border-color: rgba(240, 211, 139, 0.7); background: linear-gradient(180deg, rgba(229, 199, 121, 0.08), rgba(0, 0, 0, 0.25)); }
+  .cr-dp { background: rgba(0, 0, 0, 0.35); }
+  .cr-come { background: linear-gradient(180deg, rgba(229, 199, 121, 0.05), rgba(0, 0, 0, 0.2)); }
+  .cr-field { flex-direction: column; gap: 2px; }
+  .cr-field__nums { display: flex; gap: clamp(8px, 1.4vw, 20px); font-family: var(--font-display), Georgia, serif; font-size: clamp(13px, 1.4vw, 21px); font-weight: 700; color: #f0d38b; }
+  .cr-field__nums i { font-style: normal; }
+  .cr-field__nums .is-ring { display: inline-flex; height: 1.55em; width: 1.55em; align-items: center; justify-content: center; border-radius: 9999px; border: 1px solid rgba(240, 211, 139, 0.7); margin-top: -0.25em; }
+  .cr-field__label { font-size: 8.5px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(229, 199, 121, 0.55); }
+  .cr-odds { width: 22%; flex-shrink: 0; border-style: dashed; animation: rl-card-in 0.3s both; }
+  .cr-odds__label { font-size: 10px; font-weight: 900; letter-spacing: 0.22em; text-transform: uppercase; color: #f5d778; }
+
+  /* Number boxes */
+  .cr-box { flex-direction: column; overflow: hidden; }
+  .cr-box__hit { position: absolute; inset: 0; z-index: 1; border-radius: inherit; cursor: pointer; }
+  .cr-box__hit:disabled { cursor: default; }
+  .cr-box__num { position: relative; font-family: var(--font-display), Georgia, serif; font-size: clamp(18px, 2.4vw, 38px); font-weight: 700; line-height: 1; color: #f0d38b; pointer-events: none; }
+  .cr-box__num.is-word { font-size: clamp(12px, 1.4vw, 22px); letter-spacing: 0.12em; }
+  .cr-box__pay { position: relative; margin-top: 2px; font-size: 8.5px; font-weight: 800; letter-spacing: 0.12em; color: rgba(255, 255, 255, 0.35); pointer-events: none; }
+  .cr-box.is-point { border-color: #f6dd94; box-shadow: inset 0 0 0 1px rgba(246, 221, 148, 0.45), 0 0 16px rgba(240, 211, 139, 0.25); }
+  .cr-box__come { position: absolute; left: 4px; top: 4px; z-index: 2; display: flex; gap: 3px; }
+  .cr-box__stack { position: relative; display: block; }
+  .cr-box__stack.is-dc { opacity: 0.9; }
+  .cr-odds-chip { position: absolute; left: 45%; top: 30%; }
+
+  /* Puck */
+  .cr-puck { position: absolute; z-index: 2; top: 4px; right: 4px; display: inline-flex; height: clamp(1.25rem, 1.6vw, 1.7rem); width: clamp(1.25rem, 1.6vw, 1.7rem); align-items: center; justify-content: center; border-radius: 9999px; font-size: 8px; font-weight: 900; letter-spacing: 0.05em; color: #f5f5f5; background: radial-gradient(circle at 40% 35%, #3a3a3e, #0d0d0f); border: 1.5px solid rgba(255, 255, 255, 0.5); pointer-events: none; }
+  .cr-puck.is-on { color: #111; background: radial-gradient(circle at 40% 35%, #ffffff, #d9d9d9); border-color: #f0d38b; box-shadow: 0 0 10px rgba(255, 255, 255, 0.4); animation: rl-card-in 0.35s both; }
+  .cr-dcbar .cr-puck { top: auto; bottom: 6px; left: 50%; right: auto; translate: -50% 0; }
+
+  /* Chips on the layout */
+  .cr-chip { display: block; width: clamp(1.7rem, 2.4vw, 2.3rem); aspect-ratio: 1; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.6)); animation: pk-chip-drop 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
+  .cr-chip.is-small { width: clamp(1.35rem, 1.8vw, 1.8rem); }
+  .cr-chip-pos { position: absolute; z-index: 2; pointer-events: none; }
+  .cr-chip-br { right: 6px; bottom: 4px; }
+  .cr-chip-r { right: 8px; top: 50%; translate: 0 -50%; }
+  .cr-chip-c { left: 50%; top: 50%; translate: -50% -50%; }
+  .cr-chip-bc { left: 50%; bottom: 4px; translate: -50% 0; }
+
+  /* After a roll */
+  .cr-zone.is-win, .cr-box.is-win { border-color: #f6dd94; background: rgba(240, 211, 139, 0.14); box-shadow: 0 0 18px rgba(240, 211, 139, 0.45); }
+  .cr-zone.is-lose, .cr-box.is-lose { border-color: rgba(255, 120, 120, 0.55); background: rgba(255, 80, 80, 0.07); }
+  .cr-zone.is-move, .cr-box.is-move { border-color: rgba(160, 200, 255, 0.6); }
+
+  /* Props */
+  .cr-props { display: flex; min-height: 0; flex-direction: column; gap: 6px; }
+  .cr-props__title { font-size: 9px; font-weight: 900; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(229, 199, 121, 0.6); text-align: center; }
+  .cr-props > .grid { flex: 2; min-height: 0; grid-auto-rows: minmax(0, 1fr); }
+  .cr-prop { min-height: 0; gap: 6px; padding: 0 6px; }
+  .cr-prop--wide { flex: 1; }
+  .cr-prop.is-red .cr-prop__label { color: #ff8f8f; }
+  .cr-prop__label { font-size: 11px; font-weight: 900; letter-spacing: 0.18em; text-transform: uppercase; }
+  .cr-prop__pay { font-family: var(--font-mono), monospace; font-size: 11px; font-weight: 700; color: #f5d778; }
+  .cr-props.is-compact > .grid { grid-auto-rows: 3rem; }
+  .cr-props.is-compact .cr-prop--wide { min-height: 3rem; }
+  .cr-chip-tr { right: 3px; top: 3px; }
+  .cr-mini-dice { display: inline-flex; gap: 1px; }
+  .cr-mini-die { font-size: 20px; line-height: 1; color: #f3ead2; }
+
+  /* Dice tray (PC) */
+  .cr-tray { display: flex; flex-direction: column; gap: 0.6rem; border-radius: 1.2rem; padding: 1.1rem 1rem 0.9rem;
+    background: radial-gradient(120% 90% at 50% 30%, #2a1a1d, #120b0d 70%); box-shadow: inset 0 0 0 1px rgba(240, 211, 139, 0.3), inset 0 10px 30px rgba(0, 0, 0, 0.6); }
+  .cr-call { text-align: center; font-family: var(--font-display), Georgia, serif; font-size: 19px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #efe2bd; animation: rl-card-in 0.3s both; }
+  .cr-call.is-good { color: #f6dd94; }
+  .cr-call.is-bad { color: #ff9c9c; }
+  .cr-point { display: inline-flex; align-items: center; gap: 0.45rem; font-size: 10px; font-weight: 900; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); }
+  .cr-point__puck { display: inline-flex; height: 1.35rem; width: 1.35rem; align-items: center; justify-content: center; border-radius: 9999px; font-size: 7px; font-weight: 900; color: #eee; background: #111; border: 1px solid rgba(255, 255, 255, 0.45); }
+  .cr-point.is-on { color: #f5d778; }
+  .cr-point.is-on .cr-point__puck { color: #111; background: #f4f4f4; border-color: #f0d38b; }
+
+  /* 3D dice */
+  .cr-die { position: relative; width: var(--s); height: var(--s); perspective: 600px; }
+  .cr-cube { position: absolute; inset: 0; transform-style: preserve-3d; --h: calc(var(--s) / 2); }
+  .cr-face { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 14%; border-radius: 18%; backface-visibility: hidden;
+    background: radial-gradient(circle at 30% 25%, #ffffff, #efe9dc 60%, #d8cfbb); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08), inset 0 -3px 6px rgba(0, 0, 0, 0.12); }
+  .cr-face > span { display: flex; align-items: center; justify-content: center; }
+  .cr-pip::before { content: ""; width: 68%; height: 68%; border-radius: 9999px; background: radial-gradient(circle at 40% 35%, #3a3a3a, #050505); }
+  .cr-face:first-child .cr-pip::before { background: radial-gradient(circle at 40% 35%, #e04b5a, #8e0f1c); width: 82%; height: 82%; }
+
+  /* Roll history */
+  .cr-hist { display: flex; height: 1.9rem; align-items: center; justify-content: center; border-radius: 0.45rem; font-family: var(--font-mono), monospace; font-size: 12px; font-weight: 800; color: rgba(255, 255, 255, 0.75); background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.06); }
+  .cr-hist.is-seven { color: #ff9c9c; border-color: rgba(255, 120, 120, 0.35); }
+  .cr-hist.is-made { color: #1a1206; background: linear-gradient(180deg, #f6dd94, #c79b40); }
+  .cr-hist.is-hard { color: #f5d778; border-color: rgba(240, 211, 139, 0.4); }
+}
+
+/* Phones: a compact table, the light rules of .m-lite apply too */
+.m-lite .cr-layout { grid-template-rows: minmax(0, 1.7fr) minmax(0, 0.95fr) minmax(0, 1fr) minmax(0, 0.7fr) minmax(0, 1fr); gap: 5px; }
+.m-lite .cr-boxes { gap: 4px; }
+.m-lite .cr-row--boxes .cr-dcbar { width: 13%; }
+.m-lite .cr-big { font-size: 15px; letter-spacing: 0.24em; }
+.m-lite .cr-mid { font-size: 9.5px; letter-spacing: 0.16em; }
+.m-lite .cr-box__num { font-size: 20px; }
+.m-lite .cr-field__nums { font-size: 14px; gap: 9px; }
+.m-lite .cr-field__label { font-size: 7.5px; letter-spacing: 0.12em; }
+.m-lite .cr-chip { width: 1.75rem; filter: none; animation-duration: 0.15s; }
+.m-lite .cr-chip.is-small { width: 1.35rem; }
+.m-lite .cr-puck { height: 1.3rem; width: 1.3rem; font-size: 6.5px; top: 3px; right: 3px; }
+.m-lite .cr-zone.is-win, .m-lite .cr-box.is-win, .m-lite .cr-box.is-point { box-shadow: none; }
+.m-lite .cr-felt { background: radial-gradient(110% 75% at 50% 45%, #1d1e22, #0e0f11 75%); box-shadow: inset 0 0 0 1px rgba(240, 211, 139, 0.18); }
+.m-lite .cr-table { box-shadow: inset 0 0 0 1px rgba(240, 211, 139, 0.35); padding: 4px; }
+.m-lite .cr-face { box-shadow: none; }
+.m-lite .cr-box__come { left: 2px; top: 2px; }
+.m-lite .cr-odds { width: 26%; animation: none; }
+@media (prefers-reduced-motion: reduce) { .cr-chip, .cr-call, .cr-odds, .cr-puck.is-on { animation: none; } }
+
+/* Phones: five games in the tab row, sound keys and Focus on one line */
+@media (max-width: 639px) {
+  .ui-seg { gap: 1px; padding: 2px; }
+  .ui-seg__btn { min-width: 0; width: clamp(1.7rem, 8vw, 2.25rem); height: 2.1rem; padding: 0; }
+}

@@ -59,6 +59,11 @@ const XP_BY_EVENT: Partial<Record<GameEvent, number>> = {
   pokerBonus: 120,
   pokerFlush: 200,
   pokerBigWin: 300,
+  crapsRoll: 8,
+  crapsWin: 20,
+  crapsPoint: 60,
+  crapsHard: 150,
+  crapsBigWin: 300,
 };
 
 let state: ProgressionState = EMPTY;
@@ -129,7 +134,7 @@ function handleEvent(event: GameEvent, amount = 1) {
     totalHands: state.totalHands + (event === "bjHand" ? amount : 0),
     totalWins:
       state.totalWins +
-      ((event === "slotWin" || event === "bjWin" || event === "gambleWin" || event === "rouletteWin" || event === "pokerWin")
+      ((event === "slotWin" || event === "bjWin" || event === "gambleWin" || event === "rouletteWin" || event === "pokerWin" || event === "crapsWin")
         ? amount
         : 0),
     totalBonuses: state.totalBonuses + (event === "bonus" ? amount : 0),

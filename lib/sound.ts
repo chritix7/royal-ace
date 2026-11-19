@@ -171,6 +171,17 @@ export const sfx = {
     tone(70, 1.1, "sine", 0.12, 0.05, 40);
     [0.35, 0.55, 0.75, 0.95, 1.15].forEach((d) => tone(1800, 0.06, "sawtooth", 0.03, d, 900));
   },
+  // Craps: dice shaken in the hand, rolling on the felt, hitting the wall.
+  diceShake: () => {
+    [0, 0.06, 0.12].forEach((d) => noise(0.05, 0.07, 2600, d));
+  },
+  diceRoll: () => {
+    [0, 0.11, 0.2, 0.28, 0.36, 0.45, 0.56].forEach((d, i) => noise(0.04, 0.1 - i * 0.008, 1400, d));
+  },
+  diceLand: () => {
+    noise(0.05, 0.12, 900);
+    noise(0.04, 0.08, 1200, 0.07);
+  },
   // Roulette: the croupier launches the ball, it rolls around the
   // track and slows down (ticks spread out), then rattles into a pocket.
   ballLaunch: () => {

@@ -60,3 +60,14 @@ export const IconPoker = ({ className = "h-4 w-4" }: { className?: string }) => 
     <path d="M15.6 9.2c.9 1 2 1.7 2 2.7a1.1 1.1 0 0 1-1.9.8l.3 1.3h-1.6l.4-1.3a1.1 1.1 0 0 1-1.9-.8c0-1 1.1-1.7 2-2.7z" fill="currentColor" stroke="none" />
   </svg>
 );
+export const IconDice = ({ className = "h-4 w-4" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden="true">
+    <rect x="2.5" y="8" width="11" height="11" rx="2.2" />
+    <path d="M10.5 4.6l6.7-1.6a2 2 0 0 1 2.4 1.5l1.6 6.7a2 2 0 0 1-1.5 2.4l-3.2.8" />
+    <circle cx="5.6" cy="11.1" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="8" cy="13.5" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="10.4" cy="15.9" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="16.4" cy="6.6" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="18" cy="9.6" r="0.9" fill="currentColor" stroke="none" />
+  </svg>
+);

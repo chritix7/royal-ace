@@ -86,6 +86,13 @@ export const CHALLENGE_POOL: Challenge[] = [
   { id: "pbonus1", title: "Win the AA Bonus", key: "pokerBonus", mode: "count", goal: 1, reward: 2000 },
   { id: "pflush1", title: "Make a flush or better at Hold'em", key: "pokerFlush", mode: "count", goal: 1, reward: 2500 },
   { id: "pbig1", title: "Win 10× your Ante at Hold'em", key: "pokerBigWin", mode: "count", goal: 1, reward: 3000 },
+  // Craps
+  { id: "crolls30", title: "Roll the dice 30 times at craps", key: "crapsRoll", mode: "count", goal: 30, reward: 700 },
+  { id: "crolls80", title: "Roll the dice 80 times at craps", key: "crapsRoll", mode: "count", goal: 80, reward: 1800 },
+  { id: "cwins12", title: "Win on 12 craps rolls", key: "crapsWin", mode: "count", goal: 12, reward: 1000 },
+  { id: "cpoint2", title: "Make the point twice with a Pass bet", key: "crapsPoint", mode: "count", goal: 2, reward: 1500 },
+  { id: "chard1", title: "Win a hardway", key: "crapsHard", mode: "count", goal: 1, reward: 2500 },
+  { id: "cbig1", title: "Win a craps bet paying 10 to 1 or more", key: "crapsBigWin", mode: "count", goal: 1, reward: 3000 },
 ];
 
 /**

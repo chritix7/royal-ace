@@ -9,6 +9,7 @@ import RewardsPanel from "../components/RewardsPanel";
 import Slots from "../components/Slots";
 import Roulette from "../components/Roulette";
 import Poker from "../components/Poker";
+import Craps from "../components/Craps";
 import StatsPanel from "../components/StatsPanel";
 import { Counter } from "../components/ui";
 import { achievementsStore, challengeView, useAchievements } from "../lib/achievementsStore";
@@ -21,17 +22,18 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import { progressionStore, useProgression } from "../lib/progression";
 import { weeklyStore } from "../lib/weekly";
 import ChipFly from "../components/ChipFly";
-import { IconFocus, IconPoker, IconRoulette, IconSlot, IconSpade } from "../components/UiIcons";
+import { IconDice, IconFocus, IconPoker, IconRoulette, IconSlot, IconSpade } from "../components/UiIcons";
 import HotkeysOverlay from "../components/HotkeysOverlay";
 import { useBalanceFlash } from "../hooks/useBalanceFlash";
 import { sessionStore } from "../lib/sessionStore";
 
-type Tab = "blackjack" | "slots" | "roulette" | "poker";
+type Tab = "blackjack" | "slots" | "roulette" | "poker" | "craps";
 const TABS: { id: Tab; label: string; Icon: (p: { className?: string }) => ReactElement; aria: string }[] = [
   { id: "blackjack", label: "Blackjack", Icon: IconSpade, aria: "Blackjack" },
   { id: "slots", label: "Slot machine", Icon: IconSlot, aria: "Slot machine" },
   { id: "roulette", label: "Roulette", Icon: IconRoulette, aria: "Roulette" },
   { id: "poker", label: "Hold'em", Icon: IconPoker, aria: "Casino Hold'em poker" },
+  { id: "craps", label: "Craps", Icon: IconDice, aria: "Craps" },
 ];
 
 /**
@@ -108,7 +110,7 @@ export default function Home() {
 
   // Live figures for the header cards.
   const stats = useStats();
-  const rounds = stats.bjHands + stats.spins + (stats.rouletteSpins ?? 0) + (stats.pokerHands ?? 0);
+  const rounds = stats.bjHands + stats.spins + (stats.rouletteSpins ?? 0) + (stats.pokerHands ?? 0) + (stats.crapsRolls ?? 0);
   const roundsLabel = `${rounds.toLocaleString("en-US")} ${rounds === 1 ? "round" : "rounds"}`;
   const challenges = challengeView(useAchievements());
   const challengesDone = challenges.filter((c) => c.done).length;
@@ -242,7 +244,7 @@ export default function Home() {
 
   <span
     role="status"
-    className={`min-w-0 flex-1 truncate text-[10px] text-white/40 sm:text-xs ${
+    className={`min-w-0 flex-1 truncate text-[10px] text-white/40 max-[399px]:hidden sm:text-xs ${
       locked && tab !== "slots" ? "visible" : "invisible"
     }`}
   >
@@ -301,6 +303,11 @@ export default function Home() {
         <div className={tab === "poker" ? "" : "hidden"}>
           <ErrorBoundary label="Casino Hold'em">
             <Poker active={tab === "poker"} focus={tab === "poker" && focusMode} onFocusChange={setFocusMode} />
+          </ErrorBoundary>
+        </div>
+        <div className={tab === "craps" ? "" : "hidden"}>
+          <ErrorBoundary label="Craps">
+            <Craps active={tab === "craps"} focus={tab === "craps" && focusMode} onFocusChange={setFocusMode} />
           </ErrorBoundary>
         </div>
       </section>

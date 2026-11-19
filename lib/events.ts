@@ -32,7 +32,12 @@ export type GameEvent =
   | "pokerWin" // une main de Casino Hold'em gagnée
   | "pokerBonus" // un AA Bonus payé
   | "pokerFlush" // couleur ou mieux en main finale (main suivie)
-  | "pokerBigWin"; // un gain d'au moins 10 fois l'Ante
+  | "pokerBigWin" // un gain d'au moins 10 fois l'Ante
+  | "crapsRoll" // un lancer de dés au craps
+  | "crapsWin" // un lancer gagnant au craps
+  | "crapsPoint" // un point gagné avec une mise Pass
+  | "crapsHard" // un hardway gagné
+  | "crapsBigWin"; // une mise payée au moins 10 contre 1
 
 type Listener = (event: GameEvent, amount: number) => void;
 const listeners = new Set<Listener>();
