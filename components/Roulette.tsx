@@ -7,7 +7,6 @@ import RouletteTable from "./roulette/RouletteTable";
 import RouletteRacetrack from "./roulette/RouletteRacetrack";
 import { AutoMenu, BigWin, Favourites, RoundDetail, RoundHistory, StylePanel, THEMES } from "./roulette/RoulettePanels";
 import type { RoundRecord } from "../lib/useRoulette";
-import AchievementToast from "./AchievementToast";
 import RouletteWheel from "./roulette/RouletteWheel";
 import { money } from "../lib/game";
 import {
@@ -27,7 +26,7 @@ import {
   TABLE_MIN,
   type AnnounceKey,
 } from "../lib/roulette";
-import { ROULETTE_BADGES, ROULETTE_CHIPS, useRoulette, type RouletteGame } from "../lib/useRoulette";
+import { ROULETTE_CHIPS, useRoulette, type RouletteGame } from "../lib/useRoulette";
 import { exitFullscreenSettled, isNarrowScreen, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
 import { useSession } from "../lib/sessionStore";
 
@@ -339,18 +338,6 @@ function StyleCompact({ g }: { g: RouletteGame }) {
             <span className="block w-full truncate text-center text-[9.5px] font-semibold tracking-[0.06em] text-white/70">{t.name}</span>
           </button>
         ))}
-      </div>
-      <div>
-        <p className="rl-mini-label">
-          Badges · {g.badges.length}/{ROULETTE_BADGES.length}
-        </p>
-        <div className="mt-1 flex justify-between gap-1">
-          {ROULETTE_BADGES.map((b) => (
-            <span key={b.id} title={`${b.title} — ${b.desc}`} className={`rl-medal h-6 w-6 ${g.badges.includes(b.id) ? "is-got" : ""}`} aria-label={`${b.title}${g.badges.includes(b.id) ? " (earned)" : ""}`}>
-              ★
-            </span>
-          ))}
-        </div>
       </div>
     </div>
   );
@@ -1432,7 +1419,6 @@ export default function Roulette({
           <BigWin {...bigWin} light onDone={() => setBigWin(null)} />
         </div>
       )}
-      <AchievementToast toast={g.badgeToast} onDismiss={g.dismissBadge} />
     </div>
   );
 }

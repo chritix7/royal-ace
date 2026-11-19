@@ -105,8 +105,9 @@ const persist = () => {
 
 const levelFromXp = (xp: number) => Math.max(1, Math.floor(xp / XP_PER_LEVEL) + 1);
 
+/** Chips paid on reaching a level: 5,000 at level 2, +1,500 a level, up to 60,000. */
 export function levelReward(level: number) {
-  return 1000 + (level - 1) * 400;
+  return Math.min(60000, 5000 + (level - 2) * 1500);
 }
 
 function handleEvent(event: GameEvent, amount = 1) {

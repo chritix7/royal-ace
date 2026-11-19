@@ -3,9 +3,9 @@ import { isNextDay, today } from "./clock";
 import { wallet } from "./wallet";
 import { progressionStore } from "./progression";
 
-/** Bonus quotidien : 200 chips le premier jour, +100 par jour consécutif, jusqu'à 800 le 7e jour. */
-export const DAILY_BASE = 1000;
-export const DAILY_STEP = 500;
+/** Bonus quotidien : 5 000 le premier jour, +2 500 par jour consécutif, jusqu'à 20 000 le 7e jour. */
+export const DAILY_BASE = 5000;
+export const DAILY_STEP = 2500;
 export const DAILY_MAX_DAYS = 7;
 export type VipTier = {
   id: string;
@@ -16,10 +16,10 @@ export type VipTier = {
 
 export const VIP_TIERS: VipTier[] = [
   { id: "bronze", label: "Bronze", minLevel: 1, dailyBonus: 0 },
-  { id: "silver", label: "Silver", minLevel: 5, dailyBonus: 1000 },
-  { id: "gold", label: "Gold", minLevel: 10, dailyBonus: 2000 },
-  { id: "platinum", label: "Platinum", minLevel: 20, dailyBonus: 4000 },
-  { id: "kingpin", label: "Kingpin", minLevel: 35, dailyBonus: 8000 },
+  { id: "silver", label: "Silver", minLevel: 5, dailyBonus: 5000 },
+  { id: "gold", label: "Gold", minLevel: 10, dailyBonus: 12000 },
+  { id: "platinum", label: "Platinum", minLevel: 20, dailyBonus: 25000 },
+  { id: "kingpin", label: "Kingpin", minLevel: 35, dailyBonus: 50000 },
 ];
 
 export function vipTierForLevel(level: number): VipTier {

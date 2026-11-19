@@ -584,14 +584,10 @@ function giveDealer() {
   const c = ref.current;
   if (c.unlocked.includes(id)) return;
   const ach = ACHIEVEMENTS.find((a) => a.id === id);
-  set({
-    unlocked: [...c.unlocked, id],
-    // Format: "<id>|<title>|<desc>" so the AchievementToast component
-    // can parse it. Keeps the state shape (string|null) unchanged while
-    // carrying the full achievement payload for the toast.
-    toast: ach ? `${ach.id}|${ach.title}|${ach.desc}` : id,
-  });
-  sfx.win();
+  // Recorded silently: challenges and milestones now live in the
+  // casino-wide Challenges panel (no blackjack-only badge toast).
+  void ach;
+  set({ unlocked: [...c.unlocked, id] });
 }
 
 

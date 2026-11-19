@@ -1,18 +1,29 @@
 import { useSyncExternalStore } from "react";
 import { dayNumber, today } from "./clock";
 import { onEvent, type GameEvent } from "./events";
+import { wallet } from "./wallet";
 
 export type WeeklyState = {
   weekStart: number | null;
   points: number;
   previousPoints: number;
+  /** Weekly chests already opened this week (indexes in WEEKLY_TIERS). */
+  claimed: number[];
 };
 
 const EMPTY: WeeklyState = {
   weekStart: null,
   points: 0,
   previousPoints: 0,
+  claimed: [],
 };
+
+/** Weekly chests: points earned in every game, opened once each per week. */
+export const WEEKLY_TIERS = [
+  { label: "Bronze chest", points: 3000, reward: 40000 },
+  { label: "Silver chest", points: 10000, reward: 120000 },
+  { label: "Gold chest", points: 25000, reward: 300000 },
+];
 
 const KEY = "royalace:weekly:v1";
 
@@ -33,6 +44,10 @@ export const WEEKLY_POINTS: Partial<Record<GameEvent, number>> = {
   crapsRoll: 8,
   crapsWin: 15,
   crapsPoint: 40,
+  bjBlackjack: 60,
+  rouletteLightning: 150,
+  pokerFlush: 100,
+  crapsHard: 80,
 };
 
 let state: WeeklyState = EMPTY;
@@ -78,6 +93,7 @@ function rollWeek(): boolean {
     weekStart,
     points: 0,
     previousPoints: isFollowingWeek ? state.points : 0,
+    claimed: [],
   };
 
   return true;
@@ -136,6 +152,7 @@ export const weeklyStore = {
             weekStart: saved.weekStart,
             points: safePoints(saved.points),
             previousPoints: safePoints(saved.previousPoints),
+            claimed: Array.isArray(saved.claimed) ? saved.claimed.filter((x): x is number => typeof x === "number") : [],
           };
         }
       }
@@ -162,6 +179,18 @@ export const weeklyStore = {
       persist();
       emit();
     }
+  },
+
+  /** Opens a weekly chest once its points are reached. Returns the chips paid. */
+  claim(tier: number): number {
+    rollWeek();
+    const t = WEEKLY_TIERS[tier];
+    if (!t || state.points < t.points || state.claimed.includes(tier) || wallet.getLocked()) return 0;
+    state = { ...state, claimed: [...state.claimed, tier] };
+    persist();
+    wallet.add(t.reward);
+    emit();
+    return t.reward;
   },
 };
 

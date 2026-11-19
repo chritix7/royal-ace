@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from "react";
-import { challengesFor, type Challenge } from "./achievements";
+import { CHEST_REWARD, GAMES, MILESTONES, PLAY_EVENT, TOUR_REWARD, challengesFor, type Challenge, type Milestone } from "./achievements";
+import { statsStore } from "./statsStore";
+import { progressionStore } from "./progression";
 import { today } from "./clock";
 import { onEvent, type GameEvent } from "./events";
 import { wallet } from "./wallet";
@@ -61,6 +63,33 @@ export function challengeView(s: AchievementState): ChallengeView[] {
   });
 }
 
+/** Grand tour (a round of every game today) and the Royal chest (all ten done). */
+export type ExtraView = { id: "tour" | "chest"; title: string; progress: number; goal: number; reward: number; done: boolean; claimed: boolean };
+export function extrasView(s: AchievementState): ExtraView[] {
+  const played = GAMES.filter((g) => (s.counters[PLAY_EVENT[g.id]] ?? 0) > 0).length;
+  const views = challengeView(s);
+  const done = views.filter((v) => v.done).length;
+  return [
+    { id: "tour", title: "Grand tour · play every game today", progress: played, goal: GAMES.length, reward: TOUR_REWARD, done: played >= GAMES.length, claimed: s.claimed.includes("tour") },
+    { id: "chest", title: "Royal chest · complete all ten challenges", progress: done, goal: views.length, reward: CHEST_REWARD, done: views.length > 0 && done >= views.length, claimed: s.claimed.includes("chest") },
+  ];
+}
+
+/* ── Career milestones: earned once, read from the lifetime statistics ── */
+const CAREER_KEY = "royalace:career";
+let careerClaimed: string[] = [];
+export type MilestoneView = { def: Milestone; progress: number; done: boolean; claimed: boolean };
+export function milestoneView(): MilestoneView[] {
+  const st = statsStore.get() as unknown as Record<string, number>;
+  const level = progressionStore.get().level;
+  return MILESTONES.map((def) => {
+    const v = def.stat === "level" ? level : (st[def.stat] ?? 0);
+    const progress = Math.min(def.goal, v);
+    return { def, progress, done: progress >= def.goal, claimed: careerClaimed.includes(def.id) };
+  });
+}
+export const getCareerClaimed = () => careerClaimed;
+
 function bump(key: string, amount: number) {
   state = { ...state, counters: { ...state.counters, [key]: (state.counters[key] ?? 0) + amount } };
 }
@@ -97,6 +126,11 @@ function handleEvent(event: GameEvent, amount = 1) {
       ...toasts,
       { key: ++toastKey, id: item.def.id, title: item.def.title, reward: item.def.reward },
     ];
+  }
+  for (const x of extrasView(state)) {
+    if (!x.done || state.announced.includes(x.id)) continue;
+    state = { ...state, announced: [...state.announced, x.id] };
+    toasts = [...toasts, { key: ++toastKey, id: x.id, title: x.title, reward: x.reward }];
   }
 
   persist();
@@ -139,6 +173,12 @@ export const achievementsStore = {
       }
     } catch {}
 
+    try {
+      const raw = localStorage.getItem(CAREER_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      careerClaimed = Array.isArray(arr) ? arr.filter((x: unknown): x is string => typeof x === "string") : [];
+    } catch {}
+
     rollover();
     persist();
 
@@ -174,12 +214,28 @@ export const achievementsStore = {
     rollover();
     if (wallet.getLocked()) return 0;
     const item = challengeView(state).find((c) => c.def.id === id);
-    if (!item || !item.done || item.claimed) return 0;
+    const extra = extrasView(state).find((x) => x.id === id);
+    const reward = item ? (item.done && !item.claimed ? item.def.reward : 0) : extra ? (extra.done && !extra.claimed ? extra.reward : 0) : 0;
+    if (!reward) return 0;
     state = { ...state, claimed: [...state.claimed, id] };
     persist();
-    wallet.add(item.def.reward);
+    wallet.add(reward);
     emit();
-    return item.def.reward;
+    return reward;
+  },
+
+  /** Pays a career milestone (once for good). */
+  claimMilestone(id: string): number {
+    if (wallet.getLocked()) return 0;
+    const m = milestoneView().find((x) => x.def.id === id);
+    if (!m || !m.done || m.claimed) return 0;
+    careerClaimed = [...careerClaimed, id];
+    try {
+      localStorage.setItem(CAREER_KEY, JSON.stringify(careerClaimed));
+    } catch {}
+    wallet.add(m.def.reward);
+    emit();
+    return m.def.reward;
   },
 
   dismissToast(key: number) {

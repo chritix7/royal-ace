@@ -12,7 +12,7 @@ import Poker from "../components/Poker";
 import Craps from "../components/Craps";
 import StatsPanel from "../components/StatsPanel";
 import { Counter } from "../components/ui";
-import { achievementsStore, challengeView, useAchievements } from "../lib/achievementsStore";
+import { achievementsStore, challengeView, extrasView, useAchievements } from "../lib/achievementsStore";
 import { today } from "../lib/clock";
 import { dailyStatus, dailyStore, useDaily } from "../lib/daily";
 import { statsStore, useStats } from "../lib/statsStore";
@@ -112,9 +112,11 @@ export default function Home() {
   const stats = useStats();
   const rounds = stats.bjHands + stats.spins + (stats.rouletteSpins ?? 0) + (stats.pokerHands ?? 0) + (stats.crapsRolls ?? 0);
   const roundsLabel = `${rounds.toLocaleString("en-US")} ${rounds === 1 ? "round" : "rounds"}`;
-  const challenges = challengeView(useAchievements());
+  const achState = useAchievements();
+  const challenges = challengeView(achState);
+  const extrasToClaim = extrasView(achState).filter((x) => x.done && !x.claimed).length;
   const challengesDone = challenges.filter((c) => c.done).length;
-  const challengesToClaim = challenges.filter((c) => c.done && !c.claimed).length;
+  const challengesToClaim = challenges.filter((c) => c.done && !c.claimed).length + extrasToClaim;
   const daily = useDaily();
   const progression = useProgression();
   // Is today's daily bonus still waiting? Depends on today's date, so

@@ -381,7 +381,7 @@ export function useRoulette(active: boolean) {
     const next = [...have, id];
     setBadges(next);
     persist({ badges: next });
-    setBadgeToast(`${b.id}|${b.title}|${b.desc}`);
+    void b; // Kept silently: challenges and milestones live in the casino-wide panel.
   };
 
   const landedFor = useRef(0);

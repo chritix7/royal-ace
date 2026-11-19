@@ -12,17 +12,19 @@ import {
   vipTierForLevel,
 } from "../lib/daily";
 import { today } from "../lib/clock";
-import { progressionStore, useProgression, xpInLevel, xpForNextLevel } from "../lib/progression";
-import { useWeekly, weeklyStore } from "../lib/weekly";
+import { levelReward, progressionStore, useProgression, xpInLevel, xpForNextLevel } from "../lib/progression";
+import { useWeekly, weeklyStore, WEEKLY_TIERS } from "../lib/weekly";
+import { useLocked } from "../lib/wallet";
 
 type Props = { open: boolean; onClose: () => void };
 
-const WEEKLY_GOAL = 5000;
+const WEEKLY_GOAL = WEEKLY_TIERS[WEEKLY_TIERS.length - 1].points;
 
 export default function RewardsPanel({ open, onClose }: Props) {
   const daily = useDaily();
   const progression = useProgression();
   const weekly = useWeekly();
+  const locked = useLocked();
   const vipTier = vipTierForLevel(progression.level);
   const nextTier = nextVipTier(progression.level);
   const [flash, setFlash] = useState<string | null>(null);
@@ -220,6 +222,9 @@ export default function RewardsPanel({ open, onClose }: Props) {
                 {xpInLevel(progression.xp)} / {xpForNextLevel()} XP
               </p>
             </div>
+            <p className="mt-1 text-[10px] text-white/45">
+              Level {progression.level + 1} pays <span className="font-bold text-[#f5d778]">◈ {levelReward(progression.level + 1).toLocaleString("en-US")}</span> · XP from every game
+            </p>
             <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-black/45">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-[#8a6c2b] via-[#d7b45b] to-[#f0d38b] shadow-[0_0_10px_rgba(229,199,121,0.35)] transition-all duration-700"
@@ -358,8 +363,37 @@ export default function RewardsPanel({ open, onClose }: Props) {
 
             <p className="mt-2 text-[10px] text-white/45">
               {weekly.points.toLocaleString("en-US")} /{" "}
-              {WEEKLY_GOAL.toLocaleString("en-US")} points
+              {WEEKLY_GOAL.toLocaleString("en-US")} points · earned in every game
             </p>
+            <ul className="mt-3 space-y-1.5">
+              {WEEKLY_TIERS.map((t, i) => {
+                const reached = weekly.points >= t.points;
+                const claimed = (weekly.claimed ?? []).includes(i);
+                return (
+                  <li key={t.label} className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 ${reached ? "border-[#d7b45b]/50 bg-[#d7b45b]/[0.07]" : "border-white/[0.07] bg-black/25"}`}>
+                    <span className="min-w-0">
+                      <span className={`block text-[11px] font-bold ${reached ? "text-[#f5d778]" : "text-white/70"}`}>{t.label}</span>
+                      <span className="block text-[10px] text-white/40">{t.points.toLocaleString("en-US")} points</span>
+                    </span>
+                    {claimed ? (
+                      <span className="shrink-0 text-[10px] font-black uppercase tracking-wider text-[#e5c779]/80">Opened ✓</span>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={!reached || locked}
+                        onClick={() => {
+                          const got = weeklyStore.claim(i);
+                          if (got) setFlash(`${t.label} opened: +${got.toLocaleString("en-US")} chips`);
+                        }}
+                        className={reached ? primary : ghost}
+                      >
+                        ◈ {t.reward.toLocaleString("en-US")}
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
 
             {weeklyResetDate && (
               <p className="mt-2 text-[10px] leading-relaxed text-white/40">

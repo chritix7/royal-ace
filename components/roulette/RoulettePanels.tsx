@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import CoinRain from "../CoinRain";
 import { money } from "../../lib/game";
 import { betName, colorOf, totalOf, type Bets } from "../../lib/roulette";
-import { ROULETTE_BADGES, type RouletteGame, type RoundRecord } from "../../lib/useRoulette";
+import { type RouletteGame, type RoundRecord } from "../../lib/useRoulette";
 
 export const pill = (n: number) => `rl-pill rl-pill--${colorOf(n)} flex shrink-0 items-center justify-center rounded-md font-black tabular-nums`;
 const signed = (v: number) => `${v > 0 ? "+" : v < 0 ? "−" : ""}◈ ${money(Math.abs(v))}`;
@@ -60,27 +60,6 @@ export function StylePanel({ g }: { g: RouletteGame }) {
             </span>
           </button>
         ))}
-      </div>
-      <div>
-        <p className="rl-eyebrow mb-1.5">
-          Badges · {g.badges.length}/{ROULETTE_BADGES.length}
-        </p>
-        <div className="grid grid-cols-2 gap-1.5">
-          {ROULETTE_BADGES.map((b) => {
-            const got = g.badges.includes(b.id);
-            return (
-              <div key={b.id} title={b.desc} className={`rl-badge ${got ? "is-got" : ""}`}>
-                <span className="rl-badge__medal" aria-hidden="true">
-                  ★
-                </span>
-                <span className="min-w-0">
-                  <span className="block truncate text-[11px] font-bold text-white/85">{b.title}</span>
-                  <span className="block truncate text-[9.5px] text-white/40">{b.desc}</span>
-                </span>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </div>
   );

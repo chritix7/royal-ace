@@ -1,9 +1,57 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { achievementsStore, challengeView, useAchievements } from "../lib/achievementsStore";
+import { achievementsStore, challengeView, extrasView, milestoneView, useAchievements } from "../lib/achievementsStore";
+import { GAMES } from "../lib/achievements";
 import { useLocked } from "../lib/wallet";
+import { useStats } from "../lib/statsStore";
+import { useProgression } from "../lib/progression";
+
+/** One challenge / milestone row. */
+function Row({ title, progress, goal, reward, done, claimed, locked, onClaim, accent }: { title: string; progress: number; goal: number; reward: number; done: boolean; claimed: boolean; locked: boolean; onClaim: () => void; accent?: string }) {
+  return (
+    <li
+      className={`relative overflow-hidden rounded-xl border px-3 py-2 transition sm:p-2.5 ${done ? "border-[#d7b45b]/60 bg-[#d7b45b]/[0.08]" : "border-white/[0.07] bg-black/30"}`}
+      style={done ? { boxShadow: "0 0 14px rgba(229,199,121,0.18), inset 0 1px 0 rgba(229,199,121,0.15)" } : undefined}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <p className={`min-w-0 text-xs font-bold leading-snug tracking-wide ${done ? "text-[#f5d778]" : "text-white/80"}`}>
+          {accent && <span className="mr-1.5 rounded bg-white/[0.06] px-1.5 py-px text-[8.5px] font-black uppercase tracking-[0.15em] text-[#d7b45b]/80">{accent}</span>}
+          {title}
+        </p>
+        <span className="shrink-0 text-xs font-black tabular-nums text-[#e5c779]">◈ {reward.toLocaleString("en-US")}</span>
+      </div>
+      <div className="mt-1.5 flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/45">
+            <div className="h-full rounded-full bg-gradient-to-r from-[#8a6c2b] via-[#d7b45b] to-[#f0d38b] transition-all duration-500" style={{ width: `${Math.round((progress / goal) * 100)}%` }} />
+          </div>
+          <p className="mt-0.5 text-[10px] tabular-nums text-white/45">
+            {progress.toLocaleString("en-US")} / {goal.toLocaleString("en-US")}
+          </p>
+        </div>
+        {claimed ? (
+          <span className="shrink-0 rounded-full border border-[#d7b45b]/40 bg-[#d7b45b]/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-[#e5c779]/80">Claimed ✓</span>
+        ) : (
+          <button
+            type="button"
+            disabled={!done || locked}
+            onClick={onClaim}
+            title={done && locked ? "Finish the round in progress to claim" : undefined}
+            className={`shrink-0 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px disabled:cursor-not-allowed ${
+              done
+                ? "border-[#d7b45b]/70 bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e] shadow-[0_2px_0_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.4)] enabled:hover:brightness-110 disabled:opacity-50"
+                : "border-white/10 bg-white/[0.04] text-white/35"
+            }`}
+          >
+            {done ? "Claim" : "In progress"}
+          </button>
+        )}
+      </div>
+    </li>
+  );
+}
 
 type Props = {
   open: boolean;
@@ -13,6 +61,10 @@ type Props = {
 export default function AchievementsPanel({ open, onClose }: Props) {
   const state = useAchievements();
   const locked = useLocked();
+  // Career milestones read the lifetime stats and the level.
+  useStats();
+  useProgression();
+  const [tab, setTab] = useState<"today" | "career">("today");
 
   // A new day may have started since the page was opened.
   useEffect(() => {
@@ -40,11 +92,14 @@ export default function AchievementsPanel({ open, onClose }: Props) {
   if (!open || typeof document === "undefined") return null;
 
   const views = challengeView(state);
+  const extras = extrasView(state);
+  const career = milestoneView();
   const doneCount = views.filter((v) => v.done).length;
   const pct = views.length ? Math.round((doneCount / views.length) * 100) : 0;
-  const toClaim = views
-    .filter((v) => v.done && !v.claimed)
-    .reduce((sum, v) => sum + v.def.reward, 0);
+  const toClaim =
+    views.filter((v) => v.done && !v.claimed).reduce((sum, v) => sum + v.def.reward, 0) +
+    extras.filter((x) => x.done && !x.claimed).reduce((sum, x) => sum + x.reward, 0);
+  const careerToClaim = career.filter((m) => m.done && !m.claimed).length;
 
   return createPortal(
     <div
@@ -77,7 +132,7 @@ export default function AchievementsPanel({ open, onClose }: Props) {
         <div className="relative flex items-start justify-between gap-3 border-b border-[#d7b45b]/15 px-5 py-4 sm:px-6">
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d7b45b]/80">
-              New set every day
+              Two per game · new set every day
             </p>
             <h2 className="font-display mt-0.5 text-lg font-black tracking-wide text-white sm:text-xl">
               Daily challenges
@@ -116,79 +171,71 @@ export default function AchievementsPanel({ open, onClose }: Props) {
           </div>
         </div>
 
+        {/* Tabs */}
+        <div className="relative px-5 pt-3 sm:px-6">
+          <div className="grid grid-cols-2 gap-1 rounded-full border border-white/10 bg-black/40 p-1">
+            {(
+              [
+                ["today", "Today"],
+                ["career", `Career${careerToClaim ? ` · ${careerToClaim} to claim` : ""}`],
+              ] as const
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setTab(id)}
+                aria-pressed={tab === id}
+                className={`rounded-full py-1.5 text-[10px] font-black uppercase tracking-[0.18em] transition ${tab === id ? "bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e]" : "text-white/55 hover:text-[#e5c779]"}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Body */}
         <div className="relative min-h-0 flex-1 overflow-y-auto px-5 py-4 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin] sm:px-6">
-          <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2">
-            {views.map(({ def, progress, done, claimed }) => (
-              <li
-                key={def.id}
-                className={`relative overflow-hidden rounded-xl border px-3 py-2 transition sm:rounded-2xl sm:p-3 ${
-                  done
-                    ? "border-[#d7b45b]/60 bg-[#d7b45b]/[0.08]"
-                    : "border-white/[0.07] bg-black/30"
-                }`}
-                style={
-                  done
-                    ? {
-                        boxShadow:
-                          "0 0 14px rgba(229,199,121,0.18), inset 0 1px 0 rgba(229,199,121,0.15)",
-                      }
-                    : undefined
-                }
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <p
-                    className={`min-w-0 text-xs font-bold leading-snug tracking-wide ${
-                      done ? "text-[#f5d778]" : "text-white/80"
-                    }`}
-                  >
-                    {def.title}
-                  </p>
-                  <span className="shrink-0 text-xs font-black tabular-nums text-[#e5c779]">
-                    ◈ {def.reward.toLocaleString("en-US")}
-                  </span>
-                </div>
-
-                <div className="mt-1.5 flex items-center gap-3 sm:mt-2.5">
-                  <div className="min-w-0 flex-1">
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/45">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-[#8a6c2b] via-[#d7b45b] to-[#f0d38b] transition-all duration-500"
-                        style={{ width: `${Math.round((progress / def.goal) * 100)}%` }}
-                      />
-                    </div>
-                    <p className="mt-0.5 text-[10px] tabular-nums text-white/45 sm:mt-1">
-                      {progress} / {def.goal}
-                    </p>
-                  </div>
-
-                  {claimed ? (
-                    <span className="shrink-0 rounded-full border border-[#d7b45b]/40 bg-[#d7b45b]/10 px-3 py-1 text-[10px] sm:py-1.5 font-black uppercase tracking-wider text-[#e5c779]/80">
-                      Claimed ✓
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={!done || locked}
-                      onClick={() => achievementsStore.claim(def.id)}
-                      title={
-                        done && locked
-                          ? "Finish the round in progress to claim"
-                          : undefined
-                      }
-                      className={`shrink-0 rounded-full border px-3 py-1 text-[10px] font-black sm:py-1.5 uppercase tracking-wider outline-none transition focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:active:translate-y-px disabled:cursor-not-allowed ${
-                        done
-                          ? "border-[#d7b45b]/70 bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e] shadow-[0_2px_0_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.4)] enabled:hover:brightness-110 disabled:opacity-50"
-                          : "border-white/10 bg-white/[0.04] text-white/35"
-                      }`}
-                    >
-                      {done ? "Claim" : "In progress"}
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
+          {tab === "today" ? (
+            <div className="space-y-3">
+              <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2">
+                {extras.map((x) => (
+                  <Row key={x.id} title={x.title} progress={x.progress} goal={x.goal} reward={x.reward} done={x.done} claimed={x.claimed} locked={locked} onClaim={() => achievementsStore.claim(x.id)} accent={x.id === "chest" ? "Bonus" : "Tour"} />
+                ))}
+              </ul>
+              {GAMES.map((g) => {
+                const list = views.filter((v) => v.def.game === g.id);
+                if (!list.length) return null;
+                return (
+                  <section key={g.id}>
+                    <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.28em] text-[#d7b45b]/75">{g.label}</p>
+                    <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2">
+                      {list.map(({ def, progress, done, claimed }) => (
+                        <Row key={def.id} title={def.title} progress={progress} goal={def.goal} reward={def.reward} done={done} claimed={claimed} locked={locked} onClaim={() => achievementsStore.claim(def.id)} />
+                      ))}
+                    </ul>
+                  </section>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-[11px] text-white/50">Milestones earned once for good, from everything you have played so far.</p>
+              {[...GAMES, { id: "all" as const, label: "Royal Ace" }].map((g) => {
+                const list = career.filter((m) => m.def.game === g.id);
+                if (!list.length) return null;
+                return (
+                  <section key={g.id}>
+                    <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.28em] text-[#d7b45b]/75">{g.label}</p>
+                    <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2">
+                      {list.map(({ def, progress, done, claimed }) => (
+                        <Row key={def.id} title={def.title} progress={progress} goal={def.goal} reward={def.reward} done={done} claimed={claimed} locked={locked} onClaim={() => achievementsStore.claimMilestone(def.id)} />
+                      ))}
+                    </ul>
+                  </section>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>,
