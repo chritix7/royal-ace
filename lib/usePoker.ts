@@ -258,10 +258,10 @@ export function usePoker(active: boolean) {
     persist({ chip: v });
   };
   const toggleHint = () => {
-    setHintOn((v) => {
-      persist({ hintOn: !v });
-      return !v;
-    });
+    const on = !hintOn;
+    setHintOn(on);
+    persist({ hintOn: on });
+    setMessage(on ? "Hints on · the suggested play shows at the flop" : "Hints off");
   };
 
   // ---- The hand

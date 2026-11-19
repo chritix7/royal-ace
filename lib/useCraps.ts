@@ -240,11 +240,12 @@ export function useCraps(active: boolean, rollMs: number) {
     setChipState(v);
     persist({ chip: v });
   };
-  const toggleHint = () =>
-    setHintOn((v) => {
-      persist({ hintOn: !v });
-      return !v;
-    });
+  const toggleHint = () => {
+    const on = !hintOn;
+    setHintOn(on);
+    persist({ hintOn: on });
+    setMessage(on ? "Hints on · tips show under the dice" : "Hints off");
+  };
 
   // ---- Roll
   const timer = useRef(0);

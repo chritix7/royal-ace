@@ -559,6 +559,14 @@ export default function Craps({ active, focus = false, onFocusChange }: { active
     };
   }, [focus]);
 
+  // Phones share one line: a new message (call, refusal) shows for a moment,
+  // then the tip comes back when hints are on.
+  const [msgFresh, setMsgFresh] = useState(false);
+  useEffect(() => {
+    setMsgFresh(true);
+    const t = window.setTimeout(() => setMsgFresh(false), 2400);
+    return () => window.clearTimeout(t);
+  }, [g.message, g.refused]);
   const res = g.rolling ? null : g.result;
   const won = res ? res.returned : 0;
   const net = res ? res.won - res.lost : null;
@@ -764,7 +772,7 @@ export default function Craps({ active, focus = false, onFocusChange }: { active
               ☰
             </button>
           </div>
-          <div className="mb-1 flex h-5 items-center justify-center">{g.hint && !g.refused ? <p className="truncate text-[10.5px] text-[#e9d9a9]/75">💡 {g.hint}</p> : messageLine}</div>
+          <div className="mb-1 flex h-5 items-center justify-center">{g.hint && !msgFresh ? <p className="truncate text-[10.5px] text-[#e9d9a9]/75">💡 {g.hint}</p> : messageLine}</div>
           <div className="cr-table min-h-0 flex-1">
             <div className="cr-felt h-full p-2">
               <Layout g={g} flash={flash} compact />
