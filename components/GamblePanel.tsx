@@ -119,7 +119,7 @@ export default function GamblePanel({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex flex-col items-center justify-center overflow-y-auto bg-black/90 px-4 py-6 backdrop-blur-sm"
+      className="safe-y [--sy:1.5rem] fixed inset-0 z-[60] flex flex-col items-center justify-center overflow-y-auto bg-black/90 px-4 py-6 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="gamble-title"

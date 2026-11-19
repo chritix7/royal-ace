@@ -101,7 +101,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[180] flex items-center justify-center p-4 animate-vegas-fade sm:p-6"
+      className="safe-y fixed inset-0 z-[180] flex items-center justify-center p-4 animate-vegas-fade sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-label="Rewards"
@@ -114,7 +114,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
       />
 
       <div
-        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl lg:max-w-4xl border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a1512] via-[#120e0b] to-[#070504] shadow-[0_30px_80px_rgba(0,0,0,0.9)] animate-insurance-slide-in"
+        className="relative flex max-h-[min(90vh,calc(100dvh_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom)_-_2rem))] w-full max-w-2xl flex-col overflow-hidden rounded-3xl lg:max-w-4xl border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a1512] via-[#120e0b] to-[#070504] shadow-[0_30px_80px_rgba(0,0,0,0.9)] animate-insurance-slide-in"
         style={{
           backgroundImage:
             "radial-gradient(120% 60% at 50% 0%, rgba(215,180,91,0.15) 0%, transparent 60%), linear-gradient(180deg, #1a1512 0%, #120e0b 60%, #070504 100%)",

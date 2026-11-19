@@ -798,7 +798,7 @@ export default function Sidebar({ g }: { g: Game }) {
 
         {mounted && recapOpen && createPortal(
           <div
-            className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-vegas-fade"
+            className="safe-y [--sy:1.5rem] fixed inset-0 z-[100] flex items-center justify-center p-6 animate-vegas-fade"
             role="dialog"
             aria-modal="true"
             aria-label="Session summary before reset"
@@ -969,7 +969,7 @@ export default function Sidebar({ g }: { g: Game }) {
 
         {mounted && vegasPickerOpen && createPortal(
           <div
-            className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-vegas-fade"
+            className="safe-y [--sy:1.5rem] fixed inset-0 z-[100] flex items-center justify-center p-6 animate-vegas-fade"
             role="dialog"
             aria-modal="true"
             aria-label="Choose a Vegas color"

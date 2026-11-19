@@ -29,7 +29,7 @@ export default function BonusResultModal({
   const tier = k >= 6 ? "Legendary" : k >= 2.5 ? "Huge" : k >= 1 ? "Great" : x > 0 ? "Nice" : "Tough";
   const hot = k >= 1;
   return (
-    <div className="backdrop-in fixed inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+    <div className="safe-y backdrop-in fixed inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-sm">
       {hot && <CoinRain count={x >= 20 ? 60 : 34} />}
       <div
         role="dialog"

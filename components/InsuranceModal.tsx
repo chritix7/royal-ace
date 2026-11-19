@@ -46,7 +46,7 @@ export default function InsuranceModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[180] flex items-center justify-center p-6 animate-vegas-fade"
+      className="safe-y [--sy:1.5rem] fixed inset-0 z-[180] flex items-center justify-center p-6 animate-vegas-fade"
       role="dialog"
       aria-modal="true"
       aria-labelledby="insurance-title"

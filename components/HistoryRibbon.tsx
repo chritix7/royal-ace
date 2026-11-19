@@ -79,7 +79,7 @@ function HandReplay({
   const dealerTotal = handValue(dealer).total;
 
   return createPortal(
-    <div className="fixed inset-0 z-[190] flex items-center justify-center p-4 animate-vegas-fade">
+    <div className="safe-y fixed inset-0 z-[190] flex items-center justify-center p-4 animate-vegas-fade">
       <button
         type="button"
         aria-label="Close hand replay"

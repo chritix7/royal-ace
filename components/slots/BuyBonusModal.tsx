@@ -36,7 +36,7 @@ export default function BuyBonusModal({
 
   return (
     <div
-      className="backdrop-in fixed inset-0 z-[80] flex items-center justify-center bg-black/75 backdrop-blur-sm"
+      className="safe-y backdrop-in fixed inset-0 z-[80] flex items-center justify-center bg-black/75 backdrop-blur-sm"
       onClick={onClose}
     >
       <div

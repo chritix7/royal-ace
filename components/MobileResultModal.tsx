@@ -52,7 +52,7 @@ export default function MobileResultModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[180] flex items-center justify-center p-4 animate-vegas-fade md:hidden"
+      className="safe-y fixed inset-0 z-[180] flex items-center justify-center p-4 animate-vegas-fade md:hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Round details"

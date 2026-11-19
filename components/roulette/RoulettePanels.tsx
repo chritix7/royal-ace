@@ -123,7 +123,7 @@ export function RoundDetail({ r, onClose }: { r: RoundRecord; onClose: () => voi
   }, [onClose]);
   const net = r.returned - r.staked;
   return (
-    <div className="backdrop-in fixed inset-0 z-[95] flex items-center justify-center p-4">
+    <div className="safe-y backdrop-in fixed inset-0 z-[95] flex items-center justify-center p-4">
       <button aria-label="Close" className="absolute inset-0 cursor-default bg-black/70" onClick={onClose} />
       <div role="dialog" aria-modal="true" aria-label="Round details" className="blur-in relative w-[min(26rem,100%)] rounded-2xl rl-result-card !flex-col !items-stretch !gap-3 !p-5">
         <div className="flex items-center gap-3">

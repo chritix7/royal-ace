@@ -91,7 +91,7 @@ export default function HotkeysOverlay() {
   );
 
   const body = (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 animate-vegas-fade">
+    <div className="safe-y fixed inset-0 z-[80] flex items-center justify-center p-4 animate-vegas-fade">
       <button
         type="button"
         aria-label="Close keyboard shortcuts"

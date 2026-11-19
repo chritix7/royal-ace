@@ -2236,3 +2236,9 @@ html.rl-wheel-solid body *:not(.rl-wheel-overlay, .rl-wheel-overlay *, .rl-over-
   /* Bigger symbols in the taller cells (they stay inside their cell) */
   [data-focus] .slot-reels [role="img"] > img { width: 94% !important; height: 72% !important; }
 }
+
+/* Centred dialogs keep clear of the iPhone status bar and home bar
+   (fullscreen / installed app), on top of their own padding. */
+@media (max-width: 1023px) {
+  .safe-y { padding-top: max(var(--sy, 1rem), calc(env(safe-area-inset-top) + 0.5rem)); padding-bottom: max(var(--sy, 1rem), calc(env(safe-area-inset-bottom) + 0.5rem)); }
+}

@@ -74,7 +74,7 @@ export default function SideBetModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[180] flex items-center justify-center p-4 animate-vegas-fade sm:p-6"
+      className="safe-y fixed inset-0 z-[180] flex items-center justify-center p-4 animate-vegas-fade sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-label={`Stake ${label}`}
