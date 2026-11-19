@@ -1236,7 +1236,7 @@ useEffect(() => {
             aria-label="Game info"
             className="[animation:drawerIn_.4s_cubic-bezier(0.22,1,0.36,1)_both] absolute right-0 top-0 flex h-full w-full flex-col border-l sm:w-[min(680px,94vw)] border-white/10 bg-[#0b0f0d] shadow-[-20px_0_60px_rgba(0,0,0,0.6)]"
           >
-            <div className="flex items-center justify-between border-b border-white/10 px-5 py-3">
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-3" style={{ paddingTop: "max(0.75rem, calc(env(safe-area-inset-top) + 0.5rem))" }}>
               <p className="text-[11px] font-black uppercase tracking-[0.25em] text-[#e5c779]">Game info</p>
               <button
                 onClick={() => setInfoOpen(false)}

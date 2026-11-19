@@ -379,7 +379,7 @@ function PanelsDrawer({ g, initial, onClose }: { g: RouletteGame; initial: Panel
         aria-label="Roulette panels"
         className="[animation:drawerIn_.4s_cubic-bezier(0.22,1,0.36,1)_both] absolute right-0 top-0 flex h-full w-full flex-col border-l border-white/10 bg-[#0c0c0e] shadow-[-20px_0_60px_rgba(0,0,0,0.6)] sm:w-[min(480px,94vw)]"
       >
-        <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-3">
+        <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-3" style={{ paddingTop: "max(0.75rem, calc(env(safe-area-inset-top) + 0.5rem))" }}>
           <div className="rl-tabs !grid-cols-4 flex-1" role="tablist">
             {tabs.map(([id, label]) => (
               <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={`rl-tab ${tab === id ? "is-on" : ""}`}>
@@ -489,7 +489,7 @@ function InfoPanel({ onClose, g }: { onClose: () => void; g: RouletteGame }) {
         aria-label="Roulette info"
         className="[animation:drawerIn_.4s_cubic-bezier(0.22,1,0.36,1)_both] absolute right-0 top-0 flex h-full w-full flex-col border-l border-white/10 bg-[#0c0c0e] shadow-[-20px_0_60px_rgba(0,0,0,0.6)] sm:w-[min(520px,94vw)]"
       >
-        <div className="flex items-center justify-between border-b border-white/10 px-5 py-3" style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}>
+        <div className="flex items-center justify-between border-b border-white/10 px-5 py-3" style={{ paddingTop: "max(0.75rem, calc(env(safe-area-inset-top) + 0.5rem))" }}>
           <p className="text-[11px] font-black uppercase tracking-[0.25em] text-[#e5c779]">European roulette</p>
           <button onClick={onClose} aria-label="Close" className="lux-btn h-9 w-9 text-sm">
             ✕
