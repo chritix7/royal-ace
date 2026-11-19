@@ -132,7 +132,7 @@ export default function AchievementsPanel({ open, onClose }: Props) {
         <div className="relative flex items-start justify-between gap-3 border-b border-[#d7b45b]/15 px-5 py-4 sm:px-6">
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d7b45b]/80">
-              Two per game · new set every day
+              2 per game · new every day
             </p>
             <h2 className="font-display mt-0.5 text-lg font-black tracking-wide text-white sm:text-xl">
               Daily challenges
