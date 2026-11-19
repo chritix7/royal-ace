@@ -6,7 +6,7 @@ import { sfx } from "./sound";
 import { track } from "./events";
 import { sessionStore } from "./sessionStore";
 import { useBalance, wallet } from "./wallet";
-import { canPlace, kindOf, limitFor, maxOdds, MIN_BET, numOf, removable, resolve, rollDie, totalOf, type Bets, type BoxNum, type RollResult } from "./craps";
+import { canPlace, kindOf, TABLE_MAX, limitFor, maxOdds, MIN_BET, numOf, removable, resolve, rollDie, totalOf, type Bets, type BoxNum, type RollResult } from "./craps";
 
 /**
  * Craps at the Royal Ace table. Chips leave the credit when they are
@@ -144,7 +144,9 @@ export function useCraps(active: boolean, rollMs: number) {
     const have = bets[key] ?? 0;
     const lim = limitFor(key, bets, point);
     if (have >= lim) return refuse(lim === 0 ? "Nothing to back here" : `Limit ◈ ${lim.toLocaleString("en-US")} on this bet`);
-    const add = Math.min(amount, lim - have);
+    const room = TABLE_MAX - totalOf(bets);
+    if (room <= 0) return refuse(`Table limit ◈ ${TABLE_MAX.toLocaleString("en-US")} on the layout`);
+    const add = Math.min(amount, lim - have, room);
     if (add + have < MIN_BET) return refuse(`Minimum ◈ ${MIN_BET}`);
     if (add > wallet.getBalance()) return refuse("Not enough chips");
     wallet.add(-add);
@@ -185,15 +187,22 @@ export function useCraps(active: boolean, rollMs: number) {
     setUndoStack([]);
     setMessage("Bets taken down");
   };
-  /** Same one-roll bets (field, props) as on the last roll. */
+  /** Same one-roll bets (field, props) as on the last roll, within the rules and limits. */
   const rebet = () => {
     if (rolling) return;
     const add = Object.entries(lastOneRoll);
     if (!add.length) return refuse("No one-roll bets to repeat");
-    const cost = add.reduce((a, [, v]) => a + v, 0);
-    if (cost > wallet.getBalance()) return refuse("Not enough chips");
     const next = { ...bets };
-    for (const [k, v] of add) next[k] = (next[k] ?? 0) + v;
+    let cost = 0;
+    for (const [k, v] of add) {
+      if (canPlace(k, next, point)) continue;
+      const have = next[k] ?? 0;
+      const amount = Math.min(v, limitFor(k, next, point) - have, TABLE_MAX - totalOf(next), wallet.getBalance() - cost);
+      if (amount + have < MIN_BET || amount <= 0) continue;
+      next[k] = have + amount;
+      cost += amount;
+    }
+    if (!cost) return refuse("Not enough chips or limits reached");
     wallet.add(-cost);
     setBets(next);
     persist({ bets: next });
@@ -208,7 +217,7 @@ export function useCraps(active: boolean, rollMs: number) {
       const have = next[key] ?? 0;
       const want = Math.max(0, max - have);
       if (want <= 0) return;
-      const can = Math.min(want, wallet.getBalance() - cost);
+      const can = Math.min(want, wallet.getBalance() - cost, TABLE_MAX - totalOf(next));
       if (can < MIN_BET) return;
       next[key] = have + can;
       cost += can;

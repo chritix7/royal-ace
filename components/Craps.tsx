@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode }
 import { ChipFace, TableChip } from "./ChipButton";
 import { Counter } from "./ui";
 import { money } from "../lib/game";
-import { BOX, EDGES, HARD_PAYS, PLACE_PAYS, PROPS, betName, kindOf, numOf, type BoxNum } from "../lib/craps";
+import { BOX, EDGES, HARD_PAYS, LIMITS, PROP_LIMITS, TABLE_MAX, MIN_BET, PLACE_PAYS, PROPS, betName, kindOf, numOf, type BoxNum } from "../lib/craps";
 import { CRAPS_CHIPS, useCraps, type CrapsGame, type RollRecord } from "../lib/useCraps";
 import { exitFullscreenSettled, isNarrowScreen, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
 import { useSession } from "../lib/sessionStore";
@@ -387,6 +387,34 @@ function Rules() {
         <b className="text-[#f0d38b]">Place</b> bets win when their number comes before a 7 (9:5, 7:5, 7:6). <b>Hardways</b> need the pair before a 7 or the
         easy way. Place bets and hardways are off on the come-out roll. Field and props are decided in one roll.
       </p>
+      <div>
+        <p className="rl-eyebrow mb-1 !text-[9px]">Table limits</p>
+        <ul className="grid grid-cols-1 gap-[3px] sm:grid-cols-2">
+          {(
+            [
+              ["Pass, Don't pass, Come, Don't come", LIMITS.line],
+              ["Odds", "3-4-5× the bet (lay 6×)"],
+              ["Field", LIMITS.field],
+              ["Place 6 / 8", LIMITS.place[6]],
+              ["Place 5 / 9", LIMITS.place[5]],
+              ["Place 4 / 10", LIMITS.place[4]],
+              ["Hard 6 / 8", LIMITS.hard[6]],
+              ["Hard 4 / 10", LIMITS.hard[4]],
+              ["Any 7", PROP_LIMITS.any7],
+              ["Any craps", PROP_LIMITS.anyCraps],
+              ["3 / 11", PROP_LIMITS.three],
+              ["2 / 12", PROP_LIMITS.two],
+              ["Whole layout", TABLE_MAX],
+            ] as [string, number | string][]
+          ).map(([k, v]) => (
+            <li key={k} className="flex justify-between gap-2 rounded bg-white/[0.03] px-2 py-0.5 text-[11px]">
+              <span className="truncate">{k}</span>
+              <span className="shrink-0 font-mono text-white/55">{typeof v === "number" ? `◈ ${compactMoney(v)}` : v}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-1 text-[10.5px] text-white/45">Minimum ◈ {MIN_BET} a bet. Bets that cancel out are refused: Pass with Don&apos;t pass, Come with Don&apos;t come, a Place bet on a number you bet against with Don&apos;t come.</p>
+      </div>
       <div>
         <p className="rl-eyebrow mb-1 !text-[9px]">House edge</p>
         <ul className="grid grid-cols-1 gap-[3px] sm:grid-cols-2">

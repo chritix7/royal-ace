@@ -48,7 +48,34 @@ export const ODDS_MULT: Record<BoxNum, number> = { 4: 3, 10: 3, 5: 4, 9: 4, 6: 5
 /** Winnings (not counting the stake), whole chips only, rounded down. */
 export const ratio = (stake: number, [w, per]: [number, number]) => Math.floor((stake * w) / per);
 
-export const LIMITS = { line: 200000, field: 200000, place: 200000, hard: 50000, prop: 50000 } as const;
+/**
+ * Table limits, per bet. As at the roulette table, the bigger the payout the
+ * lower the limit, so the most a single bet can win stays around ◈ 450–600K
+ * (odds come on top, capped at 3-4-5× the flat bet).
+ */
+export const LIMITS = { line: 500000, field: 200000, hard: { 6: 50000, 8: 50000, 4: 60000, 10: 60000 }, place: { 6: 300000, 8: 300000, 5: 250000, 9: 250000, 4: 200000, 10: 200000 } } as const;
+export const PROP_LIMITS: Record<string, number> = { any7: 100000, anyCraps: 60000, two: 15000, twelve: 15000, three: 30000, eleven: 30000 };
+/** Most chips on the layout at once. */
+export const TABLE_MAX = 5000000;
+
+/**
+ * Bets that cancel each other out cannot be on the table together, like red
+ * and black at the roulette: Pass with Don't pass, Come with Don't come on
+ * the same roll, a come bet and a don't come bet on the same number, and a
+ * Place bet with a don't come bet on that number.
+ */
+export function conflictOf(key: string, bets: Bets): string | null {
+  const has = (k: string) => (bets[k] ?? 0) > 0;
+  const k = kindOf(key);
+  const n = numOf(key);
+  if (key === "pass" && has("dontPass")) return "Pass and Don't pass cancel out — pick one side";
+  if (key === "dontPass" && has("pass")) return "Pass and Don't pass cancel out — pick one side";
+  if (key === "come" && has("dontCome")) return "Come and Don't come cancel out — pick one side";
+  if (key === "dontCome" && has("come")) return "Come and Don't come cancel out — pick one side";
+  if (k === "place" && has(`dc${n}`)) return `You are betting against the ${n} (don't come) — no Place ${n}`;
+  if (k === "comeOdds" && has(`dc${n}`)) return `You are betting against the ${n} here`;
+  return null;
+}
 export const MIN_BET = 10;
 
 export type Kind = "pass" | "dontPass" | "come" | "dontCome" | "field" | "place" | "hard" | "prop" | "passOdds" | "dontPassOdds" | "comeOdds" | "dcOdds" | "comePoint" | "dcPoint";
@@ -299,14 +326,14 @@ export function rollDie(): number {
 /** Can this bet be made now? Returns a reason when not. */
 export function canPlace(key: string, bets: Bets, point: BoxNum | null): string | null {
   const k = kindOf(key);
-  if (k === "pass" || k === "dontPass") return point === null ? null : "Line bets go on during the come-out roll";
-  if (k === "come" || k === "dontCome") return point !== null ? null : "Come bets open once a point is set";
+  if (k === "pass" || k === "dontPass") return point === null ? conflictOf(key, bets) : "Line bets go on during the come-out roll";
+  if (k === "come" || k === "dontCome") return point !== null ? conflictOf(key, bets) : "Come bets open once a point is set";
   if (k === "passOdds") return point !== null && bets.pass ? null : "Odds go behind a Pass bet once the point is set";
   if (k === "dontPassOdds") return point !== null && bets.dontPass ? null : "Lay odds go behind a Don't pass bet once the point is set";
   if (k === "comeOdds") return bets[`come${numOf(key)}`] ? null : "No come bet on that number";
   if (k === "dcOdds") return bets[`dc${numOf(key)}`] ? null : "No don't come bet on that number";
   if (k === "comePoint" || k === "dcPoint") return "Come bets travel on their own";
-  return null;
+  return conflictOf(key, bets);
 }
 
 /** Highest stake allowed on a bet given what is already on the table. */
@@ -318,9 +345,9 @@ export function limitFor(key: string, bets: Bets, point: BoxNum | null): number 
   if (k === "dcOdds") return maxOdds(bets[`dc${numOf(key)}`] ?? 0, numOf(key), true);
   if (k === "pass" || k === "dontPass" || k === "come" || k === "dontCome") return LIMITS.line;
   if (k === "field") return LIMITS.field;
-  if (k === "place") return LIMITS.place;
-  if (k === "hard") return LIMITS.hard;
-  return LIMITS.prop;
+  if (k === "place") return LIMITS.place[numOf(key)];
+  if (k === "hard") return LIMITS.hard[numOf(key) as 4 | 6 | 8 | 10];
+  return PROP_LIMITS[key] ?? 0;
 }
 
 /** Bets the player may take back between rolls (not contract bets). */
