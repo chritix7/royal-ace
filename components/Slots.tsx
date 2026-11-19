@@ -1090,7 +1090,7 @@ useEffect(() => {
 
               <div
                 ref={mobileDeckRef}
-                className="deck sticky bottom-0 z-40 -mx-2 mt-auto px-2.5 pt-3.5 sm:-mx-8 sm:px-8 lg:hidden"
+                className={`deck sticky bottom-0 z-40 -mx-2 mt-auto px-2.5 sm:-mx-8 sm:px-8 lg:hidden ${focus ? "pt-5" : "pt-3.5"}`}
                 style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.6rem)" }}
               >
                 <span aria-hidden="true" className="deck-chevron !w-[150px]" />
@@ -1174,7 +1174,7 @@ useEffect(() => {
                       busy={s.busy}
                       ready={canSpin && !s.busy}
                       variant={skinId}
-                      size="clamp(3.9rem, 18vw, 4.4rem)"
+                      size={focus ? "clamp(4.3rem, 19.5vw, 4.9rem)" : "clamp(3.9rem, 18vw, 4.4rem)"}
                       fs={s.fs ? { played: Math.min(s.fs.played, s.fs.total), total: s.fs.total } : null}
                     />
                     <button

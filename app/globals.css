@@ -2225,3 +2225,14 @@ html.rl-wheel-solid body *:not(.rl-wheel-overlay, .rl-wheel-overlay *, .rl-over-
 .m-lite .rt-small, .m-lite .rt-vtext { text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9); }
 .m-lite .rl-chip-pick:not(.is-selected) { opacity: 0.88; }
 .m-lite .rl-chip-pick.is-selected { box-shadow: 0 0 0 2px #f0d38b, 0 0 0 4px rgba(0, 0, 0, 0.6); }
+
+/* Phones in Focus: the reel screen takes the room left between the title and
+   the console (taller cells; the width stays inside the screen). */
+@media (max-width: 1023px) {
+  [data-focus] .slot-reels {
+    --cell-w: calc((100vw - 60px) / 5);
+    --cell: min(calc(var(--cell-w) * 1.55), max(40px, calc((100dvh - var(--slots-top-m, 3.25rem) - 369px) / 4)));
+  }
+  /* Bigger symbols in the taller cells (they stay inside their cell) */
+  [data-focus] .slot-reels [role="img"] > img { width: 94% !important; height: 72% !important; }
+}
