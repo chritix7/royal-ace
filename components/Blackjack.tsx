@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useBlackjack } from "../lib/useBlackjack";
 import { ambience } from "../lib/ambience";
 import Sidebar from "./Sidebar";
@@ -25,6 +25,15 @@ export default function Blackjack({
   onFocusChange?: (next: boolean) => void;
 }) {
   const g = useBlackjack(active);
+  // Phones and tablets: what sits beside the table on PC (music, rules,
+  // explore…) opens from the ☰ key on the felt.
+  const [menu, setMenu] = useState(false);
+  useEffect(() => {
+    if (!menu) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenu(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menu]);
 
   // Room ambience only while the blackjack table is on screen.
   useEffect(() => {
@@ -63,8 +72,26 @@ export default function Blackjack({
            a flex column that distributes the felt + actions up to the
            same line. */
         <div className="slots-view-in grid gap-4 lg:grid-cols-[1fr_300px] lg:h-[calc(100dvh-10rem)] lg:items-stretch lg:overflow-hidden">
-          <Table g={g} />
-          <Sidebar g={g} />
+          <Table g={g} onMenu={() => setMenu(true)} />
+          <div className="contents max-lg:hidden">
+            <Sidebar g={g} />
+          </div>
+        </div>
+      )}
+      {menu && !focusMode && (
+        <div className="fixed inset-0 z-[80] lg:hidden">
+          <button aria-label="Close" className="backdrop-in absolute inset-0 cursor-default bg-black/55" onClick={() => setMenu(false)} />
+          <div role="dialog" aria-modal="true" aria-label="Table menu" className="rl-sheet absolute inset-x-0 bottom-0 flex max-h-[82dvh] flex-col">
+            <div className="flex items-center justify-between px-4 pb-2 pt-3">
+              <p className="text-[11px] font-black uppercase tracking-[0.25em] text-[#e5c779]">Table menu</p>
+              <button type="button" onClick={() => setMenu(false)} className="rl-icon-key" aria-label="Close">
+                ✕
+              </button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-3 [scrollbar-width:thin]" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.9rem)" }}>
+              <Sidebar g={g} />
+            </div>
+          </div>
         </div>
       )}
     </>

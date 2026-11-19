@@ -612,7 +612,7 @@ export default function Craps({ active, focus = false, onFocusChange }: { active
     return (
       <div
         data-theme="carbon"
-        className={`rl-root cr-root ${focusAnim} ${focus ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black" : "h-[calc(100dvh-10.15rem)] min-h-[540px] lg:h-[calc(100dvh-10rem)]"}`}
+        className={`rl-root cr-root ${focusAnim} ${focus ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black" : "h-[calc(100dvh_-_10.15rem_-_env(safe-area-inset-top))] min-h-[540px] lg:h-[calc(100dvh-10rem)]"}`}
       >
         {focus && (
           <button
@@ -737,7 +737,7 @@ export default function Craps({ active, focus = false, onFocusChange }: { active
   return (
     <div
       data-theme="carbon"
-      className={`rl-root cr-root m-lite ${focus ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black" : "h-[calc(100dvh-10.15rem)] min-h-[500px]"}`}
+      className={`rl-root cr-root m-lite ${focus ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black" : "h-[calc(100dvh_-_10.15rem_-_env(safe-area-inset-top))] min-h-[500px]"}`}
     >
       {focus && (
         <button

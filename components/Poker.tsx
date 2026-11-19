@@ -657,7 +657,7 @@ export default function Poker({ active, focus = false, onFocusChange }: { active
     <div
       data-theme="carbon"
       className={`rl-root pk-root ${desktop ? "" : "m-lite"} ${focusAnim} ${
-        focus ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black" : "h-[calc(100dvh-10.15rem)] min-h-[500px] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px]"
+        focus ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black" : "h-[calc(100dvh_-_10.15rem_-_env(safe-area-inset-top))] min-h-[500px] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px]"
       }`}
           >
       {focus && (

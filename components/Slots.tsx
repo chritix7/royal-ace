@@ -623,7 +623,7 @@ useEffect(() => {
       className={`grid grid-cols-[minmax(0,1fr)] gap-6 ${focusAnim} ${
         focus
           ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black [--slots-top:0rem] [--slots-top-m:calc(env(safe-area-inset-top)+3.25rem)] lg:[--slots-top-m:0rem]"
-          : "[--slots-top-m:10.15rem] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px] lg:items-stretch lg:gap-4 lg:overflow-hidden"
+          : "[--slots-top-m:calc(10.2rem_+_env(safe-area-inset-top))] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px] lg:items-stretch lg:gap-4 lg:overflow-hidden"
       }`}
     >
       {focus && (
