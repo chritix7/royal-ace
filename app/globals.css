@@ -2179,3 +2179,49 @@ html.rl-wheel-solid body *:not(.rl-wheel-overlay, .rl-wheel-overlay *, .rl-over-
 
   @media (prefers-reduced-motion: reduce) { .pk-card-in, .pk-verdict, .pk-verdict__card, .pk-spot__chip, .pk-tag, .pk-hint { animation-duration: 0.01s; } }
 }
+
+/* ───────────── Phones: light mode for slots, roulette and Hold'em (.m-lite) ─────────────
+   Same colours and materials, fewer effects: nothing loops forever for
+   decoration, no blur or shadow filters, short fades instead of staged pops.
+   Blackjack is not concerned. */
+.m-lite *, .m-lite *::before, .m-lite *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+
+/* Endless decoration: off */
+.m-lite .sym-halo, .m-lite .glass-sweep::after, .m-lite .shine-loop::after, .m-lite .spin-dome__sweep, .m-lite .spin-dome__halo,
+.m-lite .win-rays, .m-lite .win-flash, .m-lite .rl-reveal::after, .m-lite .roulette-result::before, .m-lite .roulette-result::after,
+.m-lite .coin, .m-lite .rl-ring { display: none !important; }
+.m-lite .vault-glint, .m-lite .animate-pulse, .m-lite .rl-stage::before, .m-lite .rt-lucky::before, .m-lite .rt-lucky-mark, .m-lite .rt-bolt,
+.m-lite .rl-spin.is-ready::after, .m-lite .rl-spin::after, .m-lite .rl-reveal.is-win .font-display, .m-lite .win-frame, .m-lite .rt-num::after,
+.m-lite .rl-mini-wheel__dot, .m-lite .ui-card__dot { animation: none !important; }
+.m-lite .cab-key--live { animation: none !important; }
+.m-lite .rt-num.is-win::after { opacity: 1; }
+.m-lite .win-frame { opacity: 1; }
+
+/* Winning symbols: one pop instead of an endless dance; no glow filters */
+.m-lite .anim-cherry, .m-lite .anim-lemon, .m-lite .anim-grape, .m-lite .anim-bell, .m-lite .anim-gem, .m-lite .anim-seven, .m-lite .anim-wild, .m-lite .anim-scatter {
+  animation: sym-win-pop 0.5s ease-out 1 !important; filter: none !important; }
+.m-lite [role="img"] > img, .m-lite .idle-wild, .m-lite .idle-scatter, .m-lite svg path, .m-lite .win-title-in, .m-lite .gold-text { filter: none !important; }
+.m-lite .sym-win-pop { animation-iteration-count: 1 !important; }
+
+/* Roulette: plain fades, no camera move on the wheel */
+.m-lite .rl-phone-wheel, .m-lite .rl-phone-wheel.is-closeup { transition: none !important; transform: none !important; }
+.m-lite .rl-wheel-overlay.is-open > * { animation: rl-ov-fade 0.22s ease-out both !important; }
+.m-lite .rl-wheel-overlay.is-open.is-closing > * { animation: rl-ov-fade-out 0.25s ease-in forwards !important; }
+.m-lite .rl-reveal, .m-lite .roulette-result, .m-lite .rl-strike-chip, .m-lite .rl-strike-title { animation: rl-ov-fade 0.25s ease-out both !important; }
+.m-lite .rl-strike-chip { box-shadow: none !important; opacity: 1; }
+.m-lite .rl-strike-title { text-shadow: none !important; }
+.m-lite .rl-bigwin .win-title-in { animation: rl-ov-fade 0.3s ease-out both !important; }
+.m-lite .rt-dolly { animation: rl-ov-fade 0.25s ease-out both !important; }
+
+/* Hold'em: a plain felt, quick deals */
+.m-lite .pk-felt { background: radial-gradient(110% 75% at 50% 45%, #1d1e22, #0e0f11 75%) !important; box-shadow: inset 0 0 0 1px rgba(240, 211, 139, 0.18) !important; }
+.m-lite .pk-table { box-shadow: inset 0 0 0 1px rgba(240, 211, 139, 0.35) !important; }
+.m-lite .pk-card-in { animation-duration: 0.25s !important; }
+.m-lite .pk-card-in.is-best::after { box-shadow: 0 0 0 2px #f0d38b !important; }
+.m-lite .pk-tag.is-win, .m-lite .pk-spot.is-hot .pk-spot__ring { box-shadow: none !important; }
+.m-lite .pk-verdict__card { animation: rl-ov-fade 0.25s ease-out both !important; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important; }
+/* Static filters that make phones repaint big areas (the wheel turns under its shadow) */
+.m-lite .roulette-wheel, .m-lite .rl-chip-pick, .m-lite .rl-window__value, .m-lite .rt-small, .m-lite .rt-vtext { filter: none !important; }
+.m-lite .rt-small, .m-lite .rt-vtext { text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9); }
+.m-lite .rl-chip-pick:not(.is-selected) { opacity: 0.88; }
+.m-lite .rl-chip-pick.is-selected { box-shadow: 0 0 0 2px #f0d38b, 0 0 0 4px rgba(0, 0, 0, 0.6); }

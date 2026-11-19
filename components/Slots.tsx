@@ -638,20 +638,21 @@ useEffect(() => {
           ✕ <span>Exit</span>
         </button>
       )}
-      <section className={`overflow-clip border border-white/10 bg-[#101713] shadow-2xl ${focus ? "rounded-none border-0" : "rounded-3xl"} max-lg:flex max-lg:flex-col lg:flex lg:min-h-0 lg:flex-col`}>
+      <section className={`${phoneScreen ? "m-lite" : ""} overflow-clip border border-white/10 bg-[#101713] shadow-2xl ${focus ? "rounded-none border-0" : "rounded-3xl"} max-lg:flex max-lg:flex-col lg:flex lg:min-h-0 lg:flex-col`}>
         <div
           className={`relative isolate ${skin.stage} flex min-h-[calc(100dvh-var(--slots-top-m))] flex-col px-2 pt-3 sm:px-8 sm:pt-5 lg:min-h-0 lg:flex-1 lg:px-6 lg:pb-0 lg:pt-5 ${focus ? "max-lg:flex-1" : ""}`}
           style={focus ? { paddingTop: "max(3.5rem, calc(env(safe-area-inset-top) + 3.25rem))" } : undefined}
           data-focus={focus ? "" : undefined}
         >
-          {skinId === "classic" && <ClassicRoom party={s.fs !== null} />}
-          {skinId === "miami" && <KingpinRoom party={s.fs !== null} />}
+          {/* Phones: the plain room colour only (no animated room behind the machine) */}
+          {!phoneScreen && skinId === "classic" && <ClassicRoom party={s.fs !== null} />}
+          {!phoneScreen && skinId === "miami" && <KingpinRoom party={s.fs !== null} />}
           {/* The room melts into the control deck instead of being cut */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-0 bottom-0 -z-[5] h-44 bg-gradient-to-t from-[#0c0d14] via-[#0c0d14]/70 to-transparent"
           />
-          {s.celebrate > 0 && <Confetti key={`confetti-${s.celebrate}`} colors={skin.confetti} />}
+          {s.celebrate > 0 && !phoneScreen && <Confetti key={`confetti-${s.celebrate}`} colors={skin.confetti} />}
 
           <div className="relative z-10 w-full lg:shrink-0">
   {/* Marquee between the pots: sign, tagline and the crown meter */}
@@ -719,8 +720,8 @@ useEffect(() => {
   </div>
   <div ref={reelsBoxRef} className="relative flex justify-center">
   <SlotReels
-    // Phones in Focus: no orbiting jewels (lighter while playing).
-    orbit={!(focus && phoneScreen)}
+    // Phones: no orbiting jewels (lighter while playing).
+    orbit={!phoneScreen}
     s={s}
     skin={skin}
     activeLine={activeLine}
@@ -841,7 +842,7 @@ useEffect(() => {
             <div key={`win-${s.celebrate}`} className="pointer-events-none absolute inset-0 z-30 flex flex-col items-center justify-center overflow-hidden bg-black/60" role="status">
               <div className="win-flash absolute inset-0" />
               <div aria-hidden="true" className="win-rays" />
-              <CoinRain count={s.winBanner.tier === "epic" ? 64 : 38} />
+              {!phoneScreen && <CoinRain count={s.winBanner.tier === "epic" ? 64 : 38} />}
               <p className="win-title-in font-display gold-text relative px-4 text-center text-3xl font-bold tracking-[0.14em] [filter:drop-shadow(0_4px_0_rgba(0,0,0,0.6))_drop-shadow(0_0_24px_rgba(255,209,102,0.45))] sm:text-6xl lg:text-8xl">
                 {s.winBanner.label}
               </p>

@@ -1169,7 +1169,7 @@ export default function Roulette({
   return (
     <div
       data-theme={g.theme}
-      className={`rl-root ${focusAnim} ${
+      className={`rl-root ${desktop ? "" : "m-lite"} ${focusAnim} ${
         focus
           ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black"
           : "h-[calc(100dvh-10.15rem)] min-h-[500px] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px]"
