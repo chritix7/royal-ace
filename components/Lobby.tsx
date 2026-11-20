@@ -322,6 +322,9 @@ export default function Lobby({
   const [nameOpen, setNameOpen] = useState(false);
   const [bonus, setBonus] = useState<{ canClaim: boolean; reward: number } | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
+  // The time of day is read on the client (never during the prerender).
+  const [hello, setHello] = useState("Welcome back");
+  useEffect(() => setHello(greeting()), []);
   useEffect(() => {
     const st = dailyStatus(daily, today(), progression.level);
     setBonus({ canClaim: st.canClaim, reward: st.reward });
@@ -369,7 +372,7 @@ export default function Lobby({
   const hero = (
     <section className="lb-hero">
       <div className="min-w-0">
-        <p className="lb-hero__eyebrow">{greeting()}</p>
+        <p className="lb-hero__eyebrow">{hello}</p>
         <div className="flex min-w-0 items-center gap-2">
           <h2 className="lb-hero__name truncate">{profile.name || "Welcome"}</h2>
           <button type="button" onClick={() => setNameOpen(true)} aria-label="Change your name" className="lb-edit">
