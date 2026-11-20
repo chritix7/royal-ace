@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ChipFace } from "./ChipButton";
 import { Counter } from "./ui";
 import { money } from "../lib/game";
-import { marketsOf, priced, type Priced } from "../lib/sports/odds";
+import { marketsOf, PLAYER_KINDS, playerMarket, priced, type Priced } from "../lib/sports/odds";
 import type { Match, Sport } from "../lib/sports/types";
 import { MAX_PICKS, SPORT_CHIPS, SPORTS_MAX, SPORTS_MIN, useSportsbook, type SportsGame, type Ticket } from "../lib/useSportsbook";
 import { isNarrowScreen, requestFullscreenSettled } from "../lib/fullscreen";
@@ -145,9 +145,48 @@ function MatchRow({ g, m, open, onOpen, lite }: { g: SportsGame; m: Match; open:
               </div>
             );
           })}
+          {m.sport === "football" && m.status === "pre" && <Players g={g} m={m} />}
           {!model && <p className="text-[11px] text-white/40">Odds not available for this match.</p>}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ───────────── Player bets (football, before kick-off) ───────────── */
+
+function Players({ g, m }: { g: SportsGame; m: Match }) {
+  useEffect(() => {
+    g.loadScorers(m.comp.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [m.comp.id]);
+  const players = g.playersFor(m);
+  if (g.demo) return null;
+  return (
+    <div className="sb-market sb-players">
+      <p className="sb-market__title">Players · before kick-off</p>
+      {!players.length && <p className="text-[11px] text-white/40">No player market for this match (leading scorers only).</p>}
+      {players.map((p) => (
+        <div key={p.id} className="sb-player">
+          <div className="min-w-0">
+            <p className="truncate text-[12px] font-bold text-[#efe2bd]">{p.name}</p>
+            <p className="truncate text-[10px] text-white/40">
+              {p.teamId === m.home.id ? m.home.name : m.away.name} · {p.goals} G · {p.assists} A · {p.played} games
+            </p>
+          </div>
+          <div className="sb-player__picks">
+            {PLAYER_KINDS.map(({ kind, label, title }) => {
+              const market = playerMarket(kind, p.id);
+              const odds = g.oddsNow(m, market, "yes");
+              const pk: Priced = { market, pick: "yes", label, odds };
+              return (
+                <OddButton key={kind} p={pk} on={g.inSlip.has(`${m.id}|${market}|yes`)} onClick={() => g.toggle(m, market, "yes", `${p.name} · ${label}`, title)} />
+              );
+            })}
+          </div>
+        </div>
+      ))}
+      <p className="mt-1 text-[9.5px] leading-relaxed text-white/30">Settled on the official season totals after the match. Refunded if the player does not play.</p>
     </div>
   );
 }

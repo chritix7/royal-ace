@@ -240,7 +240,7 @@ function wins(s: Score, kind: string, line: number, pick: string): boolean {
 
 /* ───────────── Prices ───────────── */
 
-const MARGIN: Record<string, number> = { "1x2": 0.06, dc: 0.05, ou: 0.06, btts: 0.06, hcp: 0.07, ml: 0.05, spread: 0.05, cs: 0.18, htft: 0.16 };
+const MARGIN: Record<string, number> = { scorer: 0.15, assist: 0.15, decisive: 0.14, "1x2": 0.06, dc: 0.05, ou: 0.06, btts: 0.06, hcp: 0.07, ml: 0.05, spread: 0.05, cs: 0.18, htft: 0.16 };
 
 /** Decimal odds with the house margin; null when the market is closed. */
 export function priceOf(p: number | null, market: string): number | null {
@@ -287,4 +287,40 @@ export function settle(m: Match, market: string, pick: string): "won" | "lost" |
   if (!s) return "void";
   if (kind === "ou" && s.h + s.a === line) return "void";
   return wins(s, kind, line, pick) ? "won" : "lost";
+}
+
+/* ───────────── Player markets (football, before kick-off) ───────────── */
+
+export type PlayerKind = "scorer" | "assist" | "decisive";
+export const PLAYER_KINDS: { kind: PlayerKind; label: string; title: string }[] = [
+  { kind: "scorer", label: "Scores", title: "Anytime scorer" },
+  { kind: "assist", label: "Assist", title: "Gives an assist" },
+  { kind: "decisive", label: "Goal or assist", title: "Decisive (goal or assist)" },
+];
+export type PlayerLine = { id: string; name: string; teamId: string; played: number; goals: number; assists: number };
+
+/** Market key of a player bet: "scorer:12345". */
+export const playerMarket = (kind: PlayerKind, id: string) => `${kind}:${id}`;
+export function parsePlayerMarket(market: string): { kind: PlayerKind; id: string } | null {
+  const [k, id] = market.split(":");
+  return (k === "scorer" || k === "assist" || k === "decisive") && id ? { kind: k, id } : null;
+}
+
+/**
+ * Chance that a player scores / assists in this match: his season rate per
+ * appearance (shrunk for small samples), scaled by how many goals his team
+ * should score today against its season average, and by the chance he
+ * plays a full part (~0.82).
+ */
+export function playerProb(model: Model | null, m: Match, p: PlayerLine, kind: PlayerKind, teamAvg: number | undefined): number | null {
+  if (!model || model.kind !== "goals" || m.sport !== "football" || m.status !== "pre") return null;
+  if (p.played < 3) return null;
+  const lam = p.teamId === m.home.id ? model.lh : p.teamId === m.away.id ? model.la : null;
+  if (lam === null) return null;
+  const base = teamAvg && teamAvg > 0.3 ? teamAvg : lam;
+  const adj = Math.max(0.5, Math.min(1.8, lam / base));
+  const g = (p.goals + 0.3) / (p.played + 2);
+  const a = (p.assists + 0.2) / (p.played + 2);
+  const rate = kind === "scorer" ? g : kind === "assist" ? a : g + a;
+  return 0.82 * (1 - Math.exp(-rate * adj));
 }

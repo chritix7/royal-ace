@@ -7,7 +7,7 @@ import { track } from "./events";
 import { sessionStore } from "./sessionStore";
 import { useBalance, wallet } from "./wallet";
 import { demoForms, demoMatches } from "./sports/demo";
-import { isOpen, modelOf, priceOf, probOf, settle } from "./sports/odds";
+import { isOpen, modelOf, parsePlayerMarket, playerProb, priceOf, probOf, settle, type PlayerLine } from "./sports/odds";
 import type { Feed, Match, Sport, Standings, StandingsFeed } from "./sports/types";
 
 /**
@@ -38,6 +38,8 @@ export type Selection = {
   kickoff: number;
   odds: number;
   live: boolean;
+  /** Player bets: his season line when the bet was placed (settles on the change). */
+  snap?: { teamId: string; comp: string; played: number; goals: number; assists: number };
 };
 export type Leg = Selection & { result: "won" | "lost" | "void" | null; final?: string };
 export type Ticket = {
@@ -81,6 +83,38 @@ function load(): Saved {
   }
 }
 
+/**
+ * A player bet is settled by comparing his season line with the one saved
+ * when the bet was placed: one more appearance, and goals / assists added
+ * (or not). Anything unclear is refunded: he did not appear, the table
+ * did not move before his team played again, or two days went by.
+ */
+function settlePlayer(
+  m: Match,
+  kind: "scorer" | "assist" | "decisive",
+  id: string,
+  snap: NonNullable<Selection["snap"]>,
+  players: PlayerLine[] | undefined,
+  all: Match[],
+  now: number,
+): Leg["result"] {
+  if (m.status === "void") return "void";
+  if (m.status !== "done") return null;
+  const p = players?.find((x) => x.id === id);
+  if (p) {
+    if (p.played === snap.played + 1) {
+      const scored = p.goals > snap.goals;
+      const assisted = p.assists > snap.assists;
+      const ok = kind === "scorer" ? scored : kind === "assist" ? assisted : scored || assisted;
+      return ok ? "won" : "lost";
+    }
+    if (p.played > snap.played + 1) return "void";
+  }
+  const later = all.some((x) => x.sport === "football" && (x.home.id === snap.teamId || x.away.id === snap.teamId) && x.kickoff > m.kickoff && x.status !== "pre");
+  if (later || now > m.kickoff + 60 * 3600000) return "void";
+  return null;
+}
+
 const day = (t: number) => new Date(t).toISOString().slice(0, 10);
 const comboOdds = (legs: { odds: number; result?: Leg["result"] }[]) =>
   Math.round(legs.reduce((p, l) => p * (l.result === "void" ? 1 : l.odds), 1) * 100) / 100;
@@ -94,6 +128,7 @@ export function useSportsbook(active: boolean) {
   const [errors, setErrors] = useState<Partial<Record<Sport, string>>>({});
   const [demo, setDemo] = useState(false);
   const [forms, setForms] = useState<FormsCache>({});
+  const [scorers, setScorers] = useState<Record<string, { at: number; players: PlayerLine[] }>>({});
   const [now, setNow] = useState(0);
   const [saved, setSaved] = useState<Saved>(EMPTY);
   const [message, setMessage] = useState("");
@@ -353,6 +388,49 @@ export function useSportsbook(active: boolean) {
   }, [matches, demo]);
 
   const formsOf = useCallback((m: Match) => forms[formKey(m)]?.teams, [forms]);
+
+  // ---- Players (football): the competition's leading scorers and assisters.
+  const scorersAsk = useRef(new Map<string, number>());
+  const loadScorers = useCallback(
+    async (comp: string, maxAge = 60 * 60000) => {
+      if (demo) return;
+      const last = scorersAsk.current.get(comp) ?? 0;
+      if (Date.now() - last < Math.min(maxAge, 10 * 60000)) return;
+      scorersAsk.current.set(comp, Date.now());
+      try {
+        const f = (await fetchFeed(`/api/sports?feed=football-scorers&comp=${encodeURIComponent(comp)}`)) as { players?: PlayerLine[]; error?: string };
+        if (f.error || !Array.isArray(f.players)) return;
+        setScorers((prev) => ({ ...prev, [comp]: { at: Date.now(), players: f.players as PlayerLine[] } }));
+      } catch {}
+    },
+    [demo, fetchFeed],
+  );
+  const playersFor = useCallback(
+    (m: Match): PlayerLine[] => {
+      if (m.sport !== "football") return [];
+      const list = scorers[m.comp.id]?.players ?? [];
+      const pick = (teamId: string) =>
+        list
+          .filter((p) => p.teamId === teamId && p.played >= 3)
+          .sort((a, b) => b.goals + b.assists * 0.6 - (a.goals + a.assists * 0.6))
+          .slice(0, 6);
+      return [...pick(m.home.id), ...pick(m.away.id)];
+    },
+    [scorers],
+  );
+  const playerOf = (m: Match, id: string) => (scorers[m.comp.id]?.players ?? []).find((p) => p.id === id);
+  const teamAvg = (m: Match, teamId: string) => formsOf(m)?.[teamId]?.scored;
+  /** Fair chance of any pick, team or player market. */
+  const chanceOf = (m: Match, market: string, pick: string, t: number): number | null => {
+    const model = modelOf(m, formsOf(m), t);
+    const pm = parsePlayerMarket(market);
+    if (pm) {
+      if (m.status !== "pre" || t >= m.kickoff) return null;
+      const p = playerOf(m, pm.id);
+      return p ? playerProb(model, m, p, pm.kind, teamAvg(m, p.teamId)) : null;
+    }
+    return model ? probOf(model, m.sport, market, pick) : null;
+  };
   const modelFor = useCallback((m: Match) => modelOf(m, formsOf(m), now || Date.now()), [formsOf, now]);
 
   /** Current odds of one pick (null: closed). */
@@ -360,10 +438,10 @@ export function useSportsbook(active: boolean) {
     (m: Match, market: string, pick: string) => {
       const t = now || Date.now();
       if (!isOpen(m, t)) return null;
-      const model = modelOf(m, formsOf(m), t);
-      return model ? priceOf(probOf(model, m.sport, market, pick), market) : null;
+      return priceOf(chanceOf(m, market, pick, t), market);
     },
-    [formsOf, now],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [formsOf, now, scorers],
   );
 
   // ---- Settlement: as soon as the feeds carry the results.
@@ -382,7 +460,11 @@ export function useSportsbook(active: boolean) {
         const m = byId.current.get(l.matchId);
         let r: Leg["result"] = null;
         let final: string | undefined;
-        if (m) {
+        const pm = parsePlayerMarket(l.market);
+        if (m && pm && l.snap) {
+          r = settlePlayer(m, pm.kind, pm.id, l.snap, scorers[l.snap.comp]?.players, matches, t);
+          if (r === "won" || r === "lost") final = r === "won" ? "✓" : "✗";
+        } else if (m) {
           r = settle(m, l.market, l.pick);
           const fs = m.regular ?? m.score;
           if (r && fs) final = `${fs.h}-${fs.a}`;
@@ -417,7 +499,20 @@ export function useSportsbook(active: boolean) {
       setMessage(`Ticket won · ◈ ${done.reduce((s2, d) => s2 + d.payout, 0).toLocaleString("en-US")}`);
     } else if (done.length) setMessage(done[0].status === "void" ? "Ticket void · stake returned" : "Ticket lost");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matches, loaded, errors]);
+  }, [matches, loaded, errors, scorers]);
+
+  // Player bets settle on the scorers table once the match is over:
+  // refresh it (every 20 min) while such a leg waits.
+  useEffect(() => {
+    const comps = new Set<string>();
+    for (const tk of saved.tickets)
+      if (tk.status === "open")
+        for (const l of tk.legs) {
+          const m = byId.current.get(l.matchId);
+          if (!l.result && l.snap && m && m.status === "done") comps.add(l.snap.comp);
+        }
+    comps.forEach((c) => loadScorers(c, 20 * 60000));
+  }, [saved.tickets, matches, loadScorers]);
 
   // ---- Slip
   const slip = saved.slip;
@@ -447,6 +542,12 @@ export function useSportsbook(active: boolean) {
       odds,
       live: m.status !== "pre",
     };
+    const pm = parsePlayerMarket(market);
+    if (pm) {
+      const p = playerOf(m, pm.id);
+      if (!p) return refuse("Player data unavailable");
+      sel.snap = { teamId: p.teamId, comp: m.comp.id, played: p.played, goals: p.goals, assists: p.assists };
+    }
     commit({ ...s, slip: [...others, sel] });
     sfx.chip();
     if (s.slip.some((x) => x.matchId === m.id)) setMessage("One pick per match: replaced");
@@ -506,8 +607,7 @@ export function useSportsbook(active: boolean) {
         if (l.result) continue;
         const m = byId.current.get(l.matchId);
         if (!m || !isOpen(m, t)) return null;
-        const model = modelOf(m, formsOf(m), t);
-        const q = model ? probOf(model, m.sport, l.market, l.pick) : null;
+        const q = chanceOf(m, l.market, l.pick, t);
         if (q === null) return null;
         p *= q;
       }
@@ -546,6 +646,8 @@ export function useSportsbook(active: boolean) {
     refused,
     modelFor,
     oddsNow,
+    playersFor,
+    loadScorers,
     slip: slipNow,
     inSlip,
     slipOdds,

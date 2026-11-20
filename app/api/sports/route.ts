@@ -95,7 +95,8 @@ export async function GET(request: Request) {
   } else if (feed === "football-scorers") {
     const comp = (q.get("comp") ?? "").toUpperCase();
     if (!FOOTBALL_COMPS[comp]) return fail("bad-request", 3600);
-    ttl = 12 * 3600;
+    // Short: player bets settle on this table after the match.
+    ttl = 30 * 60;
     key = `fbsc:${comp}`;
     load = async () => ({ players: footballScorers(await football(`/competitions/${comp}/scorers?limit=60`)), at: Date.now() });
   } else if (feed === "football-match") {
