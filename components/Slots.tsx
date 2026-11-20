@@ -624,7 +624,7 @@ useEffect(() => {
       className={`grid grid-cols-[minmax(0,1fr)] gap-6 ${focusAnim} ${
         focus
           ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black [--slots-top:0rem] [--slots-top-m:calc(env(safe-area-inset-top)+3.25rem)] lg:[--slots-top-m:0rem]"
-          : "[--slots-top-m:calc(10.2rem_+_env(safe-area-inset-top))] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px] lg:items-stretch lg:gap-4 lg:overflow-hidden"
+          : "[--slots-top-m:calc(10.3rem_+_env(safe-area-inset-top))] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px] lg:items-stretch lg:gap-4 lg:overflow-hidden"
       }`}
     >
       {focus && (
@@ -704,7 +704,7 @@ useEffect(() => {
             </h3>
             <div className="mt-1 flex items-center justify-center gap-2">
               <span aria-hidden="true" className="h-px w-4 bg-gradient-to-r from-transparent to-[#d7b45b]/70 lg:w-8" />
-              <p className="whitespace-nowrap text-[6px] uppercase leading-none tracking-[0.16em] text-[#e5c779]/75 lg:text-[8px] lg:tracking-[0.3em]">{skin.tagline}</p>
+              <p className="whitespace-nowrap text-[7px] uppercase leading-none tracking-[0.16em] text-[#e5c779]/75 lg:text-[8px] lg:tracking-[0.3em]">{skin.tagline}</p>
               <span aria-hidden="true" className="h-px w-4 bg-gradient-to-l from-transparent to-[#d7b45b]/70 lg:w-8" />
             </div>
           </div>
@@ -1098,7 +1098,7 @@ useEffect(() => {
                 {/* Displays: credit · bet · win */}
                 <div className="mx-auto grid max-w-md grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-2">
                   <div className="jewel flex h-11 min-w-0 flex-col justify-center px-2.5">
-                    <span className="text-[8px] font-black tracking-[0.25em] text-[#d7b45b]/80">CREDIT</span>
+                    <span className="text-[9px] font-black tracking-[0.22em] text-[#d7b45b]/80">CREDIT</span>
                     <span className={`gold-text whitespace-nowrap font-mono font-black leading-5 tabular-nums ${meterSizeSm(balance)}`}>
                       <span className="mr-0.5 text-[11px]">◈</span>
                       <span className={flash ? "balance-flash-pink" : ""}>
@@ -1115,7 +1115,7 @@ useEffect(() => {
                       title="Choose a bet"
                       className="jewel flex h-11 w-[5.4rem] flex-col items-center justify-center outline-none disabled:opacity-70"
                     >
-                      <span className="text-[8px] font-black tracking-[0.25em] text-[#d7b45b]/80">BET ▾</span>
+                      <span className="text-[9px] font-black tracking-[0.22em] text-[#d7b45b]/80">BET ▾</span>
                       <span className={`gold-text whitespace-nowrap font-mono font-black leading-5 tabular-nums ${meterSizeSm(bet)}`}>
                         <span className="mr-0.5 text-[11px]">◈</span>{money(bet)}
                       </span>
@@ -1123,7 +1123,7 @@ useEffect(() => {
                     {betPicker}
                   </div>
                   <div className={`jewel flex h-11 min-w-0 flex-col items-end justify-center px-2.5 ${s.lastWin > 0 && !spinningNow ? "jewel--hot" : ""}`}>
-                    <span className="text-[8px] font-black tracking-[0.25em] text-[#d7b45b]/80">WIN</span>
+                    <span className="text-[9px] font-black tracking-[0.22em] text-[#d7b45b]/80">WIN</span>
                     <span
                       className={`whitespace-nowrap font-mono font-black leading-5 tabular-nums ${meterSizeSm(s.lastWin)} ${s.lastWin > 0 && !spinningNow ? "meter-hit text-[#fff8dc]" : "gold-text"}`}
                     >
@@ -1142,7 +1142,7 @@ useEffect(() => {
                       className="cab-key !h-10 w-10 flex-col gap-0.5 leading-none"
                     >
                       <IconInfo />
-                      <span className="text-[7px] font-black tracking-[0.12em] opacity-75">INFO</span>
+                      <span className="text-[8px] font-black tracking-[0.1em] opacity-75">INFO</span>
                     </button>
                     <div className="relative">
                       {autoMenu}
@@ -1155,7 +1155,7 @@ useEffect(() => {
                         className={`cab-key !h-10 w-10 flex-col gap-0.5 leading-none ${auto ? "cab-key--stop" : ""} ${s.turbo ? "!border-[#ffd166]/70" : ""}`}
                       >
                         {auto ? <span className="text-[11px] font-black">{s.autoLeft}</span> : <IconAuto />}
-                        <span className="text-[7px] font-black tracking-[0.12em] opacity-75">{auto ? "STOP" : s.turbo ? "AUTO ⚡" : "AUTO"}</span>
+                        <span className="text-[8px] font-black tracking-[0.1em] opacity-75">{auto ? "STOP" : s.turbo ? "AUTO ⚡" : "AUTO"}</span>
                       </button>
                     </div>
                   </div>
@@ -1202,7 +1202,7 @@ useEffect(() => {
                           className={`cab-key !h-10 w-10 flex-col gap-0.5 leading-none ${s.gamble ? "cab-key--gold cab-key--live" : ""}`}
                         >
                           <IconCards />
-                          <span className="text-[7px] font-black tracking-[0.08em]">×2</span>
+                          <span className="text-[8px] font-black tracking-[0.06em]">×2</span>
                         </button>
                         <button
                           onClick={() => setBuyOpen(true)}
@@ -1211,7 +1211,7 @@ useEffect(() => {
                           className="cab-key !h-10 w-10 flex-col gap-0.5 leading-none"
                         >
                           <IconTicket />
-                          <span className="text-[7px] font-black tracking-[0.08em]">BUY</span>
+                          <span className="text-[8px] font-black tracking-[0.06em]">BUY</span>
                         </button>
                       </>
                     )}

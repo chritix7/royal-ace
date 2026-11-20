@@ -195,7 +195,7 @@ export default function BetConsole({
                 className="pointer-events-none absolute inset-x-0 bottom-full mb-1.5 flex items-center justify-center gap-1.5 px-3 sm:hidden"
               >
                 <p
-                  className="whitespace-nowrap font-serif text-[7px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.22em]"
+                  className="whitespace-nowrap font-serif text-[8.5px] font-bold uppercase tracking-[0.16em] sm:text-[10px] sm:tracking-[0.22em]"
                   style={{
                     color: "rgba(229,199,121,0.42)",
                     textShadow: "0 1px 0 rgba(0,0,0,0.9)",
@@ -210,13 +210,13 @@ export default function BetConsole({
                 </p>
                 <span
                   aria-hidden
-                  className="text-[7px] leading-none sm:text-[9px]"
+                  className="text-[8px] leading-none sm:text-[9px]"
                   style={{ color: "rgba(229,199,121,0.5)" }}
                 >
                   ❖
                 </span>
                 <p
-                  className="whitespace-nowrap font-serif text-[7px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.22em]"
+                  className="whitespace-nowrap font-serif text-[8.5px] font-bold uppercase tracking-[0.16em] sm:text-[10px] sm:tracking-[0.22em]"
                   style={{
                     color: "rgba(229,199,121,0.36)",
                     textShadow: "0 1px 0 rgba(0,0,0,0.9)",
@@ -227,13 +227,13 @@ export default function BetConsole({
                 </p>
                 <span
                   aria-hidden
-                  className="text-[7px] leading-none sm:text-[9px]"
+                  className="text-[8px] leading-none sm:text-[9px]"
                   style={{ color: "rgba(229,199,121,0.5)" }}
                 >
                   ❖
                 </span>
                 <p
-                  className="whitespace-nowrap font-serif text-[7px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.22em]"
+                  className="whitespace-nowrap font-serif text-[8.5px] font-bold uppercase tracking-[0.16em] sm:text-[10px] sm:tracking-[0.22em]"
                   style={{
                     color: "rgba(229,199,121,0.36)",
                     textShadow: "0 1px 0 rgba(0,0,0,0.9)",

@@ -2382,3 +2382,16 @@ html.rl-wheel-solid body *:not(.rl-wheel-overlay, .rl-wheel-overlay *, .rl-over-
 /* Focus opens and closes instantly in every game, on PC and phones. */
 .focus-pending > * { opacity: 1 !important; }
 .focus-stage-in > *, .focus-out > *, .slots-focus-in > *, .slots-focus-out > *, .slots-view-in { animation: none !important; will-change: auto !important; }
+
+/* Phones: no label under 8 px */
+@media (max-width: 1023px) {
+  .rl-window__label { font-size: 8.5px !important; }
+  .rl-window__cur { font-size: 9px; }
+  .pk-spot__sub { font-size: 7.5px; }
+  .m-lite .cr-field__label { font-size: 8.5px; }
+  .m-lite .cr-puck, .cr-point__puck { font-size: 7.5px; }
+  .pk-arc { font-size: 8.5px; }
+}
+
+/* Hold'em: an engraved hint on the empty board before the first deal */
+.pk-idle { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; pointer-events: none; text-align: center; font-family: var(--font-display), Georgia, serif; font-size: clamp(10px, 1.1vw, 15px); font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(240, 211, 139, 0.55); text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9); }

@@ -61,7 +61,7 @@ function HeaderCard({
       onClick={onClick}
       className={`ui-card group text-left ${compact ? "min-w-0 flex-1 touch-manipulation select-none !rounded-xl !px-2.5 !py-1" : ""} ${highlight ? "is-hot" : ""}`}
     >
-      <span className={`ui-card__label ${compact ? "!text-[8px] !tracking-[0.16em]" : ""}`}>
+      <span className={`ui-card__label ${compact ? "!text-[9px] !tracking-[0.14em]" : ""}`}>
         {label}
         {highlight && <span aria-hidden className="ui-card__dot" />}
       </span>
@@ -72,6 +72,29 @@ function HeaderCard({
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>("blackjack");
+  // Games are loaded the first time they are opened, then kept (a hand or
+  // a spin in progress is never lost). Phones only run what was played.
+  const [visited, setVisited] = useState<Set<Tab>>(() => new Set<Tab>(["blackjack"]));
+  useEffect(() => {
+    setVisited((v) => (v.has(tab) ? v : new Set(v).add(tab)));
+  }, [tab]);
+  // A game with a round saved mid-play (reload) is loaded straight away,
+  // so it can settle or resume it.
+  useEffect(() => {
+    const waiting: [Tab, string][] = [
+      ["roulette", "royalace:roulette"],
+      ["poker", "royalace:poker"],
+      ["craps", "royalace:craps"],
+    ];
+    const add: Tab[] = [];
+    for (const [t, key] of waiting) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(key) ?? "null");
+        if (saved?.pending) add.push(t);
+      } catch {}
+    }
+    if (add.length) setVisited((v) => new Set([...v, ...add]));
+  }, []);
   const [rewardsOpen, setRewardsOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
@@ -276,6 +299,7 @@ export default function Home() {
 
         {/* Les deux jeux restent montés : on ne perd pas une manche en changeant d'onglet. */}
         <div className={tab === "blackjack" ? "" : "hidden"}>
+          {visited.has("blackjack") && (
           <ErrorBoundary label="Blackjack">
             <Blackjack
               active={tab === "blackjack"}
@@ -283,8 +307,10 @@ export default function Home() {
               onFocusChange={setFocusMode}
             />
           </ErrorBoundary>
+          )}
         </div>
         <div className={tab === "slots" ? "" : "hidden"}>
+          {visited.has("slots") && (
           <ErrorBoundary label="Slots">
             <Slots
               active={tab === "slots"}
@@ -292,8 +318,10 @@ export default function Home() {
               onFocusChange={setFocusMode}
             />
           </ErrorBoundary>
+          )}
         </div>
         <div className={tab === "roulette" ? "" : "hidden"}>
+          {visited.has("roulette") && (
           <ErrorBoundary label="Roulette">
             <Roulette
               active={tab === "roulette"}
@@ -301,16 +329,21 @@ export default function Home() {
               onFocusChange={setFocusMode}
             />
           </ErrorBoundary>
+          )}
         </div>
         <div className={tab === "poker" ? "" : "hidden"}>
+          {visited.has("poker") && (
           <ErrorBoundary label="Casino Hold'em">
             <Poker active={tab === "poker"} focus={tab === "poker" && focusMode} onFocusChange={setFocusMode} />
           </ErrorBoundary>
+          )}
         </div>
         <div className={tab === "craps" ? "" : "hidden"}>
+          {visited.has("craps") && (
           <ErrorBoundary label="Craps">
             <Craps active={tab === "craps"} focus={tab === "craps" && focusMode} onFocusChange={setFocusMode} />
           </ErrorBoundary>
+          )}
         </div>
       </section>
 

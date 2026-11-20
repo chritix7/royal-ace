@@ -80,7 +80,7 @@ export default function JackpotBar({
         style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.20), transparent)" }}
       />
       <span className="min-w-0 text-center">
-      <p className="whitespace-nowrap text-[7px] font-black leading-3 tracking-[0.12em] sm:text-[9px]">
+      <p className="whitespace-nowrap text-[8px] font-black leading-3 tracking-[0.1em] sm:text-[9px]">
         <span className={`mr-0.5 text-[9px] ${SUIT[t].red ? "text-[#ff5a6e]" : "text-white"}`}>{SUIT[t].glyph}</span>
         <span className="opacity-70">{JACKPOTS[t].label}</span>
       </p>

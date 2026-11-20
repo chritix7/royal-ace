@@ -388,7 +388,12 @@ export default function Poker({ active, focus = false, onFocusChange }: { active
     </div>
   );
   const boardCards = (
-    <div className="flex gap-1.5 lg:gap-2.5">
+    <div className="relative flex gap-1.5 lg:gap-2.5">
+      {!h && (
+        <span className="pk-idle" aria-hidden="true">
+          {g.bets.ante > 0 || g.lastBets.ante > 0 ? "Ready · press Deal" : "Tap Ante to bet · then Deal"}
+        </span>
+      )}
       {[0, 1, 2, 3, 4].map((i) => (
         <span key={i}>{seat(h?.board[i], d >= 5 + i, true)}</span>
       ))}
