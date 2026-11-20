@@ -54,6 +54,14 @@ export type Ticket = {
 type Saved = { tickets: Ticket[]; slip: Selection[]; stake: number; nextId: number; pending: boolean };
 const KEY = "royalace:sports";
 const FORMS_KEY = "royalace:sports-forms";
+const RESULTS_KEY = "royalace:sports-results";
+function pastResults(sport: Sport): Match[] {
+  try {
+    return Object.values(JSON.parse(localStorage.getItem(RESULTS_KEY) ?? "{}") as Record<string, Match>).filter((m) => m.sport === sport);
+  } catch {
+    return [];
+  }
+}
 const EMPTY: Saved = { tickets: [], slip: [], stake: 100, nextId: 1, pending: false };
 
 function load(): Saved {
@@ -262,13 +270,12 @@ export function useSportsbook(active: boolean) {
         asking.current.add(k);
         let teams: Standings = {};
         if (!demo && m.sport !== "football") {
-          // The free plan has no current-season tables for basketball and
-          // hockey: team form is built from the last week's results.
+          // The free plan has no tables and no history for basketball and
+          // hockey (yesterday to tomorrow only): team form is built from the
+          // results this browser has collected over the last three weeks.
           if (history.has(m.sport)) continue;
           history.add(m.sport);
-          const past = [2, 3, 4, 5, 6, 7, 8].map((d) => day(t - d * 86400000));
-          const feeds = await Promise.all(past.map((d) => fetchFeed(`/api/sports?feed=${m.sport}&date=${d}`).catch(() => null)));
-          const done = [...feeds.flatMap((f) => (f && Array.isArray(f.matches) ? (f.matches as Match[]) : [])), ...matches.filter((x) => x.sport === m.sport)].filter((x) => x.status === "done" && x.score);
+          const done = [...pastResults(m.sport), ...matches.filter((x) => x.sport === m.sport)].filter((x) => x.status === "done" && x.score);
           const byKey = new Map<string, Record<string, { n: number; f: number; a: number; w: number }>>();
           const seen = new Set<string>();
           for (const x of done) {
@@ -321,6 +328,29 @@ export function useSportsbook(active: boolean) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, matches, demo]);
+
+  // Keep finished basketball / hockey results (21 days) for team form.
+  useEffect(() => {
+    if (demo || !matches.length) return;
+    const done = matches.filter((m) => m.sport !== "football" && m.status === "done" && m.score);
+    if (!done.length) return;
+    try {
+      const store = JSON.parse(localStorage.getItem(RESULTS_KEY) ?? "{}") as Record<string, Match>;
+      const limit = Date.now() - 21 * 86400000;
+      let changed = false;
+      for (const m of done)
+        if (!store[m.id]) {
+          store[m.id] = { ...m, clock: undefined, ht: null };
+          changed = true;
+        }
+      for (const [id, m] of Object.entries(store))
+        if (m.kickoff < limit) {
+          delete store[id];
+          changed = true;
+        }
+      if (changed) localStorage.setItem(RESULTS_KEY, JSON.stringify(store));
+    } catch {}
+  }, [matches, demo]);
 
   const formsOf = useCallback((m: Match) => forms[formKey(m)]?.teams, [forms]);
   const modelFor = useCallback((m: Match) => modelOf(m, formsOf(m), now || Date.now()), [formsOf, now]);
