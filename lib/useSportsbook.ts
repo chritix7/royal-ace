@@ -20,9 +20,11 @@ import type { Feed, Match, Sport, Standings, StandingsFeed } from "./sports/type
  */
 
 export const SPORTS_MIN = 10;
-export const SPORTS_MAX = 100000;
+/** No table limit: you can stake your whole credit (all in). */
+export const SPORTS_MAX = 1_000_000_000_000;
 export const MAX_PICKS = 10;
-export const MAX_PAYOUT = 10_000_000;
+/** Highest payout of one ticket: ◈ 1 billion. */
+export const MAX_PAYOUT = 1_000_000_000;
 export const SPORT_CHIPS = [10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000];
 const CASHOUT_CUT = 0.92;
 
@@ -559,6 +561,14 @@ export function useSportsbook(active: boolean) {
     const st = Math.max(SPORTS_MIN, Math.min(SPORTS_MAX, Math.round(v)));
     commit({ ...savedRef.current, stake: st });
   };
+  const allIn = () => {
+    const b = Math.floor(wallet.getBalance());
+    if (b < SPORTS_MIN) return refuse("Not enough chips");
+    setStake(b);
+    return true;
+  };
+  const halfStake = () => setStake(Math.floor(savedRef.current.stake / 2));
+  const doubleStake = () => setStake(Math.min(Math.floor(wallet.getBalance()), savedRef.current.stake * 2) || SPORTS_MIN);
 
   // Live odds in the slip (they move with the match).
   const slipNow = slip.map((s) => {
@@ -662,6 +672,9 @@ export function useSportsbook(active: boolean) {
     removeSel,
     clearSlip,
     setStake,
+    allIn,
+    halfStake,
+    doubleStake,
     place,
     cashOutValue,
     cashOut,

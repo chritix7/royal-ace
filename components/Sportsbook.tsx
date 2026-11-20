@@ -6,7 +6,7 @@ import { Counter } from "./ui";
 import { money } from "../lib/game";
 import { marketsOf, PLAYER_KINDS, playerMarket, priced, type Priced } from "../lib/sports/odds";
 import type { Match, Sport } from "../lib/sports/types";
-import { MAX_PICKS, SPORT_CHIPS, SPORTS_MAX, SPORTS_MIN, useSportsbook, type SportsGame, type Ticket } from "../lib/useSportsbook";
+import { MAX_PAYOUT, MAX_PICKS, SPORT_CHIPS, SPORTS_MIN, useSportsbook, type SportsGame, type Ticket } from "../lib/useSportsbook";
 import { isNarrowScreen, requestFullscreenSettled } from "../lib/fullscreen";
 import { useSession } from "../lib/sessionStore";
 
@@ -21,7 +21,8 @@ function useDesktop() {
   }, []);
   return desktop;
 }
-const compact = (v: number) => (v < 10000 ? money(v) : v < 1e6 ? `${Math.round(v / 100) / 10}K`.replace(".0K", "K") : `${Math.round(v / 1e5) / 10}M`.replace(".0M", "M"));
+const compact = (v: number) =>
+  v < 10000 ? money(v) : v < 1e6 ? `${Math.round(v / 100) / 10}K`.replace(".0K", "K") : v < 1e9 ? `${Math.round(v / 1e5) / 10}M`.replace(".0M", "M") : `${Math.round(v / 1e8) / 10}B`.replace(".0B", "B");
 const fmtOdds = (o: number) => (o >= 100 ? o.toFixed(0) : o.toFixed(2));
 
 const SPORTS: { id: Sport; label: string; icon: string }[] = [
@@ -311,19 +312,30 @@ function Slip({ g, lite }: { g: SportsGame; lite: boolean }) {
           <input
             inputMode="numeric"
             value={typed}
-            onChange={(e) => setTyped(e.target.value.replace(/[^\d]/g, "").slice(0, 6))}
+            onChange={(e) => setTyped(e.target.value.replace(/[^\d]/g, "").slice(0, 13))}
             onBlur={() => g.setStake(+typed || SPORTS_MIN)}
             onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
-            aria-label={`Stake, ${SPORTS_MIN} to ${SPORTS_MAX}`}
+            aria-label={`Stake, from ${SPORTS_MIN}`}
           />
         </label>
+        <div className="grid grid-cols-3 gap-1">
+          <button type="button" onClick={g.halfStake} className="rl-key">
+            ½
+          </button>
+          <button type="button" onClick={g.doubleStake} className="rl-key">
+            2×
+          </button>
+          <button type="button" onClick={g.allIn} className={`rl-key ${g.stake >= Math.floor(g.balance) && g.balance >= SPORTS_MIN ? "is-on" : ""}`}>
+            All in
+          </button>
+        </div>
         <div className="grid grid-cols-2 gap-1.5">
           <div className="rl-window rl-window--sm">
             <span className="rl-window__label">Total odds</span>
             <span className="rl-window__value">{n ? fmtOdds(g.slipOdds) : "—"}</span>
           </div>
           <div className={`rl-window rl-window--sm ${n ? "is-hot" : ""}`}>
-            <span className="rl-window__label">Potential win</span>
+            <span className="rl-window__label">{g.potential >= MAX_PAYOUT ? "Max win" : "Potential win"}</span>
             <span className="rl-window__value">
               <span className="rl-window__cur">◈</span>
               {n ? compact(g.potential) : 0}
@@ -369,7 +381,7 @@ function TicketCard({ g, t }: { g: SportsGame; t: Ticket }) {
               Cash out ◈ {compact(co)}
             </button>
           ) : (
-            <span className="text-white/40">Win ◈ {compact(Math.floor(t.stake * t.odds))}</span>
+            <span className="text-white/40">Win ◈ {compact(Math.min(MAX_PAYOUT, Math.floor(t.stake * t.odds)))}</span>
           )
         ) : (
           <span className={t.payout > t.stake ? "font-bold text-[#f0d38b]" : "text-white/40"}>{t.payout ? `◈ ${money(t.payout)}` : "—"}</span>
