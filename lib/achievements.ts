@@ -16,24 +16,25 @@ export const ACHIEVEMENTS: Achievement[] = [
 ];
 
 /**
- * Daily challenges — balanced across the five games.
+ * Daily challenges — balanced across the six games.
  *
  * Every day each game gets two challenges: one "play" goal (easy, keeps
  * you moving) and one "feat" (a win or a big moment). That makes ten a
  * day, drawn by a hash of the date (the same all day, new at midnight).
  * On top of them:
  * - Grand tour: play at least one round of each game today.
- * - Royal chest: complete all ten challenges.
+ * - Royal chest: complete all twelve challenges.
  * Progress follows counters fed by the game events: `count` adds up what
  * happened today, `best` keeps the best run reached today (streaks).
  */
-export type GameId = "bj" | "slots" | "roulette" | "poker" | "craps";
+export type GameId = "bj" | "slots" | "roulette" | "poker" | "craps" | "penalty";
 export const GAMES: { id: GameId; label: string }[] = [
   { id: "bj", label: "Blackjack" },
   { id: "slots", label: "Slots" },
   { id: "roulette", label: "Roulette" },
   { id: "poker", label: "Hold'em" },
   { id: "craps", label: "Craps" },
+  { id: "penalty", label: "Penalty" },
 ];
 
 export type Challenge = {
@@ -48,13 +49,13 @@ export type Challenge = {
   reward: number;
 };
 
-export const CHALLENGES_PER_DAY = 10;
+export const CHALLENGES_PER_DAY = 12;
 /** Play one round of every game today. */
 export const TOUR_REWARD = 15000;
-/** Complete all ten challenges of the day. */
+/** Complete all twelve challenges of the day. */
 export const CHEST_REWARD = 60000;
 /** Which event marks a round played in each game (for the Grand tour). */
-export const PLAY_EVENT: Record<GameId, string> = { bj: "bjHand", slots: "spin", roulette: "rouletteSpin", poker: "pokerHand", craps: "crapsRoll" };
+export const PLAY_EVENT: Record<GameId, string> = { bj: "bjHand", slots: "spin", roulette: "rouletteSpin", poker: "pokerHand", craps: "crapsRoll", penalty: "penaltyRound" };
 
 type Def = Omit<Challenge, "game" | "tier">;
 const POOL: Record<GameId, { play: Def[]; feat: Def[] }> = {
@@ -128,6 +129,18 @@ const POOL: Record<GameId, { play: Def[]; feat: Def[] }> = {
       { id: "cr-big1", title: "Win a craps bet paying 10 to 1 or more", key: "crapsBigWin", mode: "count", goal: 1, reward: 25000 },
     ],
   },
+  penalty: {
+    play: [
+      { id: "pe-rounds20", title: "Play 20 penalty rounds", key: "penaltyRound", mode: "count", goal: 20, reward: 6000 },
+      { id: "pe-goals25", title: "Score 25 penalties", key: "penaltyGoal", mode: "count", goal: 25, reward: 8000 },
+      { id: "pe-cash8", title: "Cash out 8 times", key: "penaltyCashout", mode: "count", goal: 8, reward: 9000 },
+    ],
+    feat: [
+      { id: "pe-cash15", title: "Cash out 15 times", key: "penaltyCashout", mode: "count", goal: 15, reward: 15000 },
+      { id: "pe-goals60", title: "Score 60 penalties", key: "penaltyGoal", mode: "count", goal: 60, reward: 16000 },
+      { id: "pe-big1", title: "Cash out after 4 goals or more", key: "penaltyBigWin", mode: "count", goal: 1, reward: 25000 },
+    ],
+  },
 };
 
 /** Every challenge that can come up (for lookups). */
@@ -136,7 +149,7 @@ export const CHALLENGE_POOL: Challenge[] = GAMES.flatMap(({ id }) => [
   ...POOL[id].feat.map((d) => ({ ...d, game: id, tier: "feat" as const })),
 ]);
 
-/** The day's ten challenges: one "play" and one "feat" for each game. */
+/** The day's twelve challenges: one "play" and one "feat" for each game. */
 export function challengesFor(day: string): Challenge[] {
   const n = dayNumber(day);
   if (Number.isNaN(n)) return [];
@@ -151,7 +164,7 @@ export function challengesFor(day: string): Challenge[] {
 }
 
 /**
- * Career milestones: earned once for good, across all five games, read
+ * Career milestones: earned once for good, across all six games, read
  * from the lifetime statistics.
  */
 export type Milestone = { id: string; game: GameId | "all"; title: string; stat: string; goal: number; reward: number };
@@ -172,6 +185,9 @@ export const MILESTONES: Milestone[] = [
   { id: "m-cr150", game: "craps", title: "Roll the dice 150 times", stat: "crapsRolls", goal: 150, reward: 25000 },
   { id: "m-cr1500", game: "craps", title: "Roll the dice 1,500 times", stat: "crapsRolls", goal: 1500, reward: 120000 },
   { id: "m-crwin300", game: "craps", title: "Win on 300 craps rolls", stat: "crapsWins", goal: 300, reward: 60000 },
+  { id: "m-pe100", game: "penalty", title: "Play 100 penalty rounds", stat: "penaltyRounds", goal: 100, reward: 25000 },
+  { id: "m-pe1000", game: "penalty", title: "Play 1,000 penalty rounds", stat: "penaltyRounds", goal: 1000, reward: 120000 },
+  { id: "m-pegoal500", game: "penalty", title: "Score 500 penalties", stat: "penaltyGoals", goal: 500, reward: 60000 },
   { id: "m-lvl10", game: "all", title: "Reach level 10", stat: "level", goal: 10, reward: 75000 },
   { id: "m-lvl25", game: "all", title: "Reach level 25", stat: "level", goal: 25, reward: 200000 },
 ];

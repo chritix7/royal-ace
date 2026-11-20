@@ -197,6 +197,19 @@ export const sfx = {
       gap *= 1.045;
     }
   },
+  // Penalty: the strike, the net, the keeper's gloves.
+  kick: () => {
+    tone(120, 0.14, "sine", 0.22, 0, 55);
+    noise(0.06, 0.12, 1400);
+  },
+  net: () => {
+    noise(0.35, 0.09, 700, 0);
+    tone(200, 0.2, "sine", 0.06, 0, 120);
+  },
+  glove: () => {
+    noise(0.07, 0.16, 2600);
+    tone(180, 0.18, "triangle", 0.08, 0.02, 90);
+  },
   ballDrop: () => {
     [0, 0.09, 0.16, 0.21, 0.25].forEach((d, i) => {
       noise(0.04, 0.12 - i * 0.018, 1800, d);

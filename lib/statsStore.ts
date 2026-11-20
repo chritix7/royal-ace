@@ -28,6 +28,8 @@ export type GlobalStats = {
   pokerWins: number;
   crapsRolls: number;
   crapsWins: number;
+  penaltyRounds: number;
+  penaltyGoals: number;
 };
 
 const EMPTY: GlobalStats = {
@@ -52,6 +54,8 @@ const EMPTY: GlobalStats = {
   pokerWins: 0,
   crapsRolls: 0,
   crapsWins: 0,
+  penaltyRounds: 0,
+  penaltyGoals: 0,
 };
 
 const KEY = "royalace:global-stats";
@@ -120,6 +124,10 @@ function handleEvent(event: GameEvent, amount = 1) {
       return add("crapsRolls", amount);
     case "crapsWin":
       return add("crapsWins", amount);
+    case "penaltyRound":
+      return add("penaltyRounds", amount);
+    case "penaltyGoal":
+      return add("penaltyGoals", amount);
     default:
       return;
   }

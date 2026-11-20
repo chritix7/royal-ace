@@ -14,10 +14,10 @@ import { useWeekly, WEEKLY_TIERS } from "../lib/weekly";
 import { cleanName, profileStore, useProfile } from "../lib/profile";
 import { useLocked } from "../lib/wallet";
 
-export type LobbyGame = "blackjack" | "slots" | "roulette" | "poker" | "craps";
+export type LobbyGame = "blackjack" | "slots" | "roulette" | "poker" | "craps" | "penalty";
 
 type Info = {
-  id: LobbyGame | "penalty";
+  id: LobbyGame;
   name: string;
   tag: string;
   facts: string[];
@@ -26,7 +26,7 @@ type Info = {
   about: string[];
   challenge?: GameId;
   stat?: [string, string, string];
-  session?: "bj" | "slots" | "roulette" | "poker" | "craps";
+  session?: "bj" | "slots" | "roulette" | "poker" | "craps" | "penalty";
   soon?: boolean;
 };
 
@@ -95,11 +95,13 @@ export const LOBBY_GAMES: Info[] = [
     id: "penalty",
     name: "Penalty",
     tag: "Score, raise, cash out",
-    facts: ["Multiplier grows each goal", "Cash out any time", "Coming soon"],
-    limits: "Soon",
-    rtp: "—",
-    about: ["Pick your corner, beat the keeper, and watch the multiplier climb.", "Cash out before a save — or go for the next goal."],
-    soon: true,
+    facts: ["Up to 30.72× in five goals", "Cash out after any goal", "Fair 50/50 keeper"],
+    limits: "◈ 10 – 100K",
+    rtp: "96%",
+    about: ["Pick your corner — the keeper guesses right one time in two.", "Each goal doubles the multiplier: 1.92×, 3.84×, 7.68×, 15.36×, 30.72×.", "Cash out after any goal, or shoot again. A save loses the stake."],
+    challenge: "penalty",
+    stat: ["penaltyRounds", "penaltyGoals", "rounds"],
+    session: "penalty",
   },
 ];
 

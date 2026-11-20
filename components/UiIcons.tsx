@@ -71,6 +71,13 @@ export const IconDice = ({ className = "h-4 w-4" }: { className?: string }) => (
     <circle cx="18" cy="9.6" r="0.9" fill="currentColor" stroke="none" />
   </svg>
 );
+export const IconBall = ({ className = "h-4 w-4" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden="true">
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 8.2l3.3 2.4-1.3 3.9h-4l-1.3-3.9z" fill="currentColor" stroke="none" />
+    <path d="M12 8.2V3.5M15.3 10.6l4.4-1.5M14 14.5l2.7 3.8M10 14.5l-2.7 3.8M8.7 10.6L4.3 9.1" />
+  </svg>
+);
 export const IconHome = ({ className = "h-4 w-4" }: { className?: string }) => (
   <svg {...base} className={className} aria-hidden="true">
     <path d="M3.5 10.5 12 4l8.5 6.5" />

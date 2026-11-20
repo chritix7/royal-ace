@@ -37,7 +37,11 @@ export type GameEvent =
   | "crapsWin" // un lancer gagnant au craps
   | "crapsPoint" // un point gagné avec une mise Pass
   | "crapsHard" // un hardway gagné
-  | "crapsBigWin"; // une mise payée au moins 10 contre 1
+  | "crapsBigWin" // une mise payée au moins 10 contre 1
+  | "penaltyRound" // une série de penalties jouée
+  | "penaltyGoal" // des buts marqués (amount = nombre)
+  | "penaltyCashout" // un cash-out gagnant
+  | "penaltyBigWin"; // un cash-out après au moins 4 buts (×15.36)
 
 type Listener = (event: GameEvent, amount: number) => void;
 const listeners = new Set<Listener>();

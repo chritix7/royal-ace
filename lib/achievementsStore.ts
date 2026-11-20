@@ -63,7 +63,7 @@ export function challengeView(s: AchievementState): ChallengeView[] {
   });
 }
 
-/** Grand tour (a round of every game today) and the Royal chest (all ten done). */
+/** Grand tour (a round of every game today) and the Royal chest (all twelve done). */
 export type ExtraView = { id: "tour" | "chest"; title: string; progress: number; goal: number; reward: number; done: boolean; claimed: boolean };
 export function extrasView(s: AchievementState): ExtraView[] {
   const played = GAMES.filter((g) => (s.counters[PLAY_EVENT[g.id]] ?? 0) > 0).length;
@@ -71,7 +71,7 @@ export function extrasView(s: AchievementState): ExtraView[] {
   const done = views.filter((v) => v.done).length;
   return [
     { id: "tour", title: "Grand tour · play every game today", progress: played, goal: GAMES.length, reward: TOUR_REWARD, done: played >= GAMES.length, claimed: s.claimed.includes("tour") },
-    { id: "chest", title: "Royal chest · complete all ten challenges", progress: done, goal: views.length, reward: CHEST_REWARD, done: views.length > 0 && done >= views.length, claimed: s.claimed.includes("chest") },
+    { id: "chest", title: "Royal chest · complete all twelve challenges", progress: done, goal: views.length, reward: CHEST_REWARD, done: views.length > 0 && done >= views.length, claimed: s.claimed.includes("chest") },
   ];
 }
 
