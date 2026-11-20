@@ -1,5 +1,7 @@
 "use client";
 
+import ProfileSheet from "./ProfileSheet";
+import { careerStore, useCareer, weeklyRanking } from "../lib/career";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import GameArt, { type ArtId } from "./GameArt";
@@ -343,6 +345,14 @@ export default function Lobby({
   const locked = useLocked();
   const [detail, setDetail] = useState<Info | null>(null);
   const [nameOpen, setNameOpen] = useState(false);
+  const [profileTab, setProfileTab] = useState<null | "card" | "rank">(null);
+  const career = useCareer();
+  const [nowMs, setNowMs] = useState(0);
+  useEffect(() => {
+    careerStore.hydrate();
+    setNowMs(Date.now());
+  }, []);
+  const rank = nowMs ? weeklyRanking(career, profile.name, nowMs).rank : 0;
   const [bonus, setBonus] = useState<{ canClaim: boolean; reward: number } | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   // The time of day is read on the client (never during the prerender).
@@ -396,7 +406,9 @@ export default function Lobby({
     <div className="min-w-0">
       <p className="lb-hero__eyebrow">{hello}</p>
       <div className="flex min-w-0 items-center gap-2">
-        <h2 className="lb-hero__name truncate">{profile.name || "Welcome"}</h2>
+        <button type="button" onClick={() => setProfileTab("card")} className="min-w-0 text-left" aria-label="Your VIP card">
+          <h2 className="lb-hero__name truncate">{profile.name || "Welcome"}</h2>
+        </button>
         <button type="button" onClick={() => setNameOpen(true)} aria-label="Change your name" className="lb-edit">
           ✎
         </button>
@@ -455,7 +467,7 @@ export default function Lobby({
   const summary = (
     <section className="lb-summary">
       <button type="button" onClick={onOpenChallenges} className="lb-tile">
-        <span className="lb-tile__k">Daily challenges</span>
+        <span className="lb-tile__k">{desktop ? "Daily challenges" : "Challenges"}</span>
         <span className="lb-tile__v">
           {done}/{views.length}
           {toClaim > 0 && <em> · {toClaim} to claim</em>}
@@ -465,14 +477,33 @@ export default function Lobby({
         </span>
       </button>
       <button type="button" onClick={onOpenRewards} className="lb-tile">
-        <span className="lb-tile__k">Weekly · {nextChest.label}</span>
+        <span className="lb-tile__k">{desktop ? `Weekly · ${nextChest.label}` : "Weekly chest"}</span>
         <span className="lb-tile__v">
-          {fmt(Math.min(weekly.points, nextChest.points))} / {fmt(nextChest.points)} pts
+          {desktop ? `${fmt(Math.min(weekly.points, nextChest.points))} / ${fmt(nextChest.points)} pts` : `${fmt(Math.min(weekly.points, nextChest.points))} pts`}
         </span>
         <span className="lb-bar">
           <span style={{ width: `${Math.min(100, (weekly.points / nextChest.points) * 100)}%` }} />
         </span>
       </button>
+      <button type="button" onClick={() => setProfileTab("rank")} className="lb-tile">
+        <span className="lb-tile__k">{desktop ? "Weekly ranking" : "Ranking"}</span>
+        <span className="lb-tile__v">
+          {rank ? <em>#{rank}</em> : "—"}
+          {desktop && <> · {career.weekNet >= 0 ? "+" : "−"}◈ {fmt(Math.abs(career.weekNet))}</>}
+        </span>
+        <span className="lb-bar">
+          <span style={{ width: `${rank ? Math.max(4, ((17 - rank) / 16) * 100) : 0}%` }} />
+        </span>
+      </button>
+      {desktop && (
+        <button type="button" onClick={() => setProfileTab("card")} className="lb-tile">
+          <span className="lb-tile__k">VIP card</span>
+          <span className="lb-tile__v">{vip.label} · Lv {progression.level}</span>
+          <span className="lb-bar">
+            <span style={{ width: `${Math.min(100, (xpInLevel(progression.xp) / xpForNextLevel()) * 100)}%` }} />
+          </span>
+        </button>
+      )}
     </section>
   );
 
@@ -523,6 +554,7 @@ export default function Lobby({
       )}
       {detail && <Detail g={detail} onClose={() => setDetail(null)} onPlay={() => play(detail)} />}
       {hydrated && (nameOpen || !profile.asked) && <NameModal initial={profile.name} onDone={() => setNameOpen(false)} />}
+      {profileTab && <ProfileSheet tab={profileTab} onClose={() => setProfileTab(null)} />}
     </div>
   );
 }

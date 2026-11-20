@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { today } from "./clock";
+import { careerStore } from "./career";
 
 type GameDaily = { spins: number; wagered: number; net: number; biggest: number };
 export type SessionState = { day: string; slots: GameDaily; bj: GameDaily; roulette: GameDaily; poker: GameDaily; craps: GameDaily; penalty: GameDaily; sports: GameDaily };
@@ -33,6 +34,7 @@ function rollDayIfNeeded() {
 
 function record(game: "slots" | "bj" | "roulette" | "poker" | "craps" | "penalty" | "sports", wagered: number, net: number) {
   rollDayIfNeeded();
+  careerStore.record(game, wagered, net);
   const g = state[game];
   state = {
     ...state,
@@ -95,6 +97,7 @@ export const sessionStore = {
   sessionStore.hydrate();
 
   if (recordedBjIds.includes(id)) return;
+  careerStore.record("bj", wagered, net);
 
   const day = today();
 
@@ -141,6 +144,7 @@ export const sessionStore = {
 
   recordSlotAdjustment: (net: number) => {
   rollDayIfNeeded();
+  careerStore.record("slots", 0, net);
   const g = state.slots;
   state = {
     ...state,
