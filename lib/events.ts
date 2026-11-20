@@ -41,7 +41,14 @@ export type GameEvent =
   | "penaltyRound" // une série de penalties jouée
   | "penaltyGoal" // des buts marqués (amount = nombre)
   | "penaltyCashout" // un cash-out gagnant
-  | "penaltyBigWin"; // un cash-out après au moins 4 buts (×15.36)
+  | "penaltyBigWin" // un cash-out après au moins 4 buts (×15.36)
+  | "betPlaced" // un ticket de paris sportifs validé
+  | "betCombo" // un combiné d'au moins 3 sélections validé
+  | "betLive" // un pari pris en direct
+  | "betWon" // un ticket gagnant
+  | "betComboWon" // un combiné d'au moins 3 sélections gagnant
+  | "betBigWin" // un ticket gagnant à cote 10 ou plus
+  | "betCashout"; // un cash-out sur un ticket
 
 type Listener = (event: GameEvent, amount: number) => void;
 const listeners = new Set<Listener>();

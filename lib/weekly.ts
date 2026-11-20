@@ -52,6 +52,11 @@ export const WEEKLY_POINTS: Partial<Record<GameEvent, number>> = {
   penaltyGoal: 6,
   penaltyCashout: 15,
   penaltyBigWin: 120,
+  betPlaced: 12,
+  betCombo: 20,
+  betWon: 30,
+  betComboWon: 100,
+  betBigWin: 150,
 };
 
 let state: WeeklyState = EMPTY;

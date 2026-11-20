@@ -78,6 +78,13 @@ export const IconBall = ({ className = "h-4 w-4" }: { className?: string }) => (
     <path d="M12 8.2V3.5M15.3 10.6l4.4-1.5M14 14.5l2.7 3.8M10 14.5l-2.7 3.8M8.7 10.6L4.3 9.1" />
   </svg>
 );
+export const IconTicket = ({ className = "h-4 w-4" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden="true">
+    <path d="M4 6.5h16v3.2a2.3 2.3 0 0 0 0 4.6v3.2H4v-3.2a2.3 2.3 0 0 0 0-4.6z" />
+    <path d="M9.5 6.5v11" strokeDasharray="1.6 1.6" />
+    <path d="M12.5 10h4.5M12.5 14h3" />
+  </svg>
+);
 export const IconHome = ({ className = "h-4 w-4" }: { className?: string }) => (
   <svg {...base} className={className} aria-hidden="true">
     <path d="M3.5 10.5 12 4l8.5 6.5" />

@@ -11,6 +11,7 @@ import Roulette from "../components/Roulette";
 import Poker from "../components/Poker";
 import Craps from "../components/Craps";
 import Penalty from "../components/Penalty";
+import Sportsbook from "../components/Sportsbook";
 import StatsPanel from "../components/StatsPanel";
 import { Counter } from "../components/ui";
 import { achievementsStore, challengeView, extrasView, useAchievements } from "../lib/achievementsStore";
@@ -23,14 +24,14 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import { progressionStore, useProgression } from "../lib/progression";
 import { weeklyStore } from "../lib/weekly";
 import ChipFly from "../components/ChipFly";
-import { IconBall, IconDice, IconFocus, IconHome, IconPoker, IconRoulette, IconSlot, IconSpade } from "../components/UiIcons";
+import { IconBall, IconTicket, IconDice, IconFocus, IconHome, IconPoker, IconRoulette, IconSlot, IconSpade } from "../components/UiIcons";
 import Lobby from "../components/Lobby";
 import { profileStore } from "../lib/profile";
 import HotkeysOverlay from "../components/HotkeysOverlay";
 import { useBalanceFlash } from "../hooks/useBalanceFlash";
 import { sessionStore } from "../lib/sessionStore";
 
-type Tab = "blackjack" | "slots" | "roulette" | "poker" | "craps" | "penalty";
+type Tab = "blackjack" | "slots" | "roulette" | "poker" | "craps" | "penalty" | "sports";
 const TABS: { id: Tab; label: string; Icon: (p: { className?: string }) => ReactElement; aria: string }[] = [
   { id: "blackjack", label: "Blackjack", Icon: IconSpade, aria: "Blackjack" },
   { id: "slots", label: "Slot machine", Icon: IconSlot, aria: "Slot machine" },
@@ -38,6 +39,7 @@ const TABS: { id: Tab; label: string; Icon: (p: { className?: string }) => React
   { id: "poker", label: "Hold'em", Icon: IconPoker, aria: "Casino Hold'em poker" },
   { id: "craps", label: "Craps", Icon: IconDice, aria: "Craps" },
   { id: "penalty", label: "Penalty", Icon: IconBall, aria: "Penalty shoot-out" },
+  { id: "sports", label: "Sportsbook", Icon: IconTicket, aria: "Sports betting" },
 ];
 
 /**
@@ -128,6 +130,7 @@ export default function Home() {
       ["poker", "royalace:poker"],
       ["craps", "royalace:craps"],
       ["penalty", "royalace:penalty"],
+      ["sports", "royalace:sports"],
     ];
     const add: Tab[] = [];
     for (const [t, key] of waiting) {
@@ -184,7 +187,7 @@ export default function Home() {
 
   // Live figures for the header cards.
   const stats = useStats();
-  const rounds = stats.bjHands + stats.spins + (stats.rouletteSpins ?? 0) + (stats.pokerHands ?? 0) + (stats.crapsRolls ?? 0) + (stats.penaltyRounds ?? 0);
+  const rounds = stats.bjHands + stats.spins + (stats.rouletteSpins ?? 0) + (stats.pokerHands ?? 0) + (stats.crapsRolls ?? 0) + (stats.penaltyRounds ?? 0) + (stats.betsPlaced ?? 0);
   const roundsLabel = `${rounds.toLocaleString("en-US")} ${rounds === 1 ? "round" : "rounds"}`;
   const achState = useAchievements();
   const challenges = challengeView(achState);
@@ -411,6 +414,13 @@ export default function Home() {
           {visited.has("penalty") && (
           <ErrorBoundary label="Penalty">
             <Penalty active={tab === "penalty" && !inLobby} focus={tab === "penalty" && !inLobby && focusMode} onFocusChange={setFocusMode} />
+          </ErrorBoundary>
+          )}
+        </div>
+        <div className={tab === "sports" && !inLobby ? "" : "hidden"}>
+          {visited.has("sports") && (
+          <ErrorBoundary label="Sportsbook">
+            <Sportsbook active={tab === "sports" && !inLobby} focus={tab === "sports" && !inLobby && focusMode} onFocusChange={setFocusMode} />
           </ErrorBoundary>
           )}
         </div>

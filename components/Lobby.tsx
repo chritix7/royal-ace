@@ -14,7 +14,7 @@ import { useWeekly, WEEKLY_TIERS } from "../lib/weekly";
 import { cleanName, profileStore, useProfile } from "../lib/profile";
 import { useLocked } from "../lib/wallet";
 
-export type LobbyGame = "blackjack" | "slots" | "roulette" | "poker" | "craps" | "penalty";
+export type LobbyGame = "blackjack" | "slots" | "roulette" | "poker" | "craps" | "penalty" | "sports";
 
 type Info = {
   id: LobbyGame;
@@ -26,7 +26,7 @@ type Info = {
   about: string[];
   challenge?: GameId;
   stat?: [string, string, string];
-  session?: "bj" | "slots" | "roulette" | "poker" | "craps" | "penalty";
+  session?: "bj" | "slots" | "roulette" | "poker" | "craps" | "penalty" | "sports";
   soon?: boolean;
 };
 
@@ -102,6 +102,18 @@ export const LOBBY_GAMES: Info[] = [
     challenge: "penalty",
     stat: ["penaltyRounds", "penaltyGoals", "rounds"],
     session: "penalty",
+  },
+  {
+    id: "sports",
+    name: "Sportsbook",
+    tag: "Real matches · live odds",
+    facts: ["Football, basketball, hockey", "Combos up to 10 picks", "Live odds & cash-out"],
+    limits: "◈ 10 – 100K",
+    rtp: "≈ 94%",
+    about: ["Bet virtual chips on real matches: result, goals, handicap, correct score and more.", "Add several picks to one ticket for a combo — the odds multiply.", "In play the odds follow the score; cash out before the final whistle."],
+    challenge: "sports",
+    stat: ["betsPlaced", "betsWon", "bets"],
+    session: "sports",
   },
 ];
 
@@ -276,7 +288,7 @@ function Detail({ g, onClose, onPlay }: { g: Info; onClose: () => void; onPlay: 
 /* ───────── A game card ───────── */
 function GameCard({ g, i, onOpen, onPlay, badge, compact }: { g: Info; i: number; onOpen: () => void; onPlay: () => void; badge: string | null; compact: boolean }) {
   return (
-    <article className={`lb-card ${g.soon ? "is-soon" : ""}`} style={{ "--i": i } as CSSProperties}>
+    <article className={`lb-card ${g.soon ? "is-soon" : ""} ${g.id === "sports" ? "is-wide" : ""}`} style={{ "--i": i } as CSSProperties}>
       <button type="button" onClick={onOpen} className="lb-card__hit" aria-label={`${g.name} — details`} />
       <div className="lb-card__art">
         <GameArt id={g.id as ArtId} className="h-full w-full" />

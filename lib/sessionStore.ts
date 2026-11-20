@@ -2,10 +2,10 @@ import { useSyncExternalStore } from "react";
 import { today } from "./clock";
 
 type GameDaily = { spins: number; wagered: number; net: number; biggest: number };
-export type SessionState = { day: string; slots: GameDaily; bj: GameDaily; roulette: GameDaily; poker: GameDaily; craps: GameDaily; penalty: GameDaily };
+export type SessionState = { day: string; slots: GameDaily; bj: GameDaily; roulette: GameDaily; poker: GameDaily; craps: GameDaily; penalty: GameDaily; sports: GameDaily };
 
 const emptyGame = (): GameDaily => ({ spins: 0, wagered: 0, net: 0, biggest: 0 });
-const EMPTY: SessionState = { day: "", slots: emptyGame(), bj: emptyGame(), roulette: emptyGame(), poker: emptyGame(), craps: emptyGame(), penalty: emptyGame() };
+const EMPTY: SessionState = { day: "", slots: emptyGame(), bj: emptyGame(), roulette: emptyGame(), poker: emptyGame(), craps: emptyGame(), penalty: emptyGame(), sports: emptyGame() };
 
 const KEY = "royalace:session-today";
 let state: SessionState = EMPTY;
@@ -26,12 +26,12 @@ function persist() {
 function rollDayIfNeeded() {
   const day = today();
   if (state.day !== day) {
-    state = { day, slots: emptyGame(), bj: emptyGame(), roulette: emptyGame(), poker: emptyGame(), craps: emptyGame(), penalty: emptyGame() };
+    state = { day, slots: emptyGame(), bj: emptyGame(), roulette: emptyGame(), poker: emptyGame(), craps: emptyGame(), penalty: emptyGame(), sports: emptyGame() };
     persist();
   }
 }
 
-function record(game: "slots" | "bj" | "roulette" | "poker" | "craps" | "penalty", wagered: number, net: number) {
+function record(game: "slots" | "bj" | "roulette" | "poker" | "craps" | "penalty" | "sports", wagered: number, net: number) {
   rollDayIfNeeded();
   const g = state[game];
   state = {
@@ -76,6 +76,7 @@ export const sessionStore = {
             poker: { ...emptyGame(), ...d.poker },
             craps: { ...emptyGame(), ...d.craps },
             penalty: { ...emptyGame(), ...d.penalty },
+            sports: { ...emptyGame(), ...d.sports },
           };
         }
       }
@@ -89,6 +90,7 @@ export const sessionStore = {
   recordPoker: (wagered: number, net: number) => record("poker", wagered, net),
   recordCraps: (wagered: number, net: number) => record("craps", wagered, net),
   recordPenalty: (wagered: number, net: number) => record("penalty", wagered, net),
+  recordSports: (wagered: number, net: number) => record("sports", wagered, net),
   recordBjOnce: (id: string, wagered: number, net: number) => {
   sessionStore.hydrate();
 
@@ -107,6 +109,7 @@ export const sessionStore = {
           poker: emptyGame(),
           craps: emptyGame(),
           penalty: emptyGame(),
+          sports: emptyGame(),
         };
 
   const g = current.bj;

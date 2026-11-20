@@ -2,7 +2,7 @@
  * Lobby illustrations: gold line art on carbon black, one per game.
  * Pure SVG (no images), light enough for phones.
  */
-export type ArtId = "blackjack" | "slots" | "roulette" | "poker" | "craps" | "penalty";
+export type ArtId = "blackjack" | "slots" | "roulette" | "poker" | "craps" | "penalty" | "sports";
 
 const Defs = ({ id }: { id: string }) => (
   <defs>
@@ -120,6 +120,27 @@ export default function GameArt({ id, className = "" }: { id: ArtId; className?:
           <circle cx="160" cy="170" r="16" fill="#0d0d0f" stroke={g} strokeWidth="2.5" />
           <path d="M160 160 l8 6 -3 9 h-10 l-3 -9z" fill={g} />
           <path d="M60 182 H260" stroke={g} strokeOpacity="0.4" />
+        </>
+      )}
+      {id === "sports" && (
+        <>
+          <rect x="62" y="40" width="196" height="74" rx="12" fill="#0b0b0d" stroke={g} strokeWidth="3" />
+          <circle cx="82" cy="58" r="4" fill="#ff4d4d" />
+          <text x="92" y="62" fontSize="10" fontWeight="800" letterSpacing="2" fill="#e5c779" fillOpacity="0.8" fontFamily="Georgia, serif">
+            LIVE 67&apos;
+          </text>
+          <text x="160" y="100" textAnchor="middle" fontSize="34" fontWeight="900" fontFamily="Georgia, serif" fill={g}>
+            2 – 1
+          </text>
+          {[0, 1, 2].map((i) => (
+            <g key={i} transform={`translate(${86 + i * 52} 128)`}>
+              <rect width="44" height="30" rx="7" fill={i === 0 ? "#d9b05a" : "#151517"} stroke={g} strokeWidth="1.5" />
+              <text x="22" y="20" textAnchor="middle" fontSize="12" fontWeight="800" fill={i === 0 ? "#141210" : "#f1e3bb"}>
+                {["1.85", "3.60", "4.20"][i]}
+              </text>
+            </g>
+          ))}
+          <path d="M60 176 H260" stroke={g} strokeOpacity="0.4" />
         </>
       )}
     </svg>
