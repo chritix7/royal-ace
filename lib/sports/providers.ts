@@ -92,6 +92,57 @@ export function footballStandings(json: any): Standings {
   return out;
 }
 
+/** Leading scorers of a competition (players, season totals). */
+export type Scorer = { id: string; name: string; teamId: string; played: number; goals: number; assists: number; penalties: number };
+export function footballScorers(json: any): Scorer[] {
+  const list: any[] = Array.isArray(json?.scorers) ? json.scorers : [];
+  return list
+    .filter((r) => r?.player?.id != null && r?.team?.id != null)
+    .map((r) => ({
+      id: String(r.player.id),
+      name: String(r.player.name ?? "Player"),
+      teamId: String(r.team.id),
+      played: num(r.playedMatches) ?? 0,
+      goals: num(r.goals) ?? 0,
+      assists: num(r.assists) ?? 0,
+      penalties: num(r.penalties) ?? 0,
+    }));
+}
+
+/** Goals of one match (scorer, assist) and who played, when the plan gives it. */
+export type MatchDetail = {
+  id: string;
+  done: boolean;
+  goals: { minute: number | null; type: string; team: string; scorer: string | null; assist: string | null }[];
+  /** Players who took part (starters + subs who came on); null when unknown. */
+  played: string[] | null;
+  raw: { goals: boolean; lineups: boolean; subs: boolean };
+};
+export function footballDetail(json: any): MatchDetail {
+  const m = json?.id != null ? json : json?.match ?? {};
+  const goals: any[] = Array.isArray(m.goals) ? m.goals : [];
+  const lineupH: any[] = Array.isArray(m.homeTeam?.lineup) ? m.homeTeam.lineup : [];
+  const lineupA: any[] = Array.isArray(m.awayTeam?.lineup) ? m.awayTeam.lineup : [];
+  const subs: any[] = Array.isArray(m.substitutions) ? m.substitutions : [];
+  const lineups = lineupH.length > 0 && lineupA.length > 0;
+  const played = lineups
+    ? [...lineupH, ...lineupA].map((p) => String(p?.id)).concat(subs.map((s) => String(s?.playerIn?.id))).filter((x) => x && x !== "undefined")
+    : null;
+  return {
+    id: `fb:${m.id}`,
+    done: m.status === "FINISHED" || m.status === "AWARDED",
+    goals: goals.map((g) => ({
+      minute: num(g?.minute),
+      type: String(g?.type ?? "REGULAR"),
+      team: String(g?.team?.id ?? ""),
+      scorer: g?.scorer?.id != null ? String(g.scorer.id) : null,
+      assist: g?.assist?.id != null ? String(g.assist.id) : null,
+    })),
+    played,
+    raw: { goals: Array.isArray(m.goals), lineups, subs: Array.isArray(m.substitutions) },
+  };
+}
+
 /* ───────────── Basketball & hockey (API-Sports) ───────────── */
 
 /** Leagues we keep: [country, name keywords]. The free feed lists every game in the world. */

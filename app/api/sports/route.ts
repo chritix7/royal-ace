@@ -10,7 +10,7 @@
  *   ?feed=hockey&date=2026-11-20
  *   ?feed=basketball-standings&league=12&season=2025-2026  (same for hockey)
  */
-import { FOOTBALL_COMPS, footballMatch, footballStandings, isTopLeague, sportsGame, sportsStandings } from "../../../lib/sports/providers";
+import { FOOTBALL_COMPS, footballDetail, footballMatch, footballScorers, footballStandings, isTopLeague, sportsGame, sportsStandings } from "../../../lib/sports/providers";
 import type { Match } from "../../../lib/sports/types";
 
 type Entry = { at: number; ttl: number; body: string };
@@ -42,7 +42,7 @@ async function getJson(url: string, headers: Record<string, string>) {
   return { ok: res.ok, status: res.status, json: json as Record<string, unknown> | null };
 }
 
-async function football(url: string) {
+async function football(url: string, extra: Record<string, string> = {}) {
   const key = process.env.FOOTBALL_DATA_KEY;
   if (!key) throw new Error("missing-key");
   // Free plan: 10 calls a minute. Keep a margin for the other instances.
@@ -50,7 +50,7 @@ async function football(url: string) {
   while (fdCalls.length && now - fdCalls[0] > 60000) fdCalls.shift();
   if (fdCalls.length >= 8) throw new Error("busy");
   fdCalls.push(now);
-  const r = await getJson(`https://api.football-data.org/v4${url}`, { "X-Auth-Token": key });
+  const r = await getJson(`https://api.football-data.org/v4${url}`, { "X-Auth-Token": key, ...extra });
   if (!r.ok) throw new Error(r.status === 429 ? "busy" : `provider-${r.status}`);
   return r.json;
 }
@@ -92,6 +92,24 @@ export async function GET(request: Request) {
     ttl = 6 * 3600;
     key = `fbst:${comp}`;
     load = async () => ({ teams: footballStandings(await football(`/competitions/${comp}/standings`)), at: Date.now() });
+  } else if (feed === "football-scorers") {
+    const comp = (q.get("comp") ?? "").toUpperCase();
+    if (!FOOTBALL_COMPS[comp]) return fail("bad-request", 3600);
+    ttl = 12 * 3600;
+    key = `fbsc:${comp}`;
+    load = async () => ({ players: footballScorers(await football(`/competitions/${comp}/scorers?limit=60`)), at: Date.now() });
+  } else if (feed === "football-match") {
+    const id = q.get("id") ?? "";
+    if (!/^\d{1,9}$/.test(id)) return fail("bad-request", 3600);
+    key = `fbm:${id}`;
+    ttl = 120;
+    load = async () => {
+      const json = await football(`/matches/${id}`, { "X-Unfold-Goals": "true", "X-Unfold-Lineups": "true", "X-Unfold-Subs": "true" });
+      const detail = footballDetail(json);
+      // A finished match never changes: keep it a day.
+      if (detail.done) ttl = 24 * 3600;
+      return { detail, at: Date.now() };
+    };
   } else if (feed === "basketball" || feed === "hockey") {
     const sport = feed;
     const date = q.get("date") ?? "";
