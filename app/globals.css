@@ -2509,3 +2509,6 @@ html.rl-wheel-solid body *:not(.rl-wheel-overlay, .rl-wheel-overlay *, .rl-over-
 }
 /* PC lobby on short screens: the art keeps its room */
 @media (min-width: 1024px) and (max-height: 840px) { .is-pc .lb-card__facts { display: none; } .is-pc .lb-card__body { padding-top: 0.55rem; padding-bottom: 0.65rem; } }
+/* Lobby, phones: Continue as a full-width row */
+.lb-continue.is-row { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: 0.45rem 0.8rem; }
+@media (min-width: 1024px) { .lb-detail__art { border-bottom: 0; border-right: 1px solid rgba(229, 199, 121, 0.18); } }

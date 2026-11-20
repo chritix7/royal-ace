@@ -188,17 +188,25 @@ function Detail({ g, onClose, onPlay }: { g: Info; onClose: () => void; onPlay: 
   return createPortal(
     <div className="safe-y fixed inset-0 z-[150] flex items-end justify-center sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label={g.name}>
       <button type="button" aria-label="Close" onClick={onClose} className="backdrop-in absolute inset-0 cursor-default bg-black/70" />
-      <div className="lb-detail relative flex max-h-[min(92dvh,46rem)] w-full max-w-2xl flex-col overflow-hidden">
-        <div className="lb-detail__art relative">
-          <GameArt id={g.id as ArtId} className="mx-auto block h-40 w-auto sm:h-48" />
-          <button type="button" onClick={onClose} aria-label="Close" className="rl-icon-key absolute right-3 top-3">
+      <div className="lb-detail relative flex max-h-[min(92dvh,46rem)] w-full max-w-2xl flex-col overflow-hidden lg:max-h-[calc(100dvh-2rem)] lg:max-w-4xl lg:flex-row">
+        <div className="lb-detail__art relative lg:flex lg:w-[20rem] lg:shrink-0 lg:items-center lg:justify-center">
+          <GameArt id={g.id as ArtId} className="mx-auto block h-40 w-auto sm:h-48 lg:h-auto lg:w-full" />
+          <span className="absolute right-3 top-3 lg:hidden">
+            <button type="button" onClick={onClose} aria-label="Close" className="rl-icon-key">
+              ✕
+            </button>
+          </span>
+        </div>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <span className="absolute right-3 top-3 z-10 max-lg:hidden">
+          <button type="button" onClick={onClose} aria-label="Close" className="rl-icon-key">
             ✕
           </button>
-        </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-4 pt-3 [scrollbar-width:thin] sm:px-6">
+        </span>
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-4 pt-3 [scrollbar-width:thin] sm:px-6 lg:pt-5">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#d7b45b]/80">{g.tag}</p>
           <h2 className="font-display gold-text mt-0.5 text-2xl font-bold tracking-[0.12em] sm:text-3xl">{g.name.toUpperCase()}</h2>
-          <ul className="mt-3 space-y-1.5 text-[13px] leading-relaxed text-white/70">
+          <ul className="mt-3 space-y-1.5 text-[13px] leading-relaxed text-white/70 lg:mt-2 lg:space-y-1">
             {g.about.map((a) => (
               <li key={a} className="flex gap-2">
                 <span className="mt-[0.55em] h-1 w-1 shrink-0 rounded-full bg-[#d7b45b]" />
@@ -255,6 +263,7 @@ function Detail({ g, onClose, onPlay }: { g: Info; onClose: () => void; onPlay: 
           <button type="button" onClick={onPlay} disabled={g.soon} className="lb-play w-full">
             {g.soon ? "Coming soon" : `Play ${g.name}`}
           </button>
+        </div>
         </div>
       </div>
     </div>,
@@ -369,43 +378,63 @@ export default function Lobby({
     if (got) setFlash(`Daily bonus · +◈ ${fmt(got)}`);
   };
 
-  const hero = (
+  const nameBlock = (
+    <div className="min-w-0">
+      <p className="lb-hero__eyebrow">{hello}</p>
+      <div className="flex min-w-0 items-center gap-2">
+        <h2 className="lb-hero__name truncate">{profile.name || "Welcome"}</h2>
+        <button type="button" onClick={() => setNameOpen(true)} aria-label="Change your name" className="lb-edit">
+          ✎
+        </button>
+      </div>
+    </div>
+  );
+  const levelRow = (
+    <div className="flex min-w-0 items-center gap-2.5">
+      <span className="lb-chip">Level {progression.level}</span>
+      <span className="lb-chip is-vip">VIP · {vip.label}</span>
+      <div className="lb-xp min-w-0 flex-1" title={`${xpInLevel(progression.xp)} / ${xpForNextLevel()} XP`}>
+        <span style={{ width: `${Math.min(100, (xpInLevel(progression.xp) / xpForNextLevel()) * 100)}%` }} />
+      </div>
+    </div>
+  );
+  const bonusKey = bonus?.canClaim ? (
+    <button type="button" onClick={claimBonus} disabled={locked} className="lb-bonus">
+      <span className="lb-bonus__k">Daily bonus</span>
+      <span className="lb-bonus__v">Claim ◈ {fmt(bonus.reward)}</span>
+    </button>
+  ) : (
+    <button type="button" onClick={onOpenRewards} className="lb-bonus is-done">
+      <span className="lb-bonus__k">Daily bonus</span>
+      <span className="lb-bonus__v">{desktop ? "Claimed · see rewards" : "Claimed"}</span>
+    </button>
+  );
+  const continueKey = last ? (
+    <button type="button" onClick={() => play(last)} className={`lb-continue ${desktop ? "" : "is-row"}`}>
+      <span className="lb-continue__k">{inProgress ? "Round in progress" : "Continue"}</span>
+      <span className="lb-continue__v">{last.name} ›</span>
+    </button>
+  ) : null;
+  const hero = desktop ? (
     <section className="lb-hero">
       <div className="min-w-0">
-        <p className="lb-hero__eyebrow">{hello}</p>
-        <div className="flex min-w-0 items-center gap-2">
-          <h2 className="lb-hero__name truncate">{profile.name || "Welcome"}</h2>
-          <button type="button" onClick={() => setNameOpen(true)} aria-label="Change your name" className="lb-edit">
-            ✎
-          </button>
-        </div>
-        <div className="mt-2 flex items-center gap-2.5">
-          <span className="lb-chip">Level {progression.level}</span>
-          <span className="lb-chip is-vip">VIP · {vip.label}</span>
-          <div className="lb-xp min-w-0 flex-1" title={`${xpInLevel(progression.xp)} / ${xpForNextLevel()} XP`}>
-            <span style={{ width: `${Math.min(100, (xpInLevel(progression.xp) / xpForNextLevel()) * 100)}%` }} />
-          </div>
-        </div>
+        {nameBlock}
+        <div className="mt-2">{levelRow}</div>
       </div>
       <div className="lb-hero__side">
-        {bonus?.canClaim ? (
-          <button type="button" onClick={claimBonus} disabled={locked} className="lb-bonus">
-            <span className="lb-bonus__k">Daily bonus</span>
-            <span className="lb-bonus__v">Claim ◈ {fmt(bonus.reward)}</span>
-          </button>
-        ) : (
-          <button type="button" onClick={onOpenRewards} className="lb-bonus is-done">
-            <span className="lb-bonus__k">Daily bonus</span>
-            <span className="lb-bonus__v">Claimed · see rewards</span>
-          </button>
-        )}
-        {last && (
-          <button type="button" onClick={() => play(last)} className="lb-continue">
-            <span className="lb-continue__k">{inProgress ? "Round in progress" : "Continue"}</span>
-            <span className="lb-continue__v">{last.name} ›</span>
-          </button>
-        )}
+        {bonusKey}
+        {continueKey}
       </div>
+    </section>
+  ) : (
+    // Phones: name and bonus on one line, level below, Continue on its own row.
+    <section className="lb-hero !block">
+      <div className="flex items-start justify-between gap-3">
+        {nameBlock}
+        <div className="shrink-0">{bonusKey}</div>
+      </div>
+      <div className="mt-2">{levelRow}</div>
+      {continueKey && <div className="mt-2.5">{continueKey}</div>}
     </section>
   );
 
