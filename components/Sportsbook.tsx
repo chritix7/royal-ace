@@ -9,6 +9,8 @@ import type { Match, Sport } from "../lib/sports/types";
 import { MAX_PAYOUT, MAX_PICKS, SPORT_CHIPS, SPORTS_MIN, useSportsbook, type SportsGame, type Ticket } from "../lib/useSportsbook";
 import { isNarrowScreen, requestFullscreenSettled } from "../lib/fullscreen";
 import { useSession } from "../lib/sessionStore";
+import { sfx } from "../lib/sound";
+import { shareTicket } from "../lib/sports/shareCard";
 
 function useDesktop() {
   const [desktop, setDesktop] = useState(true);
@@ -188,6 +190,87 @@ function Players({ g, m }: { g: SportsGame; m: Match }) {
         </div>
       ))}
       <p className="mt-1 text-[9.5px] leading-relaxed text-white/30">Settled on the official season totals after the match. Refunded if the player does not play.</p>
+    </div>
+  );
+}
+
+/* ───────────── Daily boost and my live matches ───────────── */
+
+function Highlights({ g, sport }: { g: SportsGame; sport: Sport }) {
+  const b = g.boost;
+  const now = g.now || 0;
+  // My matches in play: those with an open pick.
+  const mine = useMemo(() => {
+    const ids = new Set(g.tickets.filter((t) => t.status === "open").flatMap((t) => t.legs.filter((l) => !l.result).map((l) => l.matchId)));
+    return g.matches.filter((m) => ids.has(m.id) && isLive(m));
+  }, [g.tickets, g.matches]);
+  // A goal on one of my matches: gold flash.
+  const prev = useRef(new Map<string, number>());
+  const [flash, setFlash] = useState<Record<string, number>>({});
+  useEffect(() => {
+    const hits: Record<string, number> = {};
+    for (const m of mine) {
+      const tot = (m.score?.h ?? 0) + (m.score?.a ?? 0);
+      const p = prev.current.get(m.id);
+      if (p !== undefined && tot > p) hits[m.id] = Date.now();
+      prev.current.set(m.id, tot);
+    }
+    if (Object.keys(hits).length) {
+      setFlash((f) => ({ ...f, ...hits }));
+      sfx.net();
+    }
+  }, [mine]);
+  const progress = (m: Match) => {
+    const len = m.sport === "football" ? 90 : m.sport === "hockey" ? 60 : /nba/i.test(m.comp.name) ? 48 : 40;
+    const per = m.sport === "football" ? 45 : len / (m.sport === "hockey" ? 3 : 4);
+    const c = m.clock;
+    let e = c?.minute !== undefined ? (m.sport === "football" ? c.minute : (Math.max(1, c.period) - 1) * per + c.minute) : (now - m.kickoff) / 60000 - (m.sport === "football" && now - m.kickoff > 60 * 60000 ? 15 : 0);
+    if (m.status === "break" && c?.period) e = c.period * per;
+    return Math.max(2, Math.min(100, (e / len) * 100));
+  };
+  const showBoost = b && sport === "football";
+  if (!showBoost && !mine.length) return null;
+  const key = b ? `${b.match.id}|boost|${b.pick}` : "";
+  return (
+    <div className="mb-3 space-y-2">
+      {mine.length > 0 && (
+        <div className="sb-mylive" aria-label="My live matches">
+          {mine.map((m) => (
+            <div key={`${m.id}-${flash[m.id] ?? 0}`} className={`sb-live ${flash[m.id] && Date.now() - flash[m.id] < 3000 ? "is-goal" : ""}`}>
+              <div className="sb-live__row">
+                <span className="truncate">{m.home.name}</span>
+                <b>{m.score?.h ?? 0}</b>
+              </div>
+              <div className="sb-live__row">
+                <span className="truncate">{m.away.name}</span>
+                <b>{m.score?.a ?? 0}</b>
+              </div>
+              <div className="mt-0.5 flex items-center gap-1 text-[9.5px] font-bold text-[#ff8080]">
+                <i className="sb-dot" />
+                {m.clock?.label ?? "Live"}
+              </div>
+              <div className="sb-live__bar">
+                <i style={{ width: `${progress(m)}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {showBoost && b && (
+        <div className="sb-boost">
+          <span className="sb-boost__tag">DAILY BOOST</span>
+          <div className="sb-boost__body">
+            <p className="sb-boost__title">{b.label} to win</p>
+            <p className="sb-boost__sub">
+              {b.match.home.name} – {b.match.away.name} · {b.match.comp.name} · {when(b.match, now || Date.now())}
+            </p>
+          </div>
+          <button type="button" onClick={() => g.toggle(b.match, "boost", b.pick, `${b.label} to win · boost`, "Daily boost")} className={`sb-boost__btn ${g.inSlip.has(key) ? "is-on" : ""}`} aria-pressed={g.inSlip.has(key)}>
+            <s>{fmtOdds(b.was)}</s>
+            <b>{fmtOdds(b.odds)}</b>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -387,6 +470,11 @@ function TicketCard({ g, t }: { g: SportsGame; t: Ticket }) {
           <span className={t.payout > t.stake ? "font-bold text-[#f0d38b]" : "text-white/40"}>{t.payout ? `◈ ${money(t.payout)}` : "—"}</span>
         )}
       </div>
+      {t.status !== "lost" && t.status !== "void" && (
+        <button type="button" onClick={() => shareTicket(t)} className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#e5c779]/70 hover:text-[#f5d778]">
+          Share ticket ↗
+        </button>
+      )}
     </div>
   );
 }
@@ -582,6 +670,7 @@ export default function Sportsbook({ active, focus = false, onFocusChange }: { a
               {viewTabs}
               {demoNote}
               <div className="sb-list min-h-0 flex-1 overflow-y-auto pr-1 [scrollbar-width:thin]">
+                <Highlights g={g} sport={sport} />
                 <MatchList g={g} sport={sport} view={view} comp={comp} lite={false} />
               </div>
             </div>
@@ -617,6 +706,7 @@ export default function Sportsbook({ active, focus = false, onFocusChange }: { a
           <div className="flex h-5 items-center justify-center">{messageLine}</div>
           {demoNote}
           <div className="sb-list min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <Highlights g={g} sport={sport} />
             <MatchList g={g} sport={sport} view={view} comp="all" lite />
           </div>
         </div>

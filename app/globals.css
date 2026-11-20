@@ -2699,3 +2699,43 @@ html.rl-wheel-solid body *:not(.rl-wheel-overlay, .rl-wheel-overlay *, .rl-over-
 @keyframes pe-flash { 0% { opacity: 0; } 8% { opacity: 1; } 30% { opacity: 0; } 55% { opacity: 0.85; } 75%, 100% { opacity: 0; } }
 .pe-scene.is-slow::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 3; box-shadow: inset 0 0 120px 30px rgba(0, 0, 0, 0.75); animation: pe-fade-in 0.3s ease-out both; }
 @keyframes pe-fade-in { from { opacity: 0; } }
+
+/* Casino-wide toasts (sports tickets settled in the background). */
+.ga-toasts { position: fixed; left: 50%; top: max(0.75rem, calc(env(safe-area-inset-top) + 0.5rem)); z-index: 95; display: flex; width: min(26rem, calc(100vw - 2rem)); transform: translateX(-50%); flex-direction: column; gap: 0.4rem; pointer-events: none; }
+.ga-toast { pointer-events: auto; display: flex; align-items: center; gap: 0.65rem; border-radius: 14px; border: 1px solid rgba(240, 211, 139, 0.45); background: linear-gradient(180deg, rgba(24, 24, 27, 0.97), rgba(8, 8, 9, 0.97)); padding: 0.55rem 0.8rem; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55); animation: ga-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.ga-toast.is-loss { border-color: rgba(255, 255, 255, 0.14); }
+.ga-toast.is-big { border-color: #f0d38b; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), 0 0 26px rgba(240, 211, 139, 0.3); }
+.ga-toast__icon { display: flex; height: 1.9rem; width: 1.9rem; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 50%; background: linear-gradient(180deg, #f3d98f, #b8862f); font-weight: 900; color: #141210; }
+.ga-toast.is-loss .ga-toast__icon { background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.55); }
+.ga-toast.is-info .ga-toast__icon { background: rgba(255, 255, 255, 0.12); color: #efe2bd; }
+.ga-toast__title { display: block; font-size: 11px; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; color: #f5d778; }
+.ga-toast.is-loss .ga-toast__title { color: rgba(255, 255, 255, 0.7); }
+.ga-toast__text { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: rgba(255, 255, 255, 0.5); }
+.ga-toast__amount { flex-shrink: 0; font-family: var(--font-display), Georgia, serif; font-size: 15px; font-weight: 700; color: #f5d778; }
+@keyframes ga-in { from { opacity: 0; transform: translateY(-10px) scale(0.97); } }
+
+/* Sportsbook: daily boost, my live matches. */
+.sb-boost { position: relative; display: flex; align-items: center; gap: 0.75rem; overflow: hidden; border-radius: 14px; border: 1px solid transparent; padding: 0.55rem 0.7rem;
+  background: linear-gradient(100deg, rgba(36, 30, 18, 0.98), rgba(14, 13, 11, 0.98) 60%) padding-box, linear-gradient(100deg, #f8e3a3, #8f6a26 50%, #e5c779) border-box; }
+.sb-boost__tag { flex-shrink: 0; border-radius: 9999px; background: linear-gradient(180deg, #f6dd94, #c79b40); padding: 0.18rem 0.55rem; font-size: 9px; font-weight: 900; letter-spacing: 0.16em; color: #1a1206; }
+.sb-boost__body { min-width: 0; flex: 1; }
+.sb-boost__title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; font-weight: 800; color: #f6e7bd; }
+.sb-boost__sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10.5px; color: rgba(255, 255, 255, 0.45); }
+.sb-boost__btn { display: flex; flex-shrink: 0; align-items: baseline; gap: 0.4rem; border-radius: 10px; border: 1px solid rgba(240, 211, 139, 0.7); background: rgba(0, 0, 0, 0.4); padding: 0.4rem 0.7rem; }
+.sb-boost__btn s { font-size: 11px; color: rgba(255, 255, 255, 0.35); }
+.sb-boost__btn b { font-size: 16px; font-weight: 900; color: #f5d778; font-variant-numeric: tabular-nums; }
+.sb-boost__btn.is-on { background: linear-gradient(180deg, #f3d98f, #c89a3f 70%, #a77b2c); }
+.sb-boost__btn.is-on b, .sb-boost__btn.is-on s { color: #141210; }
+.sb-boost__btn:disabled { opacity: 0.45; }
+.sb-mylive { display: flex; gap: 0.4rem; overflow-x: auto; scrollbar-width: none; }
+.sb-live { flex: 0 0 auto; min-width: 11rem; border-radius: 11px; border: 1px solid rgba(255, 90, 90, 0.3); background: rgba(0, 0, 0, 0.35); padding: 0.35rem 0.55rem; text-align: left; }
+.sb-live__row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: 11px; font-weight: 700; color: #ece3c9; }
+.sb-live__row b { font-size: 13px; color: #f5d778; font-variant-numeric: tabular-nums; }
+.sb-live__bar { margin-top: 0.3rem; height: 3px; overflow: hidden; border-radius: 9999px; background: rgba(255, 255, 255, 0.08); }
+.sb-live__bar > i { display: block; height: 100%; background: linear-gradient(90deg, #ff6b6b, #f0d38b); transition: width 1s linear; }
+.sb-live.is-goal { animation: sb-goal 2.6s ease-out; }
+@keyframes sb-goal { 0%, 30% { border-color: #f0d38b; box-shadow: 0 0 22px rgba(240, 211, 139, 0.55); background: rgba(240, 211, 139, 0.18); } 100% { box-shadow: none; } }
+.m-lite .sb-boost { padding: 0.45rem 0.55rem; gap: 0.5rem; }
+.m-lite .sb-boost__tag { display: none; }
+.m-lite .sb-live { min-width: 9.5rem; }
+.m-lite .sb-live.is-goal { animation-duration: 1.6s; }

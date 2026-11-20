@@ -20,6 +20,7 @@ import { dailyStatus, dailyStore, useDaily } from "../lib/daily";
 import { statsStore, useStats } from "../lib/statsStore";
 import { useBalance, useLocked, wallet } from "../lib/wallet";
 import AchievementToasts from "../components/AchievementToasts";
+import GameToasts from "../components/GameToasts";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { progressionStore, useProgression } from "../lib/progression";
 import { weeklyStore } from "../lib/weekly";
@@ -434,6 +435,7 @@ export default function Home() {
         onClose={() => setAchievementsOpen(false)}
       />
       <AchievementToasts />
+      <GameToasts />
       <StatsPanel open={statsOpen} onClose={() => setStatsOpen(false)} />
       <HotkeysOverlay />
     </main>

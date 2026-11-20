@@ -422,6 +422,29 @@ export function useSportsbook(active: boolean) {
   );
   const playerOf = (m: Match, id: string) => (scorers[m.comp.id]?.players ?? []).find((p) => p.id === id);
   const teamAvg = (m: Match, teamId: string) => formsOf(m)?.[teamId]?.scored;
+  // ---- Daily boost: one big football match, the favourite at a better price.
+  const boost = useMemo(() => {
+    const t = now || 0;
+    if (!t) return null;
+    const PRI = ["CL", "PL", "PD", "SA", "BL1", "FL1", "EC", "WC", "PPL", "DED", "ELC", "BSA"];
+    const cands = matches.filter((m) => m.sport === "football" && m.status === "pre" && m.kickoff > t + 10 * 60000 && m.kickoff < t + 36 * 3600000);
+    if (!cands.length) return null;
+    const best = Math.min(...cands.map((m) => (PRI.indexOf(m.comp.id) + 1 || 99)));
+    const pool = cands.filter((m) => (PRI.indexOf(m.comp.id) + 1 || 99) === best).sort((a, b) => a.id.localeCompare(b.id));
+    const seed = [...day(t)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7);
+    const m = pool[Math.abs(seed) % pool.length];
+    const model = modelOf(m, formsOf(m), t);
+    if (!model) return null;
+    const ph = probOf(model, m.sport, "1x2", "1") ?? 0;
+    const pa = probOf(model, m.sport, "1x2", "2") ?? 0;
+    const pick = ph >= pa ? "1" : "2";
+    const was = priceOf(pick === "1" ? ph : pa, "1x2");
+    if (!was) return null;
+    const odds = Math.round(was * 1.3 * 20) / 20;
+    return { match: m, pick, label: pick === "1" ? m.home.name : m.away.name, was, odds };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matches, forms, now ? day(now) : "", Math.floor((now || 0) / 600000)]);
+
   /** Fair chance of any pick, team or player market. */
   const chanceOf = (m: Match, market: string, pick: string, t: number): number | null => {
     const model = modelOf(m, formsOf(m), t);
@@ -440,10 +463,11 @@ export function useSportsbook(active: boolean) {
     (m: Match, market: string, pick: string) => {
       const t = now || Date.now();
       if (!isOpen(m, t)) return null;
+      if (market === "boost") return boost && boost.match.id === m.id && boost.pick === pick && m.status === "pre" && t < m.kickoff ? boost.odds : null;
       return priceOf(chanceOf(m, market, pick, t), market);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [formsOf, now, scorers],
+    [formsOf, now, scorers, boost],
   );
 
   // ---- Settlement: as soon as the feeds carry the results.
@@ -495,6 +519,19 @@ export function useSportsbook(active: boolean) {
         if (tk.payout >= tk.stake * 10) track("betBigWin");
       }
     }
+    for (const d of done)
+      window.dispatchEvent(
+        new CustomEvent("royal-ace:toast", {
+          detail: {
+            kind: d.status === "won" ? "win" : d.status === "void" ? "info" : "loss",
+            title: d.status === "won" ? (d.legs.length > 1 ? `Combo won · ${d.legs.length} picks` : "Bet won") : d.status === "void" ? "Ticket void · stake returned" : "Ticket lost",
+            text: d.legs.length === 1 ? d.legs[0].matchLabel : `×${d.odds.toFixed(2)}`,
+            amount: d.payout,
+            big: d.status === "won" && (d.payout >= d.stake * 10 || d.payout >= 100000),
+            game: "sports",
+          },
+        }),
+      );
     if (done.some((d) => d.status === "won")) {
       sfx.win();
       haptic(HAPTIC.win);
@@ -656,6 +693,7 @@ export function useSportsbook(active: boolean) {
     refused,
     modelFor,
     oddsNow,
+    boost,
     playersFor,
     loadScorers,
     slip: slipNow,

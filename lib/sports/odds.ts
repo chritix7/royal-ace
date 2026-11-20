@@ -157,7 +157,9 @@ export function marketsOf(m: Match, model: Model | null): Market[] {
 
 /** Fair probability that a pick wins, from the model (null: cannot price). */
 export function probOf(model: Model, sport: Sport, market: string, pick: string): number | null {
-  const [kind, lineS] = market.split(":");
+  const [raw, lineS] = market.split(":");
+  // The daily boost is a match result at a better price.
+  const kind = raw === "boost" ? "1x2" : raw;
   const line = lineS !== undefined ? +lineS : 0;
   if (model.kind === "points") {
     const lead = model.now.h - model.now.a + model.mu;
@@ -216,6 +218,7 @@ function wins(s: Score, kind: string, line: number, pick: string): boolean {
   const res = s.h > s.a ? "1" : s.h < s.a ? "2" : "X";
   switch (kind) {
     case "1x2":
+    case "boost":
       return res === pick;
     case "ml":
       return res === pick;
