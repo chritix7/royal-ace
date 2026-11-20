@@ -71,3 +71,10 @@ export const IconDice = ({ className = "h-4 w-4" }: { className?: string }) => (
     <circle cx="18" cy="9.6" r="0.9" fill="currentColor" stroke="none" />
   </svg>
 );
+export const IconHome = ({ className = "h-4 w-4" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden="true">
+    <path d="M3.5 10.5 12 4l8.5 6.5" />
+    <path d="M5.5 9v10.5h13V9" />
+    <path d="M10 19.5v-5.5h4v5.5" />
+  </svg>
+);

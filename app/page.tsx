@@ -22,7 +22,9 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import { progressionStore, useProgression } from "../lib/progression";
 import { weeklyStore } from "../lib/weekly";
 import ChipFly from "../components/ChipFly";
-import { IconDice, IconFocus, IconPoker, IconRoulette, IconSlot, IconSpade } from "../components/UiIcons";
+import { IconDice, IconFocus, IconHome, IconPoker, IconRoulette, IconSlot, IconSpade } from "../components/UiIcons";
+import Lobby from "../components/Lobby";
+import { profileStore } from "../lib/profile";
 import HotkeysOverlay from "../components/HotkeysOverlay";
 import { useBalanceFlash } from "../hooks/useBalanceFlash";
 import { sessionStore } from "../lib/sessionStore";
@@ -72,12 +74,50 @@ function HeaderCard({
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>("blackjack");
+  // The lobby is the home screen: games are chosen there, and the Lobby
+  // key brings you back to it. Each game has its own address (#craps…).
+  const [inLobby, setInLobby] = useState(true);
+  const isTab = (x: string): x is Tab => TABS.some((t) => t.id === x);
+  const openGame = (id: Tab, replace = false) => {
+    setTab(id);
+    setInLobby(false);
+    profileStore.setLastGame(id);
+    try {
+      if (replace) history.replaceState({ game: id }, "", `#${id}`);
+      else history.pushState({ game: id }, "", `#${id}`);
+    } catch {}
+  };
+  const goLobby = () => {
+    setFocusMode(false);
+    setInLobby(true);
+    try {
+      history.replaceState(null, "", location.pathname + location.search);
+    } catch {}
+  };
+  useEffect(() => {
+    profileStore.hydrate();
+    const fromHash = location.hash.slice(1);
+    if (isTab(fromHash)) openGame(fromHash, true);
+    const onPop = () => {
+      const h = location.hash.slice(1);
+      if (isTab(h)) {
+        setTab(h);
+        setInLobby(false);
+      } else {
+        setFocusMode(false);
+        setInLobby(true);
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // Games are loaded the first time they are opened, then kept (a hand or
   // a spin in progress is never lost). Phones only run what was played.
-  const [visited, setVisited] = useState<Set<Tab>>(() => new Set<Tab>(["blackjack"]));
+  const [visited, setVisited] = useState<Set<Tab>>(() => new Set<Tab>());
   useEffect(() => {
-    setVisited((v) => (v.has(tab) ? v : new Set(v).add(tab)));
-  }, [tab]);
+    if (!inLobby) setVisited((v) => (v.has(tab) ? v : new Set(v).add(tab)));
+  }, [tab, inLobby]);
   // A game with a round saved mid-play (reload) is loaded straight away,
   // so it can settle or resume it.
   useEffect(() => {
@@ -104,10 +144,10 @@ export default function Home() {
   const [focusMode, setFocusMode] = useState(false);
   // Closing animations for every panel, dialog and menu (blur-out).
   useEffect(() => installExitAnimations(), []);
-  // Clear focus whenever the user switches game.
+  // Clear focus whenever the user switches game or goes to the lobby.
   useEffect(() => {
     setFocusMode(false);
-  }, [tab]);
+  }, [tab, inLobby]);
 
   // F-key toggle for Focus mode — the blackjack hook broadcasts a
   // CustomEvent when the user presses F; we listen here because the
@@ -124,12 +164,20 @@ export default function Home() {
   useEffect(() => {
     const onGoto = (e: Event) => {
       const id = (e as CustomEvent<string>).detail;
-      if (TABS.some((t) => t.id === id)) setTab(id as Tab);
+      if (TABS.some((t) => t.id === id)) openGame(id as Tab, true);
     };
     window.addEventListener("royal-ace:goto-tab", onGoto);
     return () => window.removeEventListener("royal-ace:goto-tab", onGoto);
   }, []);
   const balance = useBalance();
+  const [lgUp, setLgUp] = useState(true);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setLgUp(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   // Live figures for the header cards.
   const stats = useStats();
@@ -245,36 +293,36 @@ export default function Home() {
 </header>
       <section className="mx-auto max-w-screen-2xl px-4 pb-3 pt-2 sm:px-8 sm:pt-3">
         <div className="mb-2 flex min-w-0 items-center gap-2 sm:mb-3 sm:gap-3 lg:gap-2">
-  <div className="ui-seg shrink-0" role="tablist" aria-label="Games">
-    {TABS.map((t) => {
-      const blocked = locked && tab !== t.id;
-      const selected = tab === t.id;
-      return (
-        <button
-          key={t.id}
-          type="button"
-          role="tab"
-          aria-label={t.aria}
-          aria-selected={selected}
-          disabled={blocked}
-          onClick={() => setTab(t.id)}
-          className={`ui-seg__btn ${selected ? "is-on" : ""}`}
-        >
-          <t.Icon className="h-[18px] w-[18px] shrink-0" />
-          <span className="hidden 2xl:inline">{t.label}</span>
-        </button>
-      );
-    })}
-  </div>
-
-  <span
-    role="status"
-    className={`min-w-0 flex-1 truncate text-[10px] text-white/40 max-[399px]:hidden sm:text-xs ${
-      locked && tab !== "slots" ? "visible" : "invisible"
-    }`}
-  >
-    Round in progress…
-  </span>
+  {inLobby ? (
+    <p className="lb-title min-w-0 flex-1 truncate">Choose your game</p>
+  ) : (
+    <>
+      <button
+        type="button"
+        onClick={goLobby}
+        disabled={locked}
+        title={locked ? "Finish the round in progress first" : "Back to the lobby"}
+        className="ui-pill ui-pill--lobby shrink-0"
+      >
+        <IconHome className="h-[17px] w-[17px]" />
+        <span>Lobby</span>
+      </button>
+      <span className="ui-game-name hidden min-w-0 truncate sm:inline-flex">
+        {(() => {
+          const T = TABS.find((t) => t.id === tab)!;
+          return (
+            <>
+              <T.Icon className="h-4 w-4 shrink-0" />
+              {T.label}
+            </>
+          );
+        })()}
+      </span>
+      <span role="status" className={`min-w-0 flex-1 truncate text-[10px] text-white/40 max-[399px]:hidden sm:text-xs ${locked && tab !== "slots" ? "visible" : "invisible"}`}>
+        Round in progress…
+      </span>
+    </>
+  )}
 
   <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
     <AudioControls />
@@ -282,7 +330,7 @@ export default function Home() {
     {/* Focus (immersive) toggle — only meaningful on the blackjack tab.
         Lives in the top toolbar so it shares a row with the game tabs
         and the audio controls. */}
-    {(
+    {!inLobby && (
       <button
         type="button"
         onClick={() => setFocusMode((v) => !v)}
@@ -298,50 +346,61 @@ export default function Home() {
 </div>
 
         {/* Les deux jeux restent montés : on ne perd pas une manche en changeant d'onglet. */}
-        <div className={tab === "blackjack" ? "" : "hidden"}>
+        {inLobby && (
+          <div className="h-[calc(100dvh_-_10.15rem_-_env(safe-area-inset-top))] min-h-[480px] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px]">
+            <Lobby
+              desktop={lgUp}
+              onPlay={(id) => openGame(id)}
+              onOpenChallenges={() => setAchievementsOpen(true)}
+              onOpenRewards={() => setRewardsOpen(true)}
+              inProgress={locked ? tab : null}
+            />
+          </div>
+        )}
+        <div className={tab === "blackjack" && !inLobby ? "" : "hidden"}>
           {visited.has("blackjack") && (
           <ErrorBoundary label="Blackjack">
             <Blackjack
-              active={tab === "blackjack"}
-              focusMode={tab === "blackjack" && focusMode}
+              active={tab === "blackjack" && !inLobby}
+              focusMode={tab === "blackjack" && !inLobby && focusMode}
               onFocusChange={setFocusMode}
             />
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "slots" ? "" : "hidden"}>
+        <div className={tab === "slots" && !inLobby ? "" : "hidden"}>
           {visited.has("slots") && (
           <ErrorBoundary label="Slots">
             <Slots
-              active={tab === "slots"}
-              focus={tab === "slots" && focusMode}
+              active={tab === "slots" && !inLobby}
+              focus={tab === "slots" && !inLobby && focusMode}
               onFocusChange={setFocusMode}
             />
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "roulette" ? "" : "hidden"}>
+        <div className={tab === "roulette" && !inLobby ? "" : "hidden"}>
           {visited.has("roulette") && (
           <ErrorBoundary label="Roulette">
             <Roulette
-              active={tab === "roulette"}
-              focus={tab === "roulette" && focusMode}
+              active={tab === "roulette" && !inLobby}
+              focus={tab === "roulette" && !inLobby && focusMode}
               onFocusChange={setFocusMode}
             />
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "poker" ? "" : "hidden"}>
+        <div className={tab === "poker" && !inLobby ? "" : "hidden"}>
           {visited.has("poker") && (
           <ErrorBoundary label="Casino Hold'em">
-            <Poker active={tab === "poker"} focus={tab === "poker" && focusMode} onFocusChange={setFocusMode} />
+            <Poker active={tab === "poker" && !inLobby} focus={tab === "poker" && !inLobby && focusMode} onFocusChange={setFocusMode} />
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "craps" ? "" : "hidden"}>
+        <div className={tab === "craps" && !inLobby ? "" : "hidden"}>
           {visited.has("craps") && (
           <ErrorBoundary label="Craps">
-            <Craps active={tab === "craps"} focus={tab === "craps" && focusMode} onFocusChange={setFocusMode} />
+            <Craps active={tab === "craps" && !inLobby} focus={tab === "craps" && !inLobby && focusMode} onFocusChange={setFocusMode} />
           </ErrorBoundary>
           )}
         </div>
