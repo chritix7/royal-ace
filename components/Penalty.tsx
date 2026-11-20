@@ -290,7 +290,7 @@ function LevelPick({ g }: { g: PenaltyGame }) {
       {LEVELS.map((l) => (
         <button key={l.id} type="button" role="radio" aria-checked={g.level === l.id} disabled={Boolean(g.round)} onClick={() => g.setLevel(l.id as Level)} className={`pe-level ${g.level === l.id ? "is-on" : ""}`}>
           <span>{l.label}</span>
-          <small>{Math.round(l.goal * 100)}% · ×{ladderOf(l.id)[MAX_SHOTS - 1]}</small>
+          <small className="whitespace-nowrap"><span className="hidden 2xl:inline">{Math.round(l.goal * 100)}% · </span>×{ladderOf(l.id)[MAX_SHOTS - 1]}</small>
         </button>
       ))}
     </div>

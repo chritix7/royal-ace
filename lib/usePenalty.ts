@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { HAPTIC, haptic } from "./haptics";
 import { sfx } from "./sound";
+import { ambience } from "./ambience";
 import { track } from "./events";
 import { sessionStore } from "./sessionStore";
 import { useBalance, wallet } from "./wallet";
@@ -225,6 +226,7 @@ export function usePenalty(active: boolean, shotMs: number, slowMo = false) {
       }
       bump({ streak: savedRef.current.records.streak + 1 });
       sfx.net();
+      ambience.cheer();
       window.setTimeout(() => sfx.win(), 90);
       haptic(HAPTIC.win);
       if (g >= MAX_SHOTS) {

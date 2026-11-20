@@ -10,6 +10,7 @@ import { MAX_PAYOUT, MAX_PICKS, SPORT_CHIPS, SPORTS_MIN, useSportsbook, type Spo
 import { isNarrowScreen, requestFullscreenSettled } from "../lib/fullscreen";
 import { useSession } from "../lib/sessionStore";
 import { sfx } from "../lib/sound";
+import { ambience } from "../lib/ambience";
 import { shareTicket } from "../lib/sports/shareCard";
 
 function useDesktop() {
@@ -218,6 +219,7 @@ function Highlights({ g, sport }: { g: SportsGame; sport: Sport }) {
     if (Object.keys(hits).length) {
       setFlash((f) => ({ ...f, ...hits }));
       sfx.net();
+      ambience.cheer();
     }
   }, [mine]);
   const progress = (m: Match) => {

@@ -21,6 +21,7 @@ import { statsStore, useStats } from "../lib/statsStore";
 import { useBalance, useLocked, wallet } from "../lib/wallet";
 import AchievementToasts from "../components/AchievementToasts";
 import GameToasts from "../components/GameToasts";
+import { ambience } from "../lib/ambience";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { progressionStore, useProgression } from "../lib/progression";
 import { weeklyStore } from "../lib/weekly";
@@ -142,6 +143,10 @@ export default function Home() {
     }
     if (add.length) setVisited((v) => new Set([...v, ...add]));
   }, []);
+  // Ambience follows the game on screen (casino floor, stadium…).
+  useEffect(() => {
+    ambience.setScene(inLobby ? "lobby" : tab);
+  }, [inLobby, tab]);
   const [rewardsOpen, setRewardsOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
