@@ -2,10 +2,10 @@
  * Penalty shoot-out, cash-out style.
  *
  * - The player stakes a bet and takes up to five penalties.
- * - Each shot is a goal one time in two (the keeper guesses your corner
- *   half the time), drawn with crypto randomness.
- * - After k goals the round is worth bet × 0.96 × 2^k: 1.92×, 3.84×,
- *   7.68×, 15.36×, 30.72×. A save loses the bet. The player may cash out
+ * - Each shot beats the keeper with a fixed chance (Rookie 62%, Pro 50%,
+ *   Legend 40%), drawn with crypto randomness.
+ * - After k goals the round is worth bet × 0.96 / p^k (Pro: 1.92×, 3.84×,
+ *   7.68×, 15.36×, 30.72×; Legend up to 93.75×). A save loses the bet. The player may cash out
  *   after any goal; the fifth goal cashes out on its own.
  * - Return to player: 96% whatever the moment you cash out.
  */
@@ -16,10 +16,20 @@ export const ZONE_LABEL: Record<Zone, string> = { tl: "Top left", tr: "Top right
 
 export const MAX_SHOTS = 5;
 export const RTP = 0.96;
+
+/** Three keepers: the better he is, the higher the ladder climbs. Same 96% return. */
+export type Level = "easy" | "normal" | "legend";
+export const LEVELS: { id: Level; label: string; short: string; goal: number }[] = [
+  { id: "easy", label: "Rookie", short: "Rookie", goal: 0.62 },
+  { id: "normal", label: "Pro", short: "Pro", goal: 0.5 },
+  { id: "legend", label: "Legend", short: "Legend", goal: 0.4 },
+];
+export const goalChance = (level: Level = "normal") => LEVELS.find((l) => l.id === level)?.goal ?? 0.5;
 export const GOAL_CHANCE = 0.5;
-/** Multiplier after k goals (k ≥ 1). */
-export const multiplierAt = (k: number) => (k <= 0 ? 0 : Math.round(RTP * 2 ** k * 100) / 100);
-export const LADDER = Array.from({ length: MAX_SHOTS }, (_, i) => multiplierAt(i + 1));
+/** Multiplier after k goals (k ≥ 1) against a keeper level. */
+export const multiplierAt = (k: number, level: Level = "normal") => (k <= 0 ? 0 : Math.round((RTP / goalChance(level) ** k) * 100) / 100);
+export const ladderOf = (level: Level = "normal") => Array.from({ length: MAX_SHOTS }, (_, i) => multiplierAt(i + 1, level));
+export const LADDER = ladderOf("normal");
 
 export const MIN_BET = 10;
 export const MAX_BET = 100000;
@@ -37,12 +47,12 @@ function fair(): number {
 }
 
 /** Takes a shot at `aim`: a goal or a save, and where the keeper dives. */
-export function shoot(aim: Zone): { goal: boolean; dive: Zone } {
-  const goal = fair() >= 1 - GOAL_CHANCE;
+export function shoot(aim: Zone, level: Level = "normal"): { goal: boolean; dive: Zone } {
+  const goal = fair() >= 1 - goalChance(level);
   if (!goal) return { goal, dive: aim };
   const others = ZONES.filter((z) => z !== aim);
   return { goal, dive: others[Math.floor(fair() * others.length) % others.length] };
 }
 
 /** Chips paid when cashing out after `goals` goals. */
-export const payout = (bet: number, goals: number) => Math.floor(bet * multiplierAt(goals));
+export const payout = (bet: number, goals: number, level: Level = "normal") => Math.floor(bet * multiplierAt(goals, level));

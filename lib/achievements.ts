@@ -140,6 +140,7 @@ const POOL: Record<GameId, { play: Def[]; feat: Def[] }> = {
       { id: "pe-cash15", title: "Cash out 15 times", key: "penaltyCashout", mode: "count", goal: 15, reward: 15000 },
       { id: "pe-goals60", title: "Score 60 penalties", key: "penaltyGoal", mode: "count", goal: 60, reward: 16000 },
       { id: "pe-big1", title: "Cash out after 4 goals or more", key: "penaltyBigWin", mode: "count", goal: 1, reward: 25000 },
+      { id: "pe-perfect", title: "Score 5 out of 5", key: "penaltyPerfect", mode: "count", goal: 1, reward: 35000 },
     ],
   },
   sports: {

@@ -6,7 +6,7 @@ import { sfx } from "./sound";
 import { track } from "./events";
 import { sessionStore } from "./sessionStore";
 import { useBalance, wallet } from "./wallet";
-import { MAX_BET, MAX_SHOTS, MIN_BET, PENALTY_CHIPS, multiplierAt, payout, shoot, type Zone } from "./penalty";
+import { MAX_BET, MAX_SHOTS, MIN_BET, PENALTY_CHIPS, multiplierAt, payout, shoot, type Level, type Zone } from "./penalty";
 
 /**
  * Penalty at the Royal Ace: the bet leaves the credit at kick-off, every
@@ -17,12 +17,14 @@ import { MAX_BET, MAX_SHOTS, MIN_BET, PENALTY_CHIPS, multiplierAt, payout, shoot
 
 export type PenaltyPhase = "idle" | "aim" | "shooting" | "goal" | "saved" | "cashed";
 export type ShotRecord = { aim: Zone; dive: Zone; goal: boolean };
-export type RoundRecord = { id: number; at: number; bet: number; goals: number; won: number; cashed: boolean };
-type Round = { id: number; bet: number; shots: ShotRecord[]; inAir: ShotRecord | null };
-type Saved = { chip: number; bet: number; history: RoundRecord[]; round: Round | null; roundId: number };
+export type RoundRecord = { id: number; at: number; bet: number; goals: number; won: number; cashed: boolean; level?: Level };
+type Round = { id: number; bet: number; shots: ShotRecord[]; inAir: ShotRecord | null; level?: Level };
+export type Records = { streak: number; bestStreak: number; bestCash: number; perfects: number };
+type Saved = { chip: number; bet: number; history: RoundRecord[]; round: Round | null; roundId: number; level: Level; records: Records };
 const KEY = "royalace:penalty";
 const HISTORY_MAX = 40;
-const EMPTY: Saved = { chip: 100, bet: 100, history: [], round: null, roundId: 0 };
+const NO_RECORDS: Records = { streak: 0, bestStreak: 0, bestCash: 0, perfects: 0 };
+const EMPTY: Saved = { chip: 100, bet: 100, history: [], round: null, roundId: 0, level: "normal", records: NO_RECORDS };
 
 function load(): Saved {
   try {
@@ -35,6 +37,8 @@ function load(): Saved {
       history: Array.isArray(s.history) ? s.history.slice(-HISTORY_MAX) : [],
       round: s.round ?? null,
       roundId: s.roundId ?? 0,
+      level: s.level === "easy" || s.level === "legend" ? s.level : "normal",
+      records: { ...NO_RECORDS, ...(s.records ?? {}) },
     };
   } catch {
     return { ...EMPTY };
@@ -46,7 +50,7 @@ function save(s: Saved) {
   } catch {}
 }
 
-export function usePenalty(active: boolean, shotMs: number) {
+export function usePenalty(active: boolean, shotMs: number, slowMo = false) {
   const balance = useBalance();
   const [phase, setPhase] = useState<PenaltyPhase>("idle");
   const [bet, setBetState] = useState(EMPTY.bet);
@@ -58,6 +62,9 @@ export function usePenalty(active: boolean, shotMs: number) {
   const [result, setResult] = useState<{ won: number; goals: number; cashed: boolean } | null>(null);
   const [message, setMessage] = useState("Set your bet and kick off");
   const [refused, setRefused] = useState(0);
+  const [level, setLevelState] = useState<Level>("normal");
+  const [records, setRecords] = useState<Records>(NO_RECORDS);
+  const [shotTime, setShotTime] = useState(shotMs);
   const savedRef = useRef<Saved>({ ...EMPTY });
   const persist = (patch: Partial<Saved>) => {
     savedRef.current = { ...savedRef.current, ...patch };
@@ -71,14 +78,25 @@ export function usePenalty(active: boolean, shotMs: number) {
   };
 
   const goals = round ? round.shots.filter((s) => s.goal).length : 0;
+  const lv: Level = round?.level ?? level;
+  const bump = (patch: Partial<Records>) => {
+    const next = { ...savedRef.current.records, ...patch };
+    next.bestStreak = Math.max(next.bestStreak, next.streak);
+    persist({ records: next });
+    setRecords(next);
+  };
 
   // ---- End of a round
   const finish = useCallback((r: Round, cashed: boolean, quiet = false) => {
     const g = r.shots.filter((s) => s.goal).length;
-    const won = cashed ? payout(r.bet, g) : 0;
+    const won = cashed ? payout(r.bet, g, r.level) : 0;
     if (won) wallet.add(won);
     wallet.setLocked(false);
-    const rec: RoundRecord = { id: r.id, at: Date.now(), bet: r.bet, goals: g, won, cashed };
+    const rec: RoundRecord = { id: r.id, at: Date.now(), bet: r.bet, goals: g, won, cashed, level: r.level };
+    const rc = savedRef.current.records;
+    const nextRec: Records = { ...rc, bestCash: Math.max(rc.bestCash, won), perfects: rc.perfects + (g >= MAX_SHOTS ? 1 : 0) };
+    persist({ records: nextRec });
+    setRecords(nextRec);
     const nextHistory = [...savedRef.current.history, rec].slice(-HISTORY_MAX);
     persist({ round: null, history: nextHistory });
     setHistory(nextHistory);
@@ -91,6 +109,7 @@ export function usePenalty(active: boolean, shotMs: number) {
         if (g > 0) track("penaltyGoal", g);
         if (cashed && won > r.bet) track("penaltyCashout");
         if (cashed && g >= 4) track("penaltyBigWin");
+        if (g >= MAX_SHOTS) track("penaltyPerfect");
       },
       quiet ? 0 : 600,
     );
@@ -104,6 +123,8 @@ export function usePenalty(active: boolean, shotMs: number) {
     setChipState(s.chip);
     setBetState(s.bet);
     setHistory(s.history);
+    setLevelState(s.level);
+    setRecords(s.records);
     const r = s.round;
     if (!r) return;
     // A shot in the air when the page closed: it counts as taken.
@@ -126,7 +147,7 @@ export function usePenalty(active: boolean, shotMs: number) {
     setRound(fixed);
     wallet.setLocked(true);
     setPhase("aim");
-    setMessage(g ? `×${multiplierAt(g)} · cash out or shoot` : "Pick your corner");
+    setMessage(g ? `×${multiplierAt(g, fixed.level)} · cash out or shoot` : "Pick your corner");
     window.setTimeout(() => window.dispatchEvent(new CustomEvent("royal-ace:goto-tab", { detail: "penalty" })), 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -145,6 +166,12 @@ export function usePenalty(active: boolean, shotMs: number) {
     persist({ chip: v });
     if (!round) setBet(v);
   };
+  const setLevel = (l: Level) => {
+    if (round) return;
+    setLevelState(l);
+    persist({ level: l });
+    setResult(null);
+  };
   const double = () => setBet(bet * 2);
   const half = () => setBet(Math.floor(bet / 2));
 
@@ -153,7 +180,7 @@ export function usePenalty(active: boolean, shotMs: number) {
     if (round) return false;
     if (bet > wallet.getBalance()) return refuse("Not enough chips");
     const id = savedRef.current.roundId + 1;
-    const r: Round = { id, bet, shots: [], inAir: null };
+    const r: Round = { id, bet, shots: [], inAir: null, level };
     wallet.add(-bet);
     wallet.setLocked(true);
     persist({ round: r, roundId: id });
@@ -169,8 +196,12 @@ export function usePenalty(active: boolean, shotMs: number) {
   const timer = useRef(0);
   const shootAt = (aim: Zone) => {
     if (!round || phase !== "aim" && phase !== "goal") return false;
-    const shot = { aim, ...shoot(aim) };
+    const shot = { aim, ...shoot(aim, round.level) };
     const r: Round = { ...round, inAir: shot };
+    // The fifth goal plays in slow motion (PC).
+    const before = round.shots.filter((x) => x.goal).length;
+    const ms = slowMo && shot.goal && before === MAX_SHOTS - 1 ? Math.round(shotMs * 1.9) : shotMs;
+    setShotTime(ms);
     persist({ round: r });
     setRound(r);
     setLastShot(shot);
@@ -183,6 +214,7 @@ export function usePenalty(active: boolean, shotMs: number) {
       const done: Round = { ...r, shots: [...r.shots, shot], inAir: null };
       const g = done.shots.filter((x) => x.goal).length;
       if (!shot.goal) {
+        bump({ streak: 0 });
         sfx.glove();
         window.setTimeout(() => sfx.lose(), 120);
         haptic(HAPTIC.tick);
@@ -191,6 +223,7 @@ export function usePenalty(active: boolean, shotMs: number) {
         setMessage("Saved by the keeper");
         return;
       }
+      bump({ streak: savedRef.current.records.streak + 1 });
       sfx.net();
       window.setTimeout(() => sfx.win(), 90);
       haptic(HAPTIC.win);
@@ -204,8 +237,8 @@ export function usePenalty(active: boolean, shotMs: number) {
       persist({ round: done });
       setRound(done);
       setPhase("goal");
-      setMessage(`Goal! ×${multiplierAt(g)} · cash out or shoot`);
-    }, shotMs);
+      setMessage(`Goal! ×${multiplierAt(g, r.level)} · cash out or shoot`);
+    }, ms);
     return true;
   };
 
@@ -267,8 +300,12 @@ export function usePenalty(active: boolean, shotMs: number) {
     result,
     message,
     refused,
-    cashValue: round && goals ? payout(round.bet, goals) : 0,
-    nextValue: payout(round ? round.bet : bet, Math.min(MAX_SHOTS, goals + 1)),
+    level: lv,
+    records,
+    shotTime,
+    setLevel,
+    cashValue: round && goals ? payout(round.bet, goals, lv) : 0,
+    nextValue: payout(round ? round.bet : bet, Math.min(MAX_SHOTS, goals + 1), lv),
     setBet,
     setChip,
     double,

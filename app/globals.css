@@ -2687,3 +2687,15 @@ html.rl-wheel-solid body *:not(.rl-wheel-overlay, .rl-wheel-overlay *, .rl-over-
 .sb-player__picks { display: grid; grid-template-columns: repeat(3, 4.3rem); gap: 0.3rem; }
 .m-lite .sb-player { grid-template-columns: minmax(0, 1fr); gap: 0.25rem; }
 .m-lite .sb-player__picks { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.pe-levels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+.pe-level { display: flex; flex-direction: column; align-items: center; gap: 1px; border-radius: 9px; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(0, 0, 0, 0.3); padding: 0.3rem 0.2rem; transition: border-color 0.15s, background 0.15s; }
+.pe-level span { font-size: 10.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.65); }
+.pe-level small { font-size: 9px; color: rgba(255, 255, 255, 0.38); font-variant-numeric: tabular-nums; }
+.pe-level.is-on { border-color: #f0d38b; background: linear-gradient(180deg, rgba(215, 180, 91, 0.22), rgba(215, 180, 91, 0.05)); }
+.pe-level.is-on span { color: #f5d778; }
+.pe-level:disabled:not(.is-on) { opacity: 0.4; }
+.pe-flashes { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.pe-flashes i { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: #fff; opacity: 0; box-shadow: 0 0 14px 6px rgba(255, 250, 230, 0.75); animation: pe-flash 0.9s ease-out both; }
+@keyframes pe-flash { 0% { opacity: 0; } 8% { opacity: 1; } 30% { opacity: 0; } 55% { opacity: 0.85; } 75%, 100% { opacity: 0; } }
+.pe-scene.is-slow::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 3; box-shadow: inset 0 0 120px 30px rgba(0, 0, 0, 0.75); animation: pe-fade-in 0.3s ease-out both; }
+@keyframes pe-fade-in { from { opacity: 0; } }

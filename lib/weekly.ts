@@ -52,6 +52,7 @@ export const WEEKLY_POINTS: Partial<Record<GameEvent, number>> = {
   penaltyGoal: 6,
   penaltyCashout: 15,
   penaltyBigWin: 120,
+  penaltyPerfect: 200,
   betPlaced: 12,
   betCombo: 20,
   betWon: 30,

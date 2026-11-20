@@ -68,6 +68,7 @@ const XP_BY_EVENT: Partial<Record<GameEvent, number>> = {
   penaltyGoal: 8,
   penaltyCashout: 25,
   penaltyBigWin: 300,
+  penaltyPerfect: 500,
   betPlaced: 15,
   betCombo: 25,
   betLive: 10,

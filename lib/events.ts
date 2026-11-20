@@ -42,6 +42,7 @@ export type GameEvent =
   | "penaltyGoal" // des buts marqués (amount = nombre)
   | "penaltyCashout" // un cash-out gagnant
   | "penaltyBigWin" // un cash-out après au moins 4 buts (×15.36)
+  | "penaltyPerfect" // 5 buts sur 5
   | "betPlaced" // un ticket de paris sportifs validé
   | "betCombo" // un combiné d'au moins 3 sélections validé
   | "betLive" // un pari pris en direct
