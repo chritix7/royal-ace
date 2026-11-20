@@ -246,20 +246,60 @@ export function useSportsbook(active: boolean) {
     });
     if (!need.length) return;
     let stop = false;
+    const save = (k: string, teams: Standings) =>
+      setForms((prev) => {
+        const next = { ...prev, [k]: { at: Date.now(), teams } };
+        try {
+          localStorage.setItem(FORMS_KEY, JSON.stringify(next));
+        } catch {}
+        return next;
+      });
     (async () => {
+      const history = new Set<Sport>();
       for (const m of need) {
         if (stop) return;
         const k = formKey(m);
         asking.current.add(k);
         let teams: Standings = {};
+        if (!demo && m.sport !== "football") {
+          // The free plan has no current-season tables for basketball and
+          // hockey: team form is built from the last week's results.
+          if (history.has(m.sport)) continue;
+          history.add(m.sport);
+          const past = [2, 3, 4, 5, 6, 7, 8].map((d) => day(t - d * 86400000));
+          const feeds = await Promise.all(past.map((d) => fetchFeed(`/api/sports?feed=${m.sport}&date=${d}`).catch(() => null)));
+          const done = [...feeds.flatMap((f) => (f && Array.isArray(f.matches) ? (f.matches as Match[]) : [])), ...matches.filter((x) => x.sport === m.sport)].filter((x) => x.status === "done" && x.score);
+          const byKey = new Map<string, Record<string, { n: number; f: number; a: number; w: number }>>();
+          const seen = new Set<string>();
+          for (const x of done) {
+            if (seen.has(x.id)) continue;
+            seen.add(x.id);
+            const kk = formKey(x);
+            const tbl = byKey.get(kk) ?? {};
+            const sc = x.score as { h: number; a: number };
+            for (const [id, f, a] of [
+              [x.home.id, sc.h, sc.a],
+              [x.away.id, sc.a, sc.h],
+            ] as [string, number, number][]) {
+              const r = tbl[id] ?? { n: 0, f: 0, a: 0, w: 0 };
+              tbl[id] = { n: r.n + 1, f: r.f + f, a: r.a + a, w: r.w + (f > a ? 1 : 0) };
+            }
+            byKey.set(kk, tbl);
+          }
+          const keys = new Set([...byKey.keys(), ...need.filter((x) => x.sport === m.sport).map(formKey)]);
+          for (const kk of keys) {
+            const tbl = byKey.get(kk) ?? {};
+            const out: Standings = {};
+            for (const [id, r] of Object.entries(tbl)) out[id] = { played: r.n, scored: r.f / r.n, conceded: r.a / r.n, winPct: r.w / r.n };
+            save(kk, out);
+          }
+          continue;
+        }
         if (demo) {
           teams = demoForms(matches.filter((x) => formKey(x) === k).flatMap((x) => [x.home.id, x.away.id]), m.sport);
         } else {
           try {
-            const url =
-              m.sport === "football"
-                ? `/api/sports?feed=football-standings&comp=${m.comp.id}`
-                : `/api/sports?feed=${m.sport}-standings&league=${m.comp.id}&season=${encodeURIComponent(m.comp.season ?? "")}`;
+            const url = `/api/sports?feed=football-standings&comp=${m.comp.id}`;
             const f = (await fetchFeed(url)) as StandingsFeed;
             if (f.error) {
               asking.current.delete(k);
@@ -271,15 +311,9 @@ export function useSportsbook(active: boolean) {
             continue;
           }
           // Spread the calls (football-data: 10 a minute).
-          await new Promise((r) => setTimeout(r, m.sport === "football" ? 7000 : 1500));
+          await new Promise((r) => setTimeout(r, 7000));
         }
-        setForms((prev) => {
-          const next = { ...prev, [k]: { at: Date.now(), teams } };
-          try {
-            localStorage.setItem(FORMS_KEY, JSON.stringify(next));
-          } catch {}
-          return next;
-        });
+        save(k, teams);
       }
     })();
     return () => {

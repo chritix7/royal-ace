@@ -25,6 +25,8 @@ function reply(body: string, ttl: number, status = 200) {
     headers: {
       "content-type": "application/json; charset=utf-8",
       "cache-control": `public, max-age=0, s-maxage=${ttl}, stale-while-revalidate=${ttl * 4}`,
+      // Shared edge cache on Vercel, whatever the browser does.
+      "cdn-cache-control": `public, s-maxage=${ttl}, stale-while-revalidate=${ttl * 4}`,
     },
   });
 }
@@ -94,9 +96,9 @@ export async function GET(request: Request) {
     const sport = feed;
     const date = q.get("date") ?? "";
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return fail("bad-request", 3600);
-    // 100 calls a day for each sport: today every 20 min, other days rarely.
+    // 100 calls a day for each sport: today every 30 min, past days once a day.
     const today = day(now);
-    ttl = date === today ? 20 * 60 : date < today ? 3 * 3600 : 6 * 3600;
+    ttl = date === today ? 30 * 60 : date < today ? 24 * 3600 : 6 * 3600;
     key = `${sport}:${date}`;
     load = async () => {
       const json = await apiSports(sport, `/games?date=${date}&timezone=UTC`);
