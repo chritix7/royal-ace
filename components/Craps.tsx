@@ -8,6 +8,7 @@ import { BOX, EDGES, HARD_PAYS, LIMITS, PROP_LIMITS, TABLE_MAX, MIN_BET, PLACE_P
 import { CRAPS_CHIPS, useCraps, type CrapsGame, type RollRecord } from "../lib/useCraps";
 import { exitFullscreenSettled, isNarrowScreen, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
 import { useSession } from "../lib/sessionStore";
+import CrapsTour, { useCrapsTour } from "./CrapsTour";
 
 function useDesktop() {
   const [desktop, setDesktop] = useState(true);
@@ -487,6 +488,16 @@ export default function Craps({ active, focus = false, onFocusChange }: { active
   const flash = useFlash(g);
   const [sheet, setSheet] = useState<SheetTab | null>(null);
   const [panel, setPanel] = useState<"rolls" | "stats" | "rules">("rolls");
+  // Guided first game: offered once, on the first visit to the table.
+  const tour = useCrapsTour();
+  const offered = useRef(false);
+  useEffect(() => {
+    if (!active || tour.seen || offered.current) return;
+    offered.current = true;
+    if (Object.keys(g.bets).length === 0) tour.start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, tour.seen]);
+  const tourEl = tour.open && active ? <CrapsTour g={g} onClose={tour.close} /> : null;
 
   // ---- Focus (same behaviour as the other games)
   const [focusAnim, setFocusAnim] = useState("");
@@ -722,6 +733,9 @@ export default function Craps({ active, focus = false, onFocusChange }: { active
                   {key(<>Clear<Kbd k="C" /></>, g.clear, g.rolling, "Take down bets")}
                   {key(<>Rebet<Kbd k="R" /></>, g.rebet, !g.canRebet, "Repeat one-roll bets")}
                   {key(<>Max odds<Kbd k="O" /></>, g.maxAllOdds, g.rolling || !oddsAvailable, "Take max odds", oddsAvailable ? "is-hot" : "")}
+                  <button type="button" onClick={tour.start} className="rl-key" title="Guided first game">
+                    Tour
+                  </button>
                   <button type="button" onClick={g.toggleHint} aria-pressed={g.hintOn} className={`rl-key ${g.hintOn ? "is-on" : ""}`}>
                     Hints<Kbd k="H" />
                   </button>
@@ -730,6 +744,7 @@ export default function Craps({ active, focus = false, onFocusChange }: { active
             </div>
           </div>
         </section>
+        {tourEl}
       </div>
     );
   }
@@ -766,6 +781,9 @@ export default function Craps({ active, focus = false, onFocusChange }: { active
               <p className={`cr-call truncate !text-left !text-[14px] ${res && (res.event === "sevenOut" || res.event === "craps") ? "is-bad" : res && res.won > 0 ? "is-good" : ""}`}>{callText}</p>
               <div className="mt-0.5">{pointBadge}</div>
             </div>
+            <button type="button" onClick={tour.start} className="rl-icon-key" aria-label="Guided first game">
+              ?
+            </button>
             <button type="button" onClick={g.toggleHint} aria-pressed={g.hintOn} className={`rl-icon-key !w-auto px-2 text-[9.5px] font-bold tracking-[0.12em] ${g.hintOn ? "is-on" : ""}`}>
               HINT
             </button>
@@ -815,6 +833,7 @@ export default function Craps({ active, focus = false, onFocusChange }: { active
         </div>
       </section>
       {sheet && <Sheet g={g} flash={flash} tab={sheet} setTab={setSheet} onClose={() => setSheet(null)} />}
+      {tourEl}
     </div>
   );
 }
