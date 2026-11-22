@@ -1,6 +1,7 @@
 "use client";
 
 import StrategyCoach from "./StrategyCoach";
+import { SHOP, priceLabel, useShop } from "../lib/shop";
 import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { Theme, VegasVariant } from "../lib/game";
@@ -85,6 +86,7 @@ export default function Sidebar({ g }: { g: Game }) {
   useEffect(() => {
     if (openSection === "count" && !showCount) setOpenSection(null);
   }, [openSection, showCount]);
+  const shopState = useShop();
   const activeVariant: VegasVariant = s.settings.vegasVariant ?? "anthracite";
 
   // Close whichever modal is open on Escape.
@@ -273,6 +275,7 @@ export default function Sidebar({ g }: { g: Game }) {
                       : "border-white/10 hover:border-[#d7b45b]/40"
                   }`}
                 >
+                  {!shopState.owned.includes(`bj:${th}`) && <span className="shop-lock">🔒 {priceLabel(SHOP.find((x) => x.id === `bj:${th}`)?.price ?? 0)}</span>}
                   {/* swatch disk */}
                   <span
                     aria-hidden

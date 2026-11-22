@@ -69,6 +69,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${cinzel.variable} ${unifrakturMaguntia.variable} ${shareTechMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* Splash when launched from the home screen: the crest on black,
+            gone after a moment (CSS only, nothing to load). */}
+        <div className="app-splash" aria-hidden="true">
+          <img src="/icon-192.png" alt="" width={96} height={96} />
+          <span>ROYAL ACE</span>
+        </div>
         {children}
         <ServiceWorkerRegistrar />
         <PwaInstallBanner />

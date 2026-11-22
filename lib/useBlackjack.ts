@@ -12,6 +12,7 @@ import { CHIPS, MIN_BET, REFILL, EMPTY_STATS, EMPTY_RECORDS, DEFAULT_SETTINGS, I
 import type { S, Settings, Records } from "./game";
 import { winHistory } from "./winHistory";
 import { bjCoach } from "./bjCoach";
+import { shop } from "./shop";
 import { sessionStore } from "./sessionStore";
 import {
   createPending,
@@ -557,6 +558,11 @@ function giveDealer() {
   }
   function updateSettings(patch: Partial<Settings>) {
     if (!ready.current || blocked.current || transaction.current) return;
+    // Felts are bought once in the shop.
+    if (patch.theme && !shop.owns(`bj:${patch.theme}`)) {
+      shop.open(`bj:${patch.theme}`);
+      return;
+    }
     const c = ref.current;
     if (patch.theme === undefined && c.phase !== "betting" && c.phase !== "settled") return;
     const settings = { ...c.settings, ...patch };

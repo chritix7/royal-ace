@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { translateText, useLang } from "../lib/i18n";
 
 /**
  * The house rules printed on the felt as one curved line, the way a
@@ -18,15 +19,17 @@ export default function FeltMarkings({
   className?: string;
 }) {
   const id = useId();
+  const fr = useLang() === "fr";
   const line = [
     `Blackjack pays ${bj65 ? "6 to 5" : "3 to 2"}`,
     "Insurance pays 2 to 1",
     `Dealer ${h17 ? "hits" : "stands on"} soft 17`,
-  ].join("   ❖   ").toUpperCase();
+  ].map((t) => (fr ? translateText(t) : t)).join("   ❖   ").toUpperCase();
 
   return (
     <svg
       aria-hidden="true"
+      translate="no"
       viewBox="0 0 680 30"
       className={`pointer-events-none h-[30px] w-[min(92%,680px)] ${className}`}
     >

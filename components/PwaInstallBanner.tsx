@@ -46,6 +46,7 @@ export default function PwaInstallBanner() {
     // Already running as an installed app? nothing to install.
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
+      window.matchMedia("(display-mode: fullscreen)").matches ||
       // iOS legacy flag
       (window.navigator as unknown as { standalone?: boolean }).standalone;
     if (standalone) return;

@@ -34,7 +34,7 @@ function AmbienceKey() {
   }, [open]);
   const on = mode !== "off";
   return (
-    <div ref={box} className="relative">
+    <div ref={box} className="relative hidden sm:block">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

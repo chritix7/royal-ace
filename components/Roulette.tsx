@@ -5,7 +5,7 @@ import { ChipFace } from "./ChipButton";
 import { Counter } from "./ui";
 import RouletteTable from "./roulette/RouletteTable";
 import RouletteRacetrack from "./roulette/RouletteRacetrack";
-import { AutoMenu, BigWin, Favourites, RoundDetail, RoundHistory, StylePanel, THEMES } from "./roulette/RoulettePanels";
+import { AutoMenu, BigWin, Favourites, RoundDetail, RoundHistory, ShopLock, StylePanel, THEMES } from "./roulette/RoulettePanels";
 import type { RoundRecord } from "../lib/useRoulette";
 import RouletteWheel from "./roulette/RouletteWheel";
 import { money } from "../lib/game";
@@ -330,7 +330,8 @@ function StyleCompact({ g }: { g: RouletteGame }) {
     <div className="flex h-full flex-col justify-between gap-2">
       <div className="grid grid-cols-4 gap-1.5">
         {THEMES.map((t) => (
-          <button key={t.id} type="button" onClick={() => g.setTheme(t.id)} aria-pressed={g.theme === t.id} title={t.note} className={`rl-theme-dot ${g.theme === t.id ? "is-on" : ""}`}>
+          <button key={t.id} type="button" onClick={() => g.setTheme(t.id)} aria-pressed={g.theme === t.id} title={t.note} className={`rl-theme-dot relative ${g.theme === t.id ? "is-on" : ""}`}>
+            <ShopLock id={`rl:${t.id}`} />
             <span
               className="rl-theme-dot__swatch"
               style={{ background: `linear-gradient(135deg, ${t.swatch[0]} 0 34%, ${t.swatch[1]} 34% 70%, ${t.swatch[2]} 70%)` }}

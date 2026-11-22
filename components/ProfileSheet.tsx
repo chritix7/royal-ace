@@ -7,6 +7,7 @@ import { vipTierForLevel } from "../lib/daily";
 import { useProfile } from "../lib/profile";
 import { useProgression } from "../lib/progression";
 import { useStats } from "../lib/statsStore";
+import { useShop } from "../lib/shop";
 
 const fmt = (n: number) => Math.floor(n).toLocaleString("en-US");
 const signed = (n: number) => `${n >= 0 ? "+" : "−"}◈ ${fmt(Math.abs(n))}`;
@@ -28,6 +29,8 @@ export default function ProfileSheet({ tab: first, onClose }: { tab: "card" | "r
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
   const vip = vipTierForLevel(prog.level);
+  const cardId = useShop().card;
+  const cardFinish = cardId === "card:gold" ? "" : `is-${cardId.slice(5)}`;
   const name = profile.name || "Player";
   const rounds: [string, number][] = [
     ["bj", stats.bjHands ?? 0],
@@ -64,13 +67,13 @@ export default function ProfileSheet({ tab: first, onClose }: { tab: "card" | "r
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-3 [scrollbar-width:thin]">
           {tab === "card" ? (
             <>
-              <div className="vip-card">
+              <div className={`vip-card ${cardFinish}`}>
                 <div className="flex items-start justify-between">
                   <span className="vip-card__brand">ROYAL ACE</span>
                   <span className="vip-card__tier">VIP · {vip.label}</span>
                 </div>
                 <span className="vip-card__chip" aria-hidden="true" />
-                <p className="vip-card__name">{name}</p>
+                <p className="vip-card__name" translate="no">{name}</p>
                 <div className="flex items-end justify-between">
                   <span className="vip-card__meta">Level {prog.level} · member since {career.since || "today"}</span>
                   <span className="vip-card__rank">#{ranking.rank || "—"} this week</span>

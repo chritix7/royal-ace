@@ -28,7 +28,11 @@ import { weeklyStore } from "../lib/weekly";
 import ChipFly from "../components/ChipFly";
 import { IconBall, IconTicket, IconDice, IconFocus, IconHome, IconPoker, IconRoulette, IconSlot, IconSpade } from "../components/UiIcons";
 import Lobby from "../components/Lobby";
-import { profileStore } from "../lib/profile";
+import { profileStore, useProfile } from "../lib/profile";
+import SettingsSheet, { type SettingsTab } from "../components/SettingsSheet";
+import WelcomeTour, { WELCOME_KEY } from "../components/WelcomeTour";
+import { i18n } from "../lib/i18n";
+import { motion } from "../lib/motion";
 import HotkeysOverlay from "../components/HotkeysOverlay";
 import { useBalanceFlash } from "../hooks/useBalanceFlash";
 import { sessionStore } from "../lib/sessionStore";
@@ -221,7 +225,33 @@ export default function Home() {
     achievementsStore.hydrate();
     statsStore.hydrate();
     weeklyStore.hydrate();
+    motion.boot();
+    i18n.boot();
   }, []);
+
+  // Settings & shop sheet: from the header gear, or from a locked theme.
+  const [settings, setSettings] = useState<{ tab: SettingsTab; item?: string } | null>(null);
+  useEffect(() => {
+    const on = (e: Event) => {
+      const d = (e as CustomEvent<{ tab?: SettingsTab; item?: string }>).detail ?? {};
+      setSettings({ tab: d.tab ?? "settings", item: d.item });
+    };
+    window.addEventListener("royal-ace:settings", on);
+    return () => window.removeEventListener("royal-ace:settings", on);
+  }, []);
+  // First-launch tour of the lobby, once the name has been asked.
+  const profile = useProfile();
+  const [tourOpen, setTourOpen] = useState(false);
+  useEffect(() => {
+    if (!inLobby || !profile.asked) return;
+    let seen = true;
+    try {
+      seen = localStorage.getItem(WELCOME_KEY) === "done";
+    } catch {}
+    if (seen) return;
+    const t = window.setTimeout(() => setTourOpen(true), 700);
+    return () => window.clearTimeout(t);
+  }, [inLobby, profile.asked]);
 
   return (
     <main className="min-h-screen bg-[#080c0b] text-white">
@@ -338,6 +368,20 @@ export default function Home() {
 
   <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
     <AudioControls />
+    <button
+      type="button"
+      data-tour="settings"
+      onClick={() => setSettings({ tab: "settings" })}
+      aria-label="Settings and shop"
+      title="Settings & shop"
+      className="ui-pill"
+    >
+      <svg viewBox="0 0 24 24" className="h-[17px] w-[17px]" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+        <circle cx="12" cy="12" r="3.2" />
+        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+      </svg>
+      <span className="hidden xl:inline">Settings</span>
+    </button>
 
     {/* Focus (immersive) toggle — only meaningful on the blackjack tab.
         Lives in the top toolbar so it shares a row with the game tabs
@@ -359,7 +403,7 @@ export default function Home() {
 
         {/* Les deux jeux restent montés : on ne perd pas une manche en changeant d'onglet. */}
         {inLobby && (
-          <div className="h-[calc(100dvh_-_10.15rem_-_env(safe-area-inset-top))] min-h-[480px] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px]">
+          <div className="view-in h-[calc(100dvh_-_10.15rem_-_env(safe-area-inset-top))] min-h-[480px] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px]">
             <Lobby
               desktop={lgUp}
               onPlay={(id) => openGame(id)}
@@ -369,7 +413,7 @@ export default function Home() {
             />
           </div>
         )}
-        <div className={tab === "blackjack" && !inLobby ? "" : "hidden"}>
+        <div className={tab === "blackjack" && !inLobby ? "view-in" : "hidden"}>
           {visited.has("blackjack") && (
           <ErrorBoundary label="Blackjack">
             <Blackjack
@@ -380,7 +424,7 @@ export default function Home() {
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "slots" && !inLobby ? "" : "hidden"}>
+        <div className={tab === "slots" && !inLobby ? "view-in" : "hidden"}>
           {visited.has("slots") && (
           <ErrorBoundary label="Slots">
             <Slots
@@ -391,7 +435,7 @@ export default function Home() {
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "roulette" && !inLobby ? "" : "hidden"}>
+        <div className={tab === "roulette" && !inLobby ? "view-in" : "hidden"}>
           {visited.has("roulette") && (
           <ErrorBoundary label="Roulette">
             <Roulette
@@ -402,28 +446,28 @@ export default function Home() {
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "poker" && !inLobby ? "" : "hidden"}>
+        <div className={tab === "poker" && !inLobby ? "view-in" : "hidden"}>
           {visited.has("poker") && (
           <ErrorBoundary label="Casino Hold'em">
             <Poker active={tab === "poker" && !inLobby} focus={tab === "poker" && !inLobby && focusMode} onFocusChange={setFocusMode} />
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "craps" && !inLobby ? "" : "hidden"}>
+        <div className={tab === "craps" && !inLobby ? "view-in" : "hidden"}>
           {visited.has("craps") && (
           <ErrorBoundary label="Craps">
             <Craps active={tab === "craps" && !inLobby} focus={tab === "craps" && !inLobby && focusMode} onFocusChange={setFocusMode} />
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "penalty" && !inLobby ? "" : "hidden"}>
+        <div className={tab === "penalty" && !inLobby ? "view-in" : "hidden"}>
           {visited.has("penalty") && (
           <ErrorBoundary label="Penalty">
             <Penalty active={tab === "penalty" && !inLobby} focus={tab === "penalty" && !inLobby && focusMode} onFocusChange={setFocusMode} />
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "sports" && !inLobby ? "" : "hidden"}>
+        <div className={tab === "sports" && !inLobby ? "view-in" : "hidden"}>
           {visited.has("sports") && (
           <ErrorBoundary label="Sportsbook">
             <Sportsbook active={tab === "sports" && !inLobby} focus={tab === "sports" && !inLobby && focusMode} onFocusChange={setFocusMode} />
@@ -443,6 +487,8 @@ export default function Home() {
       <GameToasts />
       <StatsPanel open={statsOpen} onClose={() => setStatsOpen(false)} />
       <HotkeysOverlay />
+      {settings && <SettingsSheet tab={settings.tab} item={settings.item} onClose={() => setSettings(null)} onTour={() => setTourOpen(true)} />}
+      {tourOpen && inLobby && <WelcomeTour onClose={() => setTourOpen(false)} />}
     </main>
   );
 }

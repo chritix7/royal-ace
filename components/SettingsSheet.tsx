@@ -1,0 +1,253 @@
+"use client";
+
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { audio, useAudioSettings } from "../lib/audio";
+import { AMBIENCE_MODES, ambience, useAmbienceMode } from "../lib/ambience";
+import { i18n, useLang } from "../lib/i18n";
+import { motion, useReducedMotion } from "../lib/motion";
+import { cleanName, profileStore, useProfile } from "../lib/profile";
+import { SHOP, SHOP_CATS, priceLabel, shop, useShop } from "../lib/shop";
+import { useBalance, useLocked } from "../lib/wallet";
+import { money } from "../lib/game";
+
+/**
+ * Settings and the cosmetics shop, in one sheet opened from the header
+ * gear (or from a locked theme in a game, straight on that item).
+ */
+export type SettingsTab = "settings" | "shop";
+
+function Row({ title, sub, children }: { title: string; sub?: string; children: ReactNode }) {
+  return (
+    <div className="st-row">
+      <div className="min-w-0 flex-1">
+        <p className="st-row__title">{title}</p>
+        {sub && <p className="st-row__sub">{sub}</p>}
+      </div>
+      <div className="shrink-0">{children}</div>
+    </div>
+  );
+}
+const Switch = ({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) => (
+  <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={onClick} className={`rl-switch ${on ? "is-on" : ""}`} />
+);
+
+function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => void }) {
+  const a = useAudioSettings();
+  const amb = useAmbienceMode();
+  const lang = useLang();
+  const reduced = useReducedMotion();
+  const profile = useProfile();
+  const [name, setName] = useState(profile.name);
+  const [nameMsg, setNameMsg] = useState("");
+  const [reset, setReset] = useState("");
+  useEffect(() => setName(profile.name), [profile.name]);
+  const saveName = () => {
+    const c = cleanName(name);
+    if (!c) return setNameMsg("2 to 16 letters or digits");
+    profileStore.setName(c);
+    setNameMsg("Saved ✓");
+  };
+  const resetAll = () => {
+    try {
+      Object.keys(localStorage)
+        .filter((k) => k.startsWith("royalace:"))
+        .forEach((k) => localStorage.removeItem(k));
+    } catch {}
+    window.location.reload();
+  };
+  return (
+    <div className="space-y-4">
+      <section>
+        <p className="st-head">Language</p>
+        <div className="grid grid-cols-2 gap-1.5" role="radiogroup" aria-label="Language">
+          {(
+            [
+              ["en", "English"],
+              ["fr", "Français"],
+            ] as const
+          ).map(([id, label]) => (
+            <button key={id} type="button" role="radio" aria-checked={lang === id} onClick={() => i18n.set(id)} className={`st-choice ${lang === id ? "is-on" : ""}`} translate="no">
+              {label}
+            </button>
+          ))}
+        </div>
+      </section>
+      <section>
+        <p className="st-head">Sound</p>
+        <Row title="Music">
+          <Switch on={a.music} onClick={() => audio.set({ music: !a.music })} label="Music" />
+        </Row>
+        <Row title="Sound effects">
+          <Switch on={a.sfx} onClick={() => audio.set({ sfx: !a.sfx })} label="Sound effects" />
+        </Row>
+        <Row title="Vibration" sub="Phones only">
+          <Switch on={a.haptics} onClick={() => audio.set({ haptics: !a.haptics })} label="Vibration" />
+        </Row>
+        <Row title="Volume">
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={a.volume}
+            onChange={(e) => audio.set({ volume: Number(e.target.value) })}
+            aria-label="Master volume"
+            className="ui-range w-32"
+            style={{ "--v": `${Math.round(a.volume * 100)}%` } as CSSProperties}
+          />
+        </Row>
+        <p className="st-sub mt-2">Ambience</p>
+        <div className="mt-1 grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+          {AMBIENCE_MODES.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => {
+                ambience.setMode(m.id);
+                audio.unlock();
+              }}
+              className={`st-choice !text-left ${amb === m.id ? "is-on" : ""}`}
+              title={m.blurb}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+      </section>
+      <section>
+        <p className="st-head">Display</p>
+        <Row title="Reduced animations" sub="Turns off most motion and effects">
+          <Switch on={reduced} onClick={() => motion.set(!reduced)} label="Reduced animations" />
+        </Row>
+        <Row title="Replay the welcome tour">
+          <button
+            type="button"
+            className="rl-key"
+            onClick={() => {
+              onClose();
+              onTour();
+            }}
+          >
+            Tour
+          </button>
+        </Row>
+      </section>
+      <section>
+        <p className="st-head">Profile & account</p>
+        <div className="flex gap-1.5">
+          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={16} aria-label="Your name" className="st-input min-w-0 flex-1" translate="no" />
+          <button type="button" className="rl-key is-on" onClick={saveName}>
+            Save
+          </button>
+        </div>
+        {nameMsg && <p className="st-sub mt-1">{nameMsg}</p>}
+        <div className="st-danger mt-3">
+          <p className="st-row__title">Reset account</p>
+          <p className="st-row__sub">Chips, progress, challenges, tickets, purchases and settings go back to zero. This cannot be undone. Type RESET to confirm.</p>
+          <div className="mt-2 flex gap-1.5">
+            <input value={reset} onChange={(e) => setReset(e.target.value.toUpperCase())} placeholder="RESET" aria-label="Type RESET" className="st-input min-w-0 flex-1" translate="no" />
+            <button type="button" className="rl-key" disabled={reset !== "RESET"} onClick={resetAll}>
+              Reset
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function ShopPane({ focus }: { focus?: string }) {
+  const st = useShop();
+  const balance = useBalance();
+  const locked = useLocked();
+  const [msg, setMsg] = useState<{ id: string; text: string } | null>(null);
+  useEffect(() => {
+    if (!focus) return;
+    document.getElementById(`shop-${focus}`)?.scrollIntoView({ block: "center" });
+  }, [focus]);
+  return (
+    <div className="space-y-4">
+      <p className="text-[11px] text-white/50">
+        Buy once with chips, keep for good. Credit: <b className="text-[#f5d778]">◈ {money(balance)}</b>
+      </p>
+      {SHOP_CATS.map((cat) => (
+        <section key={cat.id}>
+          <p className="st-head">{cat.label}</p>
+          <p className="st-sub mb-1.5">{cat.where}</p>
+          <div className="grid grid-cols-2 gap-1.5">
+            {SHOP.filter((i) => i.cat === cat.id).map((it) => {
+              const owned = st.owned.includes(it.id);
+              const equipped = cat.id === "card" && st.card === it.id;
+              return (
+                <div key={it.id} id={`shop-${it.id}`} className={`shop-item ${focus === it.id ? "is-focus" : ""} ${owned ? "is-owned" : ""}`}>
+                  <span className="shop-item__swatch" style={{ background: `linear-gradient(135deg, ${it.swatch[0]} 0 34%, ${it.swatch[1]} 34% 72%, ${it.swatch[2]} 72%)` }} />
+                  <p className="shop-item__name">{it.name}</p>
+                  <p className="shop-item__note">{it.note}</p>
+                  {owned ? (
+                    cat.id === "card" ? (
+                      <button type="button" className={`rl-key w-full ${equipped ? "is-on" : ""}`} disabled={equipped} onClick={() => shop.equipCard(it.id)}>
+                        {equipped ? "Equipped" : "Equip"}
+                      </button>
+                    ) : (
+                      <span className="shop-item__owned">Owned</span>
+                    )
+                  ) : (
+                    <button
+                      type="button"
+                      className="rl-key is-on w-full"
+                      disabled={locked}
+                      onClick={() => {
+                        const ok = shop.buy(it.id);
+                        setMsg({ id: it.id, text: ok ? "Unlocked ✓" : "Not enough chips" });
+                        if (ok && cat.id === "card") shop.equipCard(it.id);
+                      }}
+                    >
+                      Buy · ◈ {priceLabel(it.price)}
+                    </button>
+                  )}
+                  {msg?.id === it.id && <p className="mt-1 text-center text-[10px] text-[#f5d778]">{msg.text}</p>}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+
+export default function SettingsSheet({ tab: first, item, onClose, onTour }: { tab: SettingsTab; item?: string; onClose: () => void; onTour: () => void }) {
+  const [tab, setTab] = useState<SettingsTab>(first);
+  useEffect(() => setTab(first), [first]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  if (typeof document === "undefined") return null;
+  return createPortal(
+    <div className="fixed inset-0 z-[160] flex items-end justify-center sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="Settings">
+      <button type="button" aria-label="Close" onClick={onClose} className="backdrop-in absolute inset-0 cursor-default bg-black/70" />
+      <div className="lb-detail relative flex max-h-[min(92dvh,46rem)] w-full max-w-lg flex-col overflow-hidden">
+        <div className="flex items-center gap-2 px-4 pt-4">
+          <div className="rl-tabs !grid-cols-2 flex-1" role="tablist">
+            <button type="button" role="tab" aria-selected={tab === "settings"} onClick={() => setTab("settings")} className={`rl-tab ${tab === "settings" ? "is-on" : ""}`}>
+              Settings
+            </button>
+            <button type="button" role="tab" aria-selected={tab === "shop"} onClick={() => setTab("shop")} className={`rl-tab ${tab === "shop" ? "is-on" : ""}`}>
+              Shop
+            </button>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close" className="rl-icon-key">
+            ✕
+          </button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[max(env(safe-area-inset-bottom),1rem)] pt-3 [scrollbar-width:thin]">
+          {tab === "settings" ? <SettingsPane onTour={onTour} onClose={onClose} /> : <ShopPane focus={item} />}
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}

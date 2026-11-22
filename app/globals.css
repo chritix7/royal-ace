@@ -2835,3 +2835,54 @@ html.rl-wheel-solid body *:not(.rl-wheel-overlay, .rl-wheel-overlay *, .rl-over-
 .cr-tour__card { position: fixed; left: 50%; width: min(22rem, calc(100vw - 2rem)); transform: translateX(-50%); pointer-events: auto; border-radius: 16px; border: 1px solid rgba(240, 211, 139, 0.6); background: linear-gradient(180deg, #1b1b1f, #0a0a0c); padding: 0.75rem 0.9rem; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6); animation: ga-in 0.25s ease-out both; }
 .cr-tour__title { font-family: var(--font-display), Georgia, serif; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; color: #f5d778; }
 .cr-tour__text { margin-top: 0.3rem; font-size: 12.5px; line-height: 1.45; color: rgba(255, 255, 255, 0.75); }
+/* Reduced animations (Settings) */
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+/* Shop locks on theme pickers */
+.shop-lock { position: absolute; top: 3px; right: 3px; z-index: 2; border-radius: 9999px; background: rgba(6, 6, 8, 0.88); border: 1px solid rgba(240, 211, 139, 0.45); padding: 0 0.35rem; font-size: 8.5px; font-weight: 800; line-height: 1.4; letter-spacing: 0.04em; color: #f5d778; pointer-events: none; white-space: nowrap; }
+.rl-theme-dot .shop-lock { top: -4px; right: -4px; padding: 0 0.2rem; font-size: 7.5px; }
+
+/* Settings & shop sheet */
+.st-head { margin-bottom: 0.35rem; font-family: var(--font-display), Georgia, serif; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #e5c779; }
+.st-sub { font-size: 10.5px; color: rgba(255, 255, 255, 0.45); }
+.st-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.45rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.st-row__title { font-size: 13px; font-weight: 700; color: rgba(255, 255, 255, 0.88); }
+.st-row__sub { font-size: 10.5px; line-height: 1.35; color: rgba(255, 255, 255, 0.45); }
+.st-choice { border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.1); background: #101013; padding: 0.5rem 0.6rem; font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.7); text-align: center; transition: border-color 0.15s, color 0.15s; }
+.st-choice:hover { border-color: rgba(229, 199, 121, 0.4); }
+.st-choice.is-on { border-color: #e5c779; color: #f5d778; box-shadow: 0 0 0 1px rgba(229, 199, 121, 0.3) inset; }
+.st-input { border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.12); background: #08080a; padding: 0.45rem 0.65rem; font-size: 16px; color: #fff; outline: none; }
+@media (min-width: 640px) { .st-input { font-size: 13px; } }
+.st-input:focus { border-color: #e5c779; }
+.st-danger { border-radius: 12px; border: 1px solid rgba(220, 80, 80, 0.35); background: rgba(120, 20, 20, 0.12); padding: 0.65rem 0.75rem; }
+.shop-item { display: flex; flex-direction: column; gap: 0.3rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.08); background: #0e0e11; padding: 0.5rem; }
+.shop-item.is-owned { border-color: rgba(229, 199, 121, 0.3); }
+.shop-item.is-focus { border-color: #f0d38b; box-shadow: 0 0 0 2px rgba(240, 211, 139, 0.35); }
+.shop-item__swatch { height: 2.6rem; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4); }
+.shop-item__name { font-size: 12.5px; font-weight: 800; color: #f6e7bd; }
+.shop-item__note { flex: 1; font-size: 10px; line-height: 1.3; color: rgba(255, 255, 255, 0.45); }
+.shop-item__owned { display: block; padding: 0.3rem 0; text-align: center; font-size: 10px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(229, 199, 121, 0.7); }
+
+/* VIP card finishes (shop) */
+.vip-card.is-rose { background: radial-gradient(120% 90% at 85% 0%, rgba(255, 190, 170, 0.25), transparent 55%), repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.035) 0 2px, transparent 2px 6px), linear-gradient(160deg, #2a1c1c, #0d0808) padding-box, linear-gradient(135deg, #ffe0d2, #9c5a48 40%, #f1b9a2 70%, #9c5a48) border-box; }
+.vip-card.is-platinum { background: radial-gradient(120% 90% at 85% 0%, rgba(230, 236, 245, 0.25), transparent 55%), repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.04) 0 2px, transparent 2px 6px), linear-gradient(160deg, #23262b, #0a0b0d) padding-box, linear-gradient(135deg, #ffffff, #7d858f 40%, #dfe4ea 70%, #7d858f) border-box; }
+.vip-card.is-platinum .vip-card__brand, .vip-card.is-platinum .vip-card__name { color: #eef1f5; }
+.vip-card.is-diamond { background: radial-gradient(120% 90% at 85% 0%, rgba(160, 220, 255, 0.3), transparent 55%), repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 6px), linear-gradient(160deg, #101a26, #05080c) padding-box, linear-gradient(135deg, #e8f7ff, #4f8fbf 35%, #ffffff 55%, #9fd6ff 75%, #4f8fbf) border-box; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55), 0 0 26px rgba(140, 200, 255, 0.25); }
+.vip-card.is-diamond .vip-card__brand { color: #cdeaff; }
+
+/* Lobby ↔ game: a soft entrance on computers, instant on phones */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .view-in { animation: view-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+}
+@keyframes view-in { from { opacity: 0; transform: translateY(8px) scale(0.995); } to { opacity: 1; transform: none; } }
+/* Home-screen app splash */
+.app-splash { display: none; }
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  .app-splash { position: fixed; inset: 0; z-index: 400; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; background: radial-gradient(60% 40% at 50% 45%, rgba(240, 211, 139, 0.12), transparent 70%), #080808; pointer-events: none; animation: splash-out 0.45s ease-in 0.9s forwards; }
+  .app-splash img { border-radius: 22px; box-shadow: 0 0 40px rgba(240, 211, 139, 0.25); animation: splash-in 0.6s ease-out both; }
+  .app-splash span { font-family: var(--font-display), Georgia, serif; font-size: 18px; font-weight: 700; letter-spacing: 0.4em; color: #f0d38b; animation: splash-in 0.6s ease-out 0.1s both; }
+}
+@keyframes splash-in { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: none; } }
+@keyframes splash-out { to { opacity: 0; visibility: hidden; } }
+/* French labels are longer: tighten the round buttons */
+html[lang="fr"] .sl-spin-word { padding-left: 0.06em; font-size: 13px; letter-spacing: 0.06em; }
+html[lang="fr"] .rl-round-spin__label { letter-spacing: 0.06em; }

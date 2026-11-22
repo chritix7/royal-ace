@@ -154,7 +154,7 @@ function SpinDome({
           </span>
         ) : (
           <span className="spin-dome__label flex flex-col items-center leading-none">
-            <span className="pl-[0.22em] text-[15px] tracking-[0.22em]">SPIN</span>
+            <span className="sl-spin-word pl-[0.22em] text-[15px] tracking-[0.22em]">SPIN</span>
             {/* Desktop: the keyboard shortcut */}
             <span className="mt-1 hidden pl-[0.25em] text-[7px] tracking-[0.25em] opacity-55 lg:block">SPACE</span>
           </span>

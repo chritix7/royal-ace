@@ -1,5 +1,6 @@
 "use client";
 
+import { SHOP, priceLabel, useShop } from "../../lib/shop";
 import { useEffect, useState } from "react";
 import CoinRain from "../CoinRain";
 import { money } from "../../lib/game";
@@ -10,6 +11,13 @@ export const pill = (n: number) => `rl-pill rl-pill--${colorOf(n)} flex shrink-0
 const signed = (v: number) => `${v > 0 ? "+" : v < 0 ? "−" : ""}◈ ${money(Math.abs(v))}`;
 
 /* ---------- Table themes ---------- */
+/** A lock with the price on rooms not bought yet (tap opens the shop). */
+export function ShopLock({ id }: { id: string }) {
+  const st = useShop();
+  if (st.owned.includes(id)) return null;
+  return <span className="shop-lock">🔒 {priceLabel(SHOP.find((x) => x.id === id)?.price ?? 0)}</span>;
+}
+
 export const THEMES = [
   { id: "carbon", name: "Carbon 911", note: "Matte black, carbon, gold", swatch: ["#0c0d0f", "#24262b", "#d7b45b"] },
   { id: "monaco", name: "Monaco", note: "Green baize, mahogany, brass", swatch: ["#1a0f0a", "#0f5c3a", "#d9b45e"] },
@@ -47,8 +55,9 @@ export function StylePanel({ g }: { g: RouletteGame }) {
             type="button"
             onClick={() => g.setTheme(t.id)}
             aria-pressed={g.theme === t.id}
-            className={`rl-theme-card ${g.theme === t.id ? "is-on" : ""}`}
+            className={`rl-theme-card relative ${g.theme === t.id ? "is-on" : ""}`}
           >
+            <ShopLock id={`rl:${t.id}`} />
             <span className="flex gap-1">
               {t.swatch.map((c) => (
                 <span key={c} className="h-4 w-4 rounded-full border border-white/20" style={{ background: c }} />

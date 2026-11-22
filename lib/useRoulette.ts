@@ -1,5 +1,6 @@
 "use client";
 
+import { shop } from "./shop";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { HAPTIC, haptic } from "./haptics";
 import { sfx } from "./sound";
@@ -338,6 +339,11 @@ export function useRoulette(active: boolean) {
       return !h;
     });
   const setTheme = (t: string) => {
+    // Rooms are bought once in the shop.
+    if (!shop.owns(`rl:${t}`)) {
+      shop.open(`rl:${t}`);
+      return;
+    }
     setThemeState(t);
     persist({ theme: t });
   };
