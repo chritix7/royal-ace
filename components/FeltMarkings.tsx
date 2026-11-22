@@ -29,7 +29,6 @@ export default function FeltMarkings({
   return (
     <svg
       aria-hidden="true"
-      translate="no"
       viewBox="0 0 680 30"
       className={`pointer-events-none h-[30px] w-[min(92%,680px)] ${className}`}
     >
