@@ -50,8 +50,12 @@ export type Ticket = {
   stake: number;
   odds: number; // total at placement
   legs: Leg[];
-  status: "open" | "won" | "lost" | "void" | "cashed";
+  status: "open" | "won" | "lost" | "void" | "cashed" | "refund";
   payout: number;
+  /** Combo boost on the winnings (0.05 = +5%), set when placed. */
+  boost?: number;
+  /** Combo insurance: stake back if exactly one pick loses. */
+  insured?: boolean;
   settledAt?: number;
   seen?: boolean;
 };
@@ -120,6 +124,22 @@ function settlePlayer(
 }
 
 const day = (t: number) => new Date(t).toISOString().slice(0, 10);
+/** Combo boost by number of picks (each at odds 1.20 or more). */
+const BOOST_BY_PICKS: Record<number, number> = { 3: 0.05, 4: 0.1, 5: 0.15, 6: 0.2, 7: 0.25, 8: 0.3, 9: 0.4, 10: 0.5 };
+export const MIN_ODDS_COUNTED = 1.2;
+export const INSURANCE_PICKS = 5;
+export function comboBoost(legs: { odds: number; result?: Leg["result"] }[]) {
+  const n = legs.filter((l) => l.result !== "void" && l.odds >= MIN_ODDS_COUNTED).length;
+  return n >= 10 ? 0.5 : BOOST_BY_PICKS[n] ?? 0;
+}
+export const isInsured = (legs: { odds: number }[]) => legs.filter((l) => l.odds >= MIN_ODDS_COUNTED).length >= INSURANCE_PICKS;
+/** Payout of a winning ticket: stake × odds, the boost on the winnings, capped. */
+function winPayout(stake: number, legs: { odds: number; result?: Leg["result"] }[], boost: number) {
+  const gross = stake * comboOdds(legs);
+  // The boost shrinks if picks were void (counted again at settlement).
+  const b = Math.min(boost, comboBoost(legs));
+  return Math.min(MAX_PAYOUT, Math.floor(gross + (gross - stake) * b));
+}
 const comboOdds = (legs: { odds: number; result?: Leg["result"] }[]) =>
   Math.round(legs.reduce((p, l) => p * (l.result === "void" ? 1 : l.odds), 1) * 100) / 100;
 
@@ -501,12 +521,16 @@ export function useSportsbook(active: boolean) {
         if (r) changed = true;
         return r ? { ...l, result: r, final } : l;
       });
-      const lost = legs.some((l) => l.result === "lost");
+      const nLost = legs.filter((l) => l.result === "lost").length;
       const open = legs.some((l) => !l.result);
-      if (!lost && open) return { ...tk, legs };
+      // Insured combos wait for every pick when only one has lost.
+      if (nLost === 0 && open) return { ...tk, legs };
+      if (tk.insured && nLost === 1 && open) return { ...tk, legs };
       const allVoid = legs.every((l) => l.result === "void");
-      const payout = lost ? 0 : Math.min(MAX_PAYOUT, Math.floor(tk.stake * comboOdds(legs)));
-      const next: Ticket = { ...tk, legs, status: lost ? "lost" : allVoid ? "void" : "won", payout, settledAt: t, seen: active };
+      const refund = Boolean(tk.insured) && nLost === 1 && !open;
+      const status: Ticket["status"] = refund ? "refund" : nLost ? "lost" : allVoid ? "void" : "won";
+      const payout = refund ? tk.stake : nLost ? 0 : allVoid ? tk.stake : winPayout(tk.stake, legs, tk.boost ?? 0);
+      const next: Ticket = { ...tk, legs, status, payout, settledAt: t, seen: active };
       paid += payout;
       done.push(next);
       return next;
@@ -526,8 +550,8 @@ export function useSportsbook(active: boolean) {
       window.dispatchEvent(
         new CustomEvent("royal-ace:toast", {
           detail: {
-            kind: d.status === "won" ? "win" : d.status === "void" ? "info" : "loss",
-            title: d.status === "won" ? (d.legs.length > 1 ? `Combo won · ${d.legs.length} picks` : "Bet won") : d.status === "void" ? "Ticket void · stake returned" : "Ticket lost",
+            kind: d.status === "won" ? "win" : d.status === "void" || d.status === "refund" ? "info" : "loss",
+            title: d.status === "won" ? (d.legs.length > 1 ? `Combo won · ${d.legs.length} picks` : "Bet won") : d.status === "void" ? "Ticket void · stake returned" : d.status === "refund" ? "Combo insurance · stake refunded" : "Ticket lost",
             text: d.legs.length === 1 ? d.legs[0].matchLabel : `×${d.odds.toFixed(2)}`,
             amount: d.payout,
             big: d.status === "won" && (d.payout >= d.stake * 10 || d.payout >= 100000),
@@ -539,7 +563,7 @@ export function useSportsbook(active: boolean) {
       sfx.win();
       haptic(HAPTIC.win);
       setMessage(`Ticket won · ◈ ${done.reduce((s2, d) => s2 + d.payout, 0).toLocaleString("en-US")}`);
-    } else if (done.length) setMessage(done[0].status === "void" ? "Ticket void · stake returned" : "Ticket lost");
+    } else if (done.length) setMessage(done[0].status === "void" ? "Ticket void · stake returned" : done[0].status === "refund" ? "Combo insurance · stake refunded" : "Ticket lost");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [matches, loaded, errors, scorers]);
 
@@ -665,7 +689,9 @@ export function useSportsbook(active: boolean) {
   const slipChanged = slipNow.some((s) => s.now !== null && s.now !== s.odds);
   const slipClosed = slipNow.some((s) => s.now === null);
   const stake = saved.stake;
-  const potential = Math.min(MAX_PAYOUT, Math.floor(stake * slipOdds));
+  const slipBoost = comboBoost(slipNow.map((x) => ({ odds: x.now ?? x.odds })));
+  const slipInsured = isInsured(slipNow.map((x) => ({ odds: x.now ?? x.odds })));
+  const potential = winPayout(stake, slipNow.map((x) => ({ odds: x.now ?? x.odds })), slipBoost);
 
   const place = () => {
     const s = savedRef.current;
@@ -682,7 +708,7 @@ export function useSportsbook(active: boolean) {
     if (s.stake > wallet.getBalance()) return refuse("Not enough chips");
     const t = Date.now();
     const legs: Leg[] = slipNow.map(({ now: _n, ...x }) => ({ ...x, result: null }));
-    const ticket: Ticket = { id: s.nextId, at: t, stake: s.stake, odds: comboOdds(legs), legs, status: "open", payout: 0 };
+    const ticket: Ticket = { id: s.nextId, at: t, stake: s.stake, odds: comboOdds(legs), legs, status: "open", payout: 0, boost: comboBoost(legs), insured: isInsured(legs) };
     wallet.add(-s.stake);
     commit({ ...s, tickets: [...s.tickets, ticket].slice(-150), slip: [], bb: {}, nextId: s.nextId + 1 });
     track("betPlaced");
@@ -690,7 +716,7 @@ export function useSportsbook(active: boolean) {
     if (legs.some((l) => l.live)) track("betLive");
     sfx.coin(5);
     haptic(HAPTIC.win);
-    setMessage(`Ticket placed · potential ◈ ${Math.min(MAX_PAYOUT, Math.floor(ticket.stake * ticket.odds)).toLocaleString("en-US")}`);
+    setMessage(`Ticket placed · potential ◈ ${winPayout(ticket.stake, legs, ticket.boost ?? 0).toLocaleString("en-US")}`);
     return true;
   };
 
@@ -709,7 +735,7 @@ export function useSportsbook(active: boolean) {
         if (q === null) return null;
         p *= q;
       }
-      const v = Math.floor(tk.stake * comboOdds(tk.legs) * p * CASHOUT_CUT);
+      const v = Math.floor(winPayout(tk.stake, tk.legs, tk.boost ?? 0) * p * CASHOUT_CUT);
       return v >= 1 ? Math.min(v, MAX_PAYOUT) : null;
     },
     [formsOf, now],
@@ -751,6 +777,8 @@ export function useSportsbook(active: boolean) {
     inSlip,
     slipOdds,
     slipChanged,
+    slipBoost,
+    slipInsured,
     slipClosed,
     stake,
     potential,

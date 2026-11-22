@@ -12,6 +12,7 @@ import { useSession } from "../lib/sessionStore";
 import { sfx } from "../lib/sound";
 import { ambience } from "../lib/ambience";
 import { shareTicket } from "../lib/sports/shareCard";
+import { compKey, favs, teamKey, useFavs } from "../lib/sports/favs";
 
 function useDesktop() {
   const [desktop, setDesktop] = useState(true);
@@ -141,6 +142,7 @@ function MatchRow({ g, m, open, onOpen, lite }: { g: SportsGame; m: Match; open:
       </div>
       {open && m.status !== "done" && m.status !== "void" && (
         <div className="sb-markets">
+          <FollowRow m={m} />
           {markets.slice(1).map((k) => {
             const ps = priced(m, model, k, g.now || Date.now());
             return (
@@ -158,6 +160,23 @@ function MatchRow({ g, m, open, onOpen, lite }: { g: SportsGame; m: Match; open:
           {!model && <p className="text-[11px] text-white/40">Odds not available for this match.</p>}
         </div>
       )}
+    </div>
+  );
+}
+
+function FollowRow({ m }: { m: Match }) {
+  const f = useFavs();
+  return (
+    <div className="sb-follow">
+      {[m.home, m.away].map((t) => {
+        const k = teamKey(m.sport, t.id);
+        const on = f.teams.includes(k);
+        return (
+          <button key={t.id} type="button" onClick={() => favs.toggleTeam(k)} aria-pressed={on} className={`sb-follow__key ${on ? "is-on" : ""}`}>
+            {on ? "★" : "☆"} {on ? "Following" : "Follow"} {t.name}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -286,7 +305,10 @@ function Highlights({ g, sport }: { g: SportsGame; sport: Sport }) {
 
 function useList(g: SportsGame, sport: Sport, view: View, comp: string) {
   const now = g.now || 0;
+  const fav = useFavs();
   return useMemo(() => {
+    const favComp = (id: string) => fav.comps.includes(compKey(sport, id));
+    const favTeam = (m: Match) => fav.teams.includes(teamKey(sport, m.home.id)) || fav.teams.includes(teamKey(sport, m.away.id));
     const list = g.matches.filter((m) => m.sport === sport);
     const inView = list.filter((m) => {
       if (view === "live") return isLive(m);
@@ -302,20 +324,31 @@ function useList(g: SportsGame, sport: Sport, view: View, comp: string) {
       comps.set(m.comp.id, c);
     }
     const shown = (comp === "all" ? inView : inView.filter((m) => m.comp.id === comp)).sort((a, b) => (view === "results" ? b.kickoff - a.kickoff : a.kickoff - b.kickoff));
-    const groups: { id: string; name: string; country?: string; matches: Match[] }[] = [];
+    const groups: { id: string; name: string; country?: string; matches: Match[]; pinned?: boolean }[] = [];
+    // My teams first, then pinned competitions, then the rest.
+    const mine = comp === "all" ? shown.filter(favTeam) : [];
+    if (mine.length) groups.push({ id: "★teams", name: "★ My teams", matches: mine });
     for (const m of shown) {
+      if (mine.includes(m)) continue;
       let grp = groups.find((x) => x.id === m.comp.id);
-      if (!grp) groups.push((grp = { id: m.comp.id, name: m.comp.name, country: m.comp.country, matches: [] }));
+      if (!grp) groups.push((grp = { id: m.comp.id, name: m.comp.name, country: m.comp.country, matches: [], pinned: favComp(m.comp.id) }));
       grp.matches.push(m);
     }
+    const rank = (x: (typeof groups)[number]) => (x.id === "★teams" ? 0 : x.pinned ? 1 : 2);
+    groups.sort((a, b) => rank(a) - rank(b));
     const counts: Record<View, number> = {
       live: list.filter(isLive).length,
       today: list.filter((m) => m.status === "pre" && sameDay(m.kickoff, now)).length,
       upcoming: list.filter((m) => m.status === "pre" && !sameDay(m.kickoff, now)).length,
       results: list.filter((m) => m.status === "done" || m.status === "void").length,
     };
-    return { groups, comps: [...comps.values()].sort((a, b) => b.live - a.live || b.n - a.n), counts, total: shown.length };
-  }, [g.matches, sport, view, comp, now]);
+    return {
+      groups,
+      comps: [...comps.values()].sort((a, b) => Number(favComp(b.id)) - Number(favComp(a.id)) || b.live - a.live || b.n - a.n).map((c) => ({ ...c, fav: favComp(c.id) })),
+      counts,
+      total: shown.length,
+    };
+  }, [g.matches, sport, view, comp, now, fav]);
 }
 
 function MatchList({ g, sport, view, comp, lite }: { g: SportsGame; sport: Sport; view: View; comp: string; lite: boolean }) {
@@ -335,6 +368,11 @@ function MatchList({ g, sport, view, comp, lite }: { g: SportsGame; sport: Sport
       {groups.map((grp) => (
         <section key={grp.id}>
           <p className="sb-comp">
+            {grp.id !== "★teams" && (
+              <button type="button" onClick={() => favs.toggleComp(compKey(sport, grp.id))} className={`sb-fav ${grp.pinned ? "is-on" : ""}`} aria-pressed={Boolean(grp.pinned)} aria-label={`Pin ${grp.name}`}>
+                {grp.pinned ? "★" : "☆"}
+              </button>
+            )}
             {grp.name}
             {grp.country && <span>{grp.country}</span>}
           </p>
@@ -432,6 +470,12 @@ function Slip({ g, lite }: { g: SportsGame; lite: boolean }) {
             All in
           </button>
         </div>
+        {n > 1 && (g.slipBoost > 0 || g.slipInsured || n < 3) && (
+          <div className="sb-perks">
+            {g.slipBoost > 0 ? <span className="sb-perk is-on">Combo boost +{Math.round(g.slipBoost * 100)}%</span> : <span className="sb-perk">3 picks → +5% boost</span>}
+            {g.slipInsured ? <span className="sb-perk is-on">Insured · 1 miss refunded</span> : n >= 3 && <span className="sb-perk">5 picks → insurance</span>}
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-1.5">
           <div className="rl-window rl-window--sm">
             <span className="rl-window__label">Total odds</span>
@@ -456,13 +500,15 @@ function Slip({ g, lite }: { g: SportsGame; lite: boolean }) {
 
 function TicketCard({ g, t }: { g: SportsGame; t: Ticket }) {
   const co = t.status === "open" ? g.cashOutValue(t) : null;
-  const state = t.status === "open" ? "Open" : t.status === "won" ? "Won" : t.status === "lost" ? "Lost" : t.status === "cashed" ? "Cashed out" : "Void";
+  const state = t.status === "open" ? "Open" : t.status === "won" ? "Won" : t.status === "lost" ? "Lost" : t.status === "cashed" ? "Cashed out" : t.status === "refund" ? "Refunded · insurance" : "Void";
   return (
     <div className={`sb-ticket is-${t.status}`}>
       <div className="flex items-center justify-between gap-2">
         <span className="sb-ticket__state">{state}</span>
         <span className="text-[10px] text-white/35">
           #{t.id} · {t.legs.length > 1 ? `Combo ×${fmtOdds(t.odds)}` : `@ ${fmtOdds(t.odds)}`}
+          {t.boost ? ` · +${Math.round(t.boost * 100)}%` : ""}
+          {t.insured ? " · insured" : ""}
         </span>
       </div>
       <ul className="mt-1.5 space-y-1">
@@ -484,13 +530,13 @@ function TicketCard({ g, t }: { g: SportsGame; t: Ticket }) {
               Cash out ◈ {compact(co)}
             </button>
           ) : (
-            <span className="text-white/40">Win ◈ {compact(Math.min(MAX_PAYOUT, Math.floor(t.stake * t.odds)))}</span>
+            <span className="text-white/40">Win ◈ {compact(Math.min(MAX_PAYOUT, Math.floor(t.stake * t.odds + (t.stake * t.odds - t.stake) * (t.boost ?? 0))))}</span>
           )
         ) : (
           <span className={t.payout > t.stake ? "font-bold text-[#f0d38b]" : "text-white/40"}>{t.payout ? `◈ ${money(t.payout)}` : "—"}</span>
         )}
       </div>
-      {t.status !== "lost" && t.status !== "void" && (
+      {t.status !== "lost" && t.status !== "void" && t.status !== "refund" && (
         <button type="button" onClick={() => shareTicket(t)} className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#e5c779]/70 hover:text-[#f5d778]">
           Share ticket ↗
         </button>
@@ -665,6 +711,7 @@ export default function Sportsbook({ active, focus = false, onFocusChange }: { a
                   </button>
                   {comps.map((c) => (
                     <button key={c.id} type="button" onClick={() => setComp(c.id)} className={`sb-compkey ${comp === c.id ? "is-on" : ""}`}>
+                      {c.fav && <span className="text-[#f5d778]">★</span>}
                       <span className="min-w-0 flex-1 truncate">{c.name}</span>
                       {c.live > 0 && <i className="sb-dot" />}
                       <span className="text-white/35">{c.n}</span>
@@ -759,7 +806,7 @@ function Sheet({ g, tab, setTab, onClose }: { g: SportsGame; tab: "slip" | "bets
   return (
     <div className="fixed inset-0 z-[70]">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 bg-black/60" />
-      <div role="dialog" aria-modal="true" aria-label="Bet slip" className="rl-sheet safe-y absolute inset-x-0 bottom-0 flex h-[78dvh] flex-col">
+      <div role="dialog" aria-modal="true" aria-label="Bet slip" className="rl-sheet absolute inset-x-0 bottom-0 flex h-[78dvh] flex-col">
         <div className="flex items-center gap-2 px-3 pt-3">
           <div className="rl-tabs !grid-cols-2 flex-1" role="tablist">
             {tabs.map(([id, label]) => (

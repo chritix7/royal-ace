@@ -2764,3 +2764,15 @@ html.rl-wheel-solid body *:not(.rl-wheel-overlay, .rl-wheel-overlay *, .rl-over-
 .rk-row.is-top1 .rk-row__pos { color: #f5d778; } .rk-row.is-top2 .rk-row__pos { color: #d9d9e0; } .rk-row.is-top3 .rk-row__pos { color: #d39a62; }
 .rk-row.is-you { border-color: #f0d38b; background: linear-gradient(90deg, rgba(240, 211, 139, 0.18), rgba(240, 211, 139, 0.03)); }
 .rk-row.is-you .rk-row__net { color: #f5d778; }
+.sb-perks { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.sb-perk { border-radius: 9999px; border: 1px dashed rgba(255, 255, 255, 0.15); padding: 0.12rem 0.55rem; font-size: 9.5px; font-weight: 800; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.45); }
+.sb-perk.is-on { border-style: solid; border-color: rgba(240, 211, 139, 0.6); background: rgba(240, 211, 139, 0.1); color: #f5d778; }
+.sb-ticket.is-refund { border-color: rgba(240, 211, 139, 0.3); }
+.sb-fav { flex-shrink: 0; font-size: 13px; line-height: 1; color: rgba(255, 255, 255, 0.25); transition: color 0.15s, transform 0.1s; }
+.sb-fav:hover { color: rgba(240, 211, 139, 0.7); }
+.sb-fav.is-on { color: #f5d778; }
+.sb-fav:active { transform: scale(0.9); }
+.sb-follow { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.sb-follow__key { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.1); padding: 0.2rem 0.65rem; font-size: 10.5px; font-weight: 700; color: rgba(255, 255, 255, 0.55); }
+.sb-follow__key:hover { border-color: rgba(240, 211, 139, 0.45); }
+.sb-follow__key.is-on { border-color: rgba(240, 211, 139, 0.7); background: rgba(240, 211, 139, 0.1); color: #f5d778; }
