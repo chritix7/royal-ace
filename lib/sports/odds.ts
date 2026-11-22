@@ -157,6 +157,7 @@ export function marketsOf(m: Match, model: Model | null): Market[] {
 
 /** Fair probability that a pick wins, from the model (null: cannot price). */
 export function probOf(model: Model, sport: Sport, market: string, pick: string): number | null {
+  if (market === "bb") return builderProb(model, sport, parseBuilder(pick));
   const [raw, lineS] = market.split(":");
   // The daily boost is a match result at a better price.
   const kind = raw === "boost" ? "1x2" : raw;
@@ -243,7 +244,7 @@ function wins(s: Score, kind: string, line: number, pick: string): boolean {
 
 /* ───────────── Prices ───────────── */
 
-const MARGIN: Record<string, number> = { scorer: 0.15, assist: 0.15, decisive: 0.14, "1x2": 0.07, dc: 0.05, ou: 0.06, btts: 0.06, hcp: 0.07, ml: 0.05, spread: 0.05, cs: 0.18, htft: 0.16 };
+const MARGIN: Record<string, number> = { bb: 0.1, scorer: 0.15, assist: 0.15, decisive: 0.14, "1x2": 0.07, dc: 0.05, ou: 0.06, btts: 0.06, hcp: 0.07, ml: 0.05, spread: 0.05, cs: 0.18, htft: 0.16 };
 
 /** Decimal odds with the house margin; null when the market is closed. */
 export function priceOf(p: number | null, market: string): number | null {
@@ -274,6 +275,13 @@ export function priced(m: Match, model: Model | null, market: Market, now: numbe
 /** "won" | "lost" | "void" once the match is over, null while it runs. */
 export function settle(m: Match, market: string, pick: string): "won" | "lost" | "void" | null {
   if (m.status === "void") return "void";
+  if (market === "bb") {
+    // Bet builder: every part must win; one lost part loses it at once.
+    const parts = parseBuilder(pick).map((x) => settle(m, x.market, x.pick));
+    if (parts.includes("lost")) return "lost";
+    if (parts.includes(null)) return null;
+    return parts.every((x) => x === "void") ? "void" : "won";
+  }
   const [kind, lineS] = market.split(":");
   const line = lineS !== undefined ? +lineS : 0;
   if (m.status !== "done") return m.status === "pre" ? null : settleEarly(m, kind, line, pick);
@@ -292,6 +300,44 @@ export function settle(m: Match, market: string, pick: string): "won" | "lost" |
   if (!s) return "void";
   if (kind === "ou" && s.h + s.a === line) return "void";
   return wins(s, kind, line, pick) ? "won" : "lost";
+}
+
+/* ───────────── Bet builder (one football match, several picks) ───────────── */
+
+/** Markets that can go into a bet builder: all read from the final score. */
+export const builderOk = (sport: Sport, market: string) => sport === "football" && ["1x2", "dc", "ou", "btts", "cs", "hcp"].includes(market.split(":")[0]);
+export type BuilderPart = { market: string; pick: string };
+export const encodeBuilder = (parts: BuilderPart[]) => parts.map((p) => `${p.market}=${p.pick}`).join("|");
+export function parseBuilder(pick: string): BuilderPart[] {
+  return pick
+    .split("|")
+    .map((x) => x.split("="))
+    .filter((x) => x.length === 2 && x[0] && x[1])
+    .map(([market, pk]) => ({ market, pick: pk }));
+}
+/**
+ * Joint chance of several picks on the same match, read on the same grid
+ * of final scores: correlated picks (a win and over 2.5…) are priced
+ * together, contradictory ones come out at zero.
+ */
+export function builderProb(model: Model, sport: Sport, parts: BuilderPart[]): number | null {
+  if (model.kind !== "goals" || sport !== "football" || parts.length < 2) return null;
+  if (!parts.every((p) => builderOk(sport, p.market))) return null;
+  const ph = poisson(model.lh);
+  const pa = poisson(model.la);
+  let p = 0;
+  for (let i = 0; i < ph.length; i++)
+    for (let j = 0; j < pa.length; j++) {
+      const s = { h: model.now.h + i, a: model.now.a + j };
+      if (
+        parts.every((x) => {
+          const [k, l] = x.market.split(":");
+          return wins(s, k, l !== undefined ? +l : 0, x.pick);
+        })
+      )
+        p += ph[i] * pa[j];
+    }
+  return p;
 }
 
 /** "Paid if 2 goals ahead": football match result (and the daily boost). */

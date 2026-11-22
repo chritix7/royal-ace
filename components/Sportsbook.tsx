@@ -98,7 +98,12 @@ function MatchRow({ g, m, open, onOpen, lite }: { g: SportsGame; m: Match; open:
   const main = markets[0];
   const mainPriced = main ? priced(m, model, main, g.now || Date.now()) : [];
   const live = isLive(m);
-  const add = (p: Priced, title: string) => g.toggle(m, p.market, p.pick, p.label, title);
+  const add = (p: Priced, title: string) => {
+    // Labels that read on their own in a ticket or a bet builder.
+    const k = p.market.split(":")[0];
+    const label = k === "btts" ? `Both score: ${p.label}` : k === "cs" ? `Score ${p.label}` : p.label;
+    return g.toggle(m, p.market, p.pick, label, title);
+  };
   const short = (p: Priced) => ({ ...p, label: p.pick === "X" ? "Draw" : p.pick === "1" ? "1" : p.pick === "2" ? "2" : p.label });
   return (
     <div className={`sb-match ${open ? "is-open" : ""} ${live ? "is-live" : ""}`}>
@@ -357,8 +362,21 @@ function Slip({ g, lite }: { g: SportsGame; lite: boolean }) {
         {g.slip.map((s) => (
           <div key={s.key} className={`sb-sel ${s.now === null ? "is-closed" : ""}`}>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[12px] font-bold text-[#efe2bd]">{s.label}</p>
-              <p className="truncate text-[10px] text-white/45">{s.marketTitle}</p>
+              {s.market === "bb" ? (
+                <>
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#e5c779]">Bet builder</p>
+                  {s.label.split(" + ").map((x) => (
+                    <p key={x} className="truncate text-[12px] font-bold text-[#efe2bd]">
+                      · {x}
+                    </p>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <p className="truncate text-[12px] font-bold text-[#efe2bd]">{s.label}</p>
+                  <p className="truncate text-[10px] text-white/45">{s.marketTitle}</p>
+                </>
+              )}
               <p className="truncate text-[10px] text-white/35">
                 {s.live && <span className="mr-1 text-[#ff6b6b]">LIVE</span>}
                 {s.matchLabel}

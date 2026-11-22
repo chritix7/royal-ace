@@ -7,7 +7,7 @@ import { track } from "./events";
 import { sessionStore } from "./sessionStore";
 import { useBalance, wallet } from "./wallet";
 import { demoForms, demoMatches } from "./sports/demo";
-import { isOpen, modelOf, parsePlayerMarket, playerProb, priceOf, probOf, settle, type PlayerLine } from "./sports/odds";
+import { builderOk, encodeBuilder, isOpen, modelOf, parsePlayerMarket, playerProb, priceOf, probOf, settle, type PlayerLine } from "./sports/odds";
 import type { Feed, Match, Sport, Standings, StandingsFeed } from "./sports/types";
 
 /**
@@ -55,7 +55,8 @@ export type Ticket = {
   settledAt?: number;
   seen?: boolean;
 };
-type Saved = { tickets: Ticket[]; slip: Selection[]; stake: number; nextId: number; pending: boolean };
+/** bb: the odds the player last saw for each bet builder (by match). */
+type Saved = { tickets: Ticket[]; slip: Selection[]; stake: number; nextId: number; pending: boolean; bb?: Record<string, number> };
 const KEY = "royalace:sports";
 const FORMS_KEY = "royalace:sports-forms";
 const RESULTS_KEY = "royalace:sports-results";
@@ -78,6 +79,7 @@ function load(): Saved {
       slip: Array.isArray(s.slip) ? s.slip.slice(0, MAX_PICKS) : [],
       stake: Math.min(SPORTS_MAX, Math.max(SPORTS_MIN, s.stake ?? 100)),
       nextId: s.nextId ?? 1,
+      bb: s.bb && typeof s.bb === "object" ? s.bb : {},
       pending: tickets.some((t) => t.status === "open"),
     };
   } catch {
@@ -561,14 +563,19 @@ export function useSportsbook(active: boolean) {
     const key = `${m.id}|${market}|${pick}`;
     const s = savedRef.current;
     if (s.slip.some((x) => x.key === key)) {
-      commit({ ...s, slip: s.slip.filter((x) => x.key !== key) });
+      removeSel(key);
       return true;
     }
     const odds = oddsNow(m, market, pick);
     if (odds === null) return refuse("This market is closed");
-    // One pick per match: a new pick on the same match replaces the old one.
+    // Same match: football picks read from the score build a bet builder;
+    // anything else replaces the match's previous pick.
+    const same = s.slip.filter((x) => x.matchId === m.id);
+    const building = same.length > 0 && builderOk(m.sport, market) && same.every((x) => builderOk(x.sport, x.market));
+    const keep = building ? same.filter((x) => x.market !== market) : [];
     const others = s.slip.filter((x) => x.matchId !== m.id);
-    if (others.length >= MAX_PICKS) return refuse(`${MAX_PICKS} picks at most`);
+    if (new Set(others.map((x) => x.matchId)).size >= MAX_PICKS) return refuse(`${MAX_PICKS} matches at most`);
+    if (keep.length >= 6) return refuse("6 picks at most in a bet builder");
     const sel: Selection = {
       key,
       matchId: m.id,
@@ -588,13 +595,34 @@ export function useSportsbook(active: boolean) {
       if (!p) return refuse("Player data unavailable");
       sel.snap = { teamId: p.teamId, comp: m.comp.id, played: p.played, goals: p.goals, assists: p.assists };
     }
-    commit({ ...s, slip: [...others, sel] });
+    const group = [...keep, sel];
+    const bb = { ...(s.bb ?? {}) };
+    if (group.length > 1) {
+      const o = oddsNow(m, "bb", encodeBuilder(group));
+      if (o === null) return refuse("These picks cannot all win together");
+      bb[m.id] = o;
+    } else delete bb[m.id];
+    commit({ ...s, slip: [...others, ...group], bb });
     sfx.chip();
-    if (s.slip.some((x) => x.matchId === m.id)) setMessage("One pick per match: replaced");
+    if (group.length > 1) setMessage(`Bet builder · ${group.length} picks`);
+    else if (same.length) setMessage("One pick per match: replaced");
     return true;
   };
-  const removeSel = (key: string) => commit({ ...savedRef.current, slip: savedRef.current.slip.filter((x) => x.key !== key) });
-  const clearSlip = () => commit({ ...savedRef.current, slip: [] });
+  /** Remove a pick (or a whole bet builder, by its key). */
+  const removeSel = (key: string) => {
+    const s = savedRef.current;
+    const [matchId, market] = key.split("|");
+    const slip2 = market === "bb" ? s.slip.filter((x) => x.matchId !== matchId) : s.slip.filter((x) => x.key !== key);
+    const bb = { ...(s.bb ?? {}) };
+    const left = slip2.filter((x) => x.matchId === matchId);
+    const m = byId.current.get(matchId);
+    if (left.length > 1 && m) {
+      const o = oddsNow(m, "bb", encodeBuilder(left));
+      if (o !== null) bb[matchId] = o;
+    } else delete bb[matchId];
+    commit({ ...s, slip: slip2, bb });
+  };
+  const clearSlip = () => commit({ ...savedRef.current, slip: [], bb: {} });
   const setStake = (v: number) => {
     const st = Math.max(SPORTS_MIN, Math.min(SPORTS_MAX, Math.round(v)));
     commit({ ...savedRef.current, stake: st });
@@ -609,7 +637,26 @@ export function useSportsbook(active: boolean) {
   const doubleStake = () => setStake(Math.min(Math.floor(wallet.getBalance()), savedRef.current.stake * 2) || SPORTS_MIN);
 
   // Live odds in the slip (they move with the match).
-  const slipNow = slip.map((s) => {
+  // Picks on the same match make one bet builder leg.
+  const slipLegs: Selection[] = [];
+  for (const id of [...new Set(slip.map((x) => x.matchId))]) {
+    const grp = slip.filter((x) => x.matchId === id);
+    if (grp.length === 1) slipLegs.push(grp[0]);
+    else {
+      const pick = encodeBuilder(grp);
+      slipLegs.push({
+        ...grp[0],
+        key: `${id}|bb|${pick}`,
+        market: "bb",
+        pick,
+        label: grp.map((x) => x.label).join(" + "),
+        marketTitle: `Bet builder · ${grp.length} picks`,
+        odds: saved.bb?.[id] ?? 0,
+        live: grp.some((x) => x.live),
+      });
+    }
+  }
+  const slipNow = slipLegs.map((s) => {
     const m = matches.find((x) => x.id === s.matchId);
     const o = m ? oddsNow(m, s.market, s.pick) : null;
     return { ...s, now: o };
@@ -626,15 +673,18 @@ export function useSportsbook(active: boolean) {
     if (slipClosed) return refuse("A pick is closed — remove it");
     if (slipChanged) {
       // Accept the new prices only after the player has seen them.
-      commit({ ...s, slip: slipNow.map(({ now: n, ...x }) => ({ ...x, odds: n ?? x.odds })) });
+      const fresh = new Map(slipNow.map((x) => [x.key, x.now]));
+      const bb = { ...(s.bb ?? {}) };
+      for (const x of slipNow) if (x.market === "bb" && x.now !== null) bb[x.matchId] = x.now;
+      commit({ ...s, slip: s.slip.map((x) => ({ ...x, odds: fresh.get(x.key) ?? x.odds })), bb });
       return refuse("Odds changed — check and confirm");
     }
     if (s.stake > wallet.getBalance()) return refuse("Not enough chips");
     const t = Date.now();
-    const legs: Leg[] = s.slip.map((x) => ({ ...x, result: null }));
+    const legs: Leg[] = slipNow.map(({ now: _n, ...x }) => ({ ...x, result: null }));
     const ticket: Ticket = { id: s.nextId, at: t, stake: s.stake, odds: comboOdds(legs), legs, status: "open", payout: 0 };
     wallet.add(-s.stake);
-    commit({ ...s, tickets: [...s.tickets, ticket].slice(-150), slip: [], nextId: s.nextId + 1 });
+    commit({ ...s, tickets: [...s.tickets, ticket].slice(-150), slip: [], bb: {}, nextId: s.nextId + 1 });
     track("betPlaced");
     if (legs.length >= 3) track("betCombo");
     if (legs.some((l) => l.live)) track("betLive");
