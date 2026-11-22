@@ -224,15 +224,19 @@ const maxHandCards = Math.max(
   ...s.hands.map((hand) => hand.cards.length)
 );
 
+// Phones with 3 or 4 hands: two hands per row, so the cards stay large
+// and readable (the felt has room above for a second row).
+const perRow = compact && handCount >= 3 ? 2 : handCount;
+const rows = Math.ceil(handCount / perRow);
 const playerCardStyle = (
   compact
     ? {
         "--bj-card-h": `min(
-          14dvh,
+          ${rows > 1 ? "11.5dvh" : "14dvh"},
           118px,
           calc(
-            (100vw - ${32 + handCount * 24}px) /
-            ${handCount * (0.44 * maxHandCards + 0.28)}
+            (100vw - ${32 + perRow * 24}px) /
+            ${perRow * (0.44 * maxHandCards + 0.28)}
           )
         )`,
       }
@@ -530,7 +534,7 @@ const playerCardStyle = (
           <div
   className="grid min-h-full items-center gap-1 sm:gap-3"
   style={{
-    gridTemplateColumns: `repeat(${handCount}, minmax(0, 1fr))`,
+    gridTemplateColumns: `repeat(${perRow}, minmax(0, 1fr))`,
   }}
 >
   {s.hands.length === 0 && (

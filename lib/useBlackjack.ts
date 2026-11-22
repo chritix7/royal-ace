@@ -11,6 +11,7 @@ import { bjJackpot } from "./bjJackpot";
 import { CHIPS, MIN_BET, REFILL, EMPTY_STATS, EMPTY_RECORDS, DEFAULT_SETTINGS, INITIAL, tableBacks, sleep as delay, floor10 } from "./game";
 import type { S, Settings, Records } from "./game";
 import { winHistory } from "./winHistory";
+import { bjCoach } from "./bjCoach";
 import { sessionStore } from "./sessionStore";
 import {
   createPending,
@@ -602,6 +603,10 @@ function giveDealer() {
     const csur = c.hands.length === 1 && h.cards.length === 2 && !h.split;
     const best = advise(h.cards, up, cd, cs, { canSurrender: csur, h17: c.settings.h17 });
     const ok = best === action;
+    const hv = handValue(h.cards);
+    const kind = canSplitCards(h.cards) ? "Pairs" : hv.soft ? "Soft" : "Hard";
+    const label = kind === "Pairs" ? `Pair of ${h.cards[0].rank}s` : `${kind} ${hv.total}`;
+    bjCoach.record(kind, label, up.rank, action, best);
     set({
       stats: { ...c.stats, decisions: c.stats.decisions + 1, correct: c.stats.correct + (ok ? 1 : 0) },
       goodStreak: ok ? c.goodStreak + 1 : 0,

@@ -1,5 +1,6 @@
 "use client";
 
+import StrategyCoach from "./StrategyCoach";
 import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { Theme, VegasVariant } from "../lib/game";
@@ -682,6 +683,7 @@ export default function Sidebar({ g }: { g: Game }) {
           </p>
           <p className="text-[11px] text-white/40">{s.stats.correct} / {s.stats.decisions} correct decisions</p>
           <p className="mt-3 min-h-8 text-xs text-white/70" aria-live="polite">{s.coach ?? "Make a move to get feedback."}</p>
+          <StrategyCoach h17={s.settings.h17} />
         </SectionModal>
 
         {showCount && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { handValue, isBlackjack } from "../lib/blackjack";
 import { MIN_BET, REFILL, money, tableBg } from "../lib/game";
 import PlayingCard from "./PlayingCard";
@@ -81,6 +81,16 @@ function getShoeStatus(g: Game): {
   // Which side-bet staking modal is open (Perfect Pairs / 21+3 / none).
   // Tapping either felt pill opens the shared SideBetModal.
   const [sideBetOpen, setSideBetOpen] = useState<"pp" | "t3" | null>(null);
+  // Phones: multi-hand cards are sized to the screen (two hands a row) so
+  // they stay readable instead of shrinking to the small compact size.
+  const [phone, setPhone] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const sync = () => setPhone(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
   const {
   s,
   roundBreakdown,
@@ -393,7 +403,16 @@ function getShoeStatus(g: Game): {
               wraps, so splitting (extra hands, spot badges, longer
               labels) can't push the bet zone and its buttons down past
               the bottom edge of the felt. */}
-          <div className="flex flex-wrap items-start justify-center gap-2 max-lg:mt-auto sm:gap-5 lg:mt-4 lg:h-[156px] lg:flex-nowrap lg:gap-3">
+          <div
+            className={`flex flex-wrap items-start justify-center gap-2 max-lg:mt-auto sm:gap-5 lg:mt-4 lg:h-[156px] lg:flex-nowrap lg:gap-3 ${phone && s.hands.length > 1 ? "!gap-x-1 !gap-y-1.5" : ""}`}
+            style={
+              phone && s.hands.length > 1
+                ? ({
+                    "--bj-card-h": `min(${s.hands.length > 2 ? "9.5dvh" : "12dvh"}, 104px, calc((100vw - ${48 + Math.min(2, s.hands.length) * 30}px) / ${Math.min(2, s.hands.length) * (0.44 * Math.max(2, ...s.hands.map((h) => h.cards.length)) + 0.28)}))`,
+                  } as CSSProperties)
+                : undefined
+            }
+          >
   {s.hands.length === 0 && (
     <div
       aria-hidden="true"
@@ -411,7 +430,7 @@ function getShoeStatus(g: Game): {
                   data-deal-target={`hand-${i}`}
                   className={`relative rounded-2xl border p-2 transition sm:p-3 ${
                     isActive ? "border-[#e5c779]/70 bg-[#e5c779]/10" : "border-transparent"
-                  } ${compact && !isActive && s.phase === "player" ? "opacity-75" : ""}`}
+                  } ${compact && !isActive && s.phase === "player" ? "opacity-85" : ""} ${phone && s.hands.length > 1 ? "!p-1.5" : ""}`}
                 >
                   {/* Engraved per-hand spot badge — only in multi-hand play. */}
                   {multi && (
@@ -441,7 +460,7 @@ function getShoeStatus(g: Game): {
                     </span>
                     {h.result && <HandResultBadge result={h.result} />}
                   </div>
-                  <div className={`flex justify-center ${compact ? "min-h-[72px] sm:min-h-24" : "min-h-24 sm:min-h-28 lg:min-h-[96px]"}`}>
+                  <div className={`flex justify-center ${phone && s.hands.length > 1 ? "min-h-[var(--bj-card-h)]" : compact ? "min-h-[72px] sm:min-h-24" : "min-h-24 sm:min-h-28 lg:min-h-[96px]"}`}>
                     {h.cards.map((card, k) => (
                       <span
                         key={`p${i}-${k}-${card.rank}${card.suit}`}
@@ -460,6 +479,7 @@ function getShoeStatus(g: Game): {
                           card={card}
                           overlap={k > 0}
                           compact={compact}
+                          fit={phone && s.hands.length > 1}
                           back={back}
                           animated={false}
                         />
