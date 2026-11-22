@@ -2809,3 +2809,23 @@ html.rl-wheel-solid body *:not(.rl-wheel-overlay, .rl-wheel-overlay *, .rl-over-
 .bj-chart__label { font-size: 10px; font-weight: 800; color: rgba(255, 255, 255, 0.65); align-self: center; }
 .bj-cell { display: flex; height: 1.15rem; align-items: center; justify-content: center; border-radius: 3px; font-size: 9.5px; font-weight: 900; color: rgba(0, 0, 0, 0.8); }
 .bj-cell.is-H { background: #e7e2d4; } .bj-cell.is-S { background: #c8a65b; } .bj-cell.is-D { background: #5fbf7a; } .bj-cell.is-P { background: #6fa8dc; } .bj-cell.is-R { background: #d9776f; }
+/* Slots: win tiers, each with its own look, and the ladder that lights up */
+.win-ladder { display: flex; gap: 0.5rem; }
+.win-ladder__step { border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(0, 0, 0, 0.55); padding: 0.25rem 0.9rem; font-family: var(--font-display), Georgia, serif; font-size: 12px; font-weight: 700; letter-spacing: 0.24em; color: rgba(255, 255, 255, 0.3); }
+.win-ladder__step.is-reached { animation: win-step 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
+.win-ladder__step.is-reached.is-big { --c1: #f8e3a3; --c2: #c89a3f; }
+.win-ladder__step.is-reached.is-mega { --c1: #ffd0f0; --c2: #d14fa0; }
+.win-ladder__step.is-reached.is-epic { --c1: #d9f7ff; --c2: #5aa9ff; }
+@keyframes win-step { 0% { transform: scale(0.8); } 60% { transform: scale(1.18); } 100% { transform: scale(1); color: #141210; border-color: var(--c1); background: linear-gradient(180deg, var(--c1), var(--c2)); box-shadow: 0 0 18px var(--c2); } }
+.win-tier-mega .win-flash { background: radial-gradient(circle at 50% 45%, rgba(255, 120, 210, 0.35), transparent 60%); }
+.win-tier-epic .win-flash { background: radial-gradient(circle at 50% 45%, rgba(120, 200, 255, 0.4), transparent 62%); }
+.win-tier-epic .gold-text { background-image: linear-gradient(100deg, #fff3c4, #9be7ff 30%, #ffd0f0 55%, #f8e3a3 80%); }
+@media (max-width: 639px) { .win-ladder__step { padding: 0.2rem 0.6rem; font-size: 10px; letter-spacing: 0.16em; } }
+/* Hold'em: odds pill, clickable hands, replay cards */
+.pk-odds { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pk-hist:hover { border-color: rgba(240, 211, 139, 0.4); }
+.pk-rcard { display: flex; height: 3.4rem; width: 2.45rem; flex-direction: column; align-items: center; justify-content: center; border-radius: 6px; background: #f6efdc; font-family: Georgia, serif; font-size: 17px; font-weight: 700; line-height: 1; color: #1a1612; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(200, 166, 91, 0.6); animation: pk-rin 0.3s ease-out both; }
+.pk-rcard small { font-size: 15px; }
+.pk-rcard.is-red { color: #a01c2c; }
+.pk-rcard.is-back { background: repeating-linear-gradient(45deg, #1b2a22 0 4px, #0f1a14 4px 8px); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45), inset 0 0 0 2px rgba(200, 166, 91, 0.5); animation: none; }
+@keyframes pk-rin { from { opacity: 0; transform: translateY(6px) scale(0.92); } }

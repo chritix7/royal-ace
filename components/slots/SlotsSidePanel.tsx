@@ -6,6 +6,7 @@ import { achievementsStore, challengeView, useAchievements } from "../../lib/ach
 import { COLLECTION_CHIP_MULT } from "../../lib/collection";
 import { money } from "../../lib/game";
 import { useSession } from "../../lib/sessionStore";
+import { useSlotBonuses } from "../../lib/slotBonuses";
 import { RANKS, SKINS, type SkinId, type Skin } from "../../lib/skins";
 import {
   BONUS_PRICE_MULT,
@@ -236,6 +237,7 @@ export default function SlotsSidePanel({
       {current === "session" && (
         <div className="space-y-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-3 lg:space-y-0">
           <div className="space-y-3">
+          <BonusHistory card={card} />
           <div className={card}>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#d7b45b]/80">Today</p>
             <dl className="mt-2 grid grid-cols-3 gap-2 text-center">
@@ -321,5 +323,39 @@ export default function SlotsSidePanel({
         Virtual chips only. No real money, deposits or cash-outs.
       </p>
     </aside>
+  );
+}
+
+/** The last free-spin bonuses: spins, retriggers, total and × the bet. */
+function BonusHistory({ card }: { card: string }) {
+  const list = useSlotBonuses();
+  const best = list.reduce((m, b) => Math.max(m, b.bet ? b.win / b.bet : 0), 0);
+  return (
+    <div className={card}>
+      <div className="flex items-baseline justify-between">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#d7b45b]/80">Bonus history</p>
+        {list.length > 0 && <p className="text-[10px] text-white/40">best ×{Math.round(best)}</p>}
+      </div>
+      {!list.length ? (
+        <p className="mt-2 text-[12px] text-white/40">No bonus yet — three scatters, or buy one.</p>
+      ) : (
+        <ul className="mt-2 space-y-1">
+          {list.slice(0, 8).map((b) => {
+            const x = b.bet ? b.win / b.bet : 0;
+            return (
+              <li key={b.at} className="flex items-center gap-2 rounded-lg bg-black/30 px-2.5 py-1.5 text-[11.5px]">
+                <span className="w-12 shrink-0 font-mono text-[10px] text-white/40">{new Date(b.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                <span className="min-w-0 flex-1 truncate text-white/70">
+                  {b.spins} spins{b.retriggers ? ` · +${b.retriggers} retrig.` : ""}
+                  {b.bought && <span className="ml-1 rounded bg-[#d7b45b]/20 px-1 text-[9px] font-bold text-[#f0d38b]">BUY</span>}
+                </span>
+                <span className={`font-mono font-bold ${x >= 50 ? "text-[#f5d778]" : x >= 20 ? "text-[#f0d99a]" : "text-white/80"}`}>◈ {money(b.win)}</span>
+                <span className="w-12 shrink-0 text-right font-mono text-[10px] text-white/45">×{x >= 100 ? Math.round(x) : x.toFixed(1)}</span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
   );
 }

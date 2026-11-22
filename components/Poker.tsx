@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import PlayingCard from "./PlayingCard";
+import { handOdds, type HandOdds } from "../lib/pokerOdds";
+import { hint as hintOf, settle as settleHand } from "../lib/poker";
 import { ChipFace, TableChip } from "./ChipButton";
 import { Counter } from "./ui";
 import { money } from "../lib/game";
@@ -156,6 +158,9 @@ const MiniCard = ({ c }: { c: Card }) => (
   </span>
 );
 
+/** Replays open from any hand in the list (a module-level setter keeps the props simple). */
+let openReplay: ((h: HandRecord) => void) | null = null;
+
 function HistoryList({ items, max }: { items: HandRecord[]; max?: number }) {
   const list = [...items].reverse().slice(0, max ?? items.length);
   if (!list.length) return <p className="py-3 text-center text-[11px] text-white/35">Your hands will show here.</p>;
@@ -164,7 +169,7 @@ function HistoryList({ items, max }: { items: HandRecord[]; max?: number }) {
       {list.map((h) => {
         const net = h.returned - h.staked;
         return (
-          <li key={h.id + "-" + h.at} className="flex items-center gap-2 rounded-lg border border-white/[0.05] bg-black/25 px-2 py-1">
+          <li key={h.id + "-" + h.at} onClick={() => openReplay?.(h)} title="Replay this hand" className="pk-hist flex cursor-pointer items-center gap-2 rounded-lg border border-white/[0.05] bg-black/25 px-2 py-1">
             <span className="flex shrink-0 gap-0.5">
               {h.player.map((c, i) => (
                 <MiniCard key={i} c={c} />
@@ -267,8 +272,144 @@ function Sheet({ g, tab, setTab, onClose }: { g: PokerGame; tab: SheetTab; setTa
 }
 type SheetTab = "pay" | "hands" | "stats" | "rules";
 
+/* ───────────── Hand odds (optional) and hand replay ───────────── */
+
+function useOddsSwitch() {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    try {
+      setOn(localStorage.getItem("royalace:poker-odds") === "on");
+    } catch {}
+  }, []);
+  const toggle = () =>
+    setOn((v) => {
+      try {
+        localStorage.setItem("royalace:poker-odds", v ? "off" : "on");
+      } catch {}
+      return !v;
+    });
+  return [on, toggle] as const;
+}
+
+/** Odds at the decision, worked out just after the flop is shown. */
+function useHandOdds(player: Card[] | undefined, flop: Card[] | undefined, on: boolean) {
+  const [odds, setOdds] = useState<HandOdds | null>(null);
+  const key = player && flop && flop.length === 3 ? [...player, ...flop].map((c) => c.rank + c.suit).join(",") : "";
+  useEffect(() => {
+    setOdds(null);
+    if (!on || !key || !player || !flop) return;
+    const t = window.setTimeout(() => setOdds(handOdds(player, flop, window.matchMedia("(min-width: 1024px)").matches ? 1600 : 900)), 60);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, on]);
+  return odds;
+}
+const pct = (x: number) => `${Math.round(x * 100)}%`;
+const OddsBadge = ({ odds }: { odds: HandOdds | null }) =>
+  odds ? (
+    <span className={`pk-hint pk-odds ${odds.callEv > -1 ? "is-call" : "is-fold"}`} title={`Over ${odds.samples} simulated run-outs. Folding costs 1 Ante; calling is worth ${odds.callEv.toFixed(2)} Ante on average.`}>
+      Win {pct(odds.win)} · Tie {pct(odds.tie)} · Call {odds.callEv >= 0 ? "+" : ""}
+      {odds.callEv.toFixed(2)}
+    </span>
+  ) : (
+    <span className="pk-hint is-off">Odds…</span>
+  );
+
+function Replay({ h, onClose }: { h: HandRecord; onClose: () => void }) {
+  const [step, setStep] = useState(0);
+  const [playing, setPlaying] = useState(true);
+  useEffect(() => {
+    if (!playing || step >= 3) return;
+    const t = window.setTimeout(() => setStep((x) => x + 1), 1400);
+    return () => window.clearTimeout(t);
+  }, [playing, step]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  const flop = h.board.slice(0, 3);
+  const advice = hintOf(h.player, flop);
+  const odds = useMemo(() => handOdds(h.player, flop, 900), [h]);
+  const st = useMemo(() => settleHand({ ante: h.ante, bonus: h.bonus }, h.called, h.player, h.dealer, h.board), [h]);
+  const net = h.returned - h.staked;
+  const board = step >= 2 ? h.board : step >= 1 ? flop : [];
+  const steps = ["Your cards", "The flop · decision", "Turn and river", "Showdown"];
+  const row = (cards: Card[], hidden = 0) => (
+    <div className="flex justify-center gap-1">
+      {cards.map((c, i) => (
+        <span key={i} className={`pk-rcard ${c.suit === "♥" || c.suit === "♦" ? "is-red" : ""}`}>
+          {c.rank}
+          <small>{c.suit}</small>
+        </span>
+      ))}
+      {Array.from({ length: hidden }, (_, i) => (
+        <span key={`h${i}`} className="pk-rcard is-back" />
+      ))}
+    </div>
+  );
+  return (
+    <div className="fixed inset-0 z-[150] flex items-end justify-center sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="Hand replay">
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 bg-black/70" />
+      <div className="rl-sheet relative w-full max-w-md rounded-3xl p-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
+        <div className="mb-3 flex items-center justify-between">
+          <p className="rl-eyebrow !text-[9px]">Hand replay · {steps[step]}</p>
+          <button type="button" onClick={onClose} className="rl-icon-key" aria-label="Close">
+            ✕
+          </button>
+        </div>
+        <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Dealer</p>
+        {step >= 3 ? row(h.dealer) : row([], 2)}
+        <div className="my-3">{row(board, 5 - board.length)}</div>
+        {row(h.player)}
+        <p className="mt-1 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">You</p>
+        <div className="mt-3 min-h-[3.5rem] rounded-xl bg-black/30 px-3 py-2 text-center text-[12px] text-white/75">
+          {step === 0 && <>Ante ◈ {money(h.ante)}{h.bonus ? ` · AA Bonus ◈ ${money(h.bonus)}` : ""}</>}
+          {step === 1 && (
+            <>
+              You {h.called ? "called" : "folded"} · hint said <b className={advice === "call" ? "text-emerald-300" : "text-red-300"}>{advice}</b>
+              <span className="mt-0.5 block text-[11px] text-white/45">
+                Win {pct(odds.win)} · Tie {pct(odds.tie)} · Call worth {odds.callEv.toFixed(2)} Ante (fold −1)
+              </span>
+            </>
+          )}
+          {step === 2 && <>Your hand: {st.player.name}</>}
+          {step === 3 && (
+            <>
+              {h.called ? `${st.player.name} vs ${st.dealer.name}${st.dealerQualifies ? "" : " (no qualify)"}` : "Folded"}
+              <span className={`mt-0.5 block font-mono text-[13px] font-bold ${net > 0 ? "text-emerald-300" : net < 0 ? "text-red-300" : "text-white/60"}`}>
+                {net > 0 ? "+" : net < 0 ? "−" : ""}◈ {money(Math.abs(net))}
+              </span>
+            </>
+          )}
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-1.5">
+          <button type="button" className="rl-key" disabled={step === 0} onClick={() => { setPlaying(false); setStep((x) => Math.max(0, x - 1)); }}>
+            ◂ Back
+          </button>
+          <button type="button" className="rl-key is-on" onClick={() => { if (step >= 3) setStep(0); setPlaying((p) => step >= 3 || !p); }}>
+            {step >= 3 ? "Again" : playing ? "Pause" : "Play"}
+          </button>
+          <button type="button" className="rl-key" disabled={step >= 3} onClick={() => { setPlaying(false); setStep((x) => Math.min(3, x + 1)); }}>
+            Next ▸
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Poker({ active, focus = false, onFocusChange }: { active: boolean; focus?: boolean; onFocusChange?: (v: boolean) => void }) {
   const g = usePoker(active);
+  const [oddsOn, toggleOdds] = useOddsSwitch();
+  const handOddsNow = useHandOdds(g.phase === "decision" ? g.hand?.player : undefined, g.phase === "decision" ? g.hand?.board.slice(0, 3) : undefined, oddsOn);
+  const [replay, setReplay] = useState<HandRecord | null>(null);
+  useEffect(() => {
+    openReplay = setReplay;
+    return () => {
+      openReplay = null;
+    };
+  }, []);
   const desktop = useDesktop();
   const [sheet, setSheet] = useState<SheetTab | null>(null);
   const [panel, setPanel] = useState<"pay" | "hands" | "stats" | "rules">("pay");
@@ -412,9 +553,11 @@ export default function Poker({ active, focus = false, onFocusChange }: { active
       <BetSpot g={g} spot="call" label="Call" sub="2× ante" amount={g.callStake} hot={Boolean(res && res.callBack > g.callStake)} />
     </div>
   );
+  const oddsBadge = g.phase === "decision" && oddsOn ? <OddsBadge odds={handOddsNow} /> : null;
   const badges = (
     <div className="flex min-h-5 flex-wrap items-center justify-center gap-1.5 lg:justify-end">
       {hintBadge}
+      {oddsBadge}
       {bonusBadge}
     </div>
   );
@@ -471,6 +614,7 @@ export default function Poker({ active, focus = false, onFocusChange }: { active
               <div className="flex max-w-full items-center gap-1.5 overflow-hidden">
                 <HandTag text={playerLine} tone={playerTone} />
                 {hintBadge}
+                {oddsBadge}
                 {g.bonusNow?.pays ? bonusBadge : null}
               </div>
               <div className="flex items-center gap-3">
@@ -583,6 +727,9 @@ export default function Poker({ active, focus = false, onFocusChange }: { active
             {betKeys}
             <button type="button" onClick={g.toggleHint} aria-pressed={g.hintOn} className={`rl-key ${g.hintOn ? "is-on" : ""}`} title="Show the suggested play at the decision">
               Hint<Kbd k="H" />
+            </button>
+            <button type="button" onClick={toggleOdds} aria-pressed={oddsOn} className={`rl-key ${oddsOn ? "is-on" : ""}`} title="Show your chances at the decision">
+              Odds
             </button>
           </div>
         </div>
@@ -742,6 +889,9 @@ export default function Poker({ active, focus = false, onFocusChange }: { active
               <button type="button" onClick={g.toggleHint} aria-pressed={g.hintOn} className={`rl-icon-key !w-auto px-2.5 text-[10px] font-bold tracking-[0.15em] ${g.hintOn ? "is-on" : ""}`}>
                 HINT
               </button>
+              <button type="button" onClick={toggleOdds} aria-pressed={oddsOn} className={`rl-icon-key !w-auto px-2 text-[10px] font-bold tracking-[0.12em] ${oddsOn ? "is-on" : ""}`}>
+                %
+              </button>
               <button type="button" onClick={() => setSheet("pay")} className="rl-icon-key" aria-label="Paytable, hands and rules">
                 ☰
               </button>
@@ -753,6 +903,7 @@ export default function Poker({ active, focus = false, onFocusChange }: { active
         {!desktop && phoneConsole}
       </section>
       {!desktop && sheet && <Sheet g={g} tab={sheet} setTab={setSheet} onClose={() => setSheet(null)} />}
+      {replay && <Replay h={replay} onClose={() => setReplay(null)} />}
     </div>
   );
 }

@@ -840,7 +840,7 @@ useEffect(() => {
           )}
 
           {s.winBanner && (
-            <div key={`win-${s.celebrate}`} className="pointer-events-none absolute inset-0 z-30 flex flex-col items-center justify-center overflow-hidden bg-black/60" role="status">
+            <div key={`win-${s.celebrate}`} className={`win-tier-${s.winBanner.tier || "small"} pointer-events-none absolute inset-0 z-30 flex flex-col items-center justify-center overflow-hidden bg-black/60`} role="status">
               <div className="win-flash absolute inset-0" />
               <div aria-hidden="true" className="win-rays" />
               {!phoneScreen && <CoinRain count={s.winBanner.tier === "epic" ? 64 : 38} />}
@@ -859,6 +859,21 @@ useEffect(() => {
                   <RollingNumber value={s.winBanner.amount} fromZero ms={s.winBanner.tier === "epic" ? 2800 : 1900} />
                 </p>
               </div>
+              {s.winBanner.tier && !s.winBanner.label.includes("JACKPOT") && (
+                // The tier ladder lights up as the count climbs: Big → Mega → Epic.
+                <div className="win-ladder relative mt-3 sm:mt-5" aria-hidden="true">
+                  {(["big", "mega", "epic"] as const).map((t, i) => {
+                    const reached = ["big", "mega", "epic"].indexOf(s.winBanner!.tier) >= i;
+                    const steps = ["big", "mega", "epic"].indexOf(s.winBanner!.tier) + 1;
+                    const ms = s.winBanner!.tier === "epic" ? 2800 : 1900;
+                    return (
+                      <span key={t} className={`win-ladder__step is-${t} ${reached ? "is-reached" : ""}`} style={reached ? { animationDelay: `${Math.round(((i + 1) / steps) * ms * 0.85)}ms` } : undefined}>
+                        {t.toUpperCase()}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 

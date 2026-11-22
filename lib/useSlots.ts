@@ -1,5 +1,6 @@
 "use client";
 
+import { slotBonuses } from "./slotBonuses";
 import { useEffect, useRef, useState } from "react";
 import {
   BET_LEVELS,
@@ -336,6 +337,7 @@ function bonusContinue() {
     await new Promise<void>((resolve) => {
   bonusDone.current = resolve;
 
+  slotBonuses.add({ at: Date.now(), win: fsWin, spins: used, bet: BET_LEVELS[ref.current.betIdx], retriggers, best, bought });
   set({
     fs: null,
     bonusResult: {
