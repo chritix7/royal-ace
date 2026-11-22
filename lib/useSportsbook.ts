@@ -492,8 +492,9 @@ export function useSportsbook(active: boolean) {
           if (r === "won" || r === "lost") final = r === "won" ? "✓" : "✗";
         } else if (m) {
           r = settle(m, l.market, l.pick);
-          const fs = m.regular ?? m.score;
-          if (r && fs) final = `${fs.h}-${fs.a}`;
+          const fs = m.status === "done" ? m.regular ?? m.score : m.score;
+          // Decided before the end (an over passed, 2 goals up…): paid at once.
+          if (r && fs) final = m.status === "done" ? `${fs.h}-${fs.a}` : `${fs.h}-${fs.a} early`;
         } else if (loaded[l.sport] && !errors[l.sport] && t > l.kickoff + 48 * 3600000) r = "void"; // never got a result
         if (r) changed = true;
         return r ? { ...l, result: r, final } : l;

@@ -138,7 +138,7 @@ export function marketsOf(m: Match, model: Model | null): Market[] {
     return out;
   }
   const reg = m.sport === "hockey" ? " (60 min)" : "";
-  out.push({ key: "1x2", title: `Match result${reg}`, picks: [{ market: "1x2", pick: "1", label: h }, { market: "1x2", pick: "X", label: "Draw" }, { market: "1x2", pick: "2", label: a }] });
+  out.push({ key: "1x2", title: m.sport === "football" ? "Match result · paid early 2 goals up" : `Match result${reg}`, picks: [{ market: "1x2", pick: "1", label: h }, { market: "1x2", pick: "X", label: "Draw" }, { market: "1x2", pick: "2", label: a }] });
   if (m.sport === "hockey") out.push({ key: "ml", title: "Winner (incl. OT & shootout)", picks: [{ market: "ml", pick: "1", label: h }, { market: "ml", pick: "2", label: a }] });
   out.push({ key: "dc", title: `Double chance${reg}`, picks: [{ market: "dc", pick: "1X", label: `${h} or draw` }, { market: "dc", pick: "12", label: `${h} or ${a}` }, { market: "dc", pick: "X2", label: `Draw or ${a}` }] });
   for (const l of m.sport === "football" ? FB_LINES : HK_LINES)
@@ -243,7 +243,7 @@ function wins(s: Score, kind: string, line: number, pick: string): boolean {
 
 /* ───────────── Prices ───────────── */
 
-const MARGIN: Record<string, number> = { scorer: 0.15, assist: 0.15, decisive: 0.14, "1x2": 0.06, dc: 0.05, ou: 0.06, btts: 0.06, hcp: 0.07, ml: 0.05, spread: 0.05, cs: 0.18, htft: 0.16 };
+const MARGIN: Record<string, number> = { scorer: 0.15, assist: 0.15, decisive: 0.14, "1x2": 0.07, dc: 0.05, ou: 0.06, btts: 0.06, hcp: 0.07, ml: 0.05, spread: 0.05, cs: 0.18, htft: 0.16 };
 
 /** Decimal odds with the house margin; null when the market is closed. */
 export function priceOf(p: number | null, market: string): number | null {
@@ -274,9 +274,11 @@ export function priced(m: Match, model: Model | null, market: Market, now: numbe
 /** "won" | "lost" | "void" once the match is over, null while it runs. */
 export function settle(m: Match, market: string, pick: string): "won" | "lost" | "void" | null {
   if (m.status === "void") return "void";
-  if (m.status !== "done") return null;
   const [kind, lineS] = market.split(":");
   const line = lineS !== undefined ? +lineS : 0;
+  if (m.status !== "done") return m.status === "pre" ? null : settleEarly(m, kind, line, pick);
+  // Football result: paid as soon as the team was 2 goals up at half-time.
+  if (twoUp(m, kind, pick, m.ht)) return "won";
   if (kind === "htft") {
     if (!m.ht || !m.regular) return "void";
     const r = (s: Score) => (s.h > s.a ? "1" : s.h < s.a ? "2" : "X");
@@ -290,6 +292,48 @@ export function settle(m: Match, market: string, pick: string): "won" | "lost" |
   if (!s) return "void";
   if (kind === "ou" && s.h + s.a === line) return "void";
   return wins(s, kind, line, pick) ? "won" : "lost";
+}
+
+/** "Paid if 2 goals ahead": football match result (and the daily boost). */
+export const TWO_UP = (sport: Sport, market: string, pick: string) => sport === "football" && (market === "1x2" || market === "boost") && (pick === "1" || pick === "2");
+function twoUp(m: Match, kind: string, pick: string, s: Score | null | undefined) {
+  if (!s || !TWO_UP(m.sport, kind, pick)) return false;
+  return pick === "1" ? s.h - s.a >= 2 : s.a - s.h >= 2;
+}
+
+/**
+ * Bets that are already decided while the match is still on, paid (or
+ * lost) at once, like a real bookmaker: an "over" passed, both teams have
+ * scored, a correct score already beaten, the half-time half of a
+ * HT/FT pick, and the football result when the team leads by 2.
+ */
+function settleEarly(m: Match, kind: string, line: number, pick: string): "won" | "lost" | null {
+  const s = m.score;
+  if (!s) return null;
+  // Hockey "60 min" markets: overtime goals do not count.
+  if (m.sport === "hockey" && m.clock && m.clock.period > 3) return null;
+  const tot = s.h + s.a;
+  if (twoUp(m, kind, pick, s)) return "won";
+  switch (kind) {
+    case "ou":
+      if (tot > line) return pick === "over" ? "won" : "lost";
+      return null;
+    case "btts":
+      if (s.h > 0 && s.a > 0) return pick === "yes" ? "won" : "lost";
+      return null;
+    case "cs": {
+      const [h, a] = pick.split("-").map(Number);
+      return s.h > h || s.a > a ? "lost" : null;
+    }
+    case "htft": {
+      // The half-time score is known once the second half has started.
+      if (m.sport !== "football" || !m.ht || (m.status !== "break" && (m.clock?.period ?? 0) < 2)) return null;
+      const r = m.ht.h > m.ht.a ? "1" : m.ht.h < m.ht.a ? "2" : "X";
+      return pick.split("/")[0] !== r ? "lost" : null;
+    }
+    default:
+      return null;
+  }
 }
 
 /* ───────────── Player markets (football, before kick-off) ───────────── */
