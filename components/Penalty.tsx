@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "re
 import { ChipFace } from "./ChipButton";
 import { Counter } from "./ui";
 import { money } from "../lib/game";
-import { LEVELS, MAX_BET, MAX_SHOTS, MIN_BET, PENALTY_CHIPS, RTP, ZONES, ZONE_LABEL, ladderOf, multiplierAt, type Level, type Zone } from "../lib/penalty";
+import { LEVELS, SHOOTERS, MAX_BET, MAX_SHOTS, MIN_BET, PENALTY_CHIPS, RTP, ZONES, ZONE_LABEL, ladderOf, multiplierAt, type Level, type Zone } from "../lib/penalty";
 import { usePenalty, type PenaltyGame, type RoundRecord, type ShotRecord } from "../lib/usePenalty";
 import { isNarrowScreen, requestFullscreenSettled } from "../lib/fullscreen";
 import { useSession } from "../lib/sessionStore";
@@ -182,7 +182,7 @@ function Scene({ g, ms, lite }: { g: PenaltyGame; ms: number; lite: boolean }) {
 
   const banner =
     g.phase === "goal" ? (
-      <span className="pe-banner is-goal">GOAL</span>
+      <span className={`pe-banner is-goal ${g.lastShot && (g.lastShot.aim === "tl" || g.lastShot.aim === "tr") ? "is-top" : ""}`}>{g.lastShot && (g.lastShot.aim === "tl" || g.lastShot.aim === "tr") ? "TOP CORNER" : "GOAL"}</span>
     ) : g.phase === "saved" ? (
       <span className="pe-banner is-saved">SAVED</span>
     ) : g.phase === "cashed" && g.result ? (
@@ -203,6 +203,9 @@ function Scene({ g, ms, lite }: { g: PenaltyGame; ms: number; lite: boolean }) {
       )}
       <div ref={box} className="pe-field">
         <div aria-hidden="true" className="pe-grass" style={{ top: `${GOAL.b}%` }} />
+        {!lite && g.phase === "goal" && g.lastShot && (g.lastShot.aim === "tl" || g.lastShot.aim === "tr") && (
+          <span key={`tc-${g.shotId}`} aria-hidden="true" className="pe-burst" style={{ left: `${ZONE_AT[g.lastShot.aim][0]}%`, top: `${ZONE_AT[g.lastShot.aim][1]}%` }} />
+        )}
       {/* Box lines and the spot */}
       <svg aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none" className="pe-lines">
         <path d={`M4 ${GOAL.b + 1} H96`} />
@@ -266,7 +269,7 @@ function ShotDots({ shots, inAir }: { shots: ShotRecord[]; inAir: boolean }) {
 }
 
 function Ladder({ g, horizontal }: { g: PenaltyGame; horizontal: boolean }) {
-  const ladder = ladderOf(g.level).map((m, i) => ({ m, k: i + 1 }));
+  const ladder = ladderOf(g.level, g.shooter).map((m, i) => ({ m, k: i + 1 }));
   const steps = horizontal ? ladder : [...ladder].reverse();
   return (
     <ol className={`pe-ladder ${horizontal ? "is-row" : ""}`} aria-label="Multipliers">
@@ -284,13 +287,31 @@ function Ladder({ g, horizontal }: { g: PenaltyGame; horizontal: boolean }) {
   );
 }
 
+function ShooterPick({ g }: { g: PenaltyGame }) {
+  return (
+    <div className="pe-shooters mb-2" role="radiogroup" aria-label="Penalty taker">
+      {SHOOTERS.map((x) => (
+        <button key={x.id} type="button" role="radio" aria-checked={g.shooter === x.id} disabled={Boolean(g.round)} onClick={() => g.setShooter(x.id)} title={`${x.name} — ${x.blurb}`} className={`pe-shooter ${g.shooter === x.id ? "is-on" : ""}`}>
+          <span className="pe-shooter__num">{x.number}</span>
+          <span className="min-w-0 text-left">
+            <span className="pe-shooter__name">{x.name.replace("The ", "")}</span>
+            <span className="pe-shooter__stats">
+              ACC {x.acc} · PWR {x.pwr}
+            </span>
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function LevelPick({ g }: { g: PenaltyGame }) {
   return (
     <div className="pe-levels mb-2" role="radiogroup" aria-label="Keeper">
       {LEVELS.map((l) => (
         <button key={l.id} type="button" role="radio" aria-checked={g.level === l.id} disabled={Boolean(g.round)} onClick={() => g.setLevel(l.id as Level)} className={`pe-level ${g.level === l.id ? "is-on" : ""}`}>
           <span>{l.label}</span>
-          <small className="whitespace-nowrap"><span className="hidden 2xl:inline">{Math.round(l.goal * 100)}% · </span>×{ladderOf(l.id)[MAX_SHOTS - 1]}</small>
+          <small className="whitespace-nowrap"><span className="hidden 2xl:inline">{Math.round(l.goal * 100)}% · </span>×{ladderOf(l.id, g.shooter)[MAX_SHOTS - 1]}</small>
         </button>
       ))}
     </div>
@@ -310,7 +331,7 @@ function History({ items }: { items: RoundRecord[] }) {
                 <i key={i} className={i < r.goals ? "is-goal" : "is-saved"} />
               ))}
             </span>
-            <span className="flex-1 truncate text-white/60">{r.cashed ? `${r.goals} goal${r.goals > 1 ? "s" : ""} · ×${multiplierAt(r.goals, r.level)}` : `Saved on shot ${r.goals + 1}`}
+            <span className="flex-1 truncate text-white/60">{r.cashed ? `${r.goals} goal${r.goals > 1 ? "s" : ""} · ×${multiplierAt(r.goals, r.level, r.shooter)}` : `Saved on shot ${r.goals + 1}`}
               {r.level && r.level !== "normal" && <em className="ml-1 not-italic text-[#e5c779]/60">{LEVELS.find((l) => l.id === r.level)?.short}</em>}</span>
             <span className={net > 0 ? "text-[#f0d38b]" : "text-white/35"}>
               {net > 0 ? "+" : "−"}◈ {compactMoney(Math.abs(net))}
@@ -475,6 +496,7 @@ export default function Penalty({ active, focus = false, onFocusChange }: { acti
                   <ShotDots shots={g.round?.shots ?? []} inAir={shooting || (inRound && !shooting)} />
                 </div>
                 <LevelPick g={g} />
+                <ShooterPick g={g} />
                 <Ladder g={g} horizontal={false} />
               </div>
               <div className="rl-card flex min-h-0 flex-1 flex-col p-3">
@@ -575,22 +597,31 @@ export default function Penalty({ active, focus = false, onFocusChange }: { acti
             <div className="min-w-0 flex-1">
               <Ladder g={g} horizontal />
             </div>
-            <button
-              type="button"
-              disabled={inRound}
-              onClick={() => g.setLevel(LEVELS[(LEVELS.findIndex((l) => l.id === g.level) + 1) % LEVELS.length].id)}
-              className="rl-icon-key !w-auto px-2 text-[9px] font-bold uppercase tracking-[0.1em] disabled:opacity-50"
-              aria-label={`Keeper: ${g.level}. Tap to change`}
-            >
-              {LEVELS.find((l) => l.id === g.level)?.short}
-            </button>
             <button type="button" onClick={() => setSheet(true)} className="rl-icon-key" aria-label="Rounds and rules">
               ☰
             </button>
           </div>
-          <div className="mb-1 flex h-5 items-center justify-center gap-2">
+          <div className="mb-1 flex h-6 items-center gap-1.5">
+            <button
+              type="button"
+              disabled={inRound}
+              onClick={() => g.setShooter(SHOOTERS[(SHOOTERS.findIndex((x) => x.id === g.shooter) + 1) % SHOOTERS.length].id)}
+              className="pe-mini-key font-black"
+              aria-label={`Penalty taker: ${g.shooter}. Tap to change`}
+            >
+              #{SHOOTERS.find((x) => x.id === g.shooter)?.number}
+            </button>
+            <button
+              type="button"
+              disabled={inRound}
+              onClick={() => g.setLevel(LEVELS[(LEVELS.findIndex((l) => l.id === g.level) + 1) % LEVELS.length].id)}
+              className="pe-mini-key uppercase tracking-[0.08em]"
+              aria-label={`Keeper: ${g.level}. Tap to change`}
+            >
+              {LEVELS.find((l) => l.id === g.level)?.short}
+            </button>
             <ShotDots shots={g.round?.shots ?? []} inAir={inRound} />
-            {messageLine}
+            <div className="min-w-0 flex-1 text-center">{messageLine}</div>
           </div>
           <div className="min-h-0 flex-1">
             <Scene g={g} ms={g.shotTime} lite />
