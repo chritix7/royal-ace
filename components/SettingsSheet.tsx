@@ -9,6 +9,7 @@ import { motion, useReducedMotion } from "../lib/motion";
 import { cleanName, profileStore, useProfile } from "../lib/profile";
 import { SHOP, SHOP_CATS, priceLabel, shop, useShop } from "../lib/shop";
 import { useBalance, useLocked } from "../lib/wallet";
+import { cloud, useCloud } from "../lib/cloud";
 import { money } from "../lib/game";
 
 /**
@@ -31,6 +32,137 @@ function Row({ title, sub, children }: { title: string; sub?: string; children: 
 const Switch = ({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) => (
   <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={onClick} className={`rl-switch ${on ? "is-on" : ""}`} />
 );
+
+function ago(at: number) {
+  if (!at) return "not yet";
+  const m = Math.round((Date.now() - at) / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m} min ago`;
+  const h = Math.round(m / 60);
+  return h < 48 ? `${h} h ago` : `${Math.round(h / 24)} days ago`;
+}
+
+function CloudSection() {
+  const c = useCloud();
+  const profile = useProfile();
+  const [confirmDel, setConfirmDel] = useState(false);
+  const [code, setCode] = useState("");
+  const [paste, setPaste] = useState(false);
+  const [codeMsg, setCodeMsg] = useState("");
+  const copy = async () => {
+    const v = await cloud.exportCode();
+    setCode(v);
+    setPaste(false);
+    try {
+      await navigator.clipboard.writeText(v);
+      setCodeMsg("Code copied ✓ Keep it somewhere safe (Notes, e-mail to yourself).");
+    } catch {
+      setCodeMsg("Copy the code below and keep it somewhere safe.");
+    }
+  };
+  const restoreCode = async () => {
+    const ok = await cloud.importCode(code);
+    if (!ok) setCodeMsg("This code is not valid");
+  };
+  return (
+    <section>
+      <p className="st-head">Cloud save · Face ID</p>
+      {!c.ready ? (
+        <p className="st-sub">Checking…</p>
+      ) : !c.configured ? (
+        <p className="st-sub">Cloud save is being set up — come back in a moment. You can already use a backup code below.</p>
+      ) : !c.supported ? (
+        <p className="st-sub">This browser has no passkeys. Use a backup code below.</p>
+      ) : c.linked ? (
+        <div className="st-cloud is-on">
+          <p className="st-row__title">
+            Saved to the cloud ✓ <span className="text-white/45">·</span> <span translate="no">{c.name}</span>
+          </p>
+          <p className="st-row__sub">{`Last save: ${ago(c.at)}. Saves itself while you play; on another device, open Settings and tap “I already have a save”.`}</p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            <button type="button" className="rl-key is-on" disabled={c.busy} onClick={() => void cloud.syncNow()}>
+              Save now
+            </button>
+            <button type="button" className="rl-key" disabled={c.busy} onClick={() => void cloud.signOut()}>
+              Sign out
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="st-cloud">
+          <p className="st-row__sub">Protect your progress with a passkey: Face ID or Touch ID, kept in your iCloud Keychain. Get everything back on any device, even after deleting the app. No password, no e-mail.</p>
+          <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+            <button type="button" className="rl-key is-on" disabled={c.busy} onClick={() => void cloud.create(profile.name || "Player")}>
+              Save my progress
+            </button>
+            <button type="button" className="rl-key" disabled={c.busy} onClick={() => void cloud.restore()}>
+              I already have a save
+            </button>
+          </div>
+        </div>
+      )}
+      {c.msg && <p className="mt-1.5 text-[11px] text-[#f5d778]">{c.msg}</p>}
+      <div className="mt-3">
+        <p className="st-row__title">Backup code</p>
+        <p className="st-row__sub">A code holding all your progress, to paste on another device. Works without an account.</p>
+        <div className="mt-1.5 flex gap-1.5">
+          <button type="button" className="rl-key" onClick={() => void copy()}>
+            Copy my code
+          </button>
+          <button
+            type="button"
+            className="rl-key"
+            onClick={() => {
+              setPaste(true);
+              setCode("");
+              setCodeMsg("");
+            }}
+          >
+            Paste a code
+          </button>
+        </div>
+        {(code || paste) && (
+          <textarea
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            readOnly={!paste}
+            rows={3}
+            placeholder="RA1.…"
+            aria-label="Backup code"
+            className="st-input mt-1.5 w-full resize-none font-mono !text-[11px]"
+            translate="no"
+          />
+        )}
+        {paste && (
+          <button type="button" className="rl-key is-on mt-1.5" disabled={code.trim().length < 8} onClick={() => void restoreCode()}>
+            Restore from this code
+          </button>
+        )}
+        {codeMsg && <p className="mt-1 text-[11px] text-[#f5d778]">{codeMsg}</p>}
+      </div>
+      {c.linked && (
+        <div className="mt-3">
+          {confirmDel ? (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] text-white/60">Delete the cloud account and its data?</span>
+              <button type="button" className="rl-key" onClick={() => { setConfirmDel(false); void cloud.deleteAccount(); }}>
+                Delete
+              </button>
+              <button type="button" className="rl-key" onClick={() => setConfirmDel(false)}>
+                Keep
+              </button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => setConfirmDel(true)} className="text-[10.5px] text-white/40 underline underline-offset-2 hover:text-white/70">
+              Delete my cloud account and data
+            </button>
+          )}
+        </div>
+      )}
+      <p className="st-sub mt-2">Privacy: the cloud keeps your nickname and your game data only. Face ID never leaves your device — the server stores a public key. Delete it all at any time.</p>
+    </section>
+  );
+}
 
 function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => void }) {
   const a = useAudioSettings();
@@ -58,6 +190,7 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
   };
   return (
     <div className="space-y-4">
+      <CloudSection />
       <section>
         <p className="st-head">Language</p>
         <div className="grid grid-cols-2 gap-1.5" role="radiogroup" aria-label="Language">

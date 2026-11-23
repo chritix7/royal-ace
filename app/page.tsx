@@ -33,6 +33,7 @@ import SettingsSheet, { type SettingsTab } from "../components/SettingsSheet";
 import WelcomeTour, { WELCOME_KEY } from "../components/WelcomeTour";
 import { i18n } from "../lib/i18n";
 import { motion } from "../lib/motion";
+import { cloud } from "../lib/cloud";
 import HotkeysOverlay from "../components/HotkeysOverlay";
 import { useBalanceFlash } from "../hooks/useBalanceFlash";
 import { sessionStore } from "../lib/sessionStore";
@@ -227,6 +228,7 @@ export default function Home() {
     weeklyStore.hydrate();
     motion.boot();
     i18n.boot();
+    void cloud.boot();
   }, []);
 
   // Settings & shop sheet: from the header gear, or from a locked theme.
