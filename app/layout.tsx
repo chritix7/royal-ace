@@ -72,7 +72,7 @@ export default function RootLayout({
         {/* Splash when launched from the home screen: the crest on black,
             gone after a moment (CSS only, nothing to load). */}
         <div className="app-splash" aria-hidden="true">
-          <img src="/icon-192.png" alt="" width={96} height={96} />
+          <img src="/icon-192.png" alt="" width={96} height={96} loading="lazy" decoding="async" />
           <span>ROYAL ACE</span>
         </div>
         {children}
