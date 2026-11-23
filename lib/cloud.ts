@@ -196,7 +196,14 @@ export const cloud = {
         startSync();
         void push();
       } catch (e) {
-        set({ busy: false, msg: errText(e) });
+        const standalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as unknown as { standalone?: boolean }).standalone;
+        set({
+          busy: false,
+          msg:
+            standalone && e instanceof DOMException && e.name === "NotAllowedError"
+              ? "iOS blocks creating the key inside the installed app. Create it once in Safari on the same site, then come back here and tap “I already have a save”."
+              : errText(e),
+        });
         void cloud.prepare(name);
       }
     })();
