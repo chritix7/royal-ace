@@ -50,6 +50,11 @@ const okData = (d: unknown): d is Record<string, string> =>
 export async function GET(req: Request) {
   if (!redisReady()) return json({ configured: false, linked: false });
   try {
+    if (new URL(req.url).searchParams.has("health")) {
+      const k = `health:${randomId(6)}`;
+      const [set, get] = (await pipeline([["SET", k, "1", "EX", 30], ["GET", k]])) as string[];
+      return json({ configured: true, storage: set === "OK" && get === "1" ? "ok" : "bad" });
+    }
     const uid = await sessionUser(req);
     if (!uid) return json({ configured: true, linked: false });
     const [user, save] = await Promise.all([getUser(uid), getSave(uid)]);
