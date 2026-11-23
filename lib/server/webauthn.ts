@@ -4,7 +4,7 @@
  * RP ID hash, user present + verified, signature). Attestation is not
  * requested ("none"), so it is not verified.
  */
-import { createHash, createPublicKey, randomBytes, verify } from "node:crypto";
+import { createHash, createPublicKey, randomBytes, verify, type JsonWebKey } from "node:crypto";
 
 export const b64u = (b: Uint8Array | Buffer) => Buffer.from(b).toString("base64url");
 export const fromB64u = (s: string) => Buffer.from(s, "base64url");
