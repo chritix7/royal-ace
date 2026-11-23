@@ -403,7 +403,7 @@ export default function Home() {
 
         {/* Les deux jeux restent montés : on ne perd pas une manche en changeant d'onglet. */}
         {inLobby && (
-          <div className="view-in h-[calc(100dvh_-_10.15rem_-_env(safe-area-inset-top))] min-h-[480px] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px]">
+          <div className="app-view-in h-[calc(100dvh_-_10.15rem_-_env(safe-area-inset-top))] min-h-[480px] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px]">
             <Lobby
               desktop={lgUp}
               onPlay={(id) => openGame(id)}
@@ -413,7 +413,7 @@ export default function Home() {
             />
           </div>
         )}
-        <div className={tab === "blackjack" && !inLobby ? "view-in" : "hidden"}>
+        <div className={tab === "blackjack" && !inLobby ? "app-view-in" : "hidden"}>
           {visited.has("blackjack") && (
           <ErrorBoundary label="Blackjack">
             <Blackjack
@@ -424,7 +424,7 @@ export default function Home() {
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "slots" && !inLobby ? "view-in" : "hidden"}>
+        <div className={tab === "slots" && !inLobby ? "app-view-in" : "hidden"}>
           {visited.has("slots") && (
           <ErrorBoundary label="Slots">
             <Slots
@@ -435,7 +435,7 @@ export default function Home() {
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "roulette" && !inLobby ? "view-in" : "hidden"}>
+        <div className={tab === "roulette" && !inLobby ? "app-view-in" : "hidden"}>
           {visited.has("roulette") && (
           <ErrorBoundary label="Roulette">
             <Roulette
@@ -446,28 +446,28 @@ export default function Home() {
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "poker" && !inLobby ? "view-in" : "hidden"}>
+        <div className={tab === "poker" && !inLobby ? "app-view-in" : "hidden"}>
           {visited.has("poker") && (
           <ErrorBoundary label="Casino Hold'em">
             <Poker active={tab === "poker" && !inLobby} focus={tab === "poker" && !inLobby && focusMode} onFocusChange={setFocusMode} />
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "craps" && !inLobby ? "view-in" : "hidden"}>
+        <div className={tab === "craps" && !inLobby ? "app-view-in" : "hidden"}>
           {visited.has("craps") && (
           <ErrorBoundary label="Craps">
             <Craps active={tab === "craps" && !inLobby} focus={tab === "craps" && !inLobby && focusMode} onFocusChange={setFocusMode} />
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "penalty" && !inLobby ? "view-in" : "hidden"}>
+        <div className={tab === "penalty" && !inLobby ? "app-view-in" : "hidden"}>
           {visited.has("penalty") && (
           <ErrorBoundary label="Penalty">
             <Penalty active={tab === "penalty" && !inLobby} focus={tab === "penalty" && !inLobby && focusMode} onFocusChange={setFocusMode} />
           </ErrorBoundary>
           )}
         </div>
-        <div className={tab === "sports" && !inLobby ? "view-in" : "hidden"}>
+        <div className={tab === "sports" && !inLobby ? "app-view-in" : "hidden"}>
           {visited.has("sports") && (
           <ErrorBoundary label="Sportsbook">
             <Sportsbook active={tab === "sports" && !inLobby} focus={tab === "sports" && !inLobby && focusMode} onFocusChange={setFocusMode} />
