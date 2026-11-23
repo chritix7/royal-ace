@@ -113,7 +113,7 @@ function startSync() {
 
 const errText = (e: unknown) => {
   const m = e instanceof Error ? e.message : "";
-  if (e instanceof DOMException && e.name === "NotAllowedError") return "Face ID was cancelled or not allowed";
+  if (e instanceof DOMException && e.name === "NotAllowedError") return `Face ID was cancelled or not allowed — ${e.message}`;
   if (e instanceof DOMException && e.name === "InvalidStateError") return "A passkey already exists here: tap “I already have a save”";
   if (e instanceof DOMException) return `Face ID unavailable (${e.name})`;
   if (m === "storage-not-configured") return "Cloud storage is not set up yet";
