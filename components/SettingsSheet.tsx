@@ -60,6 +60,10 @@ function CloudSection() {
       setCodeMsg("Copy the code below and keep it somewhere safe.");
     }
   };
+  // Fetch the Face ID challenges now, so the tap opens Face ID at once.
+  useEffect(() => {
+    if (c.ready && c.configured && !c.linked) void cloud.prepare(profile.name || "Player");
+  }, [c.ready, c.configured, c.linked, profile.name]);
   const restoreCode = async () => {
     const ok = await cloud.importCode(code);
     if (!ok) setCodeMsg("This code is not valid");
@@ -92,10 +96,10 @@ function CloudSection() {
         <div className="st-cloud">
           <p className="st-row__sub">Protect your progress with a passkey: Face ID or Touch ID, kept in your iCloud Keychain. Get everything back on any device, even after deleting the app. No password, no e-mail.</p>
           <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-            <button type="button" className="rl-key is-on" disabled={c.busy} onClick={() => void cloud.create(profile.name || "Player")}>
+            <button type="button" className="rl-key is-on" disabled={c.busy} onClick={() => cloud.create(profile.name || "Player")}>
               Save my progress
             </button>
-            <button type="button" className="rl-key" disabled={c.busy} onClick={() => void cloud.restore()}>
+            <button type="button" className="rl-key" disabled={c.busy} onClick={() => cloud.restore()}>
               I already have a save
             </button>
           </div>

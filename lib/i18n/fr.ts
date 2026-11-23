@@ -1028,4 +1028,7 @@ export const FR: Record<string, string> = {
   "Account and cloud data deleted": "Compte et données cloud supprimés",
   "just now": "à l'instant",
   "not yet": "pas encore",
+  "One moment, then tap again": "Un instant, puis touche à nouveau",
+  "Face ID was cancelled or not allowed": "Face ID a été annulé ou refusé",
+  "A passkey already exists here: tap “I already have a save”": "Une clé d'accès existe déjà ici : touche « J'ai déjà une sauvegarde »",
 };
