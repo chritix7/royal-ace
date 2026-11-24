@@ -28,6 +28,12 @@ export const MAX_PICKS = 10;
 export const MAX_PAYOUT = 1_000_000_000;
 export const SPORT_CHIPS = [10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000];
 const CASHOUT_CUT = 0.92;
+/** Live bets and live cash-outs wait this long, then the score is checked again. */
+export const LIVE_DELAY = 12000;
+export const CASHOUT_DELAY = 8000;
+/** Live prices are suspended when the feed has not been refreshed for this long. */
+const STALE_AFTER = 120000;
+const scoreKey = (m: Match | undefined) => (m ? `${m.status === "done" || m.status === "void" ? m.status : "in"}:${m.score?.h ?? 0}-${m.score?.a ?? 0}` : "gone");
 
 export type Selection = {
   key: string; // matchId|market|pick
@@ -51,7 +57,11 @@ export type Ticket = {
   stake: number;
   odds: number; // total at placement
   legs: Leg[];
-  status: "open" | "won" | "lost" | "void" | "cashed" | "refund";
+  status: "open" | "won" | "lost" | "void" | "cashed" | "refund" | "pending" | "declined";
+  /** Live bets: accepted after a short check that the score did not change. */
+  accept?: { until: number; scores: Record<string, string> };
+  /** Live cash-out being checked (same idea). */
+  cashing?: { until: number; value: number; scores: Record<string, string> };
   payout: number;
   /** Combo boost on the winnings (0.05 = +5%), set when placed. */
   boost?: number;
@@ -164,7 +174,7 @@ export function useSportsbook(active: boolean) {
   const hydrated = useRef(false);
 
   const commit = useCallback((next: Saved) => {
-    next = { ...next, pending: next.tickets.some((t) => t.status === "open") };
+    next = { ...next, pending: next.tickets.some((t) => t.status === "open" || t.status === "pending") };
     savedRef.current = next;
     setSaved(next);
     try {
@@ -201,7 +211,9 @@ export function useSportsbook(active: boolean) {
   }, []);
 
   const byId = useRef(new Map<string, Match>());
+  const fetchedAt = useRef<Record<Sport, number>>({ football: 0, basketball: 0, hockey: 0 });
   const merge = useCallback((sport: Sport, list: Match[]) => {
+    fetchedAt.current[sport] = Date.now();
     setMatches((prev) => {
       const keep = prev.filter((m) => m.sport !== sport);
       const next = [...keep, ...list].sort((a, b) => a.kickoff - b.kickoff);
@@ -514,6 +526,8 @@ export function useSportsbook(active: boolean) {
     (m: Match, market: string, pick: string) => {
       const t = now || Date.now();
       if (!isOpen(m, t)) return null;
+      // Live: no price on a score the feed has not refreshed for a while.
+      if (m.status !== "pre" && !wantDemo.current && Date.now() - fetchedAt.current[m.sport] > STALE_AFTER) return null;
       if (isBoostMarket(market)) {
         const b = boostById.get(`${m.id}|${market}|${pick}`);
         return b && m.status === "pre" && t < b.ends ? b.odds : null;
@@ -759,7 +773,11 @@ export function useSportsbook(active: boolean) {
       const mm = byId.current.get(x.matchId);
       return { ...x, live: x.live || t >= x.kickoff || (mm ? mm.status !== "pre" : false), result: null };
     });
-    const ticket: Ticket = { id: s.nextId, at: t, stake: s.stake, odds: comboOdds(legs), legs, status: "open", payout: 0, boost: comboBoost(legs), insured: isInsured(legs) };
+    const liveLegs = legs.filter((l) => l.live);
+    const ticket: Ticket = { id: s.nextId, at: t, stake: s.stake, odds: comboOdds(legs), legs, status: liveLegs.length ? "pending" : "open", payout: 0, boost: comboBoost(legs), insured: isInsured(legs) };
+    // Live: accepted after a short check that nothing happened meanwhile
+    // (the feed runs a little behind the real match).
+    if (liveLegs.length) ticket.accept = { until: t + LIVE_DELAY, scores: Object.fromEntries(liveLegs.map((l) => [l.matchId, scoreKey(byId.current.get(l.matchId))])) };
     wallet.add(-s.stake);
     commit({ ...s, tickets: [...s.tickets, ticket].slice(-150), slip: [], bb: {}, nextId: s.nextId + 1 });
     track("betPlaced");
@@ -767,7 +785,7 @@ export function useSportsbook(active: boolean) {
     if (legs.some((l) => l.live)) track("betLive");
     sfx.coin(5);
     haptic(HAPTIC.win);
-    setMessage(`Ticket placed · potential ◈ ${winPayout(ticket.stake, legs, ticket.boost ?? 0).toLocaleString("en-US")}`);
+    setMessage(ticket.status === "pending" ? "Live bet · checking the score…" : `Ticket placed · potential ◈ ${winPayout(ticket.stake, legs, ticket.boost ?? 0).toLocaleString("en-US")}`);
     return true;
   };
 
@@ -793,23 +811,97 @@ export function useSportsbook(active: boolean) {
     },
     [formsOf, now],
   );
-  const cashOut = (id: number) => {
+  const payCashOut = (id: number, v: number) => {
     const s = savedRef.current;
     const tk = s.tickets.find((x) => x.id === id);
-    if (!tk) return false;
-    const v = cashOutValue(tk);
-    if (v === null) return refuse("Cash-out not available right now");
+    if (!tk || tk.status !== "open") return false;
     wallet.add(v);
-    commit({ ...s, tickets: s.tickets.map((x) => (x.id === id ? { ...x, status: "cashed", payout: v, settledAt: Date.now(), seen: true } : x)) });
+    commit({ ...s, tickets: s.tickets.map((x) => (x.id === id ? { ...x, status: "cashed", payout: v, settledAt: Date.now(), seen: true, cashing: undefined } : x)) });
     sessionStore.recordSports(tk.stake, v - tk.stake);
     track("betCashout");
     sfx.coin(8);
     setMessage(`Cashed out · ◈ ${v.toLocaleString("en-US")}`);
     return true;
   };
+  const cashOut = (id: number) => {
+    const s = savedRef.current;
+    const tk = s.tickets.find((x) => x.id === id);
+    if (!tk || tk.cashing) return false;
+    const v = cashOutValue(tk);
+    if (v === null) return refuse("Cash-out not available right now");
+    // A match in play: a short check that the score did not move first.
+    const liveIds = [...new Set(tk.legs.filter((l) => !l.result && byId.current.get(l.matchId)?.status !== "pre").map((l) => l.matchId))];
+    if (!liveIds.length || wantDemo.current) return payCashOut(id, v);
+    const t = Date.now();
+    commit({ ...s, tickets: s.tickets.map((x) => (x.id === id ? { ...x, cashing: { until: t + CASHOUT_DELAY, value: v, scores: Object.fromEntries(liveIds.map((mid) => [mid, scoreKey(byId.current.get(mid))])) } } : x)) });
+    setMessage("Cash-out · checking the score…");
+    return true;
+  };
+
+  // ---- Live checks: pending bets and cash-outs are confirmed once a fresh
+  // score shows nothing happened during the wait.
+  const toast = (kind: "info" | "loss" | "win", title: string, text: string, amount = 0) =>
+    window.dispatchEvent(new CustomEvent("royal-ace:toast", { detail: { kind, title, text, amount, game: "sports" } }));
+  useEffect(() => {
+    const due = saved.tickets.flatMap((tk) => [tk.status === "pending" ? tk.accept?.until : undefined, tk.status === "open" ? tk.cashing?.until : undefined]).filter((x): x is number => typeof x === "number");
+    if (!due.length) return;
+    const wait = Math.max(0, Math.min(...due) - Date.now());
+    let stop = false;
+    const id = window.setTimeout(async () => {
+      const s0 = savedRef.current;
+      const sports = new Set<Sport>();
+      for (const tk of s0.tickets) if (tk.accept || tk.cashing) tk.legs.forEach((l) => sports.add(l.sport));
+      if (!wantDemo.current) {
+        await Promise.all([...sports].map((sp) => (sp === "football" ? loadFootball() : loadOther(sp))));
+        await new Promise((r) => window.setTimeout(r, 400));
+      }
+      if (stop) return;
+      const t = Date.now();
+      const same = (scores: Record<string, string>) =>
+        Object.entries(scores).every(([mid, k]) => {
+          const m = byId.current.get(mid);
+          const fresh = wantDemo.current || t - fetchedAt.current[m?.sport ?? "football"] < 60000;
+          return fresh && scoreKey(m) === k && !!m && isOpen(m, t);
+        });
+      const s = savedRef.current;
+      let refund = 0;
+      const msgs: (() => void)[] = [];
+      const tickets = s.tickets.map((tk) => {
+        if (tk.status === "pending" && tk.accept && tk.accept.until <= t) {
+          if (same(tk.accept.scores)) {
+            msgs.push(() => setMessage("Live bet accepted"));
+            return { ...tk, status: "open" as const, accept: undefined };
+          }
+          refund += tk.stake;
+          msgs.push(() => toast("info", "Live bet declined · stake returned", "The score changed (or the market closed) during the check", tk.stake));
+          return { ...tk, status: "declined" as const, payout: tk.stake, settledAt: t, accept: undefined };
+        }
+        if (tk.status === "open" && tk.cashing && tk.cashing.until <= t) {
+          const c = tk.cashing;
+          const v2 = same(c.scores) ? cashOutValue({ ...tk, cashing: undefined }) : null;
+          if (v2 === null) {
+            msgs.push(() => refuse("Cash-out cancelled — the score changed"));
+            return { ...tk, cashing: undefined };
+          }
+          msgs.push(() => payCashOut(tk.id, Math.min(c.value, v2)));
+          return tk;
+        }
+        return tk;
+      });
+      if (refund) wallet.add(refund);
+      commit({ ...s, tickets });
+      msgs.forEach((f) => f());
+    }, wait);
+    return () => {
+      stop = true;
+      window.clearTimeout(id);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saved.tickets]);
   const markSeen = () => {
     const s = savedRef.current;
-    if (s.tickets.some((t) => t.status !== "open" && !t.seen)) commit({ ...s, tickets: s.tickets.map((t) => (t.status !== "open" ? { ...t, seen: true } : t)) });
+    const settled = (t: Ticket) => t.status !== "open" && t.status !== "pending";
+    if (s.tickets.some((t) => settled(t) && !t.seen)) commit({ ...s, tickets: s.tickets.map((t) => (settled(t) ? { ...t, seen: true } : t)) });
   };
 
   return {
@@ -838,8 +930,8 @@ export function useSportsbook(active: boolean) {
     stake,
     potential,
     tickets: saved.tickets,
-    unseen: saved.tickets.filter((t) => t.status !== "open" && !t.seen).length,
-    openCount: saved.tickets.filter((t) => t.status === "open").length,
+    unseen: saved.tickets.filter((t) => t.status !== "open" && t.status !== "pending" && !t.seen).length,
+    openCount: saved.tickets.filter((t) => t.status === "open" || t.status === "pending").length,
     toggle,
     removeSel,
     clearSlip,

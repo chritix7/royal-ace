@@ -260,7 +260,8 @@ export function priceOf(p: number | null, market: string): number | null {
 /** Markets close a little before the end (and at full time). */
 export function isOpen(m: Match, now: number) {
   if (m.status === "done" || m.status === "void") return false;
-  if (m.status === "pre") return now < m.kickoff + 3 * 60000 || m.sport !== "football";
+  // Pre-match prices close at kick-off; live prices open once the feed shows the match live.
+  if (m.status === "pre") return now < m.kickoff;
   if (m.sport === "football") return elapsed(m, now, 93, 2) < 87;
   if (m.sport === "hockey") return !m.clock || m.clock.period <= 3 ? elapsed(m, now, 60, 3) < 57 : false;
   return elapsed(m, now, /nba/i.test(m.comp.name) ? 48 : 40, 4) < (/nba/i.test(m.comp.name) ? 46 : 38);

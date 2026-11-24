@@ -6,7 +6,7 @@ import { Counter } from "./ui";
 import { money } from "../lib/game";
 import { marketsOf, PLAYER_KINDS, playerMarket, priced, type Priced } from "../lib/sports/odds";
 import type { Match, Sport } from "../lib/sports/types";
-import { MAX_PAYOUT, MAX_PICKS, SPORT_CHIPS, SPORTS_MIN, useSportsbook, type SportsGame, type Ticket } from "../lib/useSportsbook";
+import { MAX_PAYOUT, SPORT_CHIPS, SPORTS_MIN, useSportsbook, type SportsGame, type Ticket } from "../lib/useSportsbook";
 import { BOOST_MAX_STAKE, endsIn, type Boost } from "../lib/sports/boosts";
 import { isNarrowScreen, requestFullscreenSettled } from "../lib/fullscreen";
 import { useSession } from "../lib/sessionStore";
@@ -500,54 +500,76 @@ function Slip({ g, lite }: { g: SportsGame; lite: boolean }) {
   const [typed, setTyped] = useState("");
   useEffect(() => setTyped(String(g.stake)), [g.stake]);
   const n = g.slip.length;
+  const builder = n === 1 && g.slip[0].market === "bb";
+  const kind = n > 1 ? `Combo · ${n} picks` : builder ? "Bet builder" : n ? "Single" : "";
+  const allIn = g.stake >= Math.floor(g.balance) && g.balance >= SPORTS_MIN;
+  if (!n)
+    return (
+      <div className="sb-slip-empty">
+        <span className="sb-slip-empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5V9a2 2 0 0 0 0 4v3.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 16.5V13a2 2 0 0 0 0-4z" />
+            <path d="M9 4v14" strokeDasharray="2 2" />
+          </svg>
+        </span>
+        <p className="sb-slip-empty__title">Your ticket is empty</p>
+        <p className="sb-slip-empty__text">Tap any odds to add a pick.</p>
+        <ul className="sb-slip-empty__tips">
+          <li>Several matches make a combo: the odds multiply.</li>
+          <li>3 picks or more: combo boost on the winnings.</li>
+          <li>Two picks on one football match: bet builder.</li>
+        </ul>
+      </div>
+    );
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-0.5">
-        {!n && <p className="sb-empty !py-6">Tap odds to add picks. Several picks make a combo: the odds multiply.</p>}
-        {g.slip.map((s) => (
-          <div key={s.key} className={`sb-sel ${s.now === null ? "is-closed" : ""}`}>
-            <div className="min-w-0 flex-1">
-              {s.market === "bb" ? (
-                <>
-                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#e5c779]">Bet builder</p>
-                  {s.label.split(" + ").map((x) => (
-                    <p key={x} className="truncate text-[12px] font-bold text-[#efe2bd]">
-                      · {x}
-                    </p>
-                  ))}
-                </>
-              ) : (
-                <>
-                  <p className="truncate text-[12px] font-bold text-[#efe2bd]">{s.label}</p>
-                  <p className="truncate text-[10px] text-white/45">{s.marketTitle}</p>
-                </>
-              )}
-              <p className="truncate text-[10px] text-white/35">
-                {s.live && <span className="mr-1 text-[#ff6b6b]">LIVE</span>}
-                {s.matchLabel}
-              </p>
-            </div>
-            <div className="flex flex-col items-end gap-1">
-              <span className={`sb-sel__odds ${s.now !== null && s.now !== s.odds ? (s.now > s.odds ? "is-up" : "is-down") : ""}`}>
-                {s.now === null ? "Closed" : fmtOdds(s.now)}
-                {s.now !== null && s.now !== s.odds && <small>{fmtOdds(s.odds)}</small>}
-              </span>
-              <button type="button" onClick={() => g.removeSel(s.key)} className="text-[10px] font-bold uppercase tracking-wider text-white/35 hover:text-white/70" aria-label="Remove pick">
-                Remove
-              </button>
-            </div>
-          </div>
-        ))}
+      <div className="sb-slip-head">
+        <span className="sb-slip-kind">{kind}</span>
+        <button type="button" onClick={g.clearSlip} className="sb-textkey">
+          Clear all
+        </button>
       </div>
-      <div className="mt-2 space-y-2 border-t border-white/10 pt-2">
-        <div className="flex items-center justify-between text-[11px]">
-          <span className="font-bold uppercase tracking-[0.16em] text-white/45">{n > 1 ? `Combo · ${n} picks` : n ? "Single" : "Ticket"}</span>
-          {n > 0 && (
-            <button type="button" onClick={g.clearSlip} className="font-bold uppercase tracking-wider text-white/35 hover:text-white/70">
-              Clear
-            </button>
-          )}
-        </div>
+      <div className="lux-scroll min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-0.5">
+        {g.slip.map((s) => {
+          const moved = s.now !== null && s.now !== s.odds;
+          const boost = s.market.startsWith("boost");
+          return (
+            <div key={s.key} className={`sb-sel ${s.now === null ? "is-closed" : ""} ${s.live ? "is-live" : ""} ${boost ? "is-boost" : ""}`}>
+              <div className="min-w-0 flex-1">
+                {s.market === "bb" ? (
+                  <>
+                    <p className="sb-sel__market">Bet builder</p>
+                    {s.label.split(" + ").map((x) => (
+                      <p key={x} className="sb-sel__pick">
+                        · {x}
+                      </p>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    <p className="sb-sel__pick">{s.label}</p>
+                    <p className="sb-sel__market">{s.marketTitle}</p>
+                  </>
+                )}
+                <p className="sb-sel__match">
+                  {s.live && <span className="sb-sel__live">Live</span>}
+                  {s.matchLabel}
+                </p>
+              </div>
+              <div className="flex shrink-0 flex-col items-end justify-between gap-1">
+                <button type="button" onClick={() => g.removeSel(s.key)} className="sb-sel__x" aria-label="Remove pick">
+                  ✕
+                </button>
+                <span className={`sb-sel__odds ${moved ? (s.now! > s.odds ? "is-up" : "is-down") : ""}`}>
+                  {moved && <small>{fmtOdds(s.odds)}</small>}
+                  {s.now === null ? "Closed" : fmtOdds(s.now)}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="sb-slip-foot">
         <div className={`flex items-center gap-1 overflow-x-auto [scrollbar-width:none] ${lite ? "" : "justify-between"}`} role="radiogroup" aria-label="Stake">
           {SPORT_CHIPS.map((v) => (
             <button key={v} type="button" role="radio" aria-checked={g.stake === v} onClick={() => g.setStake(v)} className={`rl-chip-pick relative aspect-square shrink-0 rounded-full ${lite ? "w-[2.3rem]" : "w-[clamp(1.45rem,1.75vw,2rem)]"} ${g.stake === v ? "is-selected" : ""}`}>
@@ -555,101 +577,138 @@ function Slip({ g, lite }: { g: SportsGame; lite: boolean }) {
             </button>
           ))}
         </div>
-        <label className="sb-stake">
-          <span>Stake ◈</span>
-          <input
-            inputMode="numeric"
-            value={typed}
-            onChange={(e) => setTyped(e.target.value.replace(/[^\d]/g, "").slice(0, 13))}
-            onBlur={() => g.setStake(+typed || SPORTS_MIN)}
-            onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
-            aria-label={`Stake, from ${SPORTS_MIN}`}
-          />
-        </label>
-        <div className="grid grid-cols-3 gap-1">
-          <button type="button" onClick={g.halfStake} className="rl-key">
+        <div className="flex gap-1.5">
+          <label className="sb-stake min-w-0 flex-1">
+            <span>Stake</span>
+            <b aria-hidden="true">◈</b>
+            <input
+              inputMode="numeric"
+              value={typed}
+              onChange={(e) => setTyped(e.target.value.replace(/[^\d]/g, "").slice(0, 13))}
+              onBlur={() => g.setStake(+typed || SPORTS_MIN)}
+              onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
+              aria-label={`Stake, from ${SPORTS_MIN}`}
+            />
+          </label>
+          <button type="button" onClick={g.halfStake} className="pr-btn is-ghost is-sm !px-2.5">
             ½
           </button>
-          <button type="button" onClick={g.doubleStake} className="rl-key">
+          <button type="button" onClick={g.doubleStake} className="pr-btn is-ghost is-sm !px-2.5">
             2×
           </button>
-          <button type="button" onClick={g.allIn} className={`rl-key ${g.stake >= Math.floor(g.balance) && g.balance >= SPORTS_MIN ? "is-on" : ""}`}>
+          <button type="button" onClick={g.allIn} className={`pr-btn is-sm !px-2.5 ${allIn ? "" : "is-ghost"}`}>
             All in
           </button>
         </div>
-        {g.slipHasBoost && (
+        {(g.slipHasBoost || (n > 1 && (g.slipBoost > 0 || g.slipInsured || n < 3))) && (
           <div className="sb-perks">
-            <span className="sb-perk is-boost">{`Boosted odds · single bet · max ◈ ${compact(BOOST_MAX_STAKE)} · no cash-out`}</span>
+            {g.slipHasBoost && <span className="sb-perk is-boost">{`Boosted odds · single bet · max ◈ ${compact(BOOST_MAX_STAKE)} · no cash-out`}</span>}
+            {n > 1 && (g.slipBoost > 0 ? <span className="sb-perk is-on">Combo boost +{Math.round(g.slipBoost * 100)}%</span> : <span className="sb-perk">3 picks → +5% boost</span>)}
+            {n > 1 && (g.slipInsured ? <span className="sb-perk is-on">Insured · 1 miss refunded</span> : n >= 3 && <span className="sb-perk">5 picks → insurance</span>)}
           </div>
         )}
-        {n > 1 && (g.slipBoost > 0 || g.slipInsured || n < 3) && (
-          <div className="sb-perks">
-            {g.slipBoost > 0 ? <span className="sb-perk is-on">Combo boost +{Math.round(g.slipBoost * 100)}%</span> : <span className="sb-perk">3 picks → +5% boost</span>}
-            {g.slipInsured ? <span className="sb-perk is-on">Insured · 1 miss refunded</span> : n >= 3 && <span className="sb-perk">5 picks → insurance</span>}
+        <dl className="sb-receipt">
+          <div>
+            <dt>Total odds</dt>
+            <dd>{fmtOdds(g.slipOdds)}</dd>
           </div>
-        )}
-        <div className="grid grid-cols-2 gap-1.5">
-          <div className="rl-window rl-window--sm">
-            <span className="rl-window__label">Total odds</span>
-            <span className="rl-window__value">{n ? fmtOdds(g.slipOdds) : "—"}</span>
+          <div>
+            <dt>Stake</dt>
+            <dd>◈ {money(g.stake)}</dd>
           </div>
-          <div className={`rl-window rl-window--sm ${n ? "is-hot" : ""}`}>
-            <span className="rl-window__label">{g.potential >= MAX_PAYOUT ? "Max win" : "Potential win"}</span>
-            <span className="rl-window__value">
-              <span className="rl-window__cur">◈</span>
-              {n ? compact(g.potential) : 0}
-            </span>
+          <div className="is-total">
+            <dt>{g.potential >= MAX_PAYOUT ? "Max win" : "Potential win"}</dt>
+            <dd>◈ {money(g.potential)}</dd>
           </div>
-        </div>
-        <button type="button" onClick={g.place} disabled={!n} className={`rl-spin !py-2.5 ${n ? "is-ready" : ""}`}>
-          <span className="text-[13px] !tracking-[0.14em]">{g.slipChanged ? "ACCEPT NEW ODDS" : n > 1 ? "PLACE COMBO" : "PLACE BET"}</span>
-          <span className="text-[9px] font-black tracking-[0.12em] opacity-60">◈ {compact(g.stake)}{n >= MAX_PICKS ? ` · max ${MAX_PICKS} picks` : ""}</span>
+        </dl>
+        <button type="button" onClick={g.place} className={`sb-place ${g.slipChanged ? "is-changed" : ""}`}>
+          <span className="sb-place__main">{g.slipChanged ? "Accept new odds" : n > 1 ? "Place combo" : "Place bet"}</span>
+          <span className="sb-place__sub">{g.slipChanged ? "The odds moved — check them first" : `◈ ${compact(g.stake)} to win ◈ ${compact(g.potential)}`}</span>
         </button>
+        {g.slip.some((x) => x.live) && <p className="sb-note">Live bets are confirmed after a 12-second check of the score.</p>}
       </div>
     </div>
   );
 }
 
+function useSeconds(on: boolean) {
+  const [t, setT] = useState(0);
+  useEffect(() => {
+    if (!on) return;
+    setT(Date.now());
+    const id = window.setInterval(() => setT(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [on]);
+  return t;
+}
+
+const STATE: Record<Ticket["status"], string> = {
+  open: "Open",
+  pending: "Checking",
+  won: "Won",
+  lost: "Lost",
+  cashed: "Cashed out",
+  refund: "Refunded · insurance",
+  void: "Void · refunded",
+  declined: "Declined · refunded",
+};
+
 function TicketCard({ g, t }: { g: SportsGame; t: Ticket }) {
-  const co = t.status === "open" ? g.cashOutValue(t) : null;
-  const state = t.status === "open" ? "Open" : t.status === "won" ? "Won" : t.status === "lost" ? "Lost" : t.status === "cashed" ? "Cashed out" : t.status === "refund" ? "Refunded · insurance" : "Void";
+  const waiting = t.status === "pending" || !!t.cashing;
+  const now = useSeconds(waiting);
+  const co = t.status === "open" && !t.cashing ? g.cashOutValue(t) : null;
+  const potential = Math.min(MAX_PAYOUT, Math.floor(t.stake * t.odds + (t.stake * t.odds - t.stake) * (t.boost ?? 0)));
+  const left = (until?: number) => Math.max(0, Math.ceil(((until ?? 0) - (now || Date.now())) / 1000));
+  const settled = t.status !== "open" && t.status !== "pending";
   return (
     <div className={`sb-ticket is-${t.status}`}>
-      <div className="flex items-center justify-between gap-2">
-        <span className="sb-ticket__state">{state}</span>
-        <span className="text-[10px] text-white/35">
-          #{t.id} · {t.legs.length > 1 ? `Combo ×${fmtOdds(t.odds)}` : `@ ${fmtOdds(t.odds)}`}
-          {t.boost ? ` · +${Math.round(t.boost * 100)}%` : ""}
-          {t.insured ? " · insured" : ""}
+      <div className="sb-ticket__head">
+        <span className={`sb-ticket__state is-${t.status}`}>
+          {t.status === "pending" && <i className="sb-spin" aria-hidden="true" />}
+          {t.status === "pending" ? `Checking · ${left(t.accept?.until)} s` : STATE[t.status]}
+        </span>
+        <span className="sb-ticket__meta">
+          {`${t.legs.length > 1 ? `Combo · ${t.legs.length}` : "Single"} · @ ${fmtOdds(t.odds)}${t.boost ? ` · +${Math.round(t.boost * 100)}%` : ""}${t.insured ? " · insured" : ""}`}
         </span>
       </div>
-      <ul className="mt-1.5 space-y-1">
+      <ul className="sb-ticket__legs">
         {t.legs.map((l) => (
-          <li key={l.key} className="flex items-center gap-2 text-[11px]">
+          <li key={l.key}>
             <i className={`sb-leg ${l.result ? `is-${l.result}` : ""}`} />
-            <span className="min-w-0 flex-1 truncate">
-              <b className="font-bold text-[#efe2bd]">{l.label}</b> <span className="text-white/40">· {l.matchLabel}</span>
+            <span className="min-w-0 flex-1">
+              <b>{l.label}</b>
+              <span className="sb-ticket__match">
+                {l.live && <em>Live · </em>}
+                {l.matchLabel}
+              </span>
             </span>
-            <span className="text-white/45">{l.final ?? fmtOdds(l.odds)}</span>
+            <span className="sb-ticket__odds">{l.final ?? fmtOdds(l.odds)}</span>
           </li>
         ))}
       </ul>
-      <div className="mt-1.5 flex items-center justify-between gap-2 text-[11px]">
-        <span className="text-white/45">Stake ◈ {money(t.stake)}</span>
-        {t.status === "open" ? (
-          co !== null ? (
-            <button type="button" onClick={() => g.cashOut(t.id)} className="rl-key is-on !h-7">
-              Cash out ◈ {compact(co)}
-            </button>
-          ) : (
-            <span className="text-white/40">Win ◈ {compact(Math.min(MAX_PAYOUT, Math.floor(t.stake * t.odds + (t.stake * t.odds - t.stake) * (t.boost ?? 0))))}</span>
-          )
-        ) : (
-          <span className={t.payout > t.stake ? "font-bold text-[#f0d38b]" : "text-white/40"}>{t.payout ? `◈ ${money(t.payout)}` : "—"}</span>
-        )}
+      <div className="sb-ticket__foot">
+        <div>
+          <p className="sb-ticket__k">Stake</p>
+          <p className="sb-ticket__v">◈ {money(t.stake)}</p>
+        </div>
+        <div className="text-right">
+          <p className="sb-ticket__k">{settled ? (t.status === "won" || t.status === "cashed" ? "Paid" : t.payout ? "Returned" : "Return") : "To win"}</p>
+          <p className={`sb-ticket__v ${t.payout > t.stake ? "is-gold" : ""}`}>{settled ? (t.payout ? `◈ ${money(t.payout)}` : "—") : `◈ ${compact(potential)}`}</p>
+        </div>
       </div>
-      {t.status !== "lost" && t.status !== "void" && t.status !== "refund" && (
-        <button type="button" onClick={() => shareTicket(t)} className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#e5c779]/70 hover:text-[#f5d778]">
+      {t.status === "open" &&
+        (t.cashing ? (
+          <button type="button" disabled className="pr-btn is-ghost is-sm mt-2 w-full">
+            <i className="sb-spin" aria-hidden="true" />
+            {`Cash-out · checking ${left(t.cashing.until)} s`}
+          </button>
+        ) : co !== null ? (
+          <button type="button" onClick={() => g.cashOut(t.id)} className="pr-btn is-sm mt-2 w-full">
+            {`Cash out ◈ ${compact(co)}`}
+          </button>
+        ) : null)}
+      {(t.status === "open" || t.status === "won" || t.status === "cashed") && (
+        <button type="button" onClick={() => shareTicket(t)} className="sb-textkey mt-1.5">
           Share ticket ↗
         </button>
       )}
@@ -659,40 +718,45 @@ function TicketCard({ g, t }: { g: SportsGame; t: Ticket }) {
 
 function MyBets({ g }: { g: SportsGame }) {
   const s = useSession().sports;
-  const open = g.tickets.filter((t) => t.status === "open").reverse();
-  const done = g.tickets.filter((t) => t.status !== "open").reverse().slice(0, 40);
+  const [tab, setTab] = useState<"open" | "settled">("open");
+  const open = g.tickets.filter((t) => t.status === "open" || t.status === "pending").reverse();
+  const done = g.tickets.filter((t) => t.status !== "open" && t.status !== "pending").reverse().slice(0, 40);
   useEffect(() => {
     g.markSeen();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const list = tab === "open" ? open : done;
   return (
-    <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-0.5">
+    <div className="flex min-h-0 flex-1 flex-col gap-2">
       <div className="grid grid-cols-3 gap-1.5 text-center">
         {(
           [
-            ["Tickets today", String(s.spins)],
-            ["Net today", `${s.net >= 0 ? "+" : "−"}◈ ${compact(Math.abs(s.net))}`],
-            ["Best", `◈ ${compact(Math.max(0, s.biggest))}`],
+            ["Tickets today", String(s.spins), ""],
+            ["Net today", `${s.net >= 0 ? "+" : "−"}◈ ${compact(Math.abs(s.net))}`, s.net > 0 ? "is-up" : s.net < 0 ? "is-down" : ""],
+            ["Best", `◈ ${compact(Math.max(0, s.biggest))}`, ""],
           ] as const
-        ).map(([l, v]) => (
-          <div key={l} className="rounded-lg border border-white/10 bg-black/30 px-1 py-1.5">
-            <p className="text-[8.5px] font-bold uppercase tracking-[0.14em] text-white/40">{l}</p>
-            <p className="truncate text-[12px] font-bold text-[#efe2bd]">{v}</p>
+        ).map(([l, v, c]) => (
+          <div key={l} className="sb-kpi">
+            <p className="sb-kpi__k">{l}</p>
+            <p className={`sb-kpi__v ${c}`}>{v}</p>
           </div>
         ))}
       </div>
-      {!open.length && !done.length && <p className="sb-empty">No ticket yet.</p>}
-      {open.length > 0 && <p className="rl-eyebrow !text-[9px]">Open · {open.length}</p>}
-      {open.map((t) => (
-        <TicketCard key={t.id} g={g} t={t} />
-      ))}
-      {done.length > 0 && <p className="rl-eyebrow !text-[9px]">Settled</p>}
-      {done.map((t) => (
-        <TicketCard key={t.id} g={g} t={t} />
-      ))}
-      <p className="pb-1 text-center text-[9.5px] leading-relaxed text-white/30">
-        Virtual chips only — no real money. Odds by the Royal Ace model. Data: football-data.org, API-Sports.
-      </p>
+      <div className="flex gap-1.5" role="tablist">
+        <button type="button" role="tab" aria-selected={tab === "open"} onClick={() => setTab("open")} className={`st-chip flex-1 justify-center ${tab === "open" ? "is-on" : ""}`}>
+          {`Open · ${open.length}`}
+        </button>
+        <button type="button" role="tab" aria-selected={tab === "settled"} onClick={() => setTab("settled")} className={`st-chip flex-1 justify-center ${tab === "settled" ? "is-on" : ""}`}>
+          {`Settled · ${done.length}`}
+        </button>
+      </div>
+      <div className="lux-scroll min-h-0 flex-1 space-y-2 overflow-y-auto pr-0.5">
+        {!list.length && <p className="sb-empty !py-8">{tab === "open" ? "No open ticket." : "No settled ticket yet."}</p>}
+        {list.map((t) => (
+          <TicketCard key={t.id} g={g} t={t} />
+        ))}
+        <p className="pb-1 pt-1 text-center text-[9.5px] leading-relaxed text-white/30">Virtual chips only — no real money. Odds by the Royal Ace model. Data: football-data.org, API-Sports.</p>
+      </div>
     </div>
   );
 }
