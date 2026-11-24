@@ -130,7 +130,10 @@ export function NameModal({ initial, onDone }: { initial: string; onDone: () => 
   const [value, setValue] = useState(initial);
   const [error, setError] = useState<string | null>(null);
   const input = useRef<HTMLInputElement>(null);
+  // Auto-focus only with a mouse: on iPhone a focus without a tap shows no
+  // keyboard, and the field then ignores taps because it is "already" focused.
   useEffect(() => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     const t = window.setTimeout(() => input.current?.focus(), 60);
     return () => window.clearTimeout(t);
   }, []);
@@ -160,6 +163,10 @@ export function NameModal({ initial, onDone }: { initial: string; onDone: () => 
           onChange={(e) => {
             setValue(e.target.value);
             setError(null);
+          }}
+          onPointerDown={(e) => {
+            // Already focused without a keyboard (iOS): let this tap focus it again.
+            if (e.pointerType === "touch" && document.activeElement === e.currentTarget) e.currentTarget.blur();
           }}
           maxLength={16}
           placeholder="Your name or nickname"

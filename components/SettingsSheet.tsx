@@ -273,7 +273,7 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
       <section>
         <p className="st-head">Profile & account</p>
         <div className="flex gap-1.5">
-          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={16} aria-label="Your name" className="st-input min-w-0 flex-1" translate="no" />
+          <input value={name} onChange={(e) => setName(e.target.value)} onPointerDown={(e) => { if (e.pointerType === "touch" && document.activeElement === e.currentTarget) e.currentTarget.blur(); }} maxLength={16} aria-label="Your name" className="st-input min-w-0 flex-1" translate="no" />
           <button type="button" className="rl-key is-on" onClick={saveName}>
             Save
           </button>
