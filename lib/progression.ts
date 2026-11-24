@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 import { onEvent, type GameEvent } from "./events";
 import { wallet } from "./wallet";
 import { sfx } from "./sound";
+import { shop } from "./shop";
 
 /**
  * Progression permanente : XP et niveaux.
@@ -127,7 +128,8 @@ function handleEvent(event: GameEvent, amount = 1) {
 
   if (!gained) return;
 
-  const xpGain = gained * amount;
+  // XP ×2 boost from the shop.
+  const xpGain = gained * amount * shop.xpMultiplier();
 
   const nextXp = state.xp + xpGain;
   const nextLevel = levelFromXp(nextXp);

@@ -8,6 +8,7 @@ import { useProfile } from "../lib/profile";
 import { useProgression } from "../lib/progression";
 import { useStats } from "../lib/statsStore";
 import { useShop } from "../lib/shop";
+import { AvatarBadge, useTitle } from "./Avatar";
 
 const fmt = (n: number) => Math.floor(n).toLocaleString("en-US");
 const signed = (n: number) => `${n >= 0 ? "+" : "−"}◈ ${fmt(Math.abs(n))}`;
@@ -30,6 +31,7 @@ export default function ProfileSheet({ tab: first, onClose }: { tab: "card" | "r
   }, [onClose]);
   const vip = vipTierForLevel(prog.level);
   const cardId = useShop().card;
+  const title = useTitle();
   const cardFinish = cardId === "card:gold" ? "" : `is-${cardId.slice(5)}`;
   const name = profile.name || "Player";
   const rounds: [string, number][] = [
@@ -72,8 +74,14 @@ export default function ProfileSheet({ tab: first, onClose }: { tab: "card" | "r
                   <span className="vip-card__brand">ROYAL ACE</span>
                   <span className="vip-card__tier">VIP · {vip.label}</span>
                 </div>
-                <span className="vip-card__chip" aria-hidden="true" />
-                <p className="vip-card__name" translate="no">{name}</p>
+                <div className="flex items-center justify-between">
+                  <span className="vip-card__chip" aria-hidden="true" />
+                  <AvatarBadge size="md" />
+                </div>
+                <div>
+                  <p className="vip-card__name" translate="no">{name}</p>
+                  {title && <p className="pl-title -mt-0.5 text-[11px] uppercase !tracking-[0.22em]">{title}</p>}
+                </div>
                 <div className="flex items-end justify-between">
                   <span className="vip-card__meta">Level {prog.level} · member since {career.since || "today"}</span>
                   <span className="vip-card__rank">#{ranking.rank || "—"} this week</span>
@@ -107,7 +115,7 @@ export default function ProfileSheet({ tab: first, onClose }: { tab: "card" | "r
                 {top.map((r, i) => (
                   <li key={r.name + i} className={`rk-row ${r.you ? "is-you" : ""} ${i < 3 ? `is-top${i + 1}` : ""}`}>
                     <span className="rk-row__pos">{i + 1}</span>
-                    <span className="min-w-0 flex-1 truncate">{r.you ? `${r.name} (you)` : r.name}</span>
+                    <span className="flex min-w-0 flex-1 items-center gap-1.5 truncate">{r.you && <AvatarBadge size="sm" />}<span className="truncate">{r.you ? `${r.name} (you)` : r.name}</span></span>
                     <span className="rk-row__net">{signed(r.net)}</span>
                   </li>
                 ))}
@@ -116,7 +124,7 @@ export default function ProfileSheet({ tab: first, onClose }: { tab: "card" | "r
                     <li className="py-0.5 text-center text-white/30">⋯</li>
                     <li className="rk-row is-you">
                       <span className="rk-row__pos">{ranking.rank}</span>
-                      <span className="min-w-0 flex-1 truncate">{name} (you)</span>
+                      <span className="flex min-w-0 flex-1 items-center gap-1.5 truncate"><AvatarBadge size="sm" /><span className="truncate">{name} (you)</span></span>
                       <span className="rk-row__net">{signed(career.weekNet)}</span>
                     </li>
                   </>

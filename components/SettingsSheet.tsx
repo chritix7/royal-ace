@@ -7,8 +7,8 @@ import { AMBIENCE_MODES, ambience, useAmbienceMode } from "../lib/ambience";
 import { i18n, useLang } from "../lib/i18n";
 import { motion, useReducedMotion } from "../lib/motion";
 import { cleanName, profileStore, useProfile } from "../lib/profile";
-import { SHOP, SHOP_CATS, priceLabel, shop, useShop } from "../lib/shop";
-import { useBalance, useLocked } from "../lib/wallet";
+import ShopView from "./ShopView";
+import { useBalance } from "../lib/wallet";
 import { cloud, useCloud } from "../lib/cloud";
 import { money } from "../lib/game";
 
@@ -294,117 +294,6 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
   );
 }
 
-function Preview({ it }: { it: (typeof SHOP)[number] }) {
-  const [a, b, c] = it.swatch;
-  if (it.cat === "card") {
-    const fin = it.id === "card:gold" ? "" : `is-${it.id.slice(5)}`;
-    return (
-      <div className="shop-prev shop-prev--card">
-        <div className={`vip-card shop-vip ${fin}`}>
-          <div className="flex items-start justify-between">
-            <span className="vip-card__brand">ROYAL ACE</span>
-            <span className="vip-card__tier">VIP</span>
-          </div>
-          <span className="vip-card__chip" aria-hidden="true" />
-        </div>
-      </div>
-    );
-  }
-  if (it.cat === "roulette") {
-    return (
-      <div className="shop-prev" style={{ background: `radial-gradient(120% 90% at 50% 20%, ${b}, ${a})` }}>
-        <span className="shop-wheel" style={{ borderColor: c, background: `radial-gradient(circle, ${c} 0 12%, ${a} 13% 30%, transparent 31%), repeating-conic-gradient(#b3121f 0 10deg, #0b0b0d 10deg 20deg)` }} />
-      </div>
-    );
-  }
-  return (
-    <div className="shop-prev" style={{ background: `radial-gradient(120% 100% at 50% 0%, ${b}, ${a})` }}>
-      <span className="shop-arc" style={{ borderColor: c }} />
-      <span className="shop-card shop-card--face" style={{ transform: "rotate(-8deg) translateX(-30%)" }}>
-        A<span className="text-[#111]">♠</span>
-      </span>
-      <span className="shop-card shop-card--back" style={{ background: `repeating-linear-gradient(45deg, ${b} 0 3px, ${a} 3px 6px)`, borderColor: c, transform: "rotate(7deg) translateX(30%)" }} />
-    </div>
-  );
-}
-
-function ShopPane({ focus }: { focus?: string }) {
-  const st = useShop();
-  const locked = useLocked();
-  const [cat, setCat] = useState<"all" | (typeof SHOP_CATS)[number]["id"]>("all");
-  const [msg, setMsg] = useState<{ id: string; text: string } | null>(null);
-  useEffect(() => {
-    if (!focus) return;
-    const t = window.setTimeout(() => document.getElementById(`shop-${focus}`)?.scrollIntoView({ block: "center", behavior: "smooth" }), 120);
-    return () => window.clearTimeout(t);
-  }, [focus]);
-  const owned = st.owned.length;
-  return (
-    <div className="space-y-5">
-      <div className="shop-hero">
-        <p className="shop-hero__kicker">Collection</p>
-        <p className="shop-hero__title">Felts, rooms and finishes</p>
-        <p className="shop-hero__sub">Buy once with chips, keep for good. {`${owned} of ${SHOP.length} owned`}</p>
-      </div>
-      <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none]" role="tablist" aria-label="Categories">
-        {([["all", "All"], ...SHOP_CATS.map((c) => [c.id, c.label])] as [typeof cat, string][]).map(([id, label]) => (
-          <button key={id} type="button" role="tab" aria-selected={cat === id} onClick={() => setCat(id)} className={`st-chip ${cat === id ? "is-on" : ""}`}>
-            {label}
-          </button>
-        ))}
-      </div>
-      {SHOP_CATS.filter((c) => cat === "all" || c.id === cat).map((c) => (
-        <section key={c.id}>
-          <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3">
-            <p className="st-head !mb-0">{c.label}</p>
-            <p className="st-sub">{c.where}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
-            {SHOP.filter((i) => i.cat === c.id).map((it) => {
-              const has = st.owned.includes(it.id);
-              const equipped = c.id === "card" && st.card === it.id;
-              return (
-                <div key={it.id} id={`shop-${it.id}`} className={`shop-item ${focus === it.id ? "is-focus" : ""} ${has ? "is-owned" : ""}`}>
-                  <Preview it={it} />
-                  <div className="flex items-baseline justify-between gap-2">
-                    <p className="shop-item__name">{it.name}</p>
-                    {!has && <span className="shop-item__price">◈ {priceLabel(it.price)}</span>}
-                  </div>
-                  <p className="shop-item__note">{it.note}</p>
-                  {has ? (
-                    c.id === "card" ? (
-                      <button type="button" className={`rl-key w-full ${equipped ? "is-on" : ""}`} disabled={equipped} onClick={() => shop.equipCard(it.id)}>
-                        {equipped ? "Equipped" : "Equip"}
-                      </button>
-                    ) : (
-                      <span className="shop-item__owned">Owned</span>
-                    )
-                  ) : (
-                    <button
-                      type="button"
-                      className="rl-key is-on w-full"
-                      disabled={locked}
-                      onClick={() => {
-                        const ok = shop.buy(it.id);
-                        setMsg({ id: it.id, text: ok ? "Unlocked ✓" : "Not enough chips" });
-                        if (ok && c.id === "card") shop.equipCard(it.id);
-                      }}
-                    >
-                      Buy
-                    </button>
-                  )}
-                  {msg?.id === it.id && <p className="text-center text-[10px] text-[#f5d778]">{msg.text}</p>}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      ))}
-      {locked && <p className="st-sub text-center">Finish the round in progress to buy.</p>}
-    </div>
-  );
-}
-
 /** Full-screen page (settings, shop): its own header with a back key. */
 function FullPage({ title, onClose, right, children }: { title: string; onClose: () => void; right?: ReactNode; children: ReactNode }) {
   useEffect(() => {
@@ -453,7 +342,7 @@ export function ShopPage({ item, onClose }: { item?: string; onClose: () => void
         </span>
       }
     >
-      <ShopPane focus={item} />
+      <ShopView focus={item} />
     </FullPage>
   );
 }

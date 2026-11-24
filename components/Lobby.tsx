@@ -15,6 +15,7 @@ import { today } from "../lib/clock";
 import { useWeekly, WEEKLY_TIERS } from "../lib/weekly";
 import { cleanName, profileStore, useProfile } from "../lib/profile";
 import { useLocked } from "../lib/wallet";
+import { AvatarBadge, useTitle } from "./Avatar";
 
 export type LobbyGame = "blackjack" | "slots" | "roulette" | "poker" | "craps" | "penalty" | "sports";
 
@@ -404,14 +405,27 @@ export default function Lobby({
     return () => window.clearTimeout(t);
   }, [flash]);
 
+  const title = useTitle();
   const claimBonus = () => {
     const got = dailyStore.claim();
     if (got) setFlash(`Daily bonus · +◈ ${fmt(got)}`);
   };
 
   const nameBlock = (
+    <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+      <button type="button" onClick={() => setProfileTab("card")} className="shrink-0" aria-label="Your VIP card">
+        <AvatarBadge size={desktop ? "lg" : "md"} />
+      </button>
     <div className="min-w-0">
-      <p className="lb-hero__eyebrow">{hello}</p>
+      <p className="lb-hero__eyebrow truncate">
+        <span className={title ? "hidden sm:inline" : ""}>{hello}</span>
+        {title && (
+          <>
+            <span className="hidden opacity-50 sm:inline"> · </span>
+            <span className="pl-title !tracking-[0.18em]">{title}</span>
+          </>
+        )}
+      </p>
       <div className="flex min-w-0 items-center gap-2">
         <button type="button" onClick={() => setProfileTab("card")} className="min-w-0 text-left" aria-label="Your VIP card">
           <h2 className="lb-hero__name truncate">{profile.name || "Welcome"}</h2>
@@ -420,6 +434,7 @@ export default function Lobby({
           ✎
         </button>
       </div>
+    </div>
     </div>
   );
   const levelRow = (

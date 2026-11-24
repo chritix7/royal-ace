@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useShop } from "../lib/shop";
 
 /**
  * Sidebar / bet-input chip button. Now drawn as an SVG casino chip
@@ -21,6 +22,7 @@ type Scheme = {
   edge: string;
   center: string;
   text: string;
+  pip?: string;
 };
 
 // Scheme per denomination — body/rim tone + the contrasting center
@@ -49,8 +51,42 @@ function chipLabel(value: number): string {
   return String(value);
 }
 
-export function ChipFace({ value, label: forced }: { value: number; label?: string }) {
-  const scheme = SCHEMES[value] ?? SCHEMES[100];
+/** Chip sets from the shop: the centre keeps the denomination colour so
+ *  values stay readable; body, rim and edge inlays change. */
+const DENOMS = Object.keys(SCHEMES).map(Number);
+const ink = (hex: string) => {
+  const n = parseInt(hex.slice(1), 16);
+  const l = 0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
+  return l > 150 ? "#16120a" : "#ffffff";
+};
+function themed(set: string, value: number, base: Scheme): Scheme {
+  if (set === "chips:classic") return base;
+  const s = themedRaw(set, value, base);
+  return { ...s, text: ink(s.center) };
+}
+function themedRaw(set: string, value: number, base: Scheme): Scheme {
+  const i = Math.max(0, DENOMS.indexOf(value));
+  switch (set) {
+    case "chips:carbon":
+      return { body: "#1b1c21", edge: "#040405", center: base.body, text: "#ffffff", pip: "#e5c779" };
+    case "chips:neon":
+      return { body: "#14081f", edge: "#020004", center: base.body, text: "#ffffff", pip: i % 2 ? "#22e6ff" : "#ff2fd1" };
+    case "chips:jade":
+      return { body: i % 2 ? "#1f8a5f" : "#17734f", edge: "#06231a", center: base.body, text: "#ffffff", pip: "#e8c36a" };
+    case "chips:porcelain":
+      return { body: "#f6f2ea", edge: "#b9ad93", center: base.body, text: "#ffffff", pip: "#c9a24a" };
+    case "chips:ruby":
+      return { body: "#121014", edge: "#000000", center: base.body, text: "#ffffff", pip: "#ff4d5e" };
+    default:
+      return base;
+  }
+}
+
+export function ChipFace({ value, label: forced, set: forcedSet }: { value: number; label?: string; set?: string }) {
+  const equipped = useShop().chips;
+  const set = forcedSet ?? equipped;
+  const scheme = themed(set, value, SCHEMES[value] ?? SCHEMES[100]);
+  const gid = `${set.replace(/\W/g, "")}-${value}`;
   // 8 edge pips at 45° intervals, rotated from the top.
   const pipAngles = [0, 45, 90, 135, 180, 225, 270, 315];
   const label = forced ?? chipLabel(value);
@@ -66,7 +102,7 @@ export function ChipFace({ value, label: forced }: { value: number; label?: stri
     >
       <defs>
         <radialGradient
-          id={`chip-shine-${value}`}
+          id={`chip-shine-${gid}`}
           cx="34%"
           cy="30%"
           r="60%"
@@ -75,7 +111,7 @@ export function ChipFace({ value, label: forced }: { value: number; label?: stri
           <stop offset="70%" stopColor="rgba(255,255,255,0)" />
         </radialGradient>
         <radialGradient
-          id={`chip-body-${value}`}
+          id={`chip-body-${gid}`}
           cx="50%"
           cy="40%"
           r="60%"
@@ -90,7 +126,7 @@ export function ChipFace({ value, label: forced }: { value: number; label?: stri
         cx="24"
         cy="24"
         r="23"
-        fill={`url(#chip-body-${value})`}
+        fill={`url(#chip-body-${gid})`}
         stroke="rgba(0,0,0,0.5)"
         strokeWidth="1"
       />
@@ -105,7 +141,7 @@ export function ChipFace({ value, label: forced }: { value: number; label?: stri
             width="3.5"
             height="5"
             rx="0.6"
-            fill="rgba(255,255,255,0.88)"
+            fill={scheme.pip ?? "rgba(255,255,255,0.88)"}
             stroke="rgba(0,0,0,0.25)"
             strokeWidth="0.3"
             transform={`rotate(${a} 24 24)`}
@@ -156,7 +192,7 @@ export function ChipFace({ value, label: forced }: { value: number; label?: stri
         cy="15"
         rx="10"
         ry="5"
-        fill={`url(#chip-shine-${value})`}
+        fill={`url(#chip-shine-${gid})`}
         pointerEvents="none"
       />
     </svg>
