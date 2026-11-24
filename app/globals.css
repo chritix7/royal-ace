@@ -3009,19 +3009,19 @@ input, textarea, select { touch-action: auto; -webkit-user-select: text; user-se
 @media (max-width: 1023px) { .rl-chip-scroll { -webkit-mask-image: linear-gradient(90deg, transparent, #000 0.6rem, #000 calc(100% - 1.4rem), transparent); mask-image: linear-gradient(90deg, transparent, #000 0.6rem, #000 calc(100% - 1.4rem), transparent); } }
 
 /* ── Premium buttons (shop, settings): same family as the lobby "Play" key ── */
-.lux-btn { position: relative; display: inline-flex; height: 2.3rem; align-items: center; justify-content: center; gap: 0.45rem; border: 0; border-radius: 9999px; padding: 0 1rem; white-space: nowrap;
+.pr-btn { position: relative; display: inline-flex; height: 2.3rem; align-items: center; justify-content: center; gap: 0.45rem; border: 0; border-radius: 9999px; padding: 0 1rem; white-space: nowrap;
   font-family: var(--font-display), Georgia, serif; font-size: 11.5px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #1a1206;
   background: linear-gradient(180deg, #fbe9b2, #d9ae54 52%, #a87a2c); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -2px 0 rgba(0, 0, 0, 0.18), 0 6px 16px rgba(212, 169, 78, 0.22);
   outline: none; transition: filter 0.15s, transform 0.1s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-.lux-btn:hover:not(:disabled) { filter: brightness(1.08); }
-.lux-btn:active:not(:disabled) { transform: translateY(1px); }
-.lux-btn:focus-visible { box-shadow: 0 0 0 2px #0b0b0d, 0 0 0 4px #e5c779; }
-.lux-btn:disabled { cursor: not-allowed; opacity: 0.4; filter: grayscale(0.5); }
-.lux-btn.is-ghost { color: #f3d995; border: 1px solid transparent; background: linear-gradient(180deg, #1e1e23, #0d0d10) padding-box, linear-gradient(180deg, #f8e3a3, #8f6a26 60%, #e5c779) border-box; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 10px rgba(0, 0, 0, 0.4); }
-.lux-btn.is-ghost:hover:not(:disabled) { color: #fff3c4; filter: brightness(1.15); }
-.lux-btn.is-danger { color: #ffd6d6; border: 1px solid transparent; background: linear-gradient(180deg, #3a1316, #170708) padding-box, linear-gradient(180deg, #ff9a9a, #7a1d22) border-box; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 10px rgba(0, 0, 0, 0.4); }
-.lux-btn.is-sm { height: 2rem; padding: 0 0.85rem; font-size: 10.5px; letter-spacing: 0.17em; }
-.lux-btn.is-row { justify-content: space-between; padding: 0 0.95rem; }
+.pr-btn:hover:not(:disabled) { filter: brightness(1.08); }
+.pr-btn:active:not(:disabled) { transform: translateY(1px); }
+.pr-btn:focus-visible { box-shadow: 0 0 0 2px #0b0b0d, 0 0 0 4px #e5c779; }
+.pr-btn:disabled { cursor: not-allowed; opacity: 0.4; filter: grayscale(0.5); }
+.pr-btn.is-ghost { color: #f3d995; border: 1px solid transparent; background: linear-gradient(180deg, #1e1e23, #0d0d10) padding-box, linear-gradient(180deg, #f8e3a3, #8f6a26 60%, #e5c779) border-box; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 10px rgba(0, 0, 0, 0.4); }
+.pr-btn.is-ghost:hover:not(:disabled) { color: #fff3c4; filter: brightness(1.15); }
+.pr-btn.is-danger { color: #ffd6d6; border: 1px solid transparent; background: linear-gradient(180deg, #3a1316, #170708) padding-box, linear-gradient(180deg, #ff9a9a, #7a1d22) border-box; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 10px rgba(0, 0, 0, 0.4); }
+.pr-btn.is-sm { height: 2rem; padding: 0 0.85rem; font-size: 10.5px; letter-spacing: 0.17em; }
+.pr-btn.is-row { justify-content: space-between; padding: 0 0.95rem; }
 .lux-tag { display: inline-flex; height: 2.3rem; width: 100%; align-items: center; justify-content: center; gap: 0.35rem; border-radius: 9999px; font-family: var(--font-display), Georgia, serif; font-size: 10.5px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; }
 .lux-tag.is-equipped { color: #a8f0c6; border: 1px solid rgba(125, 220, 160, 0.4); background: radial-gradient(80% 120% at 50% 0%, rgba(90, 200, 130, 0.16), rgba(0, 0, 0, 0.25)); }
 .lux-tag.is-owned { color: rgba(229, 199, 121, 0.75); border: 1px dashed rgba(229, 199, 121, 0.3); font-size: 9.5px; letter-spacing: 0.14em; }

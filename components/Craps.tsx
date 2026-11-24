@@ -378,7 +378,7 @@ function RulesSummary({ onMore }: { onMore: () => void }) {
       <p>
         <b className="text-[#f0d38b]">Point:</b> the point again before a 7 wins. <b className="text-[#f0d38b]">Odds</b> behind it pay true odds, no house edge.
       </p>
-      <button type="button" onClick={onMore} className="lux-btn is-ghost is-sm mt-1 w-full">
+      <button type="button" onClick={onMore} className="pr-btn is-ghost is-sm mt-1 w-full">
         Full rules &amp; table limits
       </button>
     </div>

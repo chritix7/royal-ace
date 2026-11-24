@@ -159,7 +159,7 @@ function ItemCard({ it, focus, onMsg, msg }: { it: ShopItem; focus: boolean; onM
           equipped ? (
             <span className="lux-tag is-equipped"><span aria-hidden="true">✓</span><span>Equipped</span></span>
           ) : (
-            <button type="button" className="lux-btn is-ghost w-full" onClick={() => shop.equip(it.id)}>
+            <button type="button" className="pr-btn is-ghost w-full" onClick={() => shop.equip(it.id)}>
               Equip
             </button>
           )
@@ -169,7 +169,7 @@ function ItemCard({ it, focus, onMsg, msg }: { it: ShopItem; focus: boolean; onM
       ) : (
         <button
           type="button"
-          className="lux-btn w-full"
+          className="pr-btn w-full"
           disabled={locked}
           onClick={() => {
             const ok = shop.buy(it.id);
@@ -215,7 +215,7 @@ function ChestReveal({ it, onClose }: { it: ShopItem; onClose: () => void }) {
               {slot && (
                 <button
                   type="button"
-                  className="lux-btn"
+                  className="pr-btn"
                   onClick={() => {
                     shop.equip(it.id);
                     onClose();
@@ -224,7 +224,7 @@ function ChestReveal({ it, onClose }: { it: ShopItem; onClose: () => void }) {
                   Equip
                 </button>
               )}
-              <button type="button" className="lux-btn is-ghost" onClick={onClose}>
+              <button type="button" className="pr-btn is-ghost" onClick={onClose}>
                 {slot ? "Later" : "Great"}
               </button>
             </div>
@@ -282,7 +282,7 @@ export default function ShopView({ focus }: { focus?: string }) {
                 {st.owned.includes(deal.id) ? (
                   <span className="lux-tag is-equipped mt-1.5">Owned ✓</span>
                 ) : (
-                  <button type="button" className="lux-btn mt-1.5 w-full" disabled={locked} onClick={() => say(deal.id, shop.buy(deal.id) ? "Unlocked ✓" : "Not enough chips")}>
+                  <button type="button" className="pr-btn mt-1.5 w-full" disabled={locked} onClick={() => say(deal.id, shop.buy(deal.id) ? "Unlocked ✓" : "Not enough chips")}>
                     Buy −30%
                   </button>
                 )}
@@ -304,7 +304,7 @@ export default function ShopView({ focus }: { focus?: string }) {
               <p className="shop-feature__fine mt-1">Common 50% · Rare 32% · Epic 14% · Legendary 4%</p>
               <button
                 type="button"
-                className="lux-btn mt-2 w-full"
+                className="pr-btn mt-2 w-full"
                 disabled={locked}
                 onClick={() => {
                   const r = shop.openChest();
@@ -334,7 +334,7 @@ export default function ShopView({ focus }: { focus?: string }) {
             </span>
             <div className="grid min-w-0 flex-1 gap-1.5">
               {BOOSTS.map((b) => (
-                <button key={b.id} type="button" className="lux-btn is-ghost is-row w-full" disabled={locked} onClick={() => say(b.id, shop.buyBoost(b.id) ? "Boost on ✓" : "Not enough chips")}>
+                <button key={b.id} type="button" className="pr-btn is-ghost is-row w-full" disabled={locked} onClick={() => say(b.id, shop.buyBoost(b.id) ? "Boost on ✓" : "Not enough chips")}>
                   <span>{b.minutes >= 60 * 24 ? "24 h" : "1 h"}</span>
                   <span className="text-[#fff3c4]">◈ {priceLabel(b.price)}</span>
                 </button>
