@@ -111,7 +111,7 @@ export default function SectionModal({
         </div>
 
         {/* Scrollable body */}
-        <div className="relative min-h-0 flex-1 overflow-y-auto px-5 py-4 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin]">
+        <div className="relative min-h-0 flex-1 overflow-y-auto px-5 py-4 lux-scroll">
           {children}
         </div>
       </div>

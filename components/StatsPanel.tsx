@@ -190,7 +190,7 @@ export default function StatsPanel({ open, onClose }: Props) {
 
         {/* Scrollable body: one card per game (4 columns on computers, so
             it all fits without scrolling), then the latest big wins. */}
-        <div className="relative min-h-0 flex-1 overflow-y-auto px-4 py-3 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin] sm:px-6 sm:py-4">
+        <div className="relative min-h-0 flex-1 overflow-y-auto px-4 py-3 lux-scroll sm:px-6 sm:py-4">
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 lg:gap-2.5">
           {groups.map((group) => (
             <section key={group.title} className="rounded-2xl border border-[#c8a65b]/15 bg-black/30 p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">

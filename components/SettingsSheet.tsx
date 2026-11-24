@@ -84,10 +84,10 @@ function CloudSection() {
           </p>
           <p className="st-row__sub">{`Last save: ${ago(c.at)}. Saves itself while you play; on another device, open Settings and tap “I already have a save”.`}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            <button type="button" className="rl-key is-on" disabled={c.busy} onClick={() => void cloud.syncNow()}>
+            <button type="button" className="lux-btn is-sm" disabled={c.busy} onClick={() => void cloud.syncNow()}>
               Save now
             </button>
-            <button type="button" className="rl-key" disabled={c.busy} onClick={() => void cloud.signOut()}>
+            <button type="button" className="lux-btn is-ghost is-sm" disabled={c.busy} onClick={() => void cloud.signOut()}>
               Sign out
             </button>
           </div>
@@ -96,10 +96,10 @@ function CloudSection() {
         <div className="st-cloud">
           <p className="st-row__sub">Protect your progress with a passkey: Face ID or Touch ID, kept in your iCloud Keychain. Get everything back on any device, even after deleting the app. No password, no e-mail.</p>
           <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-            <button type="button" className="rl-key is-on" disabled={c.busy} onClick={() => cloud.create(profile.name || "Player")}>
+            <button type="button" className="lux-btn is-sm" disabled={c.busy} onClick={() => cloud.create(profile.name || "Player")}>
               Save my progress
             </button>
-            <button type="button" className="rl-key" disabled={c.busy} onClick={() => cloud.restore()}>
+            <button type="button" className="lux-btn is-ghost is-sm" disabled={c.busy} onClick={() => cloud.restore()}>
               I already have a save
             </button>
           </div>
@@ -110,12 +110,12 @@ function CloudSection() {
         <p className="st-row__title">Backup code</p>
         <p className="st-row__sub">A code holding all your progress, to paste on another device. Works without an account.</p>
         <div className="mt-1.5 flex gap-1.5">
-          <button type="button" className="rl-key" onClick={() => void copy()}>
+          <button type="button" className="lux-btn is-ghost is-sm" onClick={() => void copy()}>
             Copy my code
           </button>
           <button
             type="button"
-            className="rl-key"
+            className="lux-btn is-ghost is-sm"
             onClick={() => {
               setPaste(true);
               setCode("");
@@ -138,7 +138,7 @@ function CloudSection() {
           />
         )}
         {paste && (
-          <button type="button" className="rl-key is-on mt-1.5" disabled={code.trim().length < 8} onClick={() => void restoreCode()}>
+          <button type="button" className="lux-btn is-sm mt-1.5" disabled={code.trim().length < 8} onClick={() => void restoreCode()}>
             Restore from this code
           </button>
         )}
@@ -149,10 +149,10 @@ function CloudSection() {
           {confirmDel ? (
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-[11px] text-white/60">Delete the cloud account and its data?</span>
-              <button type="button" className="rl-key" onClick={() => { setConfirmDel(false); void cloud.deleteAccount(); }}>
+              <button type="button" className="lux-btn is-danger is-sm" onClick={() => { setConfirmDel(false); void cloud.deleteAccount(); }}>
                 Delete
               </button>
-              <button type="button" className="rl-key" onClick={() => setConfirmDel(false)}>
+              <button type="button" className="lux-btn is-ghost is-sm" onClick={() => setConfirmDel(false)}>
                 Keep
               </button>
             </div>
@@ -194,6 +194,7 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
   };
   return (
     <div className="st-grid">
+      <div className="st-col">
       <CloudSection />
       <section className="st-card">
         <p className="st-head">Language</p>
@@ -210,6 +211,8 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
           ))}
         </div>
       </section>
+      </div>
+      <div className="st-col">
       <section className="st-card">
         <p className="st-head">Sound</p>
         <Row title="Music">
@@ -252,6 +255,8 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
           ))}
         </div>
       </section>
+      </div>
+      <div className="st-col">
       <section className="st-card">
         <p className="st-head">Display</p>
         <Row title="Reduced animations" sub="Turns off most motion and effects">
@@ -260,7 +265,7 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
         <Row title="Replay the welcome tour">
           <button
             type="button"
-            className="rl-key"
+            className="lux-btn is-ghost is-sm"
             onClick={() => {
               onClose();
               onTour();
@@ -274,7 +279,7 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
         <p className="st-head">Profile & account</p>
         <div className="flex gap-1.5">
           <input value={name} onChange={(e) => setName(e.target.value)} onPointerDown={(e) => { if (e.pointerType === "touch" && document.activeElement === e.currentTarget) e.currentTarget.blur(); }} maxLength={16} aria-label="Your name" className="st-input min-w-0 flex-1" translate="no" />
-          <button type="button" className="rl-key is-on" onClick={saveName}>
+          <button type="button" className="lux-btn is-sm" onClick={saveName}>
             Save
           </button>
         </div>
@@ -284,12 +289,13 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
           <p className="st-row__sub">Chips, progress, challenges, tickets, purchases and settings go back to zero. This cannot be undone. Type RESET to confirm.</p>
           <div className="mt-2 flex gap-1.5">
             <input value={reset} onChange={(e) => setReset(e.target.value.toUpperCase())} placeholder="RESET" aria-label="Type RESET" className="st-input min-w-0 flex-1" translate="no" />
-            <button type="button" className="rl-key" disabled={reset !== "RESET"} onClick={resetAll}>
+            <button type="button" className="lux-btn is-danger is-sm" disabled={reset !== "RESET"} onClick={resetAll}>
               Reset
             </button>
           </div>
         </div>
       </section>
+      </div>
     </div>
   );
 }
@@ -314,7 +320,7 @@ function FullPage({ title, onClose, right, children }: { title: string; onClose:
           {right}
         </div>
       </header>
-      <div className="app-page__scroll min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+      <div className="app-page__scroll lux-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <div className="mx-auto w-full max-w-6xl px-4 pb-[max(env(safe-area-inset-bottom),1.5rem)] pt-4 sm:px-8 sm:pt-6">{children}</div>
       </div>
     </div>,

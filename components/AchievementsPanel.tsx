@@ -194,7 +194,7 @@ export default function AchievementsPanel({ open, onClose }: Props) {
         </div>
 
         {/* Body */}
-        <div className="relative min-h-0 flex-1 overflow-y-auto px-5 py-4 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin] sm:px-6">
+        <div className="relative min-h-0 flex-1 overflow-y-auto px-5 py-4 lux-scroll sm:px-6">
           {tab === "today" ? (
             <div className="space-y-3 lg:grid lg:grid-cols-4 lg:gap-x-3 lg:gap-y-3 lg:space-y-0">
               <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2 lg:grid-cols-1 lg:self-end">

@@ -156,16 +156,20 @@ function ItemCard({ it, focus, onMsg, msg }: { it: ShopItem; focus: boolean; onM
       <p className="shop-item__note">{it.note}</p>
       {has ? (
         slot ? (
-          <button type="button" className={`rl-key w-full ${equipped ? "is-on" : ""}`} disabled={equipped} onClick={() => shop.equip(it.id)}>
-            {equipped ? "Equipped" : "Equip"}
-          </button>
+          equipped ? (
+            <span className="lux-tag is-equipped"><span aria-hidden="true">✓</span><span>Equipped</span></span>
+          ) : (
+            <button type="button" className="lux-btn is-ghost w-full" onClick={() => shop.equip(it.id)}>
+              Equip
+            </button>
+          )
         ) : (
-          <span className="shop-item__owned">Owned · choose it in the game</span>
+          <span className="lux-tag is-owned">Owned · choose it in the game</span>
         )
       ) : (
         <button
           type="button"
-          className="rl-key is-on w-full"
+          className="lux-btn w-full"
           disabled={locked}
           onClick={() => {
             const ok = shop.buy(it.id);
@@ -205,13 +209,13 @@ function ChestReveal({ it, onClose }: { it: ShopItem; onClose: () => void }) {
             <div className="mt-2">
               <ItemPreview it={it} big />
             </div>
-            <p className="mt-3 font-display text-xl font-bold text-[#f6e7bd]">{it.name}</p>
+            <p className="shop-feature__title mt-3 !text-[22px]">{it.name}</p>
             <p className="text-[12px] text-white/55">{SHOP_CATS.find((c) => c.id === it.cat)?.label}</p>
             <div className="mt-3 flex justify-center gap-2">
               {slot && (
                 <button
                   type="button"
-                  className="rl-key is-on"
+                  className="lux-btn"
                   onClick={() => {
                     shop.equip(it.id);
                     onClose();
@@ -220,7 +224,7 @@ function ChestReveal({ it, onClose }: { it: ShopItem; onClose: () => void }) {
                   Equip
                 </button>
               )}
-              <button type="button" className="rl-key" onClick={onClose}>
+              <button type="button" className="lux-btn is-ghost" onClick={onClose}>
                 {slot ? "Later" : "Great"}
               </button>
             </div>
@@ -270,15 +274,15 @@ export default function ShopView({ focus }: { focus?: string }) {
               <ItemPreview it={deal} />
               <div className="min-w-0">
                 <p className={`shop-rarity is-${rarityOf(deal.price)} !static !inline-block`}>{RARITY_LABEL[rarityOf(deal.price)]}</p>
-                <p className="mt-1 truncate font-display text-lg font-bold text-[#f6e7bd]">{deal.name}</p>
-                <p className="text-[11px] text-white/50">{SHOP_CATS.find((c) => c.id === deal.cat)?.label}</p>
-                <p className="mt-1 text-[13px] font-black text-[#f5d778]">
+                <p className="shop-feature__title mt-1 truncate">{deal.name}</p>
+                <p className="shop-feature__fine">{SHOP_CATS.find((c) => c.id === deal.cat)?.label}</p>
+                <p className="shop-item__price mt-1 !text-[15px]">
                   <s className="mr-1.5 text-white/35">◈ {priceLabel(deal.price)}</s>◈ {priceLabel(dealPrice(deal.price))}
                 </p>
                 {st.owned.includes(deal.id) ? (
-                  <span className="shop-item__owned !text-left">Owned ✓</span>
+                  <span className="lux-tag is-equipped mt-1.5">Owned ✓</span>
                 ) : (
-                  <button type="button" className="rl-key is-on mt-1.5 w-full" disabled={locked} onClick={() => say(deal.id, shop.buy(deal.id) ? "Unlocked ✓" : "Not enough chips")}>
+                  <button type="button" className="lux-btn mt-1.5 w-full" disabled={locked} onClick={() => say(deal.id, shop.buy(deal.id) ? "Unlocked ✓" : "Not enough chips")}>
                     Buy −30%
                   </button>
                 )}
@@ -296,11 +300,11 @@ export default function ShopView({ focus }: { focus?: string }) {
               <span className="chest__lock" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[11.5px] leading-snug text-white/60">A random item you don&apos;t own yet — maybe a legendary.</p>
-              <p className="mt-1 text-[10px] text-white/40">Common 50% · Rare 32% · Epic 14% · Legendary 4%</p>
+              <p className="shop-feature__text">A random item you don&apos;t own yet — maybe a legendary.</p>
+              <p className="shop-feature__fine mt-1">Common 50% · Rare 32% · Epic 14% · Legendary 4%</p>
               <button
                 type="button"
-                className="rl-key is-on mt-2 w-full"
+                className="lux-btn mt-2 w-full"
                 disabled={locked}
                 onClick={() => {
                   const r = shop.openChest();
@@ -330,15 +334,15 @@ export default function ShopView({ focus }: { focus?: string }) {
             </span>
             <div className="grid min-w-0 flex-1 gap-1.5">
               {BOOSTS.map((b) => (
-                <button key={b.id} type="button" className="rl-key w-full !justify-between !px-3" disabled={locked} onClick={() => say(b.id, shop.buyBoost(b.id) ? "Boost on ✓" : "Not enough chips")}>
+                <button key={b.id} type="button" className="lux-btn is-ghost is-row w-full" disabled={locked} onClick={() => say(b.id, shop.buyBoost(b.id) ? "Boost on ✓" : "Not enough chips")}>
                   <span>{b.minutes >= 60 * 24 ? "24 h" : "1 h"}</span>
-                  <span className="text-[#f5d778]">◈ {priceLabel(b.price)}</span>
+                  <span className="text-[#fff3c4]">◈ {priceLabel(b.price)}</span>
                 </button>
               ))}
               {(msgs["boost:xp1"] || msgs["boost:xp24"]) && <p className="text-[10px] text-[#f5d778]">{msgs["boost:xp1"] || msgs["boost:xp24"]}</p>}
             </div>
           </div>
-          <p className="mt-2 text-[10px] text-white/40">Levels come twice as fast in every game. Time adds up.</p>
+          <p className="shop-feature__fine mt-2">Levels come twice as fast in every game. Time adds up.</p>
         </div>
       </div>
 

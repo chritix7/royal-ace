@@ -149,7 +149,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
         </div>
 
         {/* Body */}
-        <div className="relative min-h-0 flex-1 overflow-y-auto px-4 py-3 sm:px-6 sm:py-4 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin] sm:px-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4">
+        <div className="relative min-h-0 flex-1 overflow-y-auto px-4 py-3 sm:px-6 sm:py-4 lux-scroll sm:px-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4">
           {flash && (
             <div
               key={flash}
