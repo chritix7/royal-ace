@@ -2890,3 +2890,5 @@ html[lang="fr"] .sl-spin-word { padding-left: 0.06em; font-size: 13px; letter-sp
 html[lang="fr"] .rl-round-spin__label { letter-spacing: 0.06em; }
 .st-cloud { border-radius: 12px; border: 1px solid rgba(229, 199, 121, 0.25); background: linear-gradient(180deg, rgba(240, 211, 139, 0.06), transparent); padding: 0.65rem 0.75rem; }
 .st-cloud.is-on { border-color: rgba(120, 200, 140, 0.35); background: linear-gradient(180deg, rgba(120, 200, 140, 0.07), transparent); }
+/* iOS home-screen apps: make sure text fields keep native touch handling */
+input, textarea, select { touch-action: auto; -webkit-user-select: text; user-select: text; }
