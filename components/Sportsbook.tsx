@@ -502,7 +502,7 @@ function Slip({ g, lite }: { g: SportsGame; lite: boolean }) {
   const n = g.slip.length;
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-0.5 [scrollbar-width:thin]">
+      <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-0.5">
         {!n && <p className="sb-empty !py-6">Tap odds to add picks. Several picks make a combo: the odds multiply.</p>}
         {g.slip.map((s) => (
           <div key={s.key} className={`sb-sel ${s.now === null ? "is-closed" : ""}`}>
@@ -666,7 +666,7 @@ function MyBets({ g }: { g: SportsGame }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-0.5 [scrollbar-width:thin]">
+    <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-0.5">
       <div className="grid grid-cols-3 gap-1.5 text-center">
         {(
           [
@@ -829,7 +829,7 @@ export default function Sportsbook({ active, focus = false, onFocusChange }: { a
               <div className="flex flex-col gap-1.5">{sportTabs("")}</div>
               <div className="rl-card flex min-h-0 flex-1 flex-col p-2.5">
                 <p className="rl-eyebrow mb-1.5 !text-[9px]">Competitions</p>
-                <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-0.5 [scrollbar-width:thin]">
+                <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-0.5">
                   <button type="button" onClick={() => setComp("all")} className={`sb-compkey ${comp === "all" ? "is-on" : ""}`}>
                     <span className="truncate">All competitions</span>
                   </button>
@@ -860,7 +860,7 @@ export default function Sportsbook({ active, focus = false, onFocusChange }: { a
               </div>
               {viewTabs}
               {demoNote}
-              <div className="sb-list min-h-0 flex-1 overflow-y-auto pr-1 [scrollbar-width:thin]">
+              <div className="sb-list min-h-0 flex-1 overflow-y-auto pr-1">
                 {view === "boosts" ? (
                   <BoostsView g={g} />
                 ) : (

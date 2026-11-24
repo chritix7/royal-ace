@@ -379,7 +379,7 @@ function PanelsDrawer({ g, initial, onClose }: { g: RouletteGame; initial: Panel
             ✕
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:thin]">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
           {tab === "history" && <RoundHistory g={g} />}
           {tab === "favs" && <Favourites g={g} />}
           {tab === "stats" && <StatsFull g={g} />}
@@ -438,7 +438,7 @@ function MobileSheet({
             ✕
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-3 [scrollbar-width:thin]" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.9rem)" }}>
+        <div className="min-h-0 flex-1 overflow-y-auto px-3" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.9rem)" }}>
           {tab === "track" && <div className="h-[clamp(8.5rem,36vw,12rem)]">{racetrack}</div>}
           {tab === "history" && <RoundHistory g={g} />}
           {tab === "favs" && <Favourites g={g} />}
@@ -483,7 +483,7 @@ function InfoPanel({ onClose, g }: { onClose: () => void; g: RouletteGame }) {
             ✕
           </button>
         </div>
-        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4 [scrollbar-width:thin]" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 1rem)" }}>
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 1rem)" }}>
           <section className="rl-card">
             <p className="rl-eyebrow">Payouts</p>
             <dl className="mt-2 divide-y divide-white/[0.06] text-[12.5px]">

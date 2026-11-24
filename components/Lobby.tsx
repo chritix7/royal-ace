@@ -227,7 +227,7 @@ function Detail({ g, onClose, onPlay }: { g: Info; onClose: () => void; onPlay: 
             ✕
           </button>
         </span>
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-4 pt-3 [scrollbar-width:thin] sm:px-6 lg:pt-5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-4 pt-3 sm:px-6 lg:pt-5">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#d7b45b]/80">{g.tag}</p>
           <h2 className="font-display gold-text mt-0.5 text-2xl font-bold tracking-[0.12em] sm:text-3xl">{g.name.toUpperCase()}</h2>
           <ul className="mt-3 space-y-1.5 text-[13px] leading-relaxed text-white/70 lg:mt-2 lg:space-y-1">

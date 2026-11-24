@@ -88,7 +88,7 @@ export default function Blackjack({
                 ✕
               </button>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto px-3 [scrollbar-width:thin]" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.9rem)" }}>
+            <div className="min-h-0 flex-1 overflow-y-auto px-3" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.9rem)" }}>
               <Sidebar g={g} />
             </div>
           </div>

@@ -258,7 +258,7 @@ export default function SlotsSidePanel({
           </div>
           <div className={card}>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#d7b45b]/80">All time</p>
-            <dl className="mt-2 grid grid-cols-2 gap-y-1.5 text-[12.5px] text-white/55 lg:gap-y-1">
+            <dl className="mt-2 grid grid-cols-2 gap-y-1.5 text-[12.5px] text-white/55 lg:grid-cols-4 lg:gap-x-3 lg:gap-y-1 lg:text-[12px]">
               <dt>Spins</dt><dd className="text-right text-white">{money(stats.spins)}</dd>
               <dt>Wagered</dt><dd className="text-right text-white">◈ {money(stats.wagered)}</dd>
               <dt>Won</dt><dd className="text-right text-white">◈ {money(stats.won)}</dd>

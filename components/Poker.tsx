@@ -260,7 +260,7 @@ function Sheet({ g, tab, setTab, onClose }: { g: PokerGame; tab: SheetTab; setTa
             ✕
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-3 [scrollbar-width:thin]" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.9rem)" }}>
+        <div className="min-h-0 flex-1 overflow-y-auto px-3" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.9rem)" }}>
           {tab === "pay" && <Paytable g={g} />}
           {tab === "hands" && <HistoryList items={g.history} />}
           {tab === "stats" && <StatsBlock g={g} />}
@@ -860,7 +860,7 @@ export default function Poker({ active, focus = false, onFocusChange }: { active
                     </button>
                   ))}
                 </div>
-                <div className="mt-2.5 min-h-0 flex-1 overflow-y-auto pr-0.5 [scrollbar-width:thin]">
+                <div className="mt-2.5 min-h-0 flex-1 overflow-y-auto pr-0.5">
                   {panel === "pay" && <Paytable g={g} />}
                   {panel === "hands" && <HistoryList items={g.history} />}
                   {panel === "stats" && <StatsBlock g={g} />}

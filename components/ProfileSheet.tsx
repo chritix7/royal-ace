@@ -66,7 +66,7 @@ export default function ProfileSheet({ tab: first, onClose }: { tab: "card" | "r
             ✕
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-3 [scrollbar-width:thin]">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-3">
           {tab === "card" ? (
             <>
               <div className={`vip-card ${cardFinish}`}>

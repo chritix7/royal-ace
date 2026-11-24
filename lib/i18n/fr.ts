@@ -1148,4 +1148,6 @@ export const FR: Record<string, string> = {
   "🔥 Boost": "🔥 Boost",
   "⚡ Flash boosts": "⚡ Boosts flash",
   "Until 5 min before kick-off": "Jusqu'à 5 min du coup d'envoi",
+  "Hard totals": "Totaux durs",
+  "Soft hands": "Mains souples",
 };

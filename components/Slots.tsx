@@ -1262,7 +1262,7 @@ useEffect(() => {
                 ✕
               </button>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3 [scrollbar-width:thin] sm:px-5" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)" }}>
+            <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3 sm:px-5" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)" }}>
       <SlotsSidePanel
         initialTab={infoTab}
         fullscreen={false}

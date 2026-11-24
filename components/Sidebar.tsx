@@ -148,7 +148,7 @@ export default function Sidebar({ g }: { g: Game }) {
   };
 
   return (
-      <aside className="flex flex-col gap-3 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:pr-1 lg:[scrollbar-width:thin] lg:[scrollbar-color:#d7b45b40_transparent]">
+      <aside className="flex flex-col gap-3 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:pr-1 lg:[scrollbar-color:#d7b45b40_transparent]">
         {/* MASTER PANEL — balance, bet, side bets. One container so the
             player sees chips → bet → sides as a single instrument. */}
         <Panel>
@@ -677,7 +677,7 @@ export default function Sidebar({ g }: { g: Game }) {
           onClose={() => setOpenSection(null)}
           eyebrow="Basic strategy"
           title="Coach"
-          maxWidth="md"
+          maxWidth="wide"
         >
           <h3 className="sr-only">Coach</h3>
           <p className="text-xs text-white/40">Each decision is graded against basic strategy.</p>

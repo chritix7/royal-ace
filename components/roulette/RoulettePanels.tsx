@@ -81,7 +81,7 @@ export function RoundHistory({ g }: { g: RouletteGame }) {
   if (list.length === 0) return <p className="py-6 text-center text-[11px] text-white/35">Your rounds will appear here.</p>;
   return (
     <>
-      <ul className="max-h-full space-y-1 overflow-y-auto pr-1 [scrollbar-width:thin]">
+      <ul className="max-h-full space-y-1 overflow-y-auto pr-1">
         {list.map((r) => {
           const net = r.returned - r.staked;
           return (

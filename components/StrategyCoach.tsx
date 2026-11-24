@@ -28,25 +28,39 @@ function Chart({ h17 }: { h17: boolean }) {
     for (const v of [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) out.push({ label: v === 11 ? "A,A" : `${v},${v}`, cells: UPS.map((u) => advise([card(v), card(v)], card(u), true, true, { h17 })) });
     return out;
   }, [h17]);
+  // Three tables (hard totals, soft hands, pairs): side by side on a
+  // computer so the whole chart fits without scrolling.
+  const parts = [
+    { title: "Hard totals", rows: rows.slice(0, 13) },
+    { title: "Soft hands", rows: rows.slice(13, 21) },
+    { title: "Pairs", rows: rows.slice(21) },
+  ];
   return (
-    <div className="bj-chart" role="table" aria-label="Basic strategy chart">
-      <div className="bj-chart__row is-head" role="row">
-        <span />
-        {UPS.map((u) => (
-          <span key={u}>{u === 11 ? "A" : u}</span>
+    <div role="table" aria-label="Basic strategy chart">
+      <div className="bj-chart-grid">
+        {parts.map((part) => (
+          <div key={part.title} className="bj-chart">
+            <p className="bj-chart__title">{part.title}</p>
+            <div className="bj-chart__row is-head" role="row">
+              <span />
+              {UPS.map((u) => (
+                <span key={u}>{u === 11 ? "A" : u}</span>
+              ))}
+            </div>
+            {part.rows.map((r) => (
+              <div key={r.label} className="bj-chart__row" role="row">
+                <span className="bj-chart__label">{r.label}</span>
+                {r.cells.map((a, j) => (
+                  <span key={j} className={`bj-cell is-${LETTER[a]}`}>
+                    {LETTER[a]}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
         ))}
       </div>
-      {rows.map((r, i) => (
-        <div key={r.label} className={`bj-chart__row ${i === 13 || i === 21 ? "is-gap" : ""}`} role="row">
-          <span className="bj-chart__label">{r.label}</span>
-          {r.cells.map((a, j) => (
-            <span key={j} className={`bj-cell is-${LETTER[a]}`}>
-              {LETTER[a]}
-            </span>
-          ))}
-        </div>
-      ))}
-      <p className="mt-2 text-[10px] text-white/40">H hit · S stand · D double · P split · R surrender (late). Hard hands, then soft (A,x), then pairs; columns: dealer up-card.</p>
+      <p className="mt-2 text-[10px] text-white/40">H hit · S stand · D double · P split · R surrender (late). Columns: dealer up-card.</p>
     </div>
   );
 }
@@ -68,7 +82,7 @@ export default function StrategyCoach({ h17 = false }: { h17?: boolean }) {
       {tab === "chart" ? (
         <Chart h17={h17} />
       ) : (
-        <>
+        <div className="space-y-3 lg:grid lg:grid-cols-3 lg:items-start lg:gap-4 lg:space-y-0">
           <table className="bj-coach">
             <thead>
               <tr>
@@ -135,7 +149,7 @@ export default function StrategyCoach({ h17 = false }: { h17?: boolean }) {
               Reset my record
             </button>
           )}
-        </>
+        </div>
       )}
     </div>
   );

@@ -369,7 +369,7 @@ function Today({ g }: { g: PenaltyGame }) {
 
 function Rules() {
   return (
-    <div className="space-y-2 text-[11.5px] leading-relaxed text-white/65">
+    <div className="space-y-1.5 text-[11px] leading-snug text-white/65">
       <p>Set your stake and kick off: the bet leaves your credit.</p>
       <p>Pick a corner and beat the keeper. Choose him before kick-off: Rookie (62% goals, up to ×10.48), Pro (50%, up to ×30.72) or Legend (40%, up to ×93.75).</p>
       <p>After any goal, cash out or shoot again. A save loses the stake. The fifth goal cashes out on its own.</p>
@@ -512,7 +512,7 @@ export default function Penalty({ active, focus = false, onFocusChange }: { acti
                     </button>
                   ))}
                 </div>
-                <div className={`mt-2.5 min-h-0 flex-1 pr-0.5 [scrollbar-width:thin] ${panel === "rounds" ? "overflow-hidden" : "overflow-y-auto"}`}>
+                <div className={`mt-2.5 min-h-0 flex-1 pr-0.5 ${panel === "rounds" ? "overflow-hidden" : "overflow-y-auto"}`}>
                   {panel === "rounds" ? (
                     // No scrolling: the latest rounds that fit, fading out at the bottom.
                     <div className="flex h-full flex-col gap-2.5">

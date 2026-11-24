@@ -9,6 +9,7 @@ import { CRAPS_CHIPS, useCraps, type CrapsGame, type RollRecord } from "../lib/u
 import { exitFullscreenSettled, isNarrowScreen, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
 import { useSession } from "../lib/sessionStore";
 import CrapsTour, { useCrapsTour } from "./CrapsTour";
+import SectionModal from "./SectionModal";
 
 function useDesktop() {
   const [desktop, setDesktop] = useState(true);
@@ -367,9 +368,27 @@ function RollStats({ g }: { g: CrapsGame }) {
   );
 }
 
-function Rules() {
+/** Computers: the essentials in the side panel, the full rules in a wide window (no scrolling). */
+function RulesSummary({ onMore }: { onMore: () => void }) {
   return (
     <div className="space-y-2 text-[12px] leading-relaxed text-white/70">
+      <p>
+        <b className="text-[#f0d38b]">Come-out:</b> 7 or 11 wins, 2, 3 or 12 loses, anything else becomes the <b>point</b>.
+      </p>
+      <p>
+        <b className="text-[#f0d38b]">Point:</b> the point again before a 7 wins. <b className="text-[#f0d38b]">Odds</b> behind it pay true odds, no house edge.
+      </p>
+      <button type="button" onClick={onMore} className="lux-btn is-ghost is-sm mt-1 w-full">
+        Full rules &amp; table limits
+      </button>
+    </div>
+  );
+}
+
+function Rules({ wide = false }: { wide?: boolean }) {
+  return (
+    <div className={`text-[12px] leading-relaxed text-white/70 ${wide ? "space-y-3 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0" : "space-y-2"}`}>
+      <div className="space-y-2">
       <p>
         <b className="text-[#f0d38b]">Come-out roll:</b> Pass wins on 7 or 11, loses on 2, 3 or 12. Any other number becomes the <b>point</b> (the puck turns ON).
       </p>
@@ -388,6 +407,8 @@ function Rules() {
         <b className="text-[#f0d38b]">Place</b> bets win when their number comes before a 7 (9:5, 7:5, 7:6). <b>Hardways</b> need the pair before a 7 or the
         easy way. Place bets and hardways are off on the come-out roll. Field and props are decided in one roll.
       </p>
+      </div>
+      <div className="space-y-2">
       <div>
         <p className="rl-eyebrow mb-1 !text-[9px]">Table limits</p>
         <ul className="grid grid-cols-1 gap-[3px] sm:grid-cols-2">
@@ -428,6 +449,7 @@ function Rules() {
         </ul>
       </div>
       <p className="text-white/45">Keys: Space roll · O max odds · R repeat one-roll bets · U undo · C clear · H hints · 1–9, 0 chips.</p>
+      </div>
     </div>
   );
 }
@@ -461,7 +483,7 @@ function Sheet({ g, flash, tab, setTab, onClose }: { g: CrapsGame; flash: Record
             ✕
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-3 [scrollbar-width:thin]" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.9rem)" }}>
+        <div className="min-h-0 flex-1 overflow-y-auto px-3" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.9rem)" }}>
           {tab === "props" && (
             <>
               <Props g={g} flash={flash} compact />
@@ -488,6 +510,7 @@ export default function Craps({ active, focus = false, onFocusChange }: { active
   const flash = useFlash(g);
   const [sheet, setSheet] = useState<SheetTab | null>(null);
   const [panel, setPanel] = useState<"rolls" | "stats" | "rules">("rolls");
+  const [rulesOpen, setRulesOpen] = useState(false);
   // Guided first game: offered once, on the first visit to the table.
   const tour = useCrapsTour();
   const offered = useRef(false);
@@ -497,7 +520,14 @@ export default function Craps({ active, focus = false, onFocusChange }: { active
     if (Object.keys(g.bets).length === 0) tour.start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, tour.seen]);
-  const tourEl = tour.open && active ? <CrapsTour g={g} onClose={tour.close} /> : null;
+  const tourEl = (
+    <>
+      {tour.open && active && <CrapsTour g={g} onClose={tour.close} />}
+      <SectionModal open={rulesOpen} onClose={() => setRulesOpen(false)} eyebrow="Craps" title="Rules & table limits" maxWidth="wide">
+        <Rules wide />
+      </SectionModal>
+    </>
+  );
 
   // ---- Focus (same behaviour as the other games)
   const [focusAnim, setFocusAnim] = useState("");
@@ -669,10 +699,10 @@ export default function Craps({ active, focus = false, onFocusChange }: { active
                     </button>
                   ))}
                 </div>
-                <div className="mt-2.5 min-h-0 flex-1 overflow-y-auto pr-0.5 [scrollbar-width:thin]">
+                <div className="mt-2.5 min-h-0 flex-1 overflow-y-auto pr-0.5">
                   {panel === "rolls" && <RollHistory items={g.history} max={60} />}
                   {panel === "stats" && <RollStats g={g} />}
-                  {panel === "rules" && <Rules />}
+                  {panel === "rules" && <RulesSummary onMore={() => setRulesOpen(true)} />}
                 </div>
               </div>
             </aside>

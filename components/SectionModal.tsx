@@ -25,7 +25,7 @@ export default function SectionModal({
   eyebrow?: string;
   children: ReactNode;
   /** md = 28rem content, lg = 36rem, xl = 44rem. */
-  maxWidth?: "md" | "lg" | "xl";
+  maxWidth?: "md" | "lg" | "xl" | "wide";
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -53,7 +53,9 @@ export default function SectionModal({
   if (!mounted || !open) return null;
 
   const widthClass =
-    maxWidth === "xl"
+    maxWidth === "wide"
+      ? "max-w-md lg:max-w-4xl"
+      : maxWidth === "xl"
       ? "max-w-2xl"
       : maxWidth === "lg"
         ? "max-w-xl"
