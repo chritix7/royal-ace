@@ -156,11 +156,12 @@ export function marketsOf(m: Match, model: Model | null): Market[] {
 /* ───────────── Probabilities ───────────── */
 
 /** Fair probability that a pick wins, from the model (null: cannot price). */
+/** Boosted picks ("boost.<market>", or the old "boost" = match result) settle like the plain market. */
+export const baseMarket = (market: string) => (market === "boost" ? "1x2" : market.startsWith("boost.") ? market.slice(6) : market);
+
 export function probOf(model: Model, sport: Sport, market: string, pick: string): number | null {
   if (market === "bb") return builderProb(model, sport, parseBuilder(pick));
-  const [raw, lineS] = market.split(":");
-  // The daily boost is a match result at a better price.
-  const kind = raw === "boost" ? "1x2" : raw;
+  const [kind, lineS] = baseMarket(market).split(":");
   const line = lineS !== undefined ? +lineS : 0;
   if (model.kind === "points") {
     const lead = model.now.h - model.now.a + model.mu;
@@ -249,7 +250,7 @@ const MARGIN: Record<string, number> = { bb: 0.1, scorer: 0.15, assist: 0.15, de
 /** Decimal odds with the house margin; null when the market is closed. */
 export function priceOf(p: number | null, market: string): number | null {
   if (p === null || !Number.isFinite(p) || p < 0.004 || p > 0.995) return null;
-  const m = MARGIN[market.split(":")[0]] ?? 0.08;
+  const m = MARGIN[baseMarket(market).split(":")[0]] ?? 0.08;
   // Long shots: margin on the stake; favourites: on the profit (never below 1.01).
   const o = p <= 0.5 ? 1 / (p * (1 + m)) : 1 + (1 / p - 1) * (1 - 1.5 * m);
   if (o < 1.01) return null;
@@ -273,8 +274,9 @@ export function priced(m: Match, model: Model | null, market: Market, now: numbe
 /* ───────────── Settlement ───────────── */
 
 /** "won" | "lost" | "void" once the match is over, null while it runs. */
-export function settle(m: Match, market: string, pick: string): "won" | "lost" | "void" | null {
+export function settle(m: Match, rawMarket: string, pick: string): "won" | "lost" | "void" | null {
   if (m.status === "void") return "void";
+  const market = baseMarket(rawMarket);
   if (market === "bb") {
     // Bet builder: every part must win; one lost part loses it at once.
     const parts = parseBuilder(pick).map((x) => settle(m, x.market, x.pick));
@@ -341,7 +343,7 @@ export function builderProb(model: Model, sport: Sport, parts: BuilderPart[]): n
 }
 
 /** "Paid if 2 goals ahead": football match result (and the daily boost). */
-export const TWO_UP = (sport: Sport, market: string, pick: string) => sport === "football" && (market === "1x2" || market === "boost") && (pick === "1" || pick === "2");
+export const TWO_UP = (sport: Sport, market: string, pick: string) => sport === "football" && baseMarket(market) === "1x2" && (pick === "1" || pick === "2");
 function twoUp(m: Match, kind: string, pick: string, s: Score | null | undefined) {
   if (!s || !TWO_UP(m.sport, kind, pick)) return false;
   return pick === "1" ? s.h - s.a >= 2 : s.a - s.h >= 2;

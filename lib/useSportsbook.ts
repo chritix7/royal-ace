@@ -9,6 +9,7 @@ import { useBalance, wallet } from "./wallet";
 import { demoForms, demoMatches } from "./sports/demo";
 import { builderOk, encodeBuilder, isOpen, modelOf, parsePlayerMarket, playerProb, priceOf, probOf, settle, type PlayerLine } from "./sports/odds";
 import type { Feed, Match, Sport, Standings, StandingsFeed } from "./sports/types";
+import { BOOST_MAX_STAKE, dailyBoosts, flashBoost, isBoostMarket, type Boost } from "./sports/boosts";
 
 /**
  * Sports betting with virtual chips on real matches.
@@ -64,6 +65,8 @@ type Saved = { tickets: Ticket[]; slip: Selection[]; stake: number; nextId: numb
 const KEY = "royalace:sports";
 const FORMS_KEY = "royalace:sports-forms";
 const RESULTS_KEY = "royalace:sports-results";
+const BOOSTS_KEY = "royalace:sports-boosts";
+type BoostStore = { day: string; daily: Boost[]; flash: Boost[] };
 function pastResults(sport: Sport): Match[] {
   try {
     return Object.values(JSON.parse(localStorage.getItem(RESULTS_KEY) ?? "{}") as Record<string, Match>).filter((m) => m.sport === sport);
@@ -444,29 +447,6 @@ export function useSportsbook(active: boolean) {
   );
   const playerOf = (m: Match, id: string) => (scorers[m.comp.id]?.players ?? []).find((p) => p.id === id);
   const teamAvg = (m: Match, teamId: string) => formsOf(m)?.[teamId]?.scored;
-  // ---- Daily boost: one big football match, the favourite at a better price.
-  const boost = useMemo(() => {
-    const t = now || 0;
-    if (!t) return null;
-    const PRI = ["CL", "PL", "PD", "SA", "BL1", "FL1", "EC", "WC", "PPL", "DED", "ELC", "BSA"];
-    const cands = matches.filter((m) => m.sport === "football" && m.status === "pre" && m.kickoff > t + 10 * 60000 && m.kickoff < t + 36 * 3600000);
-    if (!cands.length) return null;
-    const best = Math.min(...cands.map((m) => (PRI.indexOf(m.comp.id) + 1 || 99)));
-    const pool = cands.filter((m) => (PRI.indexOf(m.comp.id) + 1 || 99) === best).sort((a, b) => a.id.localeCompare(b.id));
-    const seed = [...day(t)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7);
-    const m = pool[Math.abs(seed) % pool.length];
-    const model = modelOf(m, formsOf(m), t);
-    if (!model) return null;
-    const ph = probOf(model, m.sport, "1x2", "1") ?? 0;
-    const pa = probOf(model, m.sport, "1x2", "2") ?? 0;
-    const pick = ph >= pa ? "1" : "2";
-    const was = priceOf(pick === "1" ? ph : pa, "1x2");
-    if (!was) return null;
-    const odds = Math.round(was * 1.3 * 20) / 20;
-    return { match: m, pick, label: pick === "1" ? m.home.name : m.away.name, was, odds };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matches, forms, now ? day(now) : "", Math.floor((now || 0) / 600000)]);
-
   /** Fair chance of any pick, team or player market. */
   const chanceOf = (m: Match, market: string, pick: string, t: number): number | null => {
     const model = modelOf(m, formsOf(m), t);
@@ -480,16 +460,68 @@ export function useSportsbook(active: boolean) {
   };
   const modelFor = useCallback((m: Match) => modelOf(m, formsOf(m), now || Date.now()), [formsOf, now]);
 
+  // ---- Boosted odds: the day's list (fixed once chosen) + flash boosts
+  // that open an hour before a big kick-off. Kept across reloads.
+  const [boostStore, setBoostStore] = useState<BoostStore>({ day: "", daily: [], flash: [] });
+  useEffect(() => {
+    try {
+      const raw = JSON.parse(localStorage.getItem(BOOSTS_KEY) ?? "null") as BoostStore | null;
+      if (raw && Array.isArray(raw.daily) && Array.isArray(raw.flash)) setBoostStore(raw);
+    } catch {}
+  }, []);
+  useEffect(() => {
+    const t = now;
+    if (!t || !matches.length) return;
+    setBoostStore((st) => {
+      let next = st;
+      const d = day(t);
+      if (st.day !== d || st.daily.length < 3) {
+        const fresh = dailyBoosts(matches, (m) => modelOf(m, formsOf(m), t), t);
+        if (fresh.length > (st.day === d ? st.daily.length : 0)) next = { ...next, day: d, daily: fresh };
+        else if (st.day !== d) next = { ...next, day: d, daily: st.daily.filter((x) => x.ends > t) };
+      }
+      const have = new Set(next.flash.map((x) => x.matchId));
+      const add: Boost[] = [];
+      for (const m of matches) {
+        if (have.has(m.id)) continue;
+        const f = flashBoost(m, modelOf(m, formsOf(m), t), t);
+        if (f) add.push(f);
+      }
+      const kept = next.flash.filter((x) => x.ends > t - 6 * 3600000);
+      if (add.length || kept.length !== next.flash.length) next = { ...next, flash: [...kept, ...add] };
+      if (next !== st) {
+        try {
+          localStorage.setItem(BOOSTS_KEY, JSON.stringify(next));
+        } catch {}
+      }
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matches, forms, now]);
+  const boostsActive = useMemo(() => {
+    const t = now || 0;
+    const live = (b: Boost) => {
+      const m = byId.current.get(b.matchId);
+      return b.ends > t && (!m || m.status === "pre");
+    };
+    return { flash: boostStore.flash.filter(live).sort((a, b) => a.ends - b.ends), daily: boostStore.daily.filter(live) };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boostStore, now, matches]);
+  const boostById = useMemo(() => new Map([...boostsActive.flash, ...boostsActive.daily].map((b) => [b.id, b])), [boostsActive]);
+
   /** Current odds of one pick (null: closed). */
   const oddsNow = useCallback(
     (m: Match, market: string, pick: string) => {
       const t = now || Date.now();
       if (!isOpen(m, t)) return null;
-      if (market === "boost") return boost && boost.match.id === m.id && boost.pick === pick && m.status === "pre" && t < m.kickoff ? boost.odds : null;
+      if (isBoostMarket(market)) {
+        const b = boostById.get(`${m.id}|${market}|${pick}`);
+        return b && m.status === "pre" && t < b.ends ? b.odds : null;
+      }
       return priceOf(chanceOf(m, market, pick, t), market);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [formsOf, now, scorers, boost],
+    [formsOf, now, scorers, boostById],
   );
 
   // ---- Settlement: as soon as the feeds carry the results.
@@ -585,15 +617,25 @@ export function useSportsbook(active: boolean) {
   const inSlip = useMemo(() => new Set(slip.map((s) => s.key)), [slip]);
   const toggle = (m: Match, market: string, pick: string, label: string, marketTitle: string) => {
     const key = `${m.id}|${market}|${pick}`;
-    const s = savedRef.current;
+    let s = savedRef.current;
     if (s.slip.some((x) => x.key === key)) {
       removeSel(key);
       return true;
     }
     const odds = oddsNow(m, market, pick);
     if (odds === null) return refuse("This market is closed");
+    // Boosted odds are single bets: a boost clears the ticket, and a pick
+    // added next to a boost replaces it.
+    if (isBoostMarket(market)) {
+      if (s.slip.length) setMessage("Boosted odds are single bets — ticket cleared");
+      commit({ ...s, slip: [], bb: {} });
+    } else if (s.slip.some((x) => isBoostMarket(x.market))) {
+      commit({ ...s, slip: s.slip.filter((x) => !isBoostMarket(x.market)), bb: {} });
+      setMessage("Boosted odds are single bets — boost removed");
+    }
     // Same match: football picks read from the score build a bet builder;
     // anything else replaces the match's previous pick.
+    s = savedRef.current;
     const same = s.slip.filter((x) => x.matchId === m.id);
     const building = same.length > 0 && builderOk(m.sport, market) && same.every((x) => builderOk(x.sport, x.market));
     const keep = building ? same.filter((x) => x.market !== market) : [];
@@ -706,6 +748,10 @@ export function useSportsbook(active: boolean) {
       return refuse("Odds changed — check and confirm");
     }
     if (s.stake > wallet.getBalance()) return refuse("Not enough chips");
+    if (s.slip.some((x) => isBoostMarket(x.market))) {
+      if (s.slip.length > 1) return refuse("Boosted odds are single bets");
+      if (s.stake > BOOST_MAX_STAKE) return refuse(`Boosted odds: ◈ ${BOOST_MAX_STAKE.toLocaleString("en-US")} max stake`);
+    }
     const t = Date.now();
     const legs: Leg[] = slipNow.map(({ now: _n, ...x }) => ({ ...x, result: null }));
     const ticket: Ticket = { id: s.nextId, at: t, stake: s.stake, odds: comboOdds(legs), legs, status: "open", payout: 0, boost: comboBoost(legs), insured: isInsured(legs) };
@@ -724,6 +770,8 @@ export function useSportsbook(active: boolean) {
   const cashOutValue = useCallback(
     (tk: Ticket): number | null => {
       if (tk.status !== "open") return null;
+      // No cash-out on boosted odds (as in real sportsbooks).
+      if (tk.legs.some((l) => isBoostMarket(l.market))) return null;
       const t = now || Date.now();
       let p = 1;
       for (const l of tk.legs) {
@@ -770,7 +818,9 @@ export function useSportsbook(active: boolean) {
     refused,
     modelFor,
     oddsNow,
-    boost,
+    boosts: boostsActive,
+    boostById,
+    slipHasBoost: slipNow.some((x) => isBoostMarket(x.market)),
     playersFor,
     loadScorers,
     slip: slipNow,
