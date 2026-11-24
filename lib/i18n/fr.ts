@@ -1151,4 +1151,6 @@ export const FR: Record<string, string> = {
   "Hard totals": "Totaux durs",
   "Soft hands": "Mains souples",
   "5 Free Spins": "5 tours gratuits",
+  "Eco mode": "Mode éco",
+  "Lighter effects in the games: a cooler, quieter computer": "Effets allégés dans les jeux : un ordinateur moins chaud et plus silencieux",
 };

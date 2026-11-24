@@ -3111,3 +3111,6 @@ textarea.st-input { border-radius: 12px; }
 @media (min-width: 1024px) and (max-height: 780px) { .bj-cell { height: 0.95rem; font-size: 9px; } .bj-chart__row { margin-bottom: 1px; } }
 /* Swipe rows declared with the standard property only: hide the bar in Safari too */
 [class*="scrollbar-width:none"]::-webkit-scrollbar { display: none; }
+/* Rest (20 s without input and no round in play): every looping effect
+   pauses where it is; any touch, click, key or mouse move resumes it. */
+.is-resting *, .is-resting *::before, .is-resting *::after { animation-play-state: paused !important; }

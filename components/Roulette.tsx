@@ -29,6 +29,7 @@ import {
 import { ROULETTE_CHIPS, useRoulette, type RouletteGame } from "../lib/useRoulette";
 import { exitFullscreenSettled, isNarrowScreen, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
 import { useSession } from "../lib/sessionStore";
+import { useEco } from "../lib/motion";
 
 /** Desktop or phone layout, decided on the client. */
 function useDesktop() {
@@ -925,6 +926,7 @@ export default function Roulette({
 }) {
   const g = useRoulette(active);
   const desktop = useDesktop();
+  const eco = useEco();
   const [infoOpen, setInfoOpen] = useState(false);
 
   // Phones: the wheel takes over the screen while it spins, then hands
@@ -1158,7 +1160,7 @@ export default function Roulette({
   return (
     <div
       data-theme={g.theme}
-      className={`rl-root ${desktop ? "" : "m-lite"} ${focusAnim} ${
+      className={`rl-root ${desktop && !eco ? "" : "m-lite"} ${focusAnim} ${
         focus
           ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black"
           : "h-[calc(100dvh_-_10.15rem_-_env(safe-area-inset-top))] min-h-[500px] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px]"

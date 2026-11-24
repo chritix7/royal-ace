@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { audio, useAudioSettings } from "../lib/audio";
 import { AMBIENCE_MODES, ambience, useAmbienceMode } from "../lib/ambience";
 import { i18n, useLang } from "../lib/i18n";
-import { motion, useReducedMotion } from "../lib/motion";
+import { ecoMode, motion, useEco, useReducedMotion } from "../lib/motion";
 import { cleanName, profileStore, useProfile } from "../lib/profile";
 import ShopView from "./ShopView";
 import { useBalance } from "../lib/wallet";
@@ -173,6 +173,7 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
   const amb = useAmbienceMode();
   const lang = useLang();
   const reduced = useReducedMotion();
+  const eco = useEco();
   const profile = useProfile();
   const [name, setName] = useState(profile.name);
   const [nameMsg, setNameMsg] = useState("");
@@ -259,6 +260,9 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
       <div className="st-col">
       <section className="st-card">
         <p className="st-head">Display</p>
+        <Row title="Eco mode" sub="Lighter effects in the games: a cooler, quieter computer">
+          <Switch on={eco} onClick={() => ecoMode.set(!eco)} label="Eco mode" />
+        </Row>
         <Row title="Reduced animations" sub="Turns off most motion and effects">
           <Switch on={reduced} onClick={() => motion.set(!reduced)} label="Reduced animations" />
         </Row>

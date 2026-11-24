@@ -32,7 +32,7 @@ import { profileStore, useProfile } from "../lib/profile";
 import { SettingsPage, ShopPage, type SettingsTab } from "../components/SettingsSheet";
 import WelcomeTour, { WELCOME_KEY } from "../components/WelcomeTour";
 import { i18n } from "../lib/i18n";
-import { motion } from "../lib/motion";
+import { motion, startRest } from "../lib/motion";
 import { cloud } from "../lib/cloud";
 import HotkeysOverlay from "../components/HotkeysOverlay";
 import { useBalanceFlash } from "../hooks/useBalanceFlash";
@@ -227,6 +227,7 @@ export default function Home() {
     statsStore.hydrate();
     weeklyStore.hydrate();
     motion.boot();
+    startRest(() => wallet.getLocked());
     i18n.boot();
     void cloud.boot();
     // The home-screen splash is a full-screen layer: take it out of the page

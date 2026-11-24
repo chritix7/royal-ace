@@ -12,6 +12,7 @@ import { ANTE_MAX, ANTE_MIN, ANTE_PAYS, BONUS_MAX, BONUS_PAYS, type Settlement }
 import { POKER_CHIPS, usePoker, type HandRecord, type PokerGame, type Spot } from "../lib/usePoker";
 import { exitFullscreenSettled, isNarrowScreen, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
 import { useSession } from "../lib/sessionStore";
+import { useEco } from "../lib/motion";
 
 /** Desktop or phone layout, decided on the client. */
 function useDesktop() {
@@ -411,6 +412,7 @@ export default function Poker({ active, focus = false, onFocusChange }: { active
     };
   }, []);
   const desktop = useDesktop();
+  const eco = useEco();
   const [sheet, setSheet] = useState<SheetTab | null>(null);
   const [panel, setPanel] = useState<"pay" | "hands" | "stats" | "rules">("pay");
 
@@ -809,7 +811,7 @@ export default function Poker({ active, focus = false, onFocusChange }: { active
   return (
     <div
       data-theme="carbon"
-      className={`rl-root pk-root ${desktop ? "" : "m-lite"} ${focusAnim} ${
+      className={`rl-root pk-root ${desktop && !eco ? "" : "m-lite"} ${focusAnim} ${
         focus ? "fixed inset-0 z-[60] h-[100dvh] overflow-hidden bg-black" : "h-[calc(100dvh_-_10.15rem_-_env(safe-area-inset-top))] min-h-[500px] lg:h-[calc(100dvh-10rem)] lg:min-h-[540px]"
       }`}
           >
