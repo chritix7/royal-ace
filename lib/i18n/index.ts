@@ -41,6 +41,7 @@ const PATTERNS: [RegExp, (...m: string[]) => string][] = [
   [/^(\d+) days ago$/, (_, n) => `il y a ${n} jours`],
   [/^Face ID was cancelled or not allowed — (.+)$/, (_, v) => `Face ID a été annulé ou refusé — ${v}`],
   [/^Face ID unavailable \((\w+)\)$/, (_, v) => `Face ID indisponible (${v})`],
+  [/^(\d+) of (\d+) owned$/, (_, a, b) => `${a} sur ${b} acquis`],
   [/^From ◈ (.+)$/, (_, v) => `Dès ◈ ${v}`],
   [/^◈ (.+) – all in$/, (_, v) => `◈ ${v} – tapis`],
   [/^Claim ◈ (.+)$/, (_, v) => `Récupérer ◈ ${v}`],

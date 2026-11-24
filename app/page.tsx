@@ -29,7 +29,7 @@ import ChipFly from "../components/ChipFly";
 import { IconBall, IconTicket, IconDice, IconFocus, IconHome, IconPoker, IconRoulette, IconSlot, IconSpade } from "../components/UiIcons";
 import Lobby from "../components/Lobby";
 import { profileStore, useProfile } from "../lib/profile";
-import SettingsSheet, { type SettingsTab } from "../components/SettingsSheet";
+import { SettingsPage, ShopPage, type SettingsTab } from "../components/SettingsSheet";
 import WelcomeTour, { WELCOME_KEY } from "../components/WelcomeTour";
 import { i18n } from "../lib/i18n";
 import { motion } from "../lib/motion";
@@ -373,13 +373,29 @@ export default function Home() {
   )}
 
   <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
-    <AudioControls />
+    {/* Phones: sound lives in Settings, the bar keeps its room. */}
+    <div className="hidden sm:block">
+      <AudioControls />
+    </div>
+    <button
+      type="button"
+      onClick={() => setSettings({ tab: "shop" })}
+      aria-label="Shop"
+      title="Shop"
+      className="ui-pill"
+    >
+      <svg viewBox="0 0 24 24" className="h-[17px] w-[17px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
+        <path d="M5 8h14l-1.2 11.2a1.5 1.5 0 0 1-1.5 1.3H7.7a1.5 1.5 0 0 1-1.5-1.3L5 8z" />
+        <path d="M9 10V6.5a3 3 0 0 1 6 0V10" />
+      </svg>
+      <span className="hidden xl:inline">Shop</span>
+    </button>
     <button
       type="button"
       data-tour="settings"
       onClick={() => setSettings({ tab: "settings" })}
-      aria-label="Settings and shop"
-      title="Settings & shop"
+      aria-label="Settings"
+      title="Settings"
       className="ui-pill"
     >
       <svg viewBox="0 0 24 24" className="h-[17px] w-[17px]" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -493,7 +509,8 @@ export default function Home() {
       <GameToasts />
       <StatsPanel open={statsOpen} onClose={() => setStatsOpen(false)} />
       <HotkeysOverlay />
-      {settings && <SettingsSheet tab={settings.tab} item={settings.item} onClose={() => setSettings(null)} onTour={() => setTourOpen(true)} />}
+      {settings?.tab === "settings" && <SettingsPage onClose={() => setSettings(null)} onTour={() => setTourOpen(true)} />}
+      {settings?.tab === "shop" && <ShopPage item={settings.item} onClose={() => setSettings(null)} />}
       {tourOpen && inLobby && <WelcomeTour onClose={() => setTourOpen(false)} />}
     </main>
   );

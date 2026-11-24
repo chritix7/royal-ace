@@ -69,7 +69,7 @@ function CloudSection() {
     if (!ok) setCodeMsg("This code is not valid");
   };
   return (
-    <section>
+    <section className="st-card">
       <p className="st-head">Cloud save · Face ID</p>
       {!c.ready ? (
         <p className="st-sub">Checking…</p>
@@ -193,9 +193,9 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
     window.location.reload();
   };
   return (
-    <div className="space-y-4">
+    <div className="st-grid">
       <CloudSection />
-      <section>
+      <section className="st-card">
         <p className="st-head">Language</p>
         <div className="grid grid-cols-2 gap-1.5" role="radiogroup" aria-label="Language">
           {(
@@ -210,7 +210,7 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
           ))}
         </div>
       </section>
-      <section>
+      <section className="st-card">
         <p className="st-head">Sound</p>
         <Row title="Music">
           <Switch on={a.music} onClick={() => audio.set({ music: !a.music })} label="Music" />
@@ -252,7 +252,7 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
           ))}
         </div>
       </section>
-      <section>
+      <section className="st-card">
         <p className="st-head">Display</p>
         <Row title="Reduced animations" sub="Turns off most motion and effects">
           <Switch on={reduced} onClick={() => motion.set(!reduced)} label="Reduced animations" />
@@ -270,7 +270,7 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
           </button>
         </Row>
       </section>
-      <section>
+      <section className="st-card">
         <p className="st-head">Profile & account</p>
         <div className="flex gap-1.5">
           <input value={name} onChange={(e) => setName(e.target.value)} onPointerDown={(e) => { if (e.pointerType === "touch" && document.activeElement === e.currentTarget) e.currentTarget.blur(); }} maxLength={16} aria-label="Your name" className="st-input min-w-0 flex-1" translate="no" />
@@ -294,35 +294,85 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
   );
 }
 
+function Preview({ it }: { it: (typeof SHOP)[number] }) {
+  const [a, b, c] = it.swatch;
+  if (it.cat === "card") {
+    const fin = it.id === "card:gold" ? "" : `is-${it.id.slice(5)}`;
+    return (
+      <div className="shop-prev shop-prev--card">
+        <div className={`vip-card shop-vip ${fin}`}>
+          <div className="flex items-start justify-between">
+            <span className="vip-card__brand">ROYAL ACE</span>
+            <span className="vip-card__tier">VIP</span>
+          </div>
+          <span className="vip-card__chip" aria-hidden="true" />
+        </div>
+      </div>
+    );
+  }
+  if (it.cat === "roulette") {
+    return (
+      <div className="shop-prev" style={{ background: `radial-gradient(120% 90% at 50% 20%, ${b}, ${a})` }}>
+        <span className="shop-wheel" style={{ borderColor: c, background: `radial-gradient(circle, ${c} 0 12%, ${a} 13% 30%, transparent 31%), repeating-conic-gradient(#b3121f 0 10deg, #0b0b0d 10deg 20deg)` }} />
+      </div>
+    );
+  }
+  return (
+    <div className="shop-prev" style={{ background: `radial-gradient(120% 100% at 50% 0%, ${b}, ${a})` }}>
+      <span className="shop-arc" style={{ borderColor: c }} />
+      <span className="shop-card shop-card--face" style={{ transform: "rotate(-8deg) translateX(-30%)" }}>
+        A<span className="text-[#111]">♠</span>
+      </span>
+      <span className="shop-card shop-card--back" style={{ background: `repeating-linear-gradient(45deg, ${b} 0 3px, ${a} 3px 6px)`, borderColor: c, transform: "rotate(7deg) translateX(30%)" }} />
+    </div>
+  );
+}
+
 function ShopPane({ focus }: { focus?: string }) {
   const st = useShop();
-  const balance = useBalance();
   const locked = useLocked();
+  const [cat, setCat] = useState<"all" | (typeof SHOP_CATS)[number]["id"]>("all");
   const [msg, setMsg] = useState<{ id: string; text: string } | null>(null);
   useEffect(() => {
     if (!focus) return;
-    document.getElementById(`shop-${focus}`)?.scrollIntoView({ block: "center" });
+    const t = window.setTimeout(() => document.getElementById(`shop-${focus}`)?.scrollIntoView({ block: "center", behavior: "smooth" }), 120);
+    return () => window.clearTimeout(t);
   }, [focus]);
+  const owned = st.owned.length;
   return (
-    <div className="space-y-4">
-      <p className="text-[11px] text-white/50">
-        Buy once with chips, keep for good. Credit: <b className="text-[#f5d778]">◈ {money(balance)}</b>
-      </p>
-      {SHOP_CATS.map((cat) => (
-        <section key={cat.id}>
-          <p className="st-head">{cat.label}</p>
-          <p className="st-sub mb-1.5">{cat.where}</p>
-          <div className="grid grid-cols-2 gap-1.5">
-            {SHOP.filter((i) => i.cat === cat.id).map((it) => {
-              const owned = st.owned.includes(it.id);
-              const equipped = cat.id === "card" && st.card === it.id;
+    <div className="space-y-5">
+      <div className="shop-hero">
+        <p className="shop-hero__kicker">Collection</p>
+        <p className="shop-hero__title">Felts, rooms and finishes</p>
+        <p className="shop-hero__sub">Buy once with chips, keep for good. {`${owned} of ${SHOP.length} owned`}</p>
+      </div>
+      <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none]" role="tablist" aria-label="Categories">
+        {([["all", "All"], ...SHOP_CATS.map((c) => [c.id, c.label])] as [typeof cat, string][]).map(([id, label]) => (
+          <button key={id} type="button" role="tab" aria-selected={cat === id} onClick={() => setCat(id)} className={`st-chip ${cat === id ? "is-on" : ""}`}>
+            {label}
+          </button>
+        ))}
+      </div>
+      {SHOP_CATS.filter((c) => cat === "all" || c.id === cat).map((c) => (
+        <section key={c.id}>
+          <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3">
+            <p className="st-head !mb-0">{c.label}</p>
+            <p className="st-sub">{c.where}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
+            {SHOP.filter((i) => i.cat === c.id).map((it) => {
+              const has = st.owned.includes(it.id);
+              const equipped = c.id === "card" && st.card === it.id;
               return (
-                <div key={it.id} id={`shop-${it.id}`} className={`shop-item ${focus === it.id ? "is-focus" : ""} ${owned ? "is-owned" : ""}`}>
-                  <span className="shop-item__swatch" style={{ background: `linear-gradient(135deg, ${it.swatch[0]} 0 34%, ${it.swatch[1]} 34% 72%, ${it.swatch[2]} 72%)` }} />
-                  <p className="shop-item__name">{it.name}</p>
+                <div key={it.id} id={`shop-${it.id}`} className={`shop-item ${focus === it.id ? "is-focus" : ""} ${has ? "is-owned" : ""}`}>
+                  <Preview it={it} />
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="shop-item__name">{it.name}</p>
+                    {!has && <span className="shop-item__price">◈ {priceLabel(it.price)}</span>}
+                  </div>
                   <p className="shop-item__note">{it.note}</p>
-                  {owned ? (
-                    cat.id === "card" ? (
+                  {has ? (
+                    c.id === "card" ? (
                       <button type="button" className={`rl-key w-full ${equipped ? "is-on" : ""}`} disabled={equipped} onClick={() => shop.equipCard(it.id)}>
                         {equipped ? "Equipped" : "Equip"}
                       </button>
@@ -337,26 +387,26 @@ function ShopPane({ focus }: { focus?: string }) {
                       onClick={() => {
                         const ok = shop.buy(it.id);
                         setMsg({ id: it.id, text: ok ? "Unlocked ✓" : "Not enough chips" });
-                        if (ok && cat.id === "card") shop.equipCard(it.id);
+                        if (ok && c.id === "card") shop.equipCard(it.id);
                       }}
                     >
-                      Buy · ◈ {priceLabel(it.price)}
+                      Buy
                     </button>
                   )}
-                  {msg?.id === it.id && <p className="mt-1 text-center text-[10px] text-[#f5d778]">{msg.text}</p>}
+                  {msg?.id === it.id && <p className="text-center text-[10px] text-[#f5d778]">{msg.text}</p>}
                 </div>
               );
             })}
           </div>
         </section>
       ))}
+      {locked && <p className="st-sub text-center">Finish the round in progress to buy.</p>}
     </div>
   );
 }
 
-export default function SettingsSheet({ tab: first, item, onClose, onTour }: { tab: SettingsTab; item?: string; onClose: () => void; onTour: () => void }) {
-  const [tab, setTab] = useState<SettingsTab>(first);
-  useEffect(() => setTab(first), [first]);
+/** Full-screen page (settings, shop): its own header with a back key. */
+function FullPage({ title, onClose, right, children }: { title: string; onClose: () => void; right?: ReactNode; children: ReactNode }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -364,27 +414,46 @@ export default function SettingsSheet({ tab: first, item, onClose, onTour }: { t
   }, [onClose]);
   if (typeof document === "undefined") return null;
   return createPortal(
-    <div className="fixed inset-0 z-[160] flex items-end justify-center sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="Settings">
-      <button type="button" aria-label="Close" onClick={onClose} className="backdrop-in absolute inset-0 cursor-default bg-black/70" />
-      <div className="lb-detail relative flex max-h-[min(92dvh,46rem)] w-full max-w-lg flex-col overflow-hidden">
-        <div className="flex items-center gap-2 px-4 pt-4">
-          <div className="rl-tabs !grid-cols-2 flex-1" role="tablist">
-            <button type="button" role="tab" aria-selected={tab === "settings"} onClick={() => setTab("settings")} className={`rl-tab ${tab === "settings" ? "is-on" : ""}`}>
-              Settings
-            </button>
-            <button type="button" role="tab" aria-selected={tab === "shop"} onClick={() => setTab("shop")} className={`rl-tab ${tab === "shop" ? "is-on" : ""}`}>
-              Shop
-            </button>
-          </div>
-          <button type="button" onClick={onClose} aria-label="Close" className="rl-icon-key">
-            ✕
+    <div className="app-page fixed inset-0 z-[160] flex flex-col" role="dialog" aria-modal="true" aria-label={title}>
+      <header className="app-page__bar pt-[env(safe-area-inset-top)]">
+        <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-2.5 sm:px-8 sm:py-3">
+          <button type="button" onClick={onClose} className="ui-pill ui-pill--lobby shrink-0" aria-label="Back">
+            <span aria-hidden="true">←</span>
+            <span>Back</span>
           </button>
+          <p className="app-page__title min-w-0 flex-1 truncate">{title}</p>
+          {right}
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[max(env(safe-area-inset-bottom),1rem)] pt-3 [scrollbar-width:thin]">
-          {tab === "settings" ? <SettingsPane onTour={onTour} onClose={onClose} /> : <ShopPane focus={item} />}
-        </div>
+      </header>
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+        <div className="mx-auto w-full max-w-6xl px-4 pb-[max(env(safe-area-inset-bottom),1.5rem)] pt-4 sm:px-8 sm:pt-6">{children}</div>
       </div>
     </div>,
     document.body,
+  );
+}
+
+export function SettingsPage({ onClose, onTour }: { onClose: () => void; onTour: () => void }) {
+  return (
+    <FullPage title="Settings" onClose={onClose}>
+      <SettingsPane onTour={onTour} onClose={onClose} />
+    </FullPage>
+  );
+}
+
+export function ShopPage({ item, onClose }: { item?: string; onClose: () => void }) {
+  const balance = useBalance();
+  return (
+    <FullPage
+      title="Shop"
+      onClose={onClose}
+      right={
+        <span className="shop-balance shrink-0">
+          ◈ <span translate="no">{money(balance)}</span>
+        </span>
+      }
+    >
+      <ShopPane focus={item} />
+    </FullPage>
   );
 }

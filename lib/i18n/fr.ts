@@ -1032,4 +1032,10 @@ export const FR: Record<string, string> = {
   "Face ID was cancelled or not allowed": "Face ID a été annulé ou refusé",
   "A passkey already exists here: tap “I already have a save”": "Une clé d'accès existe déjà ici : touche « J'ai déjà une sauvegarde »",
   "iOS blocks creating the key inside the installed app. Create it once in Safari on the same site, then come back here and tap “I already have a save”.": "iOS bloque la création de la clé dans l’appli installée. Crée-la une fois dans Safari sur le même site, puis reviens ici et touche « J’ai déjà une sauvegarde ».",
+  "Collection": "Collection",
+  "Felts, rooms and finishes": "Tapis, salles et finitions",
+  "Buy once with chips, keep for good.": "Achète une fois avec tes jetons, garde-le pour toujours.",
+  "All": "Tout",
+  "Finish the round in progress to buy.": "Termine la manche en cours pour acheter.",
+  "Categories": "Catégories",
 };
