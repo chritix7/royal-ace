@@ -214,7 +214,7 @@ export default function RouletteTable({
         gridTemplateRows: "repeat(3, var(--rt-row)) var(--rt-out) var(--rt-out)",
       }
     : {
-        gridTemplateColumns: insideOnly ? "repeat(3, minmax(0,1fr))" : "minmax(0,0.62fr) minmax(0,0.78fr) repeat(3, minmax(0,1fr))",
+        gridTemplateColumns: insideOnly ? "repeat(3, minmax(0,1fr))" : "minmax(0,0.78fr) minmax(0,0.62fr) repeat(3, minmax(0,1fr))",
         gridTemplateRows: "var(--rt-zero) repeat(12, minmax(0,1fr)) var(--rt-zero)",
       };
 
@@ -223,7 +223,8 @@ export default function RouletteTable({
     gridRow: `${row} / span ${rowSpan}`,
   });
 
-  // Phones: first number column (after the dozens and even-chance columns).
+  // Phones: first number column. As on a real table, the dozens sit next to
+  // the numbers and the even chances on the outer edge.
   const vc = insideOnly ? 1 : 3;
   const cells: ReactNode[] = [];
   for (let c = 0; c < 12; c++)
@@ -289,10 +290,10 @@ export default function RouletteTable({
       )}
 
       {/* Dozens */}
-      {!insideOnly && dozens.map((d, i) => outsideCell(d.key, vText(d.t), H ? pos(2 + i * 4, 4, 4, 1) : pos(1, 2 + i * 4, 1, 4)))}
+      {!insideOnly && dozens.map((d, i) => outsideCell(d.key, vText(d.t), H ? pos(2 + i * 4, 4, 4, 1) : pos(2, 2 + i * 4, 1, 4)))}
 
       {/* Even chances */}
-      {!insideOnly && outsideOrder.map((o, i) => outsideCell(o.key, o.node, H ? pos(2 + i * 2, 5, 2, 1) : pos(2, 2 + i * 2, 1, 2), o.extra))}
+      {!insideOnly && outsideOrder.map((o, i) => outsideCell(o.key, o.node, H ? pos(2 + i * 2, 5, 2, 1) : pos(1, 2 + i * 2, 1, 2), o.extra))}
 
       {/* Inside bets on the lines + chips on the numbers */}
       <div
