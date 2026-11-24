@@ -153,10 +153,10 @@ export default function DealerShoe({
         }
         /* Vertical scan light sweeping down the right-wall hex vent */
         @keyframes bj-vent-scan {
-          0%   { top: -14px; opacity: 0; }
+          0%   { transform: translateY(-55%); opacity: 0; }
           15%  { opacity: 1; }
           85%  { opacity: 1; }
-          100% { top: 100%; opacity: 0; }
+          100% { transform: translateY(55%); opacity: 0; }
         }
         /* Sequential 3-dot activity indicator (status LED trio) */
         @keyframes bj-activity-pulse {
@@ -582,12 +582,11 @@ export default function DealerShoe({
               </svg>
               {/* Slow vertical scan light over the mesh */}
               <div
-                className="absolute left-0 right-0 h-[14px]"
+                className="absolute inset-0"
                 style={{
-                  top: "-14px",
+                  // A soft band moved with transform (no layout or blur each frame).
                   background:
-                    "linear-gradient(180deg, transparent 0%, rgba(246, 228, 169, 0.35) 50%, transparent 100%)",
-                  filter: "blur(2px)",
+                    "linear-gradient(180deg, transparent 42%, rgba(246, 228, 169, 0.3) 50%, transparent 58%)",
                   animation: "bj-vent-scan 5s ease-in-out infinite",
                 }}
               />

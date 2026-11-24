@@ -175,9 +175,10 @@ function OrbitRing({ color, mood, paused = false }: { color: string; mood: "idle
       ? `M ${cx} ${y} H ${x + W - r} A ${r} ${r} 0 0 1 ${x + W} ${y + r} V ${y + H - r} A ${r} ${r} 0 0 1 ${x + W - r} ${y + H} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + H - r} V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`
       : "";
   const per = 2 * (W + H - 4 * r) + 2 * Math.PI * r;
-  // Phones: half as many jewels (offset-path motion runs on the main thread).
-  const gap = typeof window !== "undefined" && window.innerWidth < 1024 ? 72 : 40;
-  const n = W > 0 ? Math.max(10, Math.round(per / gap)) : 0;
+  // offset-path motion runs on the main thread: few jewels, well spaced
+  // (computers ~22, phones ~12) so the machine stays cool.
+  const gap = typeof window !== "undefined" && window.innerWidth < 1024 ? 130 : 115;
+  const n = W > 0 ? Math.max(8, Math.round(per / gap)) : 0;
   const LAP = 26000; // ms per lap at idle speed
   const rate = mood === "jackpot" ? 6 : mood === "win" ? 2.6 : 1;
 
@@ -200,22 +201,34 @@ function OrbitRing({ color, mood, paused = false }: { color: string; mood: "idle
       if (reduced) a.pause();
       list.push(a);
     });
-    (Array.from(root.querySelectorAll("[data-trail]")) as SVGPathElement[]).forEach((trail) => {
-      if (typeof trail.animate !== "function") return;
-      const a = trail.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: -100 }], { duration: LAP / 2.2, iterations: Infinity, easing: "linear" });
-      if (reduced) a.pause();
-      list.push(a);
-    });
     anims.current = list;
     return () => list.forEach((a) => a.cancel());
   }, [d, n]);
-  // Phones: hold the orbit while the reels spin (frees the main thread).
+  // Rest after 20 s without a touch, a click or a key (the machine stays
+  // cool when left open); any input wakes it up.
+  const [resting, setResting] = useState(false);
+  useEffect(() => {
+    let t = 0;
+    const wake = () => {
+      setResting(false);
+      window.clearTimeout(t);
+      t = window.setTimeout(() => setResting(true), 20000);
+    };
+    wake();
+    const ev = ["pointerdown", "pointermove", "keydown", "wheel"] as const;
+    ev.forEach((e) => window.addEventListener(e, wake, { passive: true }));
+    return () => {
+      window.clearTimeout(t);
+      ev.forEach((e) => window.removeEventListener(e, wake));
+    };
+  }, []);
+  // Hold the orbit while the reels spin (frees the main thread for them) or at rest.
   useEffect(() => {
     anims.current.forEach((a) => {
-      if (paused && phone) a.pause();
+      if (paused || (resting && mood === "idle")) a.pause();
       else if (a.playState === "paused") a.play();
     });
-  }, [paused, phone, d, n]);
+  }, [paused, phone, d, n, resting, mood]);
   // Change speed smoothly when the mood changes.
   useEffect(() => {
     anims.current.forEach((a) => {
@@ -233,28 +246,6 @@ function OrbitRing({ color, mood, paused = false }: { color: string; mood: "idle
             {/* Engraved rail */}
             <path d={d} fill="none" stroke="#000" strokeOpacity={0.75} strokeWidth={9} />
             <path d={d} fill="none" stroke="#d7b45b" strokeOpacity={0.35} strokeWidth={1} />
-            {/* Light trail sweeping with the jewels */}
-            {/* Stacked strokes fake a soft glow without a per-frame blur */}
-            {!phone && <g data-trail-group>
-              {[
-                [12, 0.1],
-                [7, 0.16],
-                [3, 0.35],
-              ].map(([w, o]) => (
-                <path
-                  key={w}
-                  data-trail
-                  d={d}
-                  fill="none"
-                  pathLength={100}
-                  stroke={mood === "idle" ? "#ffd98a" : hot}
-                  strokeOpacity={mood === "idle" ? o : Math.min(1, o * 1.7)}
-                  strokeWidth={w}
-                  strokeLinecap="round"
-                  strokeDasharray="14 36"
-                />
-              ))}
-            </g>}
           </svg>
           {Array.from({ length: n }, (_, i) => {
             const star = i % 5 === 0;

@@ -207,16 +207,10 @@ body {
 /* Header ACE breathe — a slow soft gold drop-shadow that pulses on
    the gold "ACE" word. Reads as a quiet lifelike detail, not a call
    to action; it loops forever at 4.5s. */
-@keyframes header-breathe {
-  0%, 100% {
-    filter: drop-shadow(0 0 2px rgba(229, 199, 121, 0.2));
-  }
-  50% {
-    filter: drop-shadow(0 0 7px rgba(229, 199, 121, 0.55));
-  }
-}
+/* A steady soft gold glow (a looping filter repainted the header on
+   every frame, on every screen). */
 .animate-header-breathe {
-  animation: header-breathe 4.5s ease-in-out infinite;
+  text-shadow: 0 0 6px rgba(229, 199, 121, 0.4);
 }
 
 /* Header shine — on hover of the logo, a diagonal gold band sweeps
@@ -762,7 +756,7 @@ body {
 @keyframes drawerIn { 0% { transform: translateX(48px); opacity: 0; filter: blur(10px); } 60% { opacity: 1; filter: blur(1px); } 100% { transform: none; opacity: 1; filter: none; } }
 
 /* Vault teaser: a slow golden glint so players notice it exists */
-@keyframes vaultGlint { 0%, 86%, 100% { filter: none; transform: none; } 90% { filter: drop-shadow(0 0 6px #ffd166) brightness(1.4); transform: scale(1.25) rotate(-8deg); } 94% { filter: drop-shadow(0 0 3px #ffd166); transform: scale(1.1); } }
+@keyframes vaultGlint { 0%, 86%, 100% { transform: none; } 90% { transform: scale(1.25) rotate(-8deg); } 94% { transform: scale(1.1); } }
 .vault-glint { display: inline-block; animation: vaultGlint 7s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .vault-glint { animation: none; } }
 
@@ -1246,15 +1240,13 @@ body {
   height: 7px;
   transform: rotate(45deg);
   background: linear-gradient(135deg, #fff8dc 0%, #f0d38b 40%, #a87a2e 100%);
-  box-shadow: 0 0 6px rgba(255, 217, 138, 0.9), 0 0 1px #000;
+  box-shadow: 0 0 4px rgba(255, 217, 138, 0.8);
 }
 .orbit-star {
   width: 14px;
   height: 14px;
   background: radial-gradient(circle, #fff 0 18%, var(--hot) 40%, transparent 70%);
   clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
-  filter: drop-shadow(0 0 5px var(--hot));
-  animation: orbit-twinkle 1.6s ease-in-out infinite;
 }
 @keyframes orbit-twinkle {
   0%, 100% { scale: 0.85; opacity: 0.85; }
