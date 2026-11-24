@@ -229,6 +229,10 @@ export default function Home() {
     motion.boot();
     i18n.boot();
     void cloud.boot();
+    // The home-screen splash is a full-screen layer: take it out of the page
+    // once it has played (an invisible layer can keep iOS from opening the keyboard).
+    const splash = window.setTimeout(() => document.querySelector<HTMLElement>(".app-splash")?.style.setProperty("display", "none", "important"), 1500);
+    return () => window.clearTimeout(splash);
   }, []);
 
   // Settings & shop sheet: from the header gear, or from a locked theme.
