@@ -116,7 +116,7 @@ export default function AchievementsPanel({ open, onClose }: Props) {
       />
 
       <div
-        className="relative flex max-h-[min(90vh,calc(100dvh_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom)_-_2rem))] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a1512] via-[#120e0b] to-[#070504] shadow-[0_30px_80px_rgba(0,0,0,0.9)] animate-insurance-slide-in"
+        className="relative flex max-h-[min(90vh,calc(100dvh_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom)_-_2rem))] w-full max-w-2xl flex-col overflow-hidden rounded-3xl lg:max-w-6xl border border-[#d7b45b]/40 bg-gradient-to-b from-[#1a1512] via-[#120e0b] to-[#070504] shadow-[0_30px_80px_rgba(0,0,0,0.9)] animate-insurance-slide-in"
         style={{
           backgroundImage:
             "radial-gradient(120% 60% at 50% 0%, rgba(215,180,91,0.15) 0%, transparent 60%), linear-gradient(180deg, #1a1512 0%, #120e0b 60%, #070504 100%)",
@@ -139,12 +139,12 @@ export default function AchievementsPanel({ open, onClose }: Props) {
             </h2>
             <p className="mt-1 text-[11px] text-white/50">
               <span className="font-bold text-[#e5c779]">{doneCount}</span>{" "}
-              of {views.length} completed today
+              {`of ${views.length} completed today`}
               {toClaim > 0 && (
                 <>
                   {" · "}
                   <span className="font-bold text-[#f5d778]">
-                    ◈ {toClaim.toLocaleString("en-US")} to claim
+                    {`◈ ${toClaim.toLocaleString("en-US")} to claim`}
                   </span>
                 </>
               )}
@@ -196,10 +196,10 @@ export default function AchievementsPanel({ open, onClose }: Props) {
         {/* Body */}
         <div className="relative min-h-0 flex-1 overflow-y-auto px-5 py-4 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin] sm:px-6">
           {tab === "today" ? (
-            <div className="space-y-3">
-              <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2">
+            <div className="space-y-3 lg:grid lg:grid-cols-4 lg:gap-x-3 lg:gap-y-3 lg:space-y-0">
+              <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2 lg:grid-cols-1 lg:self-end">
                 {extras.map((x) => (
-                  <Row key={x.id} title={x.title} progress={x.progress} goal={x.goal} reward={x.reward} done={x.done} claimed={x.claimed} locked={locked} onClaim={() => achievementsStore.claim(x.id)} accent={x.id === "chest" ? "Bonus" : "Tour"} />
+                  <Row key={x.id} title={x.title} progress={x.progress} goal={x.goal} reward={x.reward} done={x.done} claimed={x.claimed} locked={locked} onClaim={() => achievementsStore.claim(x.id)} accent={x.id === "chest" ? "Bonus" : "All games"} />
                 ))}
               </ul>
               {GAMES.map((g) => {
@@ -208,7 +208,7 @@ export default function AchievementsPanel({ open, onClose }: Props) {
                 return (
                   <section key={g.id}>
                     <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.28em] text-[#d7b45b]/75">{g.label}</p>
-                    <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2">
+                    <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2 lg:grid-cols-1">
                       {list.map(({ def, progress, done, claimed }) => (
                         <Row key={def.id} title={def.title} progress={progress} goal={def.goal} reward={def.reward} done={done} claimed={claimed} locked={locked} onClaim={() => achievementsStore.claim(def.id)} />
                       ))}
@@ -218,15 +218,15 @@ export default function AchievementsPanel({ open, onClose }: Props) {
               })}
             </div>
           ) : (
-            <div className="space-y-3">
-              <p className="text-[11px] text-white/50">Milestones earned once for good, from everything you have played so far.</p>
+            <div className="space-y-3 lg:grid lg:grid-cols-4 lg:gap-3 lg:space-y-0">
+              <p className="text-[11px] text-white/50 lg:col-span-4">Milestones earned once for good, from everything you have played so far.</p>
               {[...GAMES, { id: "all" as const, label: "Royal Ace" }].map((g) => {
                 const list = career.filter((m) => m.def.game === g.id);
                 if (!list.length) return null;
                 return (
                   <section key={g.id}>
                     <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.28em] text-[#d7b45b]/75">{g.label}</p>
-                    <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2">
+                    <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2 lg:grid-cols-1">
                       {list.map(({ def, progress, done, claimed }) => (
                         <Row key={def.id} title={def.title} progress={progress} goal={def.goal} reward={def.reward} done={done} claimed={claimed} locked={locked} onClaim={() => achievementsStore.claimMilestone(def.id)} />
                       ))}

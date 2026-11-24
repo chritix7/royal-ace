@@ -1129,4 +1129,8 @@ export const FR: Record<string, string> = {
   "Owned · choose it in the game": "Acquis · à choisir dans le jeu",
   "XP ×2 · 1 hour": "XP ×2 · 1 heure",
   "XP ×2 · 24 hours": "XP ×2 · 24 heures",
+  "2 per game · new every day": "2 par jeu · nouveaux chaque jour",
+  "All games": "Tous les jeux",
+  "Career": "Carrière",
+  "Bronze": "Bronze",
 };

@@ -499,7 +499,7 @@ export default function Penalty({ active, focus = false, onFocusChange }: { acti
                 <ShooterPick g={g} />
                 <Ladder g={g} horizontal={false} />
               </div>
-              <div className="rl-card flex min-h-0 flex-1 flex-col p-3">
+              <div className="pe-side-extra rl-card flex min-h-0 flex-1 flex-col p-3">
                 <div className="rl-tabs !grid-cols-2" role="tablist">
                   {(
                     [
@@ -512,11 +512,14 @@ export default function Penalty({ active, focus = false, onFocusChange }: { acti
                     </button>
                   ))}
                 </div>
-                <div className="mt-2.5 min-h-0 flex-1 overflow-y-auto pr-0.5 [scrollbar-width:thin]">
+                <div className={`mt-2.5 min-h-0 flex-1 pr-0.5 [scrollbar-width:thin] ${panel === "rounds" ? "overflow-hidden" : "overflow-y-auto"}`}>
                   {panel === "rounds" ? (
-                    <div className="space-y-2.5">
+                    // No scrolling: the latest rounds that fit, fading out at the bottom.
+                    <div className="flex h-full flex-col gap-2.5">
                       <Today g={g} />
-                      <History items={g.history} />
+                      <div className="pe-hist-wrap min-h-0 flex-1 overflow-hidden">
+                        <History items={g.history.slice(-20)} />
+                      </div>
                     </div>
                   ) : (
                     <Rules />

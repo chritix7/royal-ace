@@ -76,7 +76,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
     weekly.weekStart === null
       ? null
       : new Date((weekly.weekStart + 7) * 86_400_000).toLocaleDateString(
-          "en-GB",
+        typeof document !== "undefined" && document.documentElement.lang === "fr" ? "fr-FR" : "en-GB",
           {
             weekday: "long",
             day: "numeric",
@@ -129,7 +129,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
         />
 
         {/* Header */}
-        <div className="relative flex items-start justify-between gap-3 border-b border-[#d7b45b]/15 px-5 py-4 sm:px-6">
+        <div className="relative flex items-start justify-between gap-3 border-b border-[#d7b45b]/15 px-5 py-3 sm:px-6 sm:py-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d7b45b]/80">
               Loyalty
@@ -149,7 +149,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
         </div>
 
         {/* Body */}
-        <div className="relative min-h-0 flex-1 overflow-y-auto px-5 py-4 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin] sm:px-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4">
+        <div className="relative min-h-0 flex-1 overflow-y-auto px-4 py-3 sm:px-6 sm:py-4 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin] sm:px-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4">
           {flash && (
             <div
               key={flash}
@@ -160,15 +160,14 @@ export default function RewardsPanel({ open, onClose }: Props) {
           )}
 
           {/* Daily */}
-          <section className="mb-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-4 lg:mb-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+          <section className="mb-2.5 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-3 sm:mb-4 sm:p-4 lg:mb-0 lg:p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
                   Daily bonus
                 </p>
                 <p className="mt-1 text-[11px] text-white/55">
-                  Day {Math.min(status.streakDay, DAILY_MAX_DAYS)} of{" "}
-                  {DAILY_MAX_DAYS} · Reward: ◈ {status.reward}
+                  {`Day ${Math.min(status.streakDay, DAILY_MAX_DAYS)} of ${DAILY_MAX_DAYS} · Reward: ◈ ${status.reward}`}
                 </p>
               </div>
               <button
@@ -213,7 +212,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
           </section>
 
           {/* Level */}
-          <section className="mb-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-4 lg:mb-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+          <section className="mb-2.5 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-3 sm:mb-4 sm:p-4 lg:mb-0 lg:p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
             <div className="flex items-baseline justify-between gap-3">
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
                 Level {progression.level}
@@ -223,7 +222,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
               </p>
             </div>
             <p className="mt-1 text-[10px] text-white/45">
-              Level {progression.level + 1} pays <span className="font-bold text-[#f5d778]">◈ {levelReward(progression.level + 1).toLocaleString("en-US")}</span> · XP from every game
+              {`Level ${progression.level + 1} pays `}<span className="font-bold text-[#f5d778]">◈ {levelReward(progression.level + 1).toLocaleString("en-US")}</span> · XP from every game
             </p>
             <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-black/45">
               <div
@@ -265,14 +264,14 @@ export default function RewardsPanel({ open, onClose }: Props) {
           </section>
 
           {/* VIP */}
-          <section className="mb-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-4 lg:mb-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+          <section className="mb-2.5 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-3 sm:mb-4 sm:p-4 lg:mb-0 lg:p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
                   VIP · {vipTier.label}
                 </p>
                 <p className="mt-1 text-[11px] text-white/55">
-                  +{vipTier.dailyBonus} daily bonus chips
+                  {`+${vipTier.dailyBonus} daily bonus chips`}
                 </p>
               </div>
               <span
@@ -284,8 +283,8 @@ export default function RewardsPanel({ open, onClose }: Props) {
             </div>
             {nextTier && (
               <>
-                <p className="mt-3 text-[10px] text-white/45">
-                  Next: {nextTier.label} at level {nextTier.minLevel}
+                <p className="mt-2 text-[10px] text-white/45">
+                  {`Next: ${nextTier.label} at level ${nextTier.minLevel}`}
                 </p>
                 <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-black/45">
                   <div
@@ -305,7 +304,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
           </section>
 
           {/* Weekly */}
-          <section className="mb-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-4 lg:mb-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+          <section className="mb-2.5 rounded-2xl border border-[#c8a65b]/15 bg-black/35 p-3 sm:mb-4 sm:p-4 lg:mb-0 lg:p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
@@ -324,27 +323,27 @@ export default function RewardsPanel({ open, onClose }: Props) {
               </span>
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <div className="rounded-xl border border-[#d7b45b]/25 bg-[#d7b45b]/[0.08] p-3">
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className="rounded-xl border border-[#d7b45b]/25 bg-[#d7b45b]/[0.08] px-3 py-2">
                 <p className="text-[9px] uppercase tracking-wider text-white/45">
                   This week
                 </p>
-                <p className="mt-1 font-mono text-xl font-black tabular-nums text-[#f5d778]">
+                <p className="mt-0.5 font-mono text-lg font-black tabular-nums text-[#f5d778]">
                   {weekly.points.toLocaleString("en-US")}
                 </p>
               </div>
-              <div className="rounded-xl border border-white/10 bg-black/25 p-3">
+              <div className="rounded-xl border border-white/10 bg-black/25 px-3 py-2">
                 <p className="text-[9px] uppercase tracking-wider text-white/45">
                   Last week
                 </p>
-                <p className="mt-1 font-mono text-xl font-black tabular-nums text-white/70">
+                <p className="mt-0.5 font-mono text-lg font-black tabular-nums text-white/70">
                   {weekly.previousPoints.toLocaleString("en-US")}
                 </p>
               </div>
             </div>
 
             <div
-              className="mt-3 h-1.5 overflow-hidden rounded-full bg-black/45"
+              className="mt-2 h-1.5 overflow-hidden rounded-full bg-black/45"
               role="progressbar"
               aria-label="Weekly points goal"
               aria-valuemin={0}
@@ -363,16 +362,16 @@ export default function RewardsPanel({ open, onClose }: Props) {
 
             <p className="mt-2 text-[10px] text-white/45">
               {weekly.points.toLocaleString("en-US")} /{" "}
-              {WEEKLY_GOAL.toLocaleString("en-US")} points · earned in every game
+              {`${WEEKLY_GOAL.toLocaleString("en-US")} points · earned in every game${weeklyResetDate ? ` · resets ${weeklyResetDate}` : ""}`}
             </p>
-            <ul className="mt-3 space-y-1.5">
+            <ul className="mt-2 grid grid-cols-3 gap-1.5">
               {WEEKLY_TIERS.map((t, i) => {
                 const reached = weekly.points >= t.points;
                 const claimed = (weekly.claimed ?? []).includes(i);
                 return (
-                  <li key={t.label} className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 ${reached ? "border-[#d7b45b]/50 bg-[#d7b45b]/[0.07]" : "border-white/[0.07] bg-black/25"}`}>
-                    <span className="min-w-0">
-                      <span className={`block text-[11px] font-bold ${reached ? "text-[#f5d778]" : "text-white/70"}`}>{t.label}</span>
+                  <li key={t.label} className={`flex min-w-0 flex-col items-center gap-1 rounded-xl border px-1.5 py-1.5 text-center ${reached ? "border-[#d7b45b]/50 bg-[#d7b45b]/[0.07]" : "border-white/[0.07] bg-black/25"}`}>
+                    <span className="w-full min-w-0">
+                      <span className={`block truncate text-[11px] font-bold ${reached ? "text-[#f5d778]" : "text-white/70"}`}>{t.label}</span>
                       <span className="block text-[10px] text-white/40">{t.points.toLocaleString("en-US")} points</span>
                     </span>
                     {claimed ? (
@@ -385,7 +384,7 @@ export default function RewardsPanel({ open, onClose }: Props) {
                           const got = weeklyStore.claim(i);
                           if (got) setFlash(`${t.label} opened: +${got.toLocaleString("en-US")} chips`);
                         }}
-                        className={reached ? primary : ghost}
+                        className={`${reached ? primary : ghost} w-full !px-1`}
                       >
                         ◈ {t.reward.toLocaleString("en-US")}
                       </button>
@@ -395,11 +394,6 @@ export default function RewardsPanel({ open, onClose }: Props) {
               })}
             </ul>
 
-            {weeklyResetDate && (
-              <p className="mt-2 text-[10px] leading-relaxed text-white/40">
-                Resets {weeklyResetDate} · 00:00 local
-              </p>
-            )}
           </section>
 
         </div>
