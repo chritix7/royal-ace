@@ -241,43 +241,37 @@ body {
 
 /* "Place your bet to start." idle shimmer — a long slow gradient
    pass across the pill so the UI never feels frozen. */
+/* A gentle gold breath (opacity only): the sliding gradient clipped to
+   the text was repainted on every frame. */
 @keyframes idle-shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
 }
 .animate-idle-shimmer {
-  background: linear-gradient(
-    110deg,
-    rgba(229, 199, 121, 0.55) 0%,
-    rgba(229, 199, 121, 0.85) 45%,
-    rgba(255, 240, 200, 1) 50%,
-    rgba(229, 199, 121, 0.85) 55%,
-    rgba(229, 199, 121, 0.55) 100%
-  );
-  background-size: 200% 100%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  animation: idle-shimmer 5s linear infinite;
+  color: #f0d38b;
+  text-shadow: 0 0 10px rgba(240, 211, 139, 0.25);
+  animation: idle-shimmer 3.2s ease-in-out infinite;
 }
 
 /* Deal-button idle breathing — a soft gold halo that pulses when
    the button is enabled (bet placed, balance ok). Infinite loop at
    ~2.2s so it reads as a quiet invitation, never as urgency. */
+/* The halo is drawn once on a pseudo-element; only its opacity breathes
+   (animating box-shadow repainted the table on every frame). */
 @keyframes deal-ready-pulse {
-  0%, 100% {
-    box-shadow:
-      0 0 0 0 rgba(229, 199, 121, 0),
-      0 0 10px rgba(229, 199, 121, 0.15);
-  }
-  50% {
-    box-shadow:
-      0 0 0 4px rgba(229, 199, 121, 0.1),
-      0 0 22px rgba(229, 199, 121, 0.45);
-  }
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
 }
-.animate-deal-ready {
+.animate-deal-ready { position: relative; }
+.animate-deal-ready::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 0 4px rgba(229, 199, 121, 0.1), 0 0 22px rgba(229, 199, 121, 0.45);
   animation: deal-ready-pulse 2.2s ease-in-out infinite;
+  will-change: opacity;
 }
 
 /* Phase-transition message slide — lighter than the round-complete
@@ -1232,12 +1226,12 @@ body {
   position: absolute;
   left: 0;
   top: 0;
-  offset-anchor: center;
-  will-change: offset-distance;
+  will-change: transform;
 }
 .orbit-gem {
   width: 7px;
   height: 7px;
+  margin: -3.5px 0 0 -3.5px;
   transform: rotate(45deg);
   background: linear-gradient(135deg, #fff8dc 0%, #f0d38b 40%, #a87a2e 100%);
   box-shadow: 0 0 4px rgba(255, 217, 138, 0.8);
@@ -1245,6 +1239,7 @@ body {
 .orbit-star {
   width: 14px;
   height: 14px;
+  margin: -7px 0 0 -7px;
   background: radial-gradient(circle, #fff 0 18%, var(--hot) 40%, transparent 70%);
   clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
 }
@@ -3169,3 +3164,4 @@ textarea.st-input { border-radius: 12px; }
   background: linear-gradient(0deg, var(--c), transparent 92%); animation: room-beam 3.4s ease-in-out infinite alternate; will-change: transform; }
 @keyframes room-beam { from { transform: rotate(-26deg); } to { transform: rotate(26deg); } }
 @media (max-width: 1023px) { .room-party { display: none; } }
+.fx-paused .fxp, .fx-paused .coin { animation-play-state: paused !important; }

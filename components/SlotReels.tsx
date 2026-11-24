@@ -189,10 +189,21 @@ function OrbitRing({ color, mood, paused = false }: { color: string; mood: "idle
     if (!root || !d) return;
     const reduced = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const items = Array.from(root.querySelectorAll("[data-orbit]")) as HTMLElement[];
+    // The rail is sampled once into translate keyframes: the graphics card
+    // then moves the jewels on its own (an offset-path animation was
+    // recomputed by the processor on every frame).
+    const rail = root.querySelector<SVGPathElement>("path[data-rail]");
+    if (!rail || typeof rail.getTotalLength !== "function") return;
+    const len = rail.getTotalLength();
+    const STEPS = 96;
+    const pts = Array.from({ length: STEPS + 1 }, (_, k) => rail.getPointAtLength((k / STEPS) * len));
+    const frames = (turn: string) => pts.map((p) => ({ transform: `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px)${turn}` }));
+    const gemFrames = frames(" rotate(45deg)");
+    const starFrames = frames("");
     const list: Animation[] = [];
     items.forEach((el, i) => {
       if (typeof el.animate !== "function") return;
-      const a = el.animate([{ offsetDistance: "0%" }, { offsetDistance: "100%" }], {
+      const a = el.animate(el.classList.contains("orbit-star") ? starFrames : gemFrames, {
         duration: LAP,
         iterations: Infinity,
         delay: -(i / items.length) * LAP,
@@ -244,7 +255,7 @@ function OrbitRing({ color, mood, paused = false }: { color: string; mood: "idle
         <>
           <svg className="absolute inset-0 h-full w-full overflow-visible">
             {/* Engraved rail */}
-            <path d={d} fill="none" stroke="#000" strokeOpacity={0.75} strokeWidth={9} />
+            <path data-rail d={d} fill="none" stroke="#000" strokeOpacity={0.75} strokeWidth={9} />
             <path d={d} fill="none" stroke="#d7b45b" strokeOpacity={0.35} strokeWidth={1} />
           </svg>
           {Array.from({ length: n }, (_, i) => {
@@ -254,7 +265,7 @@ function OrbitRing({ color, mood, paused = false }: { color: string; mood: "idle
                 key={i}
                 data-orbit
                 className={star ? "orbit-star" : "orbit-gem"}
-                style={{ offsetPath: `path('${d}')`, offsetRotate: "0deg", ["--hot" as string]: hot }}
+                style={{ ["--hot" as string]: hot }}
               />
             );
           })}

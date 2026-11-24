@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { itemOf, useShop } from "../lib/shop";
 
 /**
@@ -53,11 +53,21 @@ export default function CoinRain({ count = 34, kind: forced }: { count?: number;
 
 /** A small looping sample for the shop. */
 const SAMPLE = [
-  [8, 0, 1.9], [24, 0.6, 2.3], [40, 0.2, 1.7], [56, 1.0, 2.1], [72, 0.4, 2.0], [88, 0.8, 2.4], [32, 1.3, 1.8], [64, 1.6, 2.2],
+  [10, 0, 1.9], [28, 0.6, 2.3], [46, 0.2, 1.7], [64, 1.0, 2.1], [82, 0.4, 2.0], [36, 1.3, 1.8],
 ] as const;
 export function FxPreview({ kind }: { kind: string }) {
+  // Only previews on screen move (the shop has a column of them).
+  const box = useRef<HTMLDivElement>(null);
+  const [seen, setSeen] = useState(false);
+  useEffect(() => {
+    const el = box.current;
+    if (!el || typeof IntersectionObserver === "undefined") return setSeen(true);
+    const io = new IntersectionObserver(([e]) => setSeen(e.isIntersecting), { rootMargin: "40px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+    <div ref={box} className={`pointer-events-none absolute inset-0 overflow-hidden ${seen ? "" : "fx-paused"}`} aria-hidden="true">
       {SAMPLE.map(([left, delay, dur], i) => (
         <Particle key={i} kind={kind} size={15} tint={CONFETTI[i % CONFETTI.length]} style={{ left: `${left}%`, animationName: "fx-loop", animationDelay: `${delay}s`, animationDuration: `${dur}s`, animationIterationCount: "infinite", animationTimingFunction: "linear" }} />
       ))}

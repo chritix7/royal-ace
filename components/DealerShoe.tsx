@@ -159,10 +159,11 @@ export default function DealerShoe({
           100% { transform: translateY(55%); opacity: 0; }
         }
         /* Sequential 3-dot activity indicator (status LED trio) */
+        /* Opacity only (the glow is static): runs on the graphics card. */
         @keyframes bj-activity-pulse {
-          0%, 100% { opacity: 0.25; box-shadow: 0 0 2px rgba(229, 199, 121, 0.3); }
-          20%      { opacity: 1;    box-shadow: 0 0 6px rgba(246, 228, 169, 0.9), 0 0 2px rgba(246, 228, 169, 1); }
-          40%      { opacity: 0.25; box-shadow: 0 0 2px rgba(229, 199, 121, 0.3); }
+          0%, 100% { opacity: 0.25; }
+          20%      { opacity: 1; }
+          40%      { opacity: 0.25; }
         }
         /* LED pulse ring */
         @keyframes bj-led-pulse-ring {
@@ -462,6 +463,7 @@ export default function DealerShoe({
                     width: "3px",
                     height: "3px",
                     background: "#e5c779",
+                    boxShadow: "0 0 6px rgba(246, 228, 169, 0.9), 0 0 2px rgba(246, 228, 169, 1)",
                     animation: `bj-activity-pulse 1.4s linear infinite`,
                     animationDelay: `${i * 0.22}s`,
                   }}
