@@ -51,7 +51,7 @@ export const LOBBY_GAMES: Info[] = [
     name: "Miami Kingpin",
     tag: "5-reel video slot",
     facts: ["4 progressive jackpots", "Free spins · Boss wilds", "Crowns & the vault"],
-    limits: "◈ 20 – 5,000",
+    limits: "◈ 20 – 100K",
     rtp: "≈ 96%",
     about: ["Twenty paylines on five reels, with expanding Boss wilds and re-spins.", "Three scatters start the free spins; crowns fill the vault.", "Four jackpots grow with every spin: Mini, Minor, Major, Kingpin."],
     challenge: "slots",

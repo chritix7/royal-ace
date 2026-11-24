@@ -580,7 +580,7 @@ useEffect(() => {
                                   aria-pressed={i === s.betIdx}
                                   className="lux-btn h-10 font-mono text-sm tabular-nums"
                                 >
-                                  {money(v)}
+                                  {v >= 10000 ? `${v / 1000}K` : money(v)}
                                 </button>
                               ))}
                             </div>

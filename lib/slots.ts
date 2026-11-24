@@ -61,7 +61,9 @@ export const FS_MULT = 2;
 export const FS_RETRIGGER: Record<number, number> = { 3: 5, 4: 8, 5: 12 };
 export const FS_CAP = 60;
 
-export const BET_LEVELS = [20, 40, 60, 100, 200, 400, 600, 1000, 2000, 5000];
+/** Total bet per spin. Levels are only ever added at the end: the saved
+ *  choice is an index. Up to 100K, like the other high-roller tables. */
+export const BET_LEVELS = [20, 40, 60, 100, 200, 400, 600, 1000, 2000, 5000, 10000, 20000, 50000, 100000];
 
 // Combien de fois chaque symbole apparaît sur la bande de chaque rouleau.
 // Les rouleaux 2, 3 et 4 ont une bande plus longue (191 cases) pour que le wild reste rare.

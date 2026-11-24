@@ -85,7 +85,13 @@ export default function JackpotBar({
         <span className="opacity-70">{JACKPOTS[t].label}</span>
       </p>
       <p className={`truncate font-mono font-black leading-4 tabular-nums sm:text-sm ${tileSize(Math.round(pools[t] * bet))}`}>
-        <span className="opacity-60">◈</span> <GrowingValue value={Math.round(pools[t] * bet)} />
+        <span className="opacity-60">◈</span>{" "}
+        {pools[t] * bet >= 1_000_000 ? (
+          // Phones: millions in short form so the tile never cuts them.
+          <span>{`${(pools[t] * bet / 1_000_000).toFixed(pools[t] * bet >= 100_000_000 ? 0 : 2).replace(/\.?0+$/, "")}M`}</span>
+        ) : (
+          <GrowingValue value={Math.round(pools[t] * bet)} />
+        )}
       </p>
       </span>
     </div>
