@@ -260,9 +260,12 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
       <div className="st-col">
       <section className="st-card">
         <p className="st-head">Display</p>
-        <Row title="Eco mode" sub="Lighter effects in the games: a cooler, quieter computer">
-          <Switch on={eco} onClick={() => ecoMode.set(!eco)} label="Eco mode" />
-        </Row>
+        {/* Computers only: phones always run the light effects. */}
+        <div className="hidden lg:block">
+          <Row title="Eco mode" sub="Lighter effects in the games: a cooler, quieter computer">
+            <Switch on={eco} onClick={() => ecoMode.set(!eco)} label="Eco mode" />
+          </Row>
+        </div>
         <Row title="Reduced animations" sub="Turns off most motion and effects">
           <Switch on={reduced} onClick={() => motion.set(!reduced)} label="Reduced animations" />
         </Row>
