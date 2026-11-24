@@ -545,7 +545,7 @@ export function useSportsbook(active: boolean) {
           r = settlePlayer(m, pm.kind, pm.id, l.snap, scorers[l.snap.comp]?.players, matches, t);
           if (r === "won" || r === "lost") final = r === "won" ? "✓" : "✗";
         } else if (m) {
-          r = settle(m, l.market, l.pick);
+          r = settle(m, l.market, l.pick, !l.live);
           const fs = m.status === "done" ? m.regular ?? m.score : m.score;
           // Decided before the end (an over passed, 2 goals up…): paid at once.
           if (r && fs) final = m.status === "done" ? `${fs.h}-${fs.a}` : `${fs.h}-${fs.a} early`;
@@ -753,7 +753,12 @@ export function useSportsbook(active: boolean) {
       if (s.stake > BOOST_MAX_STAKE) return refuse(`Boosted odds: ◈ ${BOOST_MAX_STAKE.toLocaleString("en-US")} max stake`);
     }
     const t = Date.now();
-    const legs: Leg[] = slipNow.map(({ now: _n, ...x }) => ({ ...x, result: null }));
+    // A pick counts as live if its match has started when the ticket is placed
+    // (even if it was added to the slip before kick-off).
+    const legs: Leg[] = slipNow.map(({ now: _n, ...x }) => {
+      const mm = byId.current.get(x.matchId);
+      return { ...x, live: x.live || t >= x.kickoff || (mm ? mm.status !== "pre" : false), result: null };
+    });
     const ticket: Ticket = { id: s.nextId, at: t, stake: s.stake, odds: comboOdds(legs), legs, status: "open", payout: 0, boost: comboBoost(legs), insured: isInsured(legs) };
     wallet.add(-s.stake);
     commit({ ...s, tickets: [...s.tickets, ticket].slice(-150), slip: [], bb: {}, nextId: s.nextId + 1 });

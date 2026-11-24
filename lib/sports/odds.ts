@@ -138,7 +138,7 @@ export function marketsOf(m: Match, model: Model | null): Market[] {
     return out;
   }
   const reg = m.sport === "hockey" ? " (60 min)" : "";
-  out.push({ key: "1x2", title: m.sport === "football" ? "Match result · paid early 2 goals up" : `Match result${reg}`, picks: [{ market: "1x2", pick: "1", label: h }, { market: "1x2", pick: "X", label: "Draw" }, { market: "1x2", pick: "2", label: a }] });
+  out.push({ key: "1x2", title: m.sport === "football" ? (m.status === "pre" ? "Match result · paid early 2 goals up" : "Match result") : `Match result${reg}`, picks: [{ market: "1x2", pick: "1", label: h }, { market: "1x2", pick: "X", label: "Draw" }, { market: "1x2", pick: "2", label: a }] });
   if (m.sport === "hockey") out.push({ key: "ml", title: "Winner (incl. OT & shootout)", picks: [{ market: "ml", pick: "1", label: h }, { market: "ml", pick: "2", label: a }] });
   out.push({ key: "dc", title: `Double chance${reg}`, picks: [{ market: "dc", pick: "1X", label: `${h} or draw` }, { market: "dc", pick: "12", label: `${h} or ${a}` }, { market: "dc", pick: "X2", label: `Draw or ${a}` }] });
   for (const l of m.sport === "football" ? FB_LINES : HK_LINES)
@@ -273,22 +273,26 @@ export function priced(m: Match, model: Model | null, market: Market, now: numbe
 
 /* ───────────── Settlement ───────────── */
 
-/** "won" | "lost" | "void" once the match is over, null while it runs. */
-export function settle(m: Match, rawMarket: string, pick: string): "won" | "lost" | "void" | null {
+/**
+ * "won" | "lost" | "void" once the match is over, null while it runs.
+ * `twoUpOk`: the "paid 2 goals ahead" offer — pre-match bets only (a bet
+ * placed live on a team already 2 goals up would be a free win).
+ */
+export function settle(m: Match, rawMarket: string, pick: string, twoUpOk = false): "won" | "lost" | "void" | null {
   if (m.status === "void") return "void";
   const market = baseMarket(rawMarket);
   if (market === "bb") {
     // Bet builder: every part must win; one lost part loses it at once.
-    const parts = parseBuilder(pick).map((x) => settle(m, x.market, x.pick));
+    const parts = parseBuilder(pick).map((x) => settle(m, x.market, x.pick, twoUpOk));
     if (parts.includes("lost")) return "lost";
     if (parts.includes(null)) return null;
     return parts.every((x) => x === "void") ? "void" : "won";
   }
   const [kind, lineS] = market.split(":");
   const line = lineS !== undefined ? +lineS : 0;
-  if (m.status !== "done") return m.status === "pre" ? null : settleEarly(m, kind, line, pick);
-  // Football result: paid as soon as the team was 2 goals up at half-time.
-  if (twoUp(m, kind, pick, m.ht)) return "won";
+  if (m.status !== "done") return m.status === "pre" ? null : settleEarly(m, kind, line, pick, twoUpOk);
+  // Football result (pre-match bets): paid as soon as the team was 2 goals up at half-time.
+  if (twoUpOk && twoUp(m, kind, pick, m.ht)) return "won";
   if (kind === "htft") {
     if (!m.ht || !m.regular) return "void";
     const r = (s: Score) => (s.h > s.a ? "1" : s.h < s.a ? "2" : "X");
@@ -355,13 +359,13 @@ function twoUp(m: Match, kind: string, pick: string, s: Score | null | undefined
  * scored, a correct score already beaten, the half-time half of a
  * HT/FT pick, and the football result when the team leads by 2.
  */
-function settleEarly(m: Match, kind: string, line: number, pick: string): "won" | "lost" | null {
+function settleEarly(m: Match, kind: string, line: number, pick: string, twoUpOk: boolean): "won" | "lost" | null {
   const s = m.score;
   if (!s) return null;
   // Hockey "60 min" markets: overtime goals do not count.
   if (m.sport === "hockey" && m.clock && m.clock.period > 3) return null;
   const tot = s.h + s.a;
-  if (twoUp(m, kind, pick, s)) return "won";
+  if (twoUpOk && twoUp(m, kind, pick, s)) return "won";
   switch (kind) {
     case "ou":
       if (tot > line) return pick === "over" ? "won" : "lost";
