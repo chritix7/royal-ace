@@ -425,7 +425,7 @@ function FullPage({ title, onClose, right, children }: { title: string; onClose:
           {right}
         </div>
       </header>
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+      <div className="app-page__scroll min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
         <div className="mx-auto w-full max-w-6xl px-4 pb-[max(env(safe-area-inset-bottom),1.5rem)] pt-4 sm:px-8 sm:pt-6">{children}</div>
       </div>
     </div>,

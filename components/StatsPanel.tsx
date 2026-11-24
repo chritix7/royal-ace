@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactElement } from "react";
+import { IconBall, IconDice, IconPoker, IconRoulette, IconSlot, IconSpade, IconTicket } from "./UiIcons";
 import { createPortal } from "react-dom";
 import { useStats } from "../lib/statsStore";
 import { statsStore } from "../lib/statsStore";
@@ -44,39 +45,86 @@ export default function StatsPanel({ open, onClose }: Props) {
 
   if (!open || typeof document === "undefined") return null;
 
-  const slotWinRate = stats.spins ? Math.round((stats.slotWins / stats.spins) * 100) : 0;
-  const bjWinRate = stats.bjHands ? Math.round((stats.bjWins / stats.bjHands) * 100) : 0;
-  const decisionRate = stats.bjHands ? Math.round((stats.correctDecisions / stats.bjHands) * 100) : 0;
+  const pct = (n: number, d: number) => (d ? `${Math.round((n / d) * 100)}%` : "—");
+  let perfects = 0;
+  let bestStreak = 0;
+  try {
+    const pe = JSON.parse(localStorage.getItem("royalace:penalty") ?? "null");
+    perfects = Number(pe?.records?.perfects) || 0;
+    bestStreak = Number(pe?.records?.bestStreak) || 0;
+  } catch {}
 
+  // A few numbers per game: what you played, how often you win, one highlight.
   const groups: {
     title: string;
+    Icon: (p: { className?: string }) => ReactElement;
     items: { label: string; value: string | number }[];
   }[] = [
     {
-      title: "Slots",
+      title: "Blackjack",
+      Icon: IconSpade,
       items: [
-        { label: "Spins", value: stats.spins },
-        { label: "Wins", value: stats.slotWins },
-        { label: "Win rate", value: `${slotWinRate}%` },
-        { label: "Bonuses", value: stats.bonuses },
-        { label: "Vaults", value: stats.vaults },
-        { label: "Jackpots", value: stats.jackpots },
-        { label: "Wild expands", value: stats.wildExpands },
-        { label: "Re-spins", value: stats.respins },
-        { label: "Gambles won", value: stats.gambleWins },
+        { label: "Hands", value: stats.bjHands },
+        { label: "Win rate", value: pct(stats.bjWins, stats.bjHands) },
+        { label: "Blackjacks", value: stats.blackjacks },
+        { label: "Right plays", value: pct(stats.correctDecisions, stats.bjHands) },
       ],
     },
     {
-      title: "Blackjack",
+      title: "Slots",
+      Icon: IconSlot,
       items: [
-        { label: "Hands", value: stats.bjHands },
-        { label: "Wins", value: stats.bjWins },
-        { label: "Win rate", value: `${bjWinRate}%` },
-        { label: "Blackjacks", value: stats.blackjacks },
-        { label: "Doubled wins", value: stats.doubledWins },
-        { label: "Split wins", value: stats.splitWins },
-        { label: "Correct decisions", value: stats.correctDecisions },
-        { label: "Decision rate", value: `${decisionRate}%` },
+        { label: "Spins", value: stats.spins },
+        { label: "Win rate", value: pct(stats.slotWins, stats.spins) },
+        { label: "Bonuses", value: stats.bonuses },
+        { label: "Jackpots", value: stats.jackpots },
+      ],
+    },
+    {
+      title: "Roulette",
+      Icon: IconRoulette,
+      items: [
+        { label: "Spins", value: stats.rouletteSpins },
+        { label: "Wins", value: stats.rouletteWins },
+        { label: "Win rate", value: pct(stats.rouletteWins, stats.rouletteSpins) },
+        { label: "Straight hits", value: stats.rouletteStraights },
+      ],
+    },
+    {
+      title: "Casino Hold'em",
+      Icon: IconPoker,
+      items: [
+        { label: "Hands", value: stats.pokerHands },
+        { label: "Wins", value: stats.pokerWins },
+        { label: "Win rate", value: pct(stats.pokerWins, stats.pokerHands) },
+      ],
+    },
+    {
+      title: "Craps",
+      Icon: IconDice,
+      items: [
+        { label: "Rolls", value: stats.crapsRolls },
+        { label: "Winning rolls", value: stats.crapsWins },
+        { label: "Win rate", value: pct(stats.crapsWins, stats.crapsRolls) },
+      ],
+    },
+    {
+      title: "Penalty",
+      Icon: IconBall,
+      items: [
+        { label: "Rounds", value: stats.penaltyRounds },
+        { label: "Goals", value: stats.penaltyGoals },
+        { label: "Best streak", value: bestStreak },
+        { label: "Perfect fives", value: perfects },
+      ],
+    },
+    {
+      title: "Sportsbook",
+      Icon: IconTicket,
+      items: [
+        { label: "Tickets", value: stats.betsPlaced },
+        { label: "Won", value: stats.betsWon },
+        { label: "Hit rate", value: pct(stats.betsWon, stats.betsPlaced) },
       ],
     },
   ];
@@ -140,36 +188,29 @@ export default function StatsPanel({ open, onClose }: Props) {
           </button>
         </div>
 
-        {/* Scrollable body */}
-        {/* Three columns on desktop (Slots · Blackjack · big wins) so
-            everything fits without scrolling. */}
-        <div className="relative min-h-0 flex-1 overflow-y-auto px-5 py-4 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin] sm:px-6 lg:grid lg:grid-cols-3 lg:items-start lg:gap-5">
+        {/* Scrollable body: one card per game (4 columns on computers, so
+            it all fits without scrolling), then the latest big wins. */}
+        <div className="relative min-h-0 flex-1 overflow-y-auto px-4 py-3 [scrollbar-color:#d7b45b40_transparent] [scrollbar-width:thin] sm:px-6 sm:py-4">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 lg:gap-2.5">
           {groups.map((group) => (
-            <section key={group.title} className="mb-4 last:mb-0 sm:mb-6 lg:mb-0">
-              <p className="mb-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
+            <section key={group.title} className="rounded-2xl border border-[#c8a65b]/15 bg-black/30 p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+              <p className="mb-1.5 flex items-center gap-1.5 text-[10.5px] font-black uppercase tracking-[0.2em] text-[#e5c779]">
+                <group.Icon className="h-3.5 w-3.5 shrink-0" />
                 {group.title}
               </p>
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-2 lg:grid-cols-2">
+              <div className="grid grid-cols-4 gap-1 lg:grid-cols-2">
                 {group.items.map((item) => (
-                  <div
-                    key={item.label}
-                    className="min-w-0 rounded-xl border border-[#c8a65b]/15 bg-black/35 px-2 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] sm:rounded-2xl sm:p-3 lg:px-3 lg:py-2"
-                  >
-                    <p className="truncate text-[8px] font-bold uppercase tracking-wide text-white/45 sm:text-[10px] sm:tracking-wider">
-                      {item.label}
-                    </p>
-                    <p className="mt-0.5 text-sm font-black tabular-nums text-[#f0d38b] sm:mt-1 sm:text-lg lg:mt-0.5 lg:text-base">
-                      {item.value}
-                    </p>
+                  <div key={item.label} className="flex min-w-0 flex-col justify-between rounded-lg bg-white/[0.03] px-1.5 py-1 lg:px-2">
+                    <p className="text-[8px] font-bold uppercase leading-tight tracking-wide text-white/45 [overflow-wrap:anywhere] sm:text-[9px]">{item.label}</p>
+                    <p className="text-[13px] font-black tabular-nums text-[#f0d38b] sm:text-sm">{typeof item.value === "number" ? item.value.toLocaleString("en-US") : item.value}</p>
                   </div>
                 ))}
               </div>
             </section>
           ))}
-
-          <section>
-            <div className="mb-2 flex items-center justify-between gap-4">
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e5c779]">
+          <section className="rounded-2xl border border-[#c8a65b]/15 bg-black/30 p-2.5">
+            <div className="mb-1.5 flex items-center justify-between gap-4">
+              <p className="text-[10.5px] font-black uppercase tracking-[0.2em] text-[#e5c779]">
                 Latest big wins
               </p>
               {history.length > 0 && (
@@ -186,15 +227,15 @@ export default function StatsPanel({ open, onClose }: Props) {
             </div>
 
             {history.length === 0 ? (
-              <p className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-white/45">
+              <p className="px-1 py-2 text-xs text-white/45">
                 No big win recorded yet.
               </p>
             ) : (
-              <ul className="space-y-1.5">
-                {history.slice(0, 5).map((entry) => (
+              <ul className="space-y-1">
+                {history.slice(0, 3).map((entry) => (
                   <li
                     key={entry.id}
-                    className="flex items-center justify-between gap-4 rounded-2xl border border-[#c8a65b]/15 bg-black/35 px-4 py-2.5"
+                    className="flex items-center justify-between gap-3 rounded-lg bg-white/[0.03] px-2 py-1"
                   >
                     <div className="min-w-0">
                       <p className="truncate text-xs font-bold tracking-wide text-white">
@@ -204,7 +245,7 @@ export default function StatsPanel({ open, onClose }: Props) {
                         {new Date(entry.at).toLocaleString()}
                       </p>
                     </div>
-                    <p className="shrink-0 text-base font-black tabular-nums text-[#f0d38b]">
+                    <p className="shrink-0 text-sm font-black tabular-nums text-[#f0d38b]">
                       ◈ {entry.amount.toLocaleString("en-US")}
                     </p>
                   </li>
@@ -212,6 +253,7 @@ export default function StatsPanel({ open, onClose }: Props) {
               </ul>
             )}
           </section>
+          </div>
         </div>
 
         {/* Footer — share a snapshot, or reset stats */}

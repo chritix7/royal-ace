@@ -1038,4 +1038,12 @@ export const FR: Record<string, string> = {
   "All": "Tout",
   "Finish the round in progress to buy.": "Termine la manche en cours pour acheter.",
   "Categories": "Catégories",
+  "Right plays": "Bons coups",
+  "Straight hits": "Pleins",
+  "Winning rolls": "Lancers gagnants",
+  "Hit rate": "Réussite",
+  "Goals": "Buts",
+  "Tickets": "Tickets",
+  "Jackpots": "Jackpots",
+  "Blackjacks": "Blackjacks",
 };
