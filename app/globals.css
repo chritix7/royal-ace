@@ -3114,3 +3114,58 @@ textarea.st-input { border-radius: 12px; }
 /* Rest (20 s without input and no round in play): every looping effect
    pauses where it is; any touch, click, key or mouse move resumes it. */
 .is-resting *, .is-resting *::before, .is-resting *::after { animation-play-state: paused !important; }
+
+/* ── Vault bonus: full-screen strongroom ── */
+.vault-screen { position: fixed; inset: 0; z-index: 150; display: flex; align-items: center; justify-content: center; padding: max(env(safe-area-inset-top), 0.75rem) 0.75rem max(env(safe-area-inset-bottom), 0.75rem);
+  background: radial-gradient(60% 50% at 50% 45%, rgba(240, 211, 139, 0.12), transparent 70%), rgba(4, 4, 5, 0.94); }
+.vault-door { position: relative; display: flex; width: 100%; max-width: 40rem; max-height: 100%; flex-direction: column; gap: 0.75rem; border-radius: 22px; border: 2px solid transparent; padding: 1rem 0.9rem;
+  background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0 2px, transparent 2px 7px) padding-box, radial-gradient(120% 70% at 50% 0%, rgba(240, 211, 139, 0.14), transparent 60%) padding-box, linear-gradient(180deg, #1d1914, #0b0907) padding-box,
+    linear-gradient(160deg, #fff3c4, #8f6a26 30%, #e5c779 55%, #6b4b17 80%, #f0d38b) border-box;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.75), inset 0 0 0 6px rgba(0, 0, 0, 0.35), inset 0 0 0 7px rgba(240, 211, 139, 0.18); }
+@media (min-width: 1024px) { .vault-door { max-width: 46rem; padding: 1.4rem 1.6rem; gap: 1rem; } }
+.vault-door__bolt { position: absolute; width: 10px; height: 10px; border-radius: 9999px; background: radial-gradient(circle at 35% 30%, #fff6d8, #c99b42 55%, #5c3f12); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.7); }
+.vault-door__bolt.is-tl { left: 12px; top: 12px; } .vault-door__bolt.is-tr { right: 12px; top: 12px; } .vault-door__bolt.is-bl { left: 12px; bottom: 12px; } .vault-door__bolt.is-br { right: 12px; bottom: 12px; }
+.vault-head { text-align: center; }
+.vault-head__kicker { font-size: 10px; font-weight: 900; letter-spacing: 0.32em; text-transform: uppercase; color: rgba(215, 180, 91, 0.8); }
+.vault-head__title { margin-top: 0.15rem; font-family: var(--font-display), Georgia, serif; font-size: 26px; font-weight: 700; letter-spacing: 0.18em; background: linear-gradient(180deg, #fffaf0, #f3d995 50%, #c99b42); -webkit-background-clip: text; background-clip: text; color: transparent; }
+@media (min-width: 1024px) { .vault-head__title { font-size: 34px; } }
+.vault-pips { margin-top: 0.4rem; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 11px; color: rgba(255, 255, 255, 0.6); }
+.vault-pips i { width: 10px; height: 10px; border-radius: 9999px; border: 1px solid rgba(240, 211, 139, 0.55); background: rgba(0, 0, 0, 0.5); }
+.vault-pips i.is-on { background: radial-gradient(circle at 35% 30%, #fff3c4, #e5c779 55%, #8f6a26); box-shadow: 0 0 8px rgba(240, 211, 139, 0.6); }
+.vault-pips span { margin-left: 0.3rem; }
+.vault-grid { display: grid; min-height: 0; flex: 1 1 auto; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 0.45rem; border-radius: 14px; border: 1px solid rgba(215, 180, 91, 0.2); padding: 0.5rem; background: linear-gradient(180deg, #0d0b09, #060504); box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.65); }
+@media (min-width: 1024px) { .vault-grid { gap: 0.7rem; padding: 0.75rem; } }
+.vault-case { position: relative; display: flex; min-width: 0; aspect-ratio: 5 / 4; max-height: 7.5rem; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid rgba(215, 180, 91, 0.25); padding: 0.25rem; outline: none;
+  background: linear-gradient(180deg, #2a2420 0%, #17130f 55%, #0d0b09 100%); box-shadow: 0 2px 0 #06080d, inset 0 1px 0 rgba(255, 255, 255, 0.1); transition: transform 0.15s, border-color 0.15s; }
+@media (max-height: 700px) { .vault-case { max-height: 5rem; } }
+.vault-case:enabled:hover { transform: translateY(-2px); border-color: #f0d38b; }
+.vault-case:enabled:active { transform: translateY(1px); }
+.vault-case:focus-visible { box-shadow: 0 0 0 2px #e5c779; }
+.vault-case.is-open { border-color: rgba(110, 231, 183, 0.5); background: linear-gradient(180deg, #1b2c29, #101a19); animation: vault-pop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
+.vault-case.is-jackpot { border-color: #f0d38b; background: radial-gradient(80% 80% at 50% 30%, rgba(240, 211, 139, 0.3), transparent 70%), linear-gradient(180deg, #373021, #191712); box-shadow: 0 0 18px rgba(240, 211, 139, 0.35); animation: vault-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
+.vault-case.is-missed { opacity: 0.4; border-color: rgba(255, 255, 255, 0.08); }
+@keyframes vault-pop { from { transform: scale(0.85) rotateY(70deg); } to { transform: none; } }
+.vault-case__num { position: absolute; left: 0.4rem; top: 0.25rem; font-size: 8px; font-weight: 700; color: rgba(255, 255, 255, 0.35); font-variant-numeric: tabular-nums; }
+.vault-case__art { height: 78%; width: 78%; object-fit: contain; user-select: none; }
+.vault-case__prize { display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 0.1rem; }
+.vault-case__label { font-size: 8px; font-weight: 900; letter-spacing: 0.12em; color: #e7cc8d; }
+.vault-case__value { max-width: 100%; overflow-wrap: anywhere; font-family: var(--font-geist-mono), monospace; font-size: 11px; font-weight: 900; line-height: 1.15; color: rgba(255, 255, 255, 0.92); font-variant-numeric: tabular-nums; }
+@media (min-width: 640px) { .vault-case__value { font-size: 14px; } .vault-case__label { font-size: 10px; } .vault-case__num { font-size: 9px; } }
+.vault-foot { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: stretch; gap: 0.6rem; }
+.vault-total { display: flex; min-width: 0; flex-direction: column; justify-content: center; border-radius: 14px; border: 1px solid rgba(215, 180, 91, 0.25); padding: 0.45rem 0.8rem; background: linear-gradient(180deg, #0d0b09, #060504); box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65); }
+.vault-total__label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255, 255, 255, 0.45); }
+.vault-total__value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-geist-mono), monospace; font-size: 20px; font-weight: 900; color: #fff1bf; font-variant-numeric: tabular-nums; }
+@media (min-width: 1024px) { .vault-total__value { font-size: 26px; } }
+.vault-total__jp { font-size: 10px; font-weight: 900; letter-spacing: 0.15em; color: #e7cc8d; }
+.vault-collect { min-width: 7.5rem; padding: 0 1.2rem; font-size: 14px !important; letter-spacing: 0.2em; }
+.vault-door > :not(.vault-door__bolt) { position: relative; z-index: 1; } .vault-door__bolt { z-index: 0; }
+/* Free-spins party on its own layer (transform/opacity only) */
+.room-party { overflow: hidden; }
+.room-party::before { content: ""; position: absolute; inset: 0; opacity: 0.5; animation: room-glow 2s ease-in-out infinite; will-change: opacity; }
+.room-party--classic::before { background: radial-gradient(70% 60% at 50% 40%, rgba(255, 209, 102, 0.16), transparent 70%); }
+.room-party--kingpin::before { background: radial-gradient(70% 60% at 50% 40%, rgba(255, 46, 136, 0.16), transparent 70%); }
+@keyframes room-glow { 50% { opacity: 1; } }
+.room-beam { position: absolute; bottom: 0; width: 15%; height: 96%; margin-left: -7.5%; opacity: 0.22; transform-origin: 50% 100%; clip-path: polygon(44% 100%, 56% 100%, 100% 0, 0 0);
+  background: linear-gradient(0deg, var(--c), transparent 92%); animation: room-beam 3.4s ease-in-out infinite alternate; will-change: transform; }
+@keyframes room-beam { from { transform: rotate(-26deg); } to { transform: rotate(26deg); } }
+@media (max-width: 1023px) { .room-party { display: none; } }

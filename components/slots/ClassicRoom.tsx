@@ -8,6 +8,7 @@
 export default function ClassicRoom({ party = false }: { party?: boolean }) {
   const panels = [70, 250, 1170, 1350];
   return (
+    <>
     <svg
       className="room-svg pointer-events-none absolute inset-0 -z-10 h-full w-full"
       // Own GPU layer: rasterised once, never repainted when text or
@@ -80,7 +81,10 @@ export default function ClassicRoom({ party = false }: { party?: boolean }) {
       <rect x="0" y="650" width="1600" height="250" fill="url(#crFloorFade)" />
       <line x1="0" y1="650" x2="1600" y2="650" stroke="#d7b45b" strokeOpacity="0.35" strokeWidth="2" />
 
-      {party && <rect width="1600" height="900" fill="#ffd166" opacity="0.07" className="animate-pulse" />}
     </svg>
+    {/* Free spins: a warm glow on its own light layer (pulsing inside the
+        decor redrew all its blur filters on every frame). */}
+    {party && <div aria-hidden="true" className="room-party room-party--classic pointer-events-none absolute inset-0 -z-10" />}
+    </>
   );
 }

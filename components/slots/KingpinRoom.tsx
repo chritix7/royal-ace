@@ -11,6 +11,7 @@ export default function KingpinRoom({ party = false }: { party?: boolean }) {
   const blinds = Array.from({ length: 11 }, (_, i) => i);
   const fanRays = Array.from({ length: 9 }, (_, i) => i);
   return (
+    <>
     <svg
       className="room-svg pointer-events-none absolute inset-0 -z-10 h-full w-full"
       // Own GPU layer: rasterised once, never repainted when text or
@@ -148,28 +149,22 @@ export default function KingpinRoom({ party = false }: { party?: boolean }) {
       <rect x="0" y="640" width="1600" height="260" fill="url(#krFloorFade)" />
       <line x1="0" y1="640" x2="1600" y2="640" stroke="#d7b45b" strokeOpacity="0.28" strokeWidth="1.5" />
 
-      {/* Free spins: the party starts */}
-      {party && (
-        <g style={{ mixBlendMode: "screen" }}>
-          <rect width="1600" height="900" fill="#ff2e88" opacity="0.08" className="animate-pulse" />
-          {[
-            { x: 260, c: "#ff4fa3", delay: 0 },
-            { x: 620, c: "#ffd166", delay: -1.2 },
-            { x: 980, c: "#22d3ee", delay: -2.2 },
-            { x: 1340, c: "#a78bfa", delay: -0.6 },
-          ].map((b) => (
-            <polygon
-              key={b.x}
-              className="beam"
-              style={{ ["--delay" as string]: `${b.delay}s` }}
-              points={`${b.x - 16},900 ${b.x + 16},900 ${b.x + 120},40 ${b.x - 120},40`}
-              fill={b.c}
-              opacity="0.22"
-            />
-          ))}
-        </g>
-      )}
-
     </svg>
+    {/* Free spins: the party starts — beams and glow on their own light
+        layer, moved by the graphics card (inside the decor they redrew its
+        neon blur filters on every frame). */}
+    {party && (
+      <div aria-hidden="true" className="room-party room-party--kingpin pointer-events-none absolute inset-0 -z-10">
+        {[
+          { x: 16, c: "#ff4fa3", delay: 0 },
+          { x: 39, c: "#ffd166", delay: -1.2 },
+          { x: 61, c: "#22d3ee", delay: -2.2 },
+          { x: 84, c: "#a78bfa", delay: -0.6 },
+        ].map((b) => (
+          <span key={b.x} className="room-beam" style={{ left: `${b.x}%`, ["--c" as string]: b.c, animationDelay: `${b.delay}s` }} />
+        ))}
+      </div>
+    )}
+    </>
   );
 }
