@@ -615,6 +615,17 @@ useEffect(() => {
     "SPIN"
   );
   const net = s.stats.won - s.stats.wagered;
+  // WIN meter: during the free spins it shows the bonus total (it never
+  // drops back to 0 between spins), with the last paying spin next to the label.
+  const [spinWin, setSpinWin] = useState(0);
+  const inBonus = !!s.fs;
+  useEffect(() => {
+    if (!inBonus) setSpinWin(0);
+    else if (s.lastWin > 0) setSpinWin(s.lastWin);
+  }, [s.lastWin, inBonus]);
+  const meterValue = Math.max(0, inBonus ? s.fs!.win : s.lastWin);
+  const meterHot = meterValue > 0 && (inBonus || !spinningNow);
+  const meterLabel = inBonus ? (spinWin > 0 ? `BONUS · +◈ ${money(spinWin)}` : "BONUS WIN") : "WIN";
   const outOfChips = !s.busy && balance < BET_LEVELS[0];
 
   useEffect(() => {
@@ -1015,14 +1026,14 @@ useEffect(() => {
 
                   {/* Right wing */}
                   <div className="flex min-w-0 items-center justify-start gap-3">
-                    <div className={`jewel flex h-14 w-[10.5rem] shrink-0 flex-col items-end justify-center px-3.5 xl:w-[13rem] ${s.lastWin > 0 && !spinningNow ? "jewel--hot" : ""}`}>
-                      <span className="text-[9px] font-black tracking-[0.3em] text-[#d7b45b]/80">WIN</span>
+                    <div className={`jewel flex h-14 w-[10.5rem] shrink-0 flex-col items-end justify-center px-3.5 xl:w-[13rem] ${meterHot ? "jewel--hot" : ""}`}>
+                      <span className="max-w-full truncate text-[9px] font-black tracking-[0.3em] text-[#d7b45b]/80">{meterLabel}</span>
                       <span
-                        className={`whitespace-nowrap font-mono font-black leading-7 tabular-nums ${meterSize(s.lastWin)} ${s.lastWin > 0 && !spinningNow ? "meter-hit text-[#fff8dc]" : "gold-text"}`}
-                        style={s.lastWin > 0 && !spinningNow ? { textShadow: "0 0 16px rgba(255,209,102,0.7)" } : undefined}
+                        className={`whitespace-nowrap font-mono font-black leading-7 tabular-nums ${meterSize(meterValue)} ${meterHot ? "meter-hit text-[#fff8dc]" : "gold-text"}`}
+                        style={meterHot ? { textShadow: "0 0 16px rgba(255,209,102,0.7)" } : undefined}
                       >
                         <span className="mr-1 text-base opacity-70">◈</span>
-                        <RollingNumber value={s.lastWin} />
+                        <RollingNumber value={meterValue} />
                       </span>
                     </div>
                     <div className="flex shrink-0 items-center gap-1.5">
@@ -1139,13 +1150,13 @@ useEffect(() => {
                     </button>
                     {betPicker}
                   </div>
-                  <div className={`jewel flex h-11 min-w-0 flex-col items-end justify-center px-2.5 ${s.lastWin > 0 && !spinningNow ? "jewel--hot" : ""}`}>
-                    <span className="text-[9px] font-black tracking-[0.22em] text-[#d7b45b]/80">WIN</span>
+                  <div className={`jewel flex h-11 min-w-0 flex-col items-end justify-center px-2.5 ${meterHot ? "jewel--hot" : ""}`}>
+                    <span className="max-w-full truncate text-[9px] font-black tracking-[0.12em] text-[#d7b45b]/80">{meterLabel}</span>
                     <span
-                      className={`whitespace-nowrap font-mono font-black leading-5 tabular-nums ${meterSizeSm(s.lastWin)} ${s.lastWin > 0 && !spinningNow ? "meter-hit text-[#fff8dc]" : "gold-text"}`}
+                      className={`whitespace-nowrap font-mono font-black leading-5 tabular-nums ${meterSizeSm(meterValue)} ${meterHot ? "meter-hit text-[#fff8dc]" : "gold-text"}`}
                     >
                       <span className="mr-0.5 text-[11px] opacity-70">◈</span>
-                      <RollingNumber value={s.lastWin} />
+                      <RollingNumber value={meterValue} />
                     </span>
                   </div>
                 </div>

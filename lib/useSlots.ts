@@ -271,7 +271,9 @@ function bonusContinue() {
     if (total > 0) {
       wallet.add(total);
       const ratio = total / b;
-      set({ ...patch, cells: st.cells, lineWins: st.lineWins, lastWin: total, message: label ? `${label} · +◈ ${fmt(total)}` : `You won ◈ ${fmt(total)}` });
+      const fs = ref.current.fs;
+      // The bonus total moves with the win (the WIN meter shows it).
+      set({ ...patch, ...(fs ? { fs: { ...fs, win: fs.win + total } } : {}), cells: st.cells, lineWins: st.lineWins, lastWin: total, message: label ? `${label} · +◈ ${fmt(total)}` : `You won ◈ ${fmt(total)}` });
       if (ratio >= 20) sfx.bigWin();
       else sfx.win();
       haptic(ratio >= 20 ? HAPTIC.big : HAPTIC.win);

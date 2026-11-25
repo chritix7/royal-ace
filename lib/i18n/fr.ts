@@ -1190,4 +1190,5 @@ export const FR: Record<string, string> = {
 "Sticky wilds on the reels": "Wilds collants sur les rouleaux",
 "Gift": "Cadeau",
 "10,000,000 chips added": "10 000 000 jetons ajoutés",
+"BONUS WIN": "GAIN BONUS",
 };
