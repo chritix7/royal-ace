@@ -44,7 +44,7 @@ export const FR: Record<string, string> = {
 "Autoplay": "Jeu auto",
 "Autoplay stopped": "Jeu auto arrêté",
 "Autoplay · same bets": "Jeu auto · mêmes mises",
-"Average return about 95% of the price: results swing a lot": "Retour moyen d'environ 95 % du prix : les résultats varient beaucoup",
+"Average return about 96% of the price: results swing a lot": "Retour moyen d'environ 96 % du prix : les résultats varient beaucoup",
 "Away": "Extérieur",
 "BEST HAND": "MEILLEURE MAIN",
 "BET": "MISE",
@@ -1263,4 +1263,9 @@ export const FR: Record<string, string> = {
 "Play time": "Temps de jeu",
 "Golden Round": "Tour doré",
 "Golden": "Doré",
+"CROWNS": "COURONNES",
+"VAULT": "COFFRE",
+"Theme": "Thème",
+"Line": "Ligne",
+"lines": "lignes",
 };

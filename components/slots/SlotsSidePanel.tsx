@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLang } from "../../lib/i18n";
 import Glyph from "../Glyph";
 import { achievementsStore, challengeView, useAchievements } from "../../lib/achievementsStore";
 import { COLLECTION_CHIP_MULT } from "../../lib/collection";
@@ -77,6 +78,9 @@ export default function SlotsSidePanel({
   const session = useSession();
   const ach = useAchievements();
   const [tab, setTab] = useState<Tab>(initialTab);
+  // Long sentences with numbers inside: written in both languages here.
+  const fr = useLang() === "fr";
+  const L = (en: string, frText: string) => (fr ? frText : en);
   const challenges = challengeView(ach).filter((c) => SLOT_KEYS.has(c.def.key));
   const tabs: Array<{ id: Tab; label: string }> = [
     { id: "pay", label: "Paytable" },
@@ -135,7 +139,7 @@ export default function SlotsSidePanel({
       {current === "pay" && (
         <div className={card}>
           <p className="text-[12px] leading-5 text-white/55">
-            {PAYLINES.length} lines, wins pay left to right in multiples of the line bet (◈ {money(lineBet)} now).
+            {L(`${PAYLINES.length} lines, wins pay left to right in multiples of the line bet (◈ ${money(lineBet)} now).`, `${PAYLINES.length} lignes, les gains se lisent de gauche à droite, en multiples de la mise par ligne (◈ ${money(lineBet)} en ce moment).`)}
           </p>
           <table className="mt-3 w-full text-sm">
             <thead>
@@ -166,7 +170,7 @@ export default function SlotsSidePanel({
             </tbody>
           </table>
           <p className="mt-3 text-[11px] text-white/40">
-            Theoretical return {(THEORETICAL_RTP * 100).toFixed(0)}% including the vault and the jackpots.
+            {L(`Theoretical return ${(THEORETICAL_RTP * 100).toFixed(0)}% including the vault and the jackpots.`, `Retour théorique ${(THEORETICAL_RTP * 100).toFixed(0)} %, coffre et jackpots compris.`)}
           </p>
         </div>
       )}
@@ -175,7 +179,7 @@ export default function SlotsSidePanel({
         <div className="space-y-2 lg:grid lg:grid-cols-2 lg:gap-2 lg:space-y-0">
           <div className={rule}>
             <Glyph sym="wild" skin={skin} className="h-8 w-8 shrink-0" />
-            <p><b className="text-white">Wild · {skin.names.wild}.</b> Replaces every symbol except the scatter. Lands on reels 2, 3 and 4, expands to fill the reel and gives a free re-spin (up to 3 in a row).</p>
+            <p translate="no"><b className="text-white">{`Wild · ${skin.names.wild}.`}</b> {L("Replaces every symbol except the scatter. Lands on reels 2, 3 and 4, expands to fill the reel and gives a free re-spin (up to 3 in a row).", "Remplace tous les symboles sauf le scatter. Tombe sur les rouleaux 2, 3 et 4, s'étend sur tout le rouleau et offre un re-spin gratuit (jusqu'à 3 de suite).")}</p>
           </div>
           <div className={`${rule} border-[#d7b45b]/45`}>
             <span className="w-8 shrink-0 text-center text-xl">🔒</span>
@@ -183,19 +187,19 @@ export default function SlotsSidePanel({
           </div>
           <div className={rule}>
             <Glyph sym="scatter" skin={skin} className="h-8 w-8 shrink-0" />
-            <p><b className="text-white">Scatter · {skin.names.scatter}.</b> 3, 4 or 5 anywhere pay {SCATTER_PAYS[3]}×, {SCATTER_PAYS[4]}× or {SCATTER_PAYS[5]}× the bet and award {FS_AWARD[3]}, {FS_AWARD[4]} or {FS_AWARD[5]} free spins with sticky wilds. Retrigger +{FS_RETRIGGER[3]} / +{FS_RETRIGGER[4]} / +{FS_RETRIGGER[5]} (max {FS_CAP}).</p>
+            <p translate="no"><b className="text-white">{`Scatter · ${skin.names.scatter}.`}</b> {L(`3, 4 or 5 anywhere pay ${SCATTER_PAYS[3]}×, ${SCATTER_PAYS[4]}× or ${SCATTER_PAYS[5]}× the bet and award ${FS_AWARD[3]}, ${FS_AWARD[4]} or ${FS_AWARD[5]} free spins with sticky wilds. Retrigger +${FS_RETRIGGER[3]} / +${FS_RETRIGGER[4]} / +${FS_RETRIGGER[5]} (max ${FS_CAP}).`, `3, 4 ou 5 n'importe où paient ${SCATTER_PAYS[3]}×, ${SCATTER_PAYS[4]}× ou ${SCATTER_PAYS[5]}× la mise et donnent ${FS_AWARD[3]}, ${FS_AWARD[4]} ou ${FS_AWARD[5]} tours gratuits avec wilds collants. Relance +${FS_RETRIGGER[3]} / +${FS_RETRIGGER[4]} / +${FS_RETRIGGER[5]} (max ${FS_CAP}).`)}</p>
           </div>
           <div className={rule}>
             <span className="w-8 shrink-0 text-center text-xl">👑</span>
-            <p><b className="text-white">Crown collection.</b> Every scatter that lands adds a crown, kept separately for each bet. At 10 crowns pick 5 free spins or {COLLECTION_CHIP_MULT}× your bet in chips.</p>
+            <p translate="no"><b className="text-white">{L("Crown collection.", "Collection de couronnes.")}</b> {L(`Every scatter that lands adds a crown, kept separately for each bet. At 10 crowns pick 5 free spins or ${COLLECTION_CHIP_MULT}× your bet in chips.`, `Chaque scatter qui tombe ajoute une couronne, comptée à part pour chaque mise. À 10 couronnes, choisis 5 tours gratuits ou ${COLLECTION_CHIP_MULT}× ta mise en jetons.`)}</p>
           </div>
           <div className={rule}>
             <span className="w-8 shrink-0 text-center text-xl">🔐</span>
-            <p><b className="text-white">The vault.</b> Each paid spin has a 1 in {Math.round(1 / VAULT_TRIGGER)} chance to open it. Pick 3 of 12 cases: chips or one of the 4 jackpots (♣ Mini, ♦ Minor, ♥ Major, ♠ Kingpin), which grow with every spin and scale with your bet.</p>
+            <p translate="no"><b className="text-white">{L("The vault.", "Le coffre.")}</b> {L(`Each paid spin has a 1 in ${Math.round(1 / VAULT_TRIGGER)} chance to open it. Pick 3 of 12 cases: chips or one of the 4 jackpots (♣ Mini, ♦ Minor, ♥ Major, ♠ Kingpin), which grow with every spin and scale with your bet.`, `Chaque tour payant a 1 chance sur ${Math.round(1 / VAULT_TRIGGER)} de l'ouvrir. Choisis 3 coffrets sur 12 : des jetons ou l'un des 4 jackpots (♣ Mini, ♦ Minor, ♥ Major, ♠ Kingpin), qui grossissent à chaque tour et suivent ta mise.`)}</p>
           </div>
           <div className={rule}>
             <span className="w-8 shrink-0 text-center text-xl">🎟️</span>
-            <p><b className="text-white">Buy bonus.</b> Start {FS_AWARD[3]} free spins now for ◈ {money(bonusPrice)} ({BONUS_PRICE_MULT}× the bet). On average it returns about 95% of its price.</p>
+            <p translate="no"><b className="text-white">{L("Buy bonus.", "Acheter le bonus.")}</b> {L(`Start ${FS_AWARD[3]} free spins now for ◈ ${money(bonusPrice)} (${BONUS_PRICE_MULT}× the bet). On average it returns about 96% of its price.`, `Lance ${FS_AWARD[3]} tours gratuits tout de suite pour ◈ ${money(bonusPrice)} (${BONUS_PRICE_MULT}× la mise). En moyenne, il rend environ 96 % de son prix.`)}</p>
           </div>
           <div className={rule}>
             <span className="w-8 shrink-0 text-center text-xl">🃏</span>
@@ -203,7 +207,7 @@ export default function SlotsSidePanel({
           </div>
           <div className={rule}>
             <span className="w-8 shrink-0 text-center text-xl">⌨️</span>
-            <p><b className="text-white">Keys.</b> Space spins, ← → change the bet, T toggles turbo.</p>
+            <p translate="no"><b className="text-white">{L("Keys.", "Raccourcis.")}</b> {L("Space spins, ← → change the bet, T toggles turbo.", "Espace pour lancer, ← → pour la mise, T pour le turbo.")}</p>
           </div>
         </div>
       )}
@@ -216,8 +220,10 @@ export default function SlotsSidePanel({
             <div className="h-full rounded-full bg-[linear-gradient(90deg,#ff4fa3,#22d3ee)] transition-all duration-700" style={{ width: `${rank.progress * 100}%` }} />
           </div>
           <p className="mt-2 text-[12px] text-white/55">
-            Empire value = everything you have won on this machine: ◈ {money(stats.won)}
-            {rank.next ? `. ${rank.next.name} at ◈ ${money(rank.next.min)}.` : ". You own the skyline."}
+            {L(
+              `Empire value = everything you have won on this machine: ◈ ${money(stats.won)}${rank.next ? `. ${rank.next.name} at ◈ ${money(rank.next.min)}.` : ". You own the skyline."}`,
+              `Valeur de l'empire = tout ce que tu as gagné sur cette machine : ◈ ${money(stats.won)}${rank.next ? `. ${rank.next.name} à ◈ ${money(rank.next.min)}.` : ". La ville est à toi."}`,
+            )}
           </p>
           <ol className="mt-3 space-y-1.5 lg:mt-2 lg:space-y-1">
             {RANKS.map((r, i) => (
@@ -229,7 +235,7 @@ export default function SlotsSidePanel({
               >
                 <span>
                   {i <= rank.index ? "★" : "☆"} <b>{r.name}</b>
-                  <span className="block text-[10.5px] opacity-70">{r.bonus > 0 ? `Promotion bonus ◈ ${money(r.bonus)}` : "Starting rank"}</span>
+                  <span className="block text-[10.5px] opacity-70">{r.bonus > 0 ? L(`Promotion bonus ◈ ${money(r.bonus)}`, `Prime de promotion ◈ ${money(r.bonus)}`) : L("Starting rank", "Rang de départ")}</span>
                 </span>
                 <span className="font-mono text-[11px]">◈ {money(r.min)}</span>
               </li>
@@ -294,7 +300,7 @@ export default function SlotsSidePanel({
           </div>
           {challenges.length > 0 && (
             <div className={card}>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#d7b45b]/80">Today&apos;s slot challenges</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#d7b45b]/80">{L("Today's slot challenges", "Défis machine du jour")}</p>
               <ul className="mt-2 space-y-2">
                 {challenges.map((c) => (
                   <li key={c.def.id} className="rounded-xl bg-black/30 px-3 py-2">

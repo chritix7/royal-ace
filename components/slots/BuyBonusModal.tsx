@@ -94,7 +94,7 @@ export default function BuyBonusModal({
         <ul className="mt-4 space-y-1.5 text-left text-[12.5px] leading-5 text-white/70">
           <li className="flex gap-2"><span className="text-[#e5c779]">✦</span> {spins} free spins start right away</li>
           <li className="flex gap-2"><span className="text-[#e5c779]">✦</span> Sticky wilds: every wild that lands stays until the last spin</li>
-          <li className="flex gap-2"><span className="text-[#e5c779]">✦</span> Average return about 95% of the price: results swing a lot</li>
+          <li className="flex gap-2"><span className="text-[#e5c779]">✦</span> Average return about 96% of the price: results swing a lot</li>
         </ul>
         {short && <p className="mt-3 text-[12px] text-red-300">Not enough chips for this bonus at the current bet.</p>}
 

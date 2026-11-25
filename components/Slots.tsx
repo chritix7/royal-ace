@@ -37,6 +37,7 @@ import BonusResultModal from "./slots/BonusResultModal";
 import BuyBonusModal from "./slots/BuyBonusModal";
 import { useEco } from "../lib/motion";
 import { toast as showToast } from "./GameToasts";
+import { VAULT_TRIGGER } from "../lib/vault";
 
 function Led({
   label,
@@ -782,7 +783,7 @@ useEffect(() => {
       style={towerStyle}
     >
       <span className="flex items-center justify-between">
-        <span className="text-[9px] font-black tracking-[0.25em] text-[#e5c779]/80">👑 CROWNS</span>
+        <span className="text-[9px] font-black tracking-[0.25em] text-[#e5c779]/80"><span aria-hidden="true">👑 </span>CROWNS</span>
         <span className="font-mono text-sm font-black tabular-nums text-[#f0d99a]">{collection.crowns}/{collection.target}</span>
       </span>
       <span className="mt-2 flex gap-[3px]">
@@ -800,25 +801,29 @@ useEffect(() => {
     >
       <span className="flex items-center justify-between">
         <span className="text-[9px] font-black tracking-[0.25em] text-[#e5c779]/80"><span className="vault-glint">🔐</span> VAULT</span>
-        <span className="text-[10px] text-white/45">1 in 250</span>
+        <span className="text-[10px] text-white/45">{`1 in ${Math.round(1 / VAULT_TRIGGER)}`}</span>
       </span>
       <span className="mt-1 block text-[11px] leading-4 text-white/60">Any spin can open it: pick 3 cases, win a jackpot.</span>
     </button>
     <div className={towerCard} style={towerStyle}>
       <span className="text-[9px] font-black tracking-[0.25em] text-[#e5c779]/80">LAST SPINS</span>
       <span className="mt-2 grid grid-cols-4 gap-1">
-        {s.history.length === 0 && <span className="col-span-4 text-[11px] text-white/35">No spins yet</span>}
-        {s.history.slice(-8).map((r, i) => (
-          <span
-            key={`${s.history.length}-${i}`}
-            title={`${r.toFixed(1)}× the bet`}
-            className={`flex h-6 items-center justify-center rounded font-mono text-[10px] font-bold ${
-              r >= 20 ? "bg-[#e5c779] text-black" : r >= 1 ? "bg-emerald-500/25 text-emerald-200" : r > 0 ? "bg-white/10 text-white/60" : "bg-white/[0.04] text-white/25"
-            }`}
-          >
-            {r === 0 ? "–" : r >= 10 ? `${Math.round(r)}×` : `${r.toFixed(1)}×`}
-          </span>
-        ))}
+        {Array.from({ length: 8 }, (_, i) => {
+          const h = s.history.slice(-8);
+          const r = h[i - (8 - h.length)];
+          if (r === undefined) return <span key={`e-${i}`} className="h-6 rounded bg-white/[0.03] ring-1 ring-inset ring-white/[0.04]" aria-hidden="true" />;
+          return (
+            <span
+              key={`${s.history.length}-${i}`}
+              title={`${r.toFixed(1)}× the bet`}
+              className={`flex h-6 items-center justify-center rounded font-mono text-[10px] font-bold ${
+                r >= 20 ? "bg-[#e5c779] text-black" : r >= 1 ? "bg-emerald-500/25 text-emerald-200" : r > 0 ? "bg-white/10 text-white/60" : "bg-white/[0.04] text-white/30"
+              }`}
+            >
+              {r >= 10 ? `${Math.round(r)}×` : `${r.toFixed(r === 0 ? 0 : 1)}×`}
+            </span>
+          );
+        })}
       </span>
     </div>
     {/* Today's session at a glance: opens the Session tab */}
@@ -836,8 +841,8 @@ useEffect(() => {
         </span>
       </span>
       <span className="mt-1 flex items-center justify-between text-[10px] text-white/45">
-        <span>{money(session.slots.spins)} spins</span>
-        <span>Best ◈ {money(session.slots.biggest)}</span>
+        <span>{`${money(session.slots.spins)} ${session.slots.spins === 1 ? "spin" : "spins"}`}</span>
+        <span>{`Best ◈ ${money(session.slots.biggest)}`}</span>
       </span>
     </button>
   </div>
