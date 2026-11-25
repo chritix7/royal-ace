@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { today } from "../lib/clock";
 import { money } from "../lib/game";
@@ -32,7 +32,7 @@ import { useProgression } from "../lib/progression";
 import { vipTierForLevel } from "../lib/daily";
 
 /** A card back drawn with an item's colours. */
-function BackCard({ it, className = "", style }: { it: ShopItem; className?: string; style?: React.CSSProperties }) {
+function BackCard({ it, className = "", style }: { it: ShopItem; className?: string; style?: CSSProperties }) {
   const [a, b, c] = it.id === "back:table" ? (["#142d27", "#1b3d33", "#d7b45b"] as const) : it.swatch;
   return (
     <span className={`shop-back ${className}`} style={{ background: a, ...style }}>
@@ -42,7 +42,7 @@ function BackCard({ it, className = "", style }: { it: ShopItem; className?: str
 }
 const PIPS: Record<number, number[]> = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
 /** A die face with an item's colours. */
-function DieFace({ it, n, className = "", style }: { it: ShopItem; n: number; className?: string; style?: React.CSSProperties }) {
+function DieFace({ it, n, className = "", style }: { it: ShopItem; n: number; className?: string; style?: CSSProperties }) {
   const [hi, lo, pip] = it.swatch;
   const classic = it.id === "dice:ivory";
   return (
