@@ -1189,7 +1189,7 @@ export default function Roulette({
             <div className="flex min-h-0 flex-col items-center gap-3">
               {plaque}
               <div className={`rl-wheel-zone flex min-h-0 w-full flex-1 items-center justify-center ${closeup ? "is-closeup" : ""}`}>
-                {wheel("min(100cqw, 114cqh, 30rem)", true)}
+                {wheel("min(94cqw, 104cqh, 30rem)", true)}
               </div>
               <div className="rl-card flex w-full flex-col gap-2">
                 <div className="flex items-center gap-2">
@@ -1234,7 +1234,7 @@ export default function Roulette({
               </div>
             </div>
             {/* Table column */}
-            <div className="flex min-h-0 flex-col justify-center gap-3">
+            <div className={`flex min-h-0 flex-col gap-3 ${focus ? "rl-focus-col justify-end" : "justify-center"}`}>
               <div className="flex items-center justify-between gap-3">
                 <p
                   key={`m-${g.refused}`}
@@ -1256,7 +1256,7 @@ export default function Roulette({
                 </div>
               </div>
               <div className="relative">
-                <div className="rl-table3d [--rt-out:calc(var(--rt-row)*0.7)] [--rt-row:clamp(2.75rem,8.6dvh,6.25rem)]">
+                <div className={`rl-table3d [--rt-out:calc(var(--rt-row)*0.7)] ${focus ? "[--rt-row:clamp(2.75rem,10.6dvh,6.75rem)]" : "[--rt-row:clamp(2.75rem,8.6dvh,6.25rem)]"}`}>
                   <div className="rl-rail">
                     <RouletteTable g={g} vertical={false} onHover={setHoverKey} extraHot={rtHot} />
                   </div>
