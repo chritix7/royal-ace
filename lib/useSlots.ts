@@ -255,26 +255,28 @@ function bonusContinue() {
       collectionStore.addCrowns(b, sc);
     }
     await sleep(220 * speed());
+    // The new wilds count on this very spin: their wins show while they lock
+    // in place (and they stay for the rest of the free spins).
+    const total = st.total;
+    const patch: Partial<S> = {};
     if (st.landed.length > 0) {
-      // The new wilds lock in place, for the rest of the free spins.
       const fresh = noSticky();
       for (const [r, row] of st.landed) fresh[r][row] = true;
       track("wildExpand");
       sfx.wildExpand();
       haptic(HAPTIC.big);
-      set({ sticky: st.sticky, stickyNew: fresh, message: st.landed.length > 1 ? `${st.landed.length} sticky wilds!` : "Sticky wild!" });
-      await sleep(700 * speed());
+      Object.assign(patch, { sticky: st.sticky, stickyNew: fresh });
     }
-    let total = 0;
-    if (st.total > 0) {
-      wallet.add(st.total);
-      total = st.total;
-      const ratio = st.total / b;
-      set({ cells: st.cells, lineWins: st.lineWins, lastWin: total, message: `You won ◈ ${fmt(total)}` });
+    const label = st.landed.length > 1 ? `${st.landed.length} sticky wilds!` : st.landed.length ? "Sticky wild!" : "";
+    if (total > 0) {
+      wallet.add(total);
+      const ratio = total / b;
+      set({ ...patch, cells: st.cells, lineWins: st.lineWins, lastWin: total, message: label ? `${label} · +◈ ${fmt(total)}` : `You won ◈ ${fmt(total)}` });
       if (ratio >= 20) sfx.bigWin();
       else sfx.win();
       haptic(ratio >= 20 ? HAPTIC.big : HAPTIC.win);
-    }
+    } else if (label) set({ ...patch, message: label });
+    if (st.landed.length > 0) await sleep(700 * speed());
     return { total, scatters: st.scatters, freeSpins: st.freeSpins };
   }
 
