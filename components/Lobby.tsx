@@ -40,7 +40,7 @@ export const LOBBY_GAMES: Info[] = [
     tag: "Beat the dealer to 21",
     facts: ["Blackjack pays 3:2", "Up to 3 hands", "Perfect Pairs · 21+3"],
     limits: "From ◈ 10",
-    rtp: "≈ 99.5%",
+    rtp: "99.5%",
     about: ["Get closer to 21 than the dealer without going over.", "Double, split, surrender, insurance — and a coach that grades your play.", "Side bets: Perfect Pairs and 21+3. A Focus view for the full table."],
     challenge: "bj",
     stat: ["bjHands", "bjWins", "hands"],
@@ -52,7 +52,7 @@ export const LOBBY_GAMES: Info[] = [
     tag: "5-reel video slot",
     facts: ["4 progressive jackpots", "Free spins · Boss wilds", "Crowns & the vault"],
     limits: "◈ 20 – 100K",
-    rtp: "≈ 96%",
+    rtp: "96%",
     about: ["Twenty paylines on five reels, with expanding Boss wilds and re-spins.", "Three scatters start the free spins with sticky wilds; crowns fill the vault.", "Four jackpots grow with every spin: Mini, Minor, Major, Kingpin."],
     challenge: "slots",
     stat: ["spins", "slotWins", "spins"],
@@ -76,7 +76,7 @@ export const LOBBY_GAMES: Info[] = [
     tag: "Texas Hold'em vs the dealer",
     facts: ["Royal flush pays 100:1", "AA Bonus up to 100:1", "Hint at the flop"],
     limits: "Ante ◈ 10 – 500K",
-    rtp: "≈ 97.8%",
+    rtp: "97.8%",
     about: ["Two cards each, the flop — then call with twice your Ante, or fold.", "The dealer needs a pair of 4s to qualify.", "The AA Bonus pays on your cards and the flop, even if you fold."],
     challenge: "poker",
     stat: ["pokerHands", "pokerWins", "hands"],
@@ -88,7 +88,7 @@ export const LOBBY_GAMES: Info[] = [
     tag: "Las Vegas dice",
     facts: ["3-4-5× odds, no edge", "Place, hardways, props", "Hints for newcomers"],
     limits: "◈ 10 – 500K",
-    rtp: "98.6% (pass)",
+    rtp: "98.6%",
     about: ["Come-out: 7 or 11 wins on the Pass line, 2, 3 or 12 loses.", "Any other number is the point — hit it again before a 7.", "Odds behind your bets pay true odds: no house edge."],
     challenge: "craps",
     stat: ["crapsRolls", "crapsWins", "rolls"],
@@ -112,7 +112,7 @@ export const LOBBY_GAMES: Info[] = [
     tag: "Real matches · live odds",
     facts: ["Football, basketball, hockey", "All in · win up to ◈ 1B", "Live odds & cash-out"],
     limits: "◈ 10 – all in",
-    rtp: "≈ 94%",
+    rtp: "94%",
     about: ["Bet virtual chips on real matches: result, goals, handicap, correct score and more.", "Add several picks to one ticket for a combo — the odds multiply.", "In play the odds follow the score; cash out before the final whistle."],
     challenge: "sports",
     stat: ["betsPlaced", "betsWon", "bets"],
@@ -296,13 +296,14 @@ function Detail({ g, onClose, onPlay }: { g: Info; onClose: () => void; onPlay: 
 }
 
 /* ───────── A game card ───────── */
-function GameCard({ g, i, onOpen, onPlay, badge, compact }: { g: Info; i: number; onOpen: () => void; onPlay: () => void; badge: string | null; compact: boolean }) {
+type Badge = { text: string; kind: "todo" | "claim" | "done" } | null;
+function GameCard({ g, i, onOpen, onPlay, badge, compact }: { g: Info; i: number; onOpen: () => void; onPlay: () => void; badge: Badge; compact: boolean }) {
   return (
     <article className={`lb-card ${g.soon ? "is-soon" : ""} ${g.id === "sports" ? "is-wide" : ""}`} style={{ "--i": i } as CSSProperties}>
       <button type="button" onClick={onOpen} className="lb-card__hit" aria-label={`${g.name} — details`} />
       <div className="lb-card__art">
         <GameArt id={g.id as ArtId} className="h-full w-full" />
-        {badge && <span className="lb-badge">{badge}</span>}
+        {badge && <span className={`lb-badge is-${badge.kind}`}>{badge.text}</span>}
         {g.soon && <span className="lb-badge is-soon">Coming soon</span>}
       </div>
       <div className="lb-card__body">
@@ -317,9 +318,8 @@ function GameCard({ g, i, onOpen, onPlay, badge, compact }: { g: Info; i: number
         )}
         <div className="lb-card__foot">
           <span className="lb-card__meta">
-            {g.limits}
-            <span className="opacity-50"> · </span>
-            {g.rtp}
+            <span>{g.limits}</span>
+            <span className="lb-card__rtp">{`RTP ${g.rtp}`}</span>
           </span>
           <button type="button" onClick={onPlay} disabled={g.soon} className="lb-card__play">
             {g.soon ? "Soon" : "Play"}
@@ -383,11 +383,14 @@ export default function Lobby({
   const toClaim = views.filter((v) => v.done && !v.claimed).length + extras.filter((x) => x.done && !x.claimed).length;
   const nextChest = WEEKLY_TIERS.find((t, i) => !(weekly.claimed ?? []).includes(i) && weekly.points < t.points) ?? WEEKLY_TIERS[WEEKLY_TIERS.length - 1];
   const vip = vipTierForLevel(progression.level);
-  const badgeFor = (g: Info) => {
+  const badgeFor = (g: Info): Badge => {
     if (!g.challenge) return null;
     const mine = views.filter((v) => v.def.game === g.challenge);
+    if (!mine.length) return null;
     const d = mine.filter((v) => v.done).length;
-    return mine.length ? (d === mine.length ? "✓ Challenges done" : `${mine.length - d} challenge${mine.length - d > 1 ? "s" : ""} today`) : null;
+    if (mine.some((v) => v.done && !v.claimed)) return { text: "◈ Reward to claim", kind: "claim" };
+    if (d === mine.length) return { text: "✓ Challenges done", kind: "done" };
+    return { text: `Challenges ${d}/${mine.length}`, kind: "todo" };
   };
   const last = LOBBY_GAMES.find((g) => g.id === (inProgress ?? profile.lastGame) && !g.soon);
   const play = (g: Info) => {
@@ -441,8 +444,11 @@ export default function Lobby({
     <div className="flex min-w-0 items-center gap-2.5">
       <span className="lb-chip">Level {progression.level}</span>
       <span className="lb-chip is-vip">VIP · {vip.label}</span>
-      <div className="lb-xp min-w-0 flex-1" title={`${xpInLevel(progression.xp)} / ${xpForNextLevel()} XP`}>
-        <span style={{ width: `${Math.min(100, (xpInLevel(progression.xp) / xpForNextLevel()) * 100)}%` }} />
+      <div className="lb-xpwrap min-w-0 flex-1">
+        <div className="lb-xp" title={`${xpInLevel(progression.xp)} / ${xpForNextLevel()} XP`}>
+          <span style={{ width: `${Math.min(100, (xpInLevel(progression.xp) / xpForNextLevel()) * 100)}%` }} />
+        </div>
+        <span className="lb-xp__label">{`${fmt(xpInLevel(progression.xp))} / ${fmt(xpForNextLevel())} XP`}</span>
       </div>
     </div>
   );
@@ -465,9 +471,9 @@ export default function Lobby({
   ) : null;
   const hero = desktop ? (
     <section className="lb-hero">
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         {nameBlock}
-        <div className="mt-2">{levelRow}</div>
+        <div className="mt-2 max-w-[30rem]">{levelRow}</div>
       </div>
       <div className="lb-hero__side">
         {bonusKey}
@@ -499,7 +505,7 @@ export default function Lobby({
         </span>
       </button>
       <button type="button" onClick={onOpenRewards} className="lb-tile">
-        <span className="lb-tile__k">{desktop ? `Weekly · ${nextChest.label}` : "Weekly chest"}</span>
+        <span className="lb-tile__k">Weekly chest</span>
         <span className="lb-tile__v">
           {desktop ? `${fmt(Math.min(weekly.points, nextChest.points))} / ${fmt(nextChest.points)} pts` : `${fmt(Math.min(weekly.points, nextChest.points))} pts`}
         </span>
@@ -558,7 +564,7 @@ export default function Lobby({
           {hero}
           <div ref={rail} onScroll={onScroll} className="lb-rail min-h-0 flex-1">
             {LOBBY_GAMES.map((g, i) => (
-              <GameCard key={g.id} g={g} i={i} badge={badgeFor(g)} compact onOpen={() => setDetail(g)} onPlay={() => play(g)} />
+              <GameCard key={g.id} g={g} i={i} badge={badgeFor(g)} compact={false} onOpen={() => setDetail(g)} onPlay={() => play(g)} />
             ))}
           </div>
           <div className="flex justify-center gap-1.5" aria-hidden="true">

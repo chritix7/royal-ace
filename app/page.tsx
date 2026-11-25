@@ -367,7 +367,7 @@ export default function Home() {
     </div>
   </div>
 </header>
-      <section className="mx-auto max-w-screen-2xl px-4 pb-3 pt-2 sm:px-8 sm:pt-3">
+      <section className="mx-auto max-w-screen-2xl px-4 pb-3 pt-2 sm:px-8 sm:pt-3 lg:pb-2.5">
         <div className="mb-2 flex min-w-0 items-center gap-2 sm:mb-3 sm:gap-3 lg:gap-2">
   {inLobby ? (
     <p className="lb-title min-w-0 flex-1 truncate">Choose your game</p>

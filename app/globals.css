@@ -3332,3 +3332,20 @@ textarea.st-input { border-radius: 12px; }
 @media (max-height: 760px) { .m-lite .cr-dc-bar { display: none; } }
 /* Penalty (phones): the message wraps on two lines instead of being cut */
 .pe-msg-m .rl-message { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 10.5px; letter-spacing: 0.06em; line-height: 1.25; }
+/* Lobby v2 */
+.lb-badge.is-todo { color: rgba(239, 226, 189, 0.85); background: rgba(0, 0, 0, 0.55); box-shadow: inset 0 0 0 1px rgba(229, 199, 121, 0.35); }
+.lb-badge.is-done { color: #f5d778; background: rgba(0, 0, 0, 0.55); box-shadow: inset 0 0 0 1px rgba(229, 199, 121, 0.55); }
+.lb-badge.is-claim { animation: lb-claim 2.4s ease-in-out infinite; }
+@keyframes lb-claim { 0%, 100% { opacity: 1; } 50% { opacity: 0.72; } }
+.lb-xpwrap { display: flex; align-items: center; gap: 0.6rem; }
+.lb-xpwrap .lb-xp { flex: 1; min-width: 2.5rem; }
+.lb-xp__label { flex-shrink: 0; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.45); font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 1023px) { .lb-hero__eyebrow { letter-spacing: 0.18em; } .lb-xp__label { font-size: 9px; } }
+.lb-card__rtp::before { content: " · "; opacity: 0.5; white-space: pre; }
+@media (max-width: 1023px) {
+  .lb-card__meta { display: flex; flex-direction: column; white-space: nowrap; line-height: 1.35; }
+  .lb-card__rtp { opacity: 0.75; }
+  .lb-card__rtp::before { content: none; }
+  .lb-tile__k { letter-spacing: 0.12em; }
+  .lb-hero__eyebrow { letter-spacing: 0.12em; }
+}
