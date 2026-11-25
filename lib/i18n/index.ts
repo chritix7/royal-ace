@@ -56,6 +56,7 @@ const PATTERNS: [RegExp, (...m: string[]) => string][] = [
   [/^Level (\d+) pays$/, (_, n) => `Le niveau ${n} rapporte`],
   [/^· XP from every game$/, () => "· XP de tous les jeux"],
   [/^◈ (.+) to claim$/, (_, v) => `◈ ${v} à récupérer`],
+  [/^💡 (.+)$/s, (_, v) => `💡 ${tr(v)}`],
   [/^(\d+) sticky wilds!$/, (_, n) => `${n} wilds collants !`],
   [/^🔒 (\d+) sticky$/, (_, n) => `🔒 ${n} collant${+n > 1 ? "s" : ""}`],
   [/^Sticky wilds · (.+)\.$/, (_, v) => `Wilds collants · ${tr(v)}.`],

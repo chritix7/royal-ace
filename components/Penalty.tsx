@@ -358,8 +358,8 @@ function Today({ g }: { g: PenaltyGame }) {
           ["Record cash", `◈ ${compactMoney(r.bestCash)}`],
         ] as const
       ).map(([l, v]) => (
-        <div key={l} className="rounded-lg border border-white/10 bg-black/30 px-1 py-1.5">
-          <p className="text-[8.5px] font-bold uppercase tracking-[0.18em] text-white/40">{l}</p>
+        <div key={l} className="pe-today rounded-lg border border-white/10 bg-black/30 px-1 py-1.5">
+          <p className="truncate text-[8.5px] font-bold uppercase tracking-[0.12em] text-white/40">{l}</p>
           <p className="truncate text-[12px] font-bold text-[#efe2bd]">{v}</p>
         </div>
       ))}
@@ -624,7 +624,7 @@ export default function Penalty({ active, focus = false, onFocusChange }: { acti
               {LEVELS.find((l) => l.id === g.level)?.short}
             </button>
             <ShotDots shots={g.round?.shots ?? []} inAir={inRound} />
-            <div className="min-w-0 flex-1 text-center">{messageLine}</div>
+            <div className="pe-msg-m min-w-0 flex-1 text-center">{messageLine}</div>
           </div>
           <div className="min-h-0 flex-1">
             <Scene g={g} ms={g.shotTime} lite />

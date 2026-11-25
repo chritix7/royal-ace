@@ -254,7 +254,7 @@ function Layout({ g, flash, compact }: { g: CrapsGame; flash: Record<string, str
     <div className="cr-layout">
       <div className="cr-row cr-row--boxes">
         <Zone g={g} k="dontCome" flash={flash} className="cr-dcbar" chipPos="cr-chip-bc">
-          <span className="cr-vert">Don&apos;t come bar</span>
+          <span className="cr-vert" translate="no">Don&apos;t come<span className="cr-dc-bar"> bar</span></span>
           {g.point === null && <span className="cr-puck">OFF</span>}
         </Zone>
         <div className="cr-boxes">
@@ -821,7 +821,7 @@ export default function Craps({ active, focus = false, onFocusChange }: { active
               ☰
             </button>
           </div>
-          <div className="mb-1 flex h-5 items-center justify-center">{g.hint && !msgFresh ? <p className="truncate text-[10.5px] text-[#e9d9a9]/75">💡 {g.hint}</p> : messageLine}</div>
+          <div className="mb-1 flex h-7 items-center justify-center px-1">{g.hint && !msgFresh ? <p className="line-clamp-2 text-center text-[10.5px] leading-[1.3] text-[#e9d9a9]/75">{`💡 ${g.hint}`}</p> : messageLine}</div>
           <div className="cr-table min-h-0 flex-1">
             <div className="cr-felt h-full p-2">
               <Layout g={g} flash={flash} compact />
