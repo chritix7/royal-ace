@@ -59,7 +59,7 @@ export default function BonusResultModal({
             <span className="text-2xl text-[#bfa76e]">◈</span> <CountUp value={result.win} format={money} duration={1400} />
           </p>
           <p className={`mt-2 text-sm font-black uppercase tracking-[0.2em] ${hot ? "text-[#ffd166]" : "text-white/55"}`}>
-            {tier} · {x >= 10 ? Math.round(x) : x.toFixed(1)}× the bet
+            {`${tier} · ${x >= 10 ? Math.round(x) : x.toFixed(1)}× the bet${result.bought ? ` · price ${BONUS_PRICE_MULT}×` : ""}`}
           </p>
         </div>
 

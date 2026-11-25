@@ -1307,4 +1307,5 @@ export const FR: Record<string, string> = {
 "Royal Ace Gold: multiplier wilds ×2, ×3, ×5 that multiply together.": "Royal Ace Gold : wilds multiplicateurs ×2, ×3, ×5 qui se multiplient entre eux.",
 "Pharaoh's Vault: one symbol expands on every free spin and pays on all lines.": "Pharaoh's Vault : un symbole s'étend à chaque tour gratuit et paie sur toutes les lignes.",
 "Machine": "Machine",
+"Every wild stays as a ×2 until the last spin": "Chaque wild reste en ×2 jusqu'au dernier tour",
 };

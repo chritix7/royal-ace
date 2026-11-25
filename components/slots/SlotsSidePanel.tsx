@@ -199,7 +199,7 @@ export default function SlotsSidePanel({
             <div className={`${rule} border-[#d7b45b]/45`}>
               <span className="w-8 shrink-0 text-center text-xl">🔒</span>
               <p translate="no"><b className="text-white">{L(`Sticky wilds · ${skin.labels.freeSpins}.`, `Wilds collants · ${skin.labels.freeSpins}.`)}</b> {skinId === "gold"
-                ? L("Each wild that lands locks in place with its multiplier until the last free spin, and the next ones pile up with it.", "Chaque wild qui tombe se verrouille avec son multiplicateur jusqu'au dernier tour gratuit, et les suivants s'ajoutent.")
+                ? L("Wilds land more often, on every reel. Each one locks in place as a ×2 wild until the last free spin and the next ones pile up with it: about 3 per bonus.", "Les wilds tombent plus souvent, sur tous les rouleaux. Chacun se verrouille en wild ×2 jusqu'au dernier tour gratuit et les suivants s'ajoutent : environ 3 par bonus.")
                 : L("During the free spins, wilds can land on every reel. Each one locks in place until the last free spin and the next ones pile up with it: 1, 2, 3 wilds or more stay on the reels and pay on every line they touch. About 3 per bonus on average.", "Pendant les tours gratuits, les wilds peuvent tomber sur tous les rouleaux. Chacun se verrouille sur place jusqu'au dernier tour gratuit et les suivants s'ajoutent : 1, 2, 3 wilds ou plus restent sur les rouleaux et paient sur chaque ligne qu'ils touchent. Environ 3 par bonus en moyenne.")}</p>
             </div>
           )}

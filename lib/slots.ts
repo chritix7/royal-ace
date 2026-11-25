@@ -113,7 +113,7 @@ export const noMults = (): number[][] => Array.from({ length: REELS }, () => Arr
  * - classic / miami: expanding wild + re-spins; free spins with sticky wilds.
  * - gold: every wild carries a ×2, ×3 or ×5 multiplier (they multiply
  *   together on a line, up to ×50); it stays in its cell (no expansion);
- *   free spins with sticky multiplier wilds.
+ *   free spins: more wilds, each one sticky and ×2.
  * - pharaoh: expanding wild + re-spins; free spins with one EXPANDING SYMBOL
  *   drawn at the start, which fills its reels and pays on every line.
  * `pay` and `fsPay` scale the line pays so every machine returns the same.
@@ -127,6 +127,9 @@ export type Machine = {
   mults?: { v: number; w: number }[];
   /** Highest multiplier on one line. */
   cap?: number;
+  /** Free spins: their own multipliers and cap (default: the base ones). */
+  fsMults?: { v: number; w: number }[];
+  fsCap?: number;
   /** Wilds per reel strip in the base game (default COUNTS.wild). */
   wilds?: number[];
   /** false: the wild stays in its cell (no expansion, no re-spin). */
@@ -138,7 +141,7 @@ export const MACHINES: Record<MachineId, Machine> = {
   classic: { pay: 1, fs: "sticky", fsPay: 1, fsWilds: FS_WILDS },
   miami: { pay: 1, fs: "sticky", fsPay: 1, fsWilds: FS_WILDS },
   // Gold: wilds on every reel (about one spin in 4), each with its multiplier; it stays in its cell.
-  gold: { pay: 1.02, wilds: [1, 1, 1, 1, 1], fs: "sticky", fsPay: 1.27, fsWilds: [0, 1, 1, 1, 0], expand: false, mults: [{ v: 2, w: 60 }, { v: 3, w: 28 }, { v: 5, w: 12 }], cap: 50 },
+  gold: { pay: 1.02, wilds: [1, 1, 1, 1, 1], fs: "sticky", fsPay: 0.55, fsWilds: [1, 2, 1, 2, 1], expand: false, mults: [{ v: 2, w: 60 }, { v: 3, w: 28 }, { v: 5, w: 12 }], cap: 50, fsMults: [{ v: 2, w: 1 }], fsCap: 2 },
   pharaoh: { pay: 1, fs: "expand", fsPay: 1, fsWilds: [0, 1, 1, 1, 0], bookPay: 0.048 },
 };
 const STRIP_CACHE = new Map<string, Sym[][]>();
@@ -377,10 +380,11 @@ export function freeSpin(rng: () => number, bet: number, mult: number, st: FsSta
   }
   let mults = state.mults;
   if (m.mults) {
+    const fm: Machine = { ...m, mults: m.fsMults ?? m.mults };
     mults = state.mults.map((col) => [...col]);
-    raw.forEach((col, r) => col.forEach((s, row) => { if (s === "wild" && !state.sticky[r][row]) mults[r][row] = drawMult(rng, m); }));
+    raw.forEach((col, r) => col.forEach((s, row) => { if (s === "wild" && !state.sticky[r][row]) mults[r][row] = drawMult(rng, fm); }));
   }
-  const r = stickyFromRaw(raw, state.sticky, bet, mult, stops, m.mults ? mults : null, m.fsPay, m.cap);
+  const r = stickyFromRaw(raw, state.sticky, bet, mult, stops, m.mults ? mults : null, m.fsPay, m.fsCap ?? m.cap);
   return { ...r, bookReels: [], bookPay: 0, state: { sticky: r.sticky, mults, book: null } };
 }
 

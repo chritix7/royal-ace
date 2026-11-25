@@ -427,7 +427,7 @@ function bonusContinue() {
       mults: null,
       bookReels: [],
       book: null,
-      message: machineRef.current.fs === "expand" ? "One symbol expands on every free spin" : machineRef.current.mults ? "Multiplier wilds stay until the last spin" : "Sticky wilds: every wild stays until the last spin",
+      message: machineRef.current.fs === "expand" ? "One symbol expands on every free spin" : machineRef.current.mults ? "Every wild stays as a ×2 until the last spin" : "Sticky wilds: every wild stays until the last spin",
     });
     fsState.current = freshFs(machineRef.current);
     if (fsState.current.book) {
