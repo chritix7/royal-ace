@@ -11,6 +11,7 @@ import ShopView from "./ShopView";
 import { useBalance } from "../lib/wallet";
 import { cloud, useCloud } from "../lib/cloud";
 import { money } from "../lib/game";
+import { useStats } from "../lib/statsStore";
 
 /**
  * Settings and the cosmetics shop, in one sheet opened from the header
@@ -178,6 +179,45 @@ const SHORTCUTS: [string, [string, string][]][] = [
   ["Penalty", [["1–5", "corner"], ["X", "×2"], ["H", "½"]]],
 ];
 
+const FAV_GAMES: [string, string][] = [
+  ["bjHands", "Blackjack"],
+  ["spins", "Miami Kingpin"],
+  ["rouletteSpins", "Roulette"],
+  ["pokerHands", "Casino Hold'em"],
+  ["crapsRolls", "Craps"],
+  ["penaltyRounds", "Penalty"],
+  ["betsPlaced", "Sports betting"],
+];
+function playTime(ms: number) {
+  const m = Math.floor(ms / 60000);
+  if (m < 60) return `${m} min`;
+  const h = Math.floor(m / 60);
+  return `${h} h ${String(m % 60).padStart(2, "0")}`;
+}
+/** Account at a glance: when it started, time played, the game played most. */
+function AccountStats() {
+  const profile = useProfile();
+  const stats = useStats() as unknown as Record<string, number>;
+  const [lang] = [useLang()];
+  const top = FAV_GAMES.map(([k, name]) => [name, stats[k] ?? 0] as const).sort((a, b) => b[1] - a[1])[0];
+  const since = profile.createdAt ? new Date(profile.createdAt).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
+  const items: [string, string][] = [
+    ["Playing since", since],
+    ["Play time", playTime(profile.playMs ?? 0)],
+    ["Favourite game", top && top[1] > 0 ? top[0] : "—"],
+  ];
+  return (
+    <div className="st-acct">
+      {items.map(([k, v]) => (
+        <div key={k}>
+          <p className="st-acct__k">{k}</p>
+          <p className="st-acct__v">{v}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => void }) {
   const a = useAudioSettings();
   const amb = useAmbienceMode();
@@ -336,6 +376,7 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
           </button>
         </div>
         {nameMsg && <p className="st-sub mt-1">{nameMsg}</p>}
+        <AccountStats />
         <div className="st-danger mt-3">
           <p className="st-row__title">Reset account</p>
           <p className="st-row__sub">Chips, progress, challenges, tickets, purchases and settings go back to zero. This cannot be undone. Type RESET to confirm.</p>

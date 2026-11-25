@@ -9,7 +9,7 @@ import { wallet } from "./wallet";
  * card, table felts, roulette rooms — plus an XP boost and a mystery chest.
  * Kept with the rest of the progress (and synced by the cloud save).
  */
-export type ShopCat = "chips" | "effect" | "avatar" | "title" | "card" | "blackjack" | "roulette" | "boost";
+export type ShopCat = "chips" | "effect" | "avatar" | "title" | "card" | "back" | "dice" | "blackjack" | "roulette" | "boost";
 export type Rarity = "common" | "rare" | "epic" | "legendary";
 export type ShopItem = {
   id: string;
@@ -59,6 +59,21 @@ export const SHOP: ShopItem[] = [
   { id: "card:platinum", cat: "card", name: "Platinum", note: "Brushed steel, silver", price: 100000, swatch: ["#0d0f12", "#2c3036", "#e6ebf2"] },
   { id: "card:rose", cat: "card", name: "Rose gold", note: "Warm copper sheen", price: 150000, swatch: ["#140b0a", "#3a2320", "#f2b8a2"] },
   { id: "card:diamond", cat: "card", name: "Black diamond", note: "Facets and ice", price: 250000, swatch: ["#020204", "#141a26", "#9be7ff"] },
+  // Card backs — blackjack and Hold'em. Swatch: field, field light, ornament.
+  { id: "back:table", cat: "back", name: "Table colours", note: "Follows the felt", price: 0, swatch: ["#142d27", "#1b3d33", "#e5c779"] },
+  { id: "back:onyx", cat: "back", name: "Onyx & gold", note: "Black lacquer, gold lattice", price: 30000, swatch: ["#08080a", "#1d1d22", "#e5c779"] },
+  { id: "back:bordeaux", cat: "back", name: "Bordeaux", note: "Deep wine, gold rosette", price: 40000, swatch: ["#2a0610", "#57101f", "#e9c77e"] },
+  { id: "back:royal", cat: "back", name: "Royal blue", note: "Royal blue, silver lattice", price: 50000, swatch: ["#0a1a3f", "#1d3f8f", "#dfe6f2"] },
+  { id: "back:emerald", cat: "back", name: "Emerald", note: "Emerald and old gold", price: 80000, swatch: ["#032018", "#0c5a3d", "#e8c36a"] },
+  { id: "back:ivory", cat: "back", name: "Ivory", note: "Ivory card, gold engraving", price: 140000, swatch: ["#d8ccb0", "#f1e9d6", "#8f6a26"] },
+  { id: "back:neon", cat: "back", name: "Vegas neon", note: "Violet night, pink glow", price: 220000, swatch: ["#12001c", "#3d0b57", "#ff5fd6"] },
+  // Dice — the craps table. Swatch: face, face shade, pips.
+  { id: "dice:ivory", cat: "dice", name: "Casino ivory", note: "White dice, red ace", price: 0, swatch: ["#ffffff", "#d8cfbb", "#0b0b0b"] },
+  { id: "dice:ruby", cat: "dice", name: "Ruby glass", note: "Clear red, white pips", price: 30000, swatch: ["#e0303f", "#7a0a16", "#ffffff"] },
+  { id: "dice:onyx", cat: "dice", name: "Onyx", note: "Black dice, gold pips", price: 50000, swatch: ["#2a2a2e", "#050506", "#e5c779"] },
+  { id: "dice:jade", cat: "dice", name: "Jade", note: "Green jade, white pips", price: 80000, swatch: ["#3fae7f", "#0d5236", "#f4fff8"] },
+  { id: "dice:sapphire", cat: "dice", name: "Sapphire", note: "Deep blue, silver pips", price: 120000, swatch: ["#3a6fd8", "#0b2366", "#eef3ff"] },
+  { id: "dice:gold", cat: "dice", name: "Solid gold", note: "Gold dice, black pips", price: 250000, swatch: ["#fff0b8", "#b98a2e", "#140f04"] },
   // Blackjack felts.
   { id: "bj:green", cat: "blackjack", name: "Classic green", note: "Green baize, red backs", price: 0, swatch: ["#0b2a1c", "#11603b", "#d7b45b"] },
   { id: "bj:blue", cat: "blackjack", name: "Midnight blue", note: "Blue felt, navy backs", price: 25000, swatch: ["#061428", "#13407a", "#d7b45b"] },
@@ -84,13 +99,17 @@ export const SHOP_CATS: { id: ShopCat; label: string; where: string }[] = [
   { id: "avatar", label: "Avatars", where: "Next to your name, on your VIP card and in the ranking." },
   { id: "title", label: "Titles", where: "Shown under your name." },
   { id: "card", label: "VIP card finish", where: "Your VIP card (tap your name in the lobby)." },
+  { id: "back", label: "Card backs", where: "Blackjack and Hold'em cards." },
+  { id: "dice", label: "Dice", where: "The craps dice." },
   { id: "blackjack", label: "Blackjack felts", where: "Choose it in the blackjack table settings (Felt)." },
   { id: "roulette", label: "Roulette rooms", where: "Choose it in the roulette Style panel." },
   { id: "boost", label: "Boosts", where: "Consumables — buy as often as you like." },
 ];
 /** What can be equipped straight from the shop, and the slot it goes in. */
-export const EQUIP_SLOT: Partial<Record<ShopCat, "chips" | "effect" | "avatar" | "title" | "card">> = {
+export const EQUIP_SLOT: Partial<Record<ShopCat, "chips" | "effect" | "avatar" | "title" | "card" | "back" | "dice">> = {
   chips: "chips",
+  back: "back",
+  dice: "dice",
   effect: "effect",
   avatar: "avatar",
   title: "title",
@@ -99,10 +118,10 @@ export const EQUIP_SLOT: Partial<Record<ShopCat, "chips" | "effect" | "avatar" |
 
 export const rarityOf = (price: number): Rarity => (price >= 200000 ? "legendary" : price >= 80000 ? "epic" : price >= 30000 ? "rare" : "common");
 
-type State = { owned: string[]; card: string; chips: string; effect: string; avatar: string; title: string; xpUntil: number; chests: number; deal: { day: string; id: string | null } | null };
+type State = { owned: string[]; card: string; chips: string; effect: string; avatar: string; title: string; back: string; dice: string; xpUntil: number; chests: number; deal: { day: string; id: string | null } | null };
 const KEY = "royalace:shop";
 const FREE = SHOP.filter((i) => i.price === 0).map((i) => i.id);
-const EMPTY: State = { owned: FREE, card: "card:gold", chips: "chips:classic", effect: "fx:coins", avatar: "av:ace", title: "title:newcomer", xpUntil: 0, chests: 0, deal: null };
+const EMPTY: State = { owned: FREE, card: "card:gold", chips: "chips:classic", effect: "fx:coins", avatar: "av:ace", title: "title:newcomer", back: "back:table", dice: "dice:ivory", xpUntil: 0, chests: 0, deal: null };
 let state: State = EMPTY;
 let loaded = false;
 const listeners = new Set<() => void>();
@@ -128,6 +147,8 @@ function load() {
         effect: str(s.effect, EMPTY.effect),
         avatar: str(s.avatar, EMPTY.avatar),
         title: str(s.title, EMPTY.title),
+        back: str(s.back, EMPTY.back),
+        dice: str(s.dice, EMPTY.dice),
         xpUntil: Number(s.xpUntil) || 0,
         chests: Number(s.chests) || 0,
         deal: s.deal && typeof s.deal.day === "string" ? s.deal : null,

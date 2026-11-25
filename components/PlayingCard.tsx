@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { Card } from "../lib/blackjack";
 import { CardBackArt, CourtArt } from "./CardArt";
+import { itemOf, useShop } from "../lib/shop";
 
 /**
  * A playing card for Royal Ace Blackjack.
@@ -58,6 +59,11 @@ export default function PlayingCard({
    *  on any screen size. */
   highlight?: boolean;
 }) {
+  // A card back bought in the shop replaces the table's colours.
+  const sh = useShop();
+  const custom = sh.back && sh.back !== "back:table" ? itemOf(sh.back) : undefined;
+  const backPair: [string, string] = custom ? [custom.swatch[0], custom.swatch[1]] : back;
+  const backInk = custom?.swatch[2];
   const isRed = card.suit === "♥" || card.suit === "♦";
   const isFace = FACE_RANKS.has(card.rank);
   const isCourt = COURT_RANKS.has(card.rank);
@@ -162,12 +168,12 @@ export default function PlayingCard({
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
             boxShadow: CARD_SHADOW,
-            background: back[0],
+            background: backPair[0],
           }}
         >
           {/* Engraved back: lattice field, double frame, central
               rosette with a spade and corner fans (CardArt). */}
-          <CardBackArt back={back} />
+          <CardBackArt back={backPair} ink={backInk} />
         </div>
 
         {/* ── Face ── */}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { itemOf, useShop } from "../lib/shop";
 import { ChipFace, TableChip } from "./ChipButton";
 import { Counter } from "./ui";
 import { money } from "../lib/game";
@@ -44,10 +45,19 @@ const FACES: { v: number; t: string }[] = [
   { v: 2, t: "rotateX(-90deg) translateZ(var(--h))" },
 ];
 
+/** The dice bought in the shop (colours of the faces and the pips). */
+export function diceStyle(id: string): CSSProperties {
+  const it = id && id !== "dice:ivory" ? itemOf(id) : undefined;
+  if (!it) return {};
+  const [hi, lo, pip] = it.swatch;
+  return { ["--die-hi" as string]: hi, ["--die-a" as string]: hi, ["--die-b" as string]: lo, ["--pip" as string]: pip, ["--pip-one" as string]: pip } as CSSProperties;
+}
+
 function Die({ value, rollId, rolling, ms, size, travel, index }: { value: number; rollId: number; rolling: boolean; ms: number; size: string; travel: boolean; index: number }) {
   const cube = useRef<HTMLDivElement>(null);
   const wrap = useRef<HTMLDivElement>(null);
   const shown = useRef(0);
+  const dice = diceStyle(useShop().dice);
   // Resting face (no animation) on mount / restore.
   useLayoutEffect(() => {
     const [x, y] = FACE_ROT[value];
@@ -83,7 +93,7 @@ function Die({ value, rollId, rolling, ms, size, travel, index }: { value: numbe
     }
   }, [rolling, rollId, value, ms, travel, index]);
   return (
-    <div ref={wrap} className="cr-die" style={{ ["--s" as string]: size }} role="img" aria-label={`Die showing ${value}`}>
+    <div ref={wrap} className="cr-die" style={{ ["--s" as string]: size, ...dice }} role="img" aria-label={`Die showing ${value}`}>
       <div ref={cube} className="cr-cube">
         {FACES.map((f) => (
           <div key={f.v} className="cr-face" style={{ transform: f.t }}>

@@ -56,6 +56,8 @@ const PATTERNS: [RegExp, (...m: string[]) => string][] = [
   [/^Level (\d+) pays$/, (_, n) => `Le niveau ${n} rapporte`],
   [/^· XP from every game$/, () => "· XP de tous les jeux"],
   [/^◈ (.+) to claim$/, (_, v) => `◈ ${v} à récupérer`],
+  [/^Buy · ◈ (.+)$/, (_, v) => `Acheter · ◈ ${v}`],
+  [/^VIP · (.+)$/, (_, v) => `VIP · ${tr(v)}`],
   [/^★ Game of the day · XP ×(\d+)$/, (_, n) => `★ Jeu du jour · XP ×${n}`],
   [/^At your bet ◈ (.+) · Miami Kingpin ›$/, (_, v) => `À ta mise ◈ ${v} · Miami Kingpin ›`],
   [/^(.+) pinned first$/, (_, v) => `${v} épinglé en premier`],
