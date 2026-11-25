@@ -238,6 +238,14 @@ export default function Home() {
     startRest(() => wallet.getLocked());
     i18n.boot();
     void cloud.boot();
+    // Play time: counted while the page is visible and used in the last 2 minutes.
+    let lastInput = Date.now();
+    const onInput = () => (lastInput = Date.now());
+    window.addEventListener("pointerdown", onInput, { passive: true });
+    window.addEventListener("keydown", onInput);
+    const playClock = window.setInterval(() => {
+      if (document.visibilityState === "visible" && Date.now() - lastInput < 120000) profileStore.addPlayTime(15000);
+    }, 15000);
     // One-off gift for the phone: 10M chips, once per save (the flag travels
     // with the cloud save, so a restore never pays it twice).
     const gift = window.setTimeout(function tryGift() {
@@ -260,6 +268,9 @@ export default function Home() {
     return () => {
       window.clearTimeout(splash);
       window.clearTimeout(gift);
+      window.clearInterval(playClock);
+      window.removeEventListener("pointerdown", onInput);
+      window.removeEventListener("keydown", onInput);
     };
   }, []);
 

@@ -23,7 +23,7 @@ import {
 import { track } from "./events";
 import { GAMBLE_MAX_ROUNDS, canGamble, drawGambleCard, type CardColor } from "./gamble";
 import { HAPTIC, haptic } from "./haptics";
-import { JACKPOTS, growPools, resetPool, sanitizePools, freshPools, type JackpotTier, type Pools } from "./jackpot";
+import { JACKPOTS, foldLive, growPools, resetPool, sanitizePools, freshPools, type JackpotTier, type Pools } from "./jackpot";
 import { VAULT_PICKS, VAULT_TRIGGER, drawVault, settleVault, type VaultPrize } from "./vault";
 import { music } from "./music";
 import type { SlotLabels } from "./skins";
@@ -287,7 +287,7 @@ function bonusContinue() {
     const b = BET_LEVELS[ref.current.betIdx];
     if (!free) {
       wallet.add(-b);
-      set({ pools: growPools(ref.current.pools) });
+      set({ pools: growPools(foldLive(ref.current.pools)) });
     }
     const steps = playSequence(Math.random, b, mult);
     let spinTotal = 0;

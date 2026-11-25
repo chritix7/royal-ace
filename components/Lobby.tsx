@@ -16,6 +16,10 @@ import { useWeekly, WEEKLY_TIERS } from "../lib/weekly";
 import { cleanName, profileStore, useProfile } from "../lib/profile";
 import { useLocked } from "../lib/wallet";
 import { AvatarBadge, useTitle } from "./Avatar";
+import { GrowingValue, SUIT, useLivePools } from "./JackpotBar";
+import { JACKPOTS, sanitizePools, type JackpotTier, type Pools } from "../lib/jackpot";
+import { BET_LEVELS } from "../lib/slots";
+import { DAY_XP_MULT, gameOfDay } from "../lib/gameOfDay";
 
 export type LobbyGame = "blackjack" | "slots" | "roulette" | "poker" | "craps" | "penalty" | "sports";
 
@@ -297,13 +301,17 @@ function Detail({ g, onClose, onPlay }: { g: Info; onClose: () => void; onPlay: 
 
 /* ───────── A game card ───────── */
 type Badge = { text: string; kind: "todo" | "claim" | "done" } | null;
-function GameCard({ g, i, onOpen, onPlay, badge, compact }: { g: Info; i: number; onOpen: () => void; onPlay: () => void; badge: Badge; compact: boolean }) {
+function GameCard({ g, i, onOpen, onPlay, badge, compact, day, fav, onFav }: { g: Info; i: number; onOpen: () => void; onPlay: () => void; badge: Badge; compact: boolean; day: boolean; fav: boolean; onFav: () => void }) {
   return (
-    <article className={`lb-card ${g.soon ? "is-soon" : ""} ${g.id === "sports" ? "is-wide" : ""}`} style={{ "--i": i } as CSSProperties}>
+    <article className={`lb-card ${g.soon ? "is-soon" : ""} ${g.id === "sports" ? "is-wide" : ""} ${day ? "is-day" : ""}`} style={{ "--i": i } as CSSProperties}>
       <button type="button" onClick={onOpen} className="lb-card__hit" aria-label={`${g.name} — details`} />
       <div className="lb-card__art">
         <GameArt id={g.id as ArtId} className="h-full w-full" />
         {badge && <span className={`lb-badge is-${badge.kind}`}>{badge.text}</span>}
+        <button type="button" onClick={onFav} aria-pressed={fav} aria-label={fav ? `Unpin ${g.name}` : `Pin ${g.name} first`} title={fav ? "Pinned first · tap to unpin" : "Pin first"} className={`lb-fav ${fav ? "is-on" : ""}`}>
+          {fav ? "★" : "☆"}
+        </button>
+        {day && <span className="lb-day">{`★ Game of the day · XP ×${DAY_XP_MULT}`}</span>}
         {g.soon && <span className="lb-badge is-soon">Coming soon</span>}
       </div>
       <div className="lb-card__body">
@@ -327,6 +335,43 @@ function GameCard({ g, i, onOpen, onPlay, badge, compact }: { g: Info; i: number
         </div>
       </div>
     </article>
+  );
+}
+
+/* ───────── Live jackpots (the slot machine's pools, at your bet) ───────── */
+const JP_ORDER: JackpotTier[] = ["kingpin", "major", "minor", "mini"];
+function LiveJackpots({ onOpen, compact }: { onOpen: () => void; compact: boolean }) {
+  const [saved, setSaved] = useState<{ pools: Pools; bet: number } | null>(null);
+  useEffect(() => {
+    try {
+      const d = JSON.parse(localStorage.getItem("royalace:slots") ?? "{}");
+      const idx = Math.min(Math.max(0, d.betIdx ?? 1), BET_LEVELS.length - 1);
+      setSaved({ pools: sanitizePools(d.pools), bet: BET_LEVELS[idx] });
+    } catch {
+      setSaved({ pools: sanitizePools(null), bet: BET_LEVELS[1] });
+    }
+  }, []);
+  const pools = useLivePools(saved?.pools ?? sanitizePools(null));
+  const bet = saved?.bet ?? BET_LEVELS[1];
+  return (
+    <button type="button" onClick={onOpen} className={`lb-jp ${compact ? "is-compact" : ""}`} aria-label="Progressive jackpots — play Miami Kingpin">
+      <span className="lb-jp__live">
+        <i aria-hidden="true" />
+        {compact ? "Jackpots" : "Live jackpots"}
+      </span>
+      {JP_ORDER.map((t) => (
+        <span key={t} className={`lb-jp__pot is-${t}`}>
+          <span className={`lb-jp__suit ${SUIT[t].red ? "is-red" : ""}`} aria-hidden="true">
+            {SUIT[t].glyph}
+          </span>
+          {!compact && <span className="lb-jp__name">{JACKPOTS[t].label}</span>}
+          <span className="lb-jp__val">
+            <span className="opacity-60">◈</span> {saved ? <GrowingValue value={Math.round(pools[t] * bet)} /> : "—"}
+          </span>
+        </span>
+      ))}
+      {!compact && <span className="lb-jp__bet">{`At your bet ◈ ${bet.toLocaleString("en-US")} · Miami Kingpin ›`}</span>}
+    </button>
   );
 }
 
@@ -393,6 +438,16 @@ export default function Lobby({
     return { text: `Challenges ${d}/${mine.length}`, kind: "todo" };
   };
   const last = LOBBY_GAMES.find((g) => g.id === (inProgress ?? profile.lastGame) && !g.soon);
+  // The game of the day and the pinned favourite (read on the client: the date changes).
+  const [dayGame, setDayGame] = useState<string | null>(null);
+  useEffect(() => setDayGame(gameOfDay()), []);
+  const fav = profile.favorite ?? null;
+  const games = fav ? [...LOBBY_GAMES.filter((g) => g.id === fav), ...LOBBY_GAMES.filter((g) => g.id !== fav)] : LOBBY_GAMES;
+  const toggleFav = (g: Info) => {
+    profileStore.setFavorite(fav === g.id ? null : g.id);
+    setFlash(fav === g.id ? `${g.name} unpinned` : `${g.name} pinned first`);
+  };
+  const cardProps = (g: Info) => ({ day: dayGame === g.id, fav: fav === g.id, onFav: () => toggleFav(g) });
   const play = (g: Info) => {
     if (g.soon) return;
     if (inProgress && inProgress !== g.id) {
@@ -553,22 +608,24 @@ export default function Lobby({
             {hero}
             {summary}
           </div>
+          <LiveJackpots onOpen={() => play(LOBBY_GAMES.find((x) => x.id === "slots")!)} compact={false} />
           <div className="lb-grid min-h-0 flex-1">
-            {LOBBY_GAMES.map((g, i) => (
-              <GameCard key={g.id} g={g} i={i} badge={badgeFor(g)} compact={false} onOpen={() => setDetail(g)} onPlay={() => play(g)} />
+            {games.map((g, i) => (
+              <GameCard key={g.id} g={g} i={i} badge={badgeFor(g)} compact={false} onOpen={() => setDetail(g)} onPlay={() => play(g)} {...cardProps(g)} />
             ))}
           </div>
         </div>
       ) : (
         <div className="flex h-full min-h-0 flex-col gap-2.5">
           {hero}
+          <LiveJackpots onOpen={() => play(LOBBY_GAMES.find((x) => x.id === "slots")!)} compact />
           <div ref={rail} onScroll={onScroll} className="lb-rail min-h-0 flex-1">
-            {LOBBY_GAMES.map((g, i) => (
-              <GameCard key={g.id} g={g} i={i} badge={badgeFor(g)} compact={false} onOpen={() => setDetail(g)} onPlay={() => play(g)} />
+            {games.map((g, i) => (
+              <GameCard key={g.id} g={g} i={i} badge={badgeFor(g)} compact={false} onOpen={() => setDetail(g)} onPlay={() => play(g)} {...cardProps(g)} />
             ))}
           </div>
           <div className="flex justify-center gap-1.5" aria-hidden="true">
-            {LOBBY_GAMES.map((g, i) => (
+            {games.map((g, i) => (
               <span key={g.id} className={`lb-dot ${i === slide ? "is-on" : ""}`} />
             ))}
           </div>

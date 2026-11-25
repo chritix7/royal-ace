@@ -5,12 +5,14 @@ import RollingNumber from "./RollingNumber";
 import {
   JACKPOTS,
   JACKPOT_TIERS,
+  NET_STEP_MS,
+  livePools,
   type JackpotTier,
   type Pools,
 } from "../lib/jackpot";
 
 /** Card-suit plaques, like the jackpot cards of a casino cabinet. */
-const SUIT: Record<JackpotTier, { glyph: string; red: boolean }> = {
+export const SUIT: Record<JackpotTier, { glyph: string; red: boolean }> = {
   mini: { glyph: "♣", red: false },
   minor: { glyph: "♦", red: true },
   major: { glyph: "♥", red: true },
@@ -25,7 +27,7 @@ const STYLE: Record<JackpotTier, string> = {
 };
 
 /** Rolling value that glows briefly each time the pot grows. */
-function GrowingValue({ value }: { value: number }) {
+export function GrowingValue({ value }: { value: number }) {
   const prev = useRef(value);
   const [glow, setGlow] = useState(false);
   useEffect(() => {
@@ -38,7 +40,7 @@ function GrowingValue({ value }: { value: number }) {
     prev.current = value;
   }, [value]);
   return (
-    <span className={`inline-block transition-[filter,transform] duration-300 ${glow ? "scale-105 brightness-150 drop-shadow-[0_0_8px_currentColor]" : ""}`}>
+    <span className={`inline-block transition-[transform,color] duration-300 ${glow ? "scale-105 text-white" : ""}`}>
       <RollingNumber value={value} ms={700} />
     </span>
   );
@@ -55,8 +57,19 @@ function tileSize(v: number) {
  * `center` (the machine's sign) sits on top on small screens and between
  * Minor and Major on desktop, so the marquee and the pots share one row.
  */
+/** The pools with the floor's growth, refreshed every few seconds. */
+export function useLivePools(p: Pools) {
+  const [now, setNow] = useState(0);
+  useEffect(() => {
+    setNow(Date.now());
+    const id = window.setInterval(() => setNow(Date.now()), NET_STEP_MS);
+    return () => window.clearInterval(id);
+  }, []);
+  return now ? livePools(p, now) : p;
+}
+
 export default function JackpotBar({
-  pools,
+  pools: saved,
   bet,
   center,
 }: {
@@ -64,6 +77,7 @@ export default function JackpotBar({
   bet: number;
   center?: ReactNode;
 }) {
+  const pools = useLivePools(saved);
   const tile = (t: JackpotTier) => (
     <div
       key={t}
@@ -124,7 +138,8 @@ function fitSize(v: number, top: boolean) {
   return n <= 7 ? "text-base" : n <= 9 ? "text-sm" : "text-[13px]";
 }
 
-export function JackpotLadder({ pools, bet }: { pools: Pools; bet: number }) {
+export function JackpotLadder({ pools: saved, bet }: { pools: Pools; bet: number }) {
+  const pools = useLivePools(saved);
   const order: JackpotTier[] = ["kingpin", "major", "minor", "mini"];
   return (
     <div className="flex w-full flex-col gap-2" role="group" aria-label="Progressive jackpots">

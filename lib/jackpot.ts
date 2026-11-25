@@ -46,3 +46,43 @@ export function sanitizePools(raw: unknown): Pools {
   }
   return base;
 }
+
+/*
+ * The casino floor: the pools also grow with time, as if other players were
+ * spinning (one small step every few seconds, up to an hour's worth). The
+ * growth is folded into the saved pools at the next paid spin.
+ */
+const NET_KEY = "royalace:jp-net";
+export const NET_STEP_MS = 4000;
+const NET_MAX_STEPS = 900;
+function netAt(): number {
+  try {
+    const v = Number(localStorage.getItem(NET_KEY));
+    if (Number.isFinite(v) && v > 0) return v;
+    const now = Date.now();
+    localStorage.setItem(NET_KEY, String(now));
+    return now;
+  } catch {
+    return Date.now();
+  }
+}
+const netSteps = (now: number) => Math.min(NET_MAX_STEPS, Math.max(0, Math.floor((now - netAt()) / NET_STEP_MS)));
+/** The pools as they stand now, the floor's growth included. */
+export function livePools(p: Pools, now = Date.now()): Pools {
+  const k = netSteps(now);
+  if (!k) return p;
+  return {
+    mini: p.mini + JACKPOTS.mini.growth * k,
+    minor: p.minor + JACKPOTS.minor.growth * k,
+    major: p.major + JACKPOTS.major.growth * k,
+    kingpin: p.kingpin + JACKPOTS.kingpin.growth * k,
+  };
+}
+/** Folds the floor's growth into the pools (and restarts its clock). */
+export function foldLive(p: Pools, now = Date.now()): Pools {
+  const out = livePools(p, now);
+  try {
+    localStorage.setItem(NET_KEY, String(now));
+  } catch {}
+  return out;
+}

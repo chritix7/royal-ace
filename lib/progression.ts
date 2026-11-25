@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { DAY_XP_MULT, gameOfDay, gameOfEvent } from "./gameOfDay";
 import { onEvent, type GameEvent } from "./events";
 import { wallet } from "./wallet";
 import { sfx } from "./sound";
@@ -128,8 +129,9 @@ function handleEvent(event: GameEvent, amount = 1) {
 
   if (!gained) return;
 
-  // XP ×2 boost from the shop.
-  const xpGain = gained * amount * shop.xpMultiplier();
+  // XP ×2 boost from the shop, and ×2 on the game of the day.
+  const dayMult = gameOfEvent(event) === gameOfDay() ? DAY_XP_MULT : 1;
+  const xpGain = gained * amount * shop.xpMultiplier() * dayMult;
 
   const nextXp = state.xp + xpGain;
   const nextLevel = levelFromXp(nextXp);

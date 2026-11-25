@@ -5,7 +5,17 @@ import { useSyncExternalStore } from "react";
  * the lobby), and the last game played (the lobby's "Continue" card).
  * Kept in the browser.
  */
-export type Profile = { name: string; asked: boolean; lastGame: string | null };
+export type Profile = {
+  name: string;
+  asked: boolean;
+  lastGame: string | null;
+  /** Game pinned first in the lobby. */
+  favorite?: string | null;
+  /** When this save was started (ms). */
+  createdAt?: number;
+  /** Time spent with the app open and in use (ms). */
+  playMs?: number;
+};
 const EMPTY: Profile = { name: "", asked: false, lastGame: null };
 const KEY = "royalace:profile";
 
@@ -40,9 +50,21 @@ export const profileStore = {
       const raw = localStorage.getItem(KEY);
       if (raw) {
         const s = JSON.parse(raw) as Partial<Profile>;
-        state = { name: typeof s.name === "string" ? s.name : "", asked: Boolean(s.asked), lastGame: typeof s.lastGame === "string" ? s.lastGame : null };
+        state = {
+          name: typeof s.name === "string" ? s.name : "",
+          asked: Boolean(s.asked),
+          lastGame: typeof s.lastGame === "string" ? s.lastGame : null,
+          favorite: typeof s.favorite === "string" ? s.favorite : null,
+          createdAt: typeof s.createdAt === "number" ? s.createdAt : undefined,
+          playMs: typeof s.playMs === "number" ? s.playMs : 0,
+        };
       }
     } catch {}
+    // Older saves have no start date: from now on, it is counted.
+    if (!state.createdAt) {
+      state = { ...state, createdAt: Date.now() };
+      persist();
+    }
     emit();
   },
   setName(name: string) {
@@ -58,6 +80,17 @@ export const profileStore = {
   setLastGame(id: string) {
     if (state.lastGame === id) return;
     state = { ...state, lastGame: id };
+    persist();
+    emit();
+  },
+  setFavorite(id: string | null) {
+    state = { ...state, favorite: id };
+    persist();
+    emit();
+  },
+  /** Adds active play time (called every few seconds while the app is in use). */
+  addPlayTime(ms: number) {
+    state = { ...state, playMs: (state.playMs ?? 0) + ms };
     persist();
     emit();
   },

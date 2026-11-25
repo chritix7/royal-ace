@@ -1222,4 +1222,7 @@ export const FR: Record<string, string> = {
 "Real matches and scores (football-data.org, API-Sports); odds computed by Royal Ace.": "Vrais matchs et scores (football-data.org, API-Sports) ; cotes calculées par Royal Ace.",
 "Play well.": "Joue bien.",
 "Take breaks: the tables wait for you.": "Fais des pauses : les tables t'attendent.",
+"Live jackpots": "Jackpots en direct",
+"Pin first": "Épingler en premier",
+"Pinned first · tap to unpin": "Épinglé en premier · touche pour retirer",
 };
