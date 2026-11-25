@@ -238,10 +238,29 @@ export default function Home() {
     startRest(() => wallet.getLocked());
     i18n.boot();
     void cloud.boot();
+    // One-off gift for the phone: 10M chips, once per save (the flag travels
+    // with the cloud save, so a restore never pays it twice).
+    const gift = window.setTimeout(function tryGift() {
+      const KEY = "royalace:gift-10m-2611";
+      try {
+        if (localStorage.getItem(KEY) || Date.now() > Date.UTC(2026, 11, 31)) return;
+        if (!window.matchMedia("(pointer: coarse)").matches) return;
+        if (wallet.getLocked()) {
+          window.setTimeout(tryGift, 5000);
+          return;
+        }
+        localStorage.setItem(KEY, String(Date.now()));
+        wallet.add(10_000_000);
+        window.dispatchEvent(new CustomEvent("royal-ace:toast", { detail: { kind: "win", eyebrow: "Gift", title: "10,000,000 chips added", amount: 10_000_000, ms: 6000 } }));
+      } catch {}
+    }, 6000);
     // The home-screen splash is a full-screen layer: take it out of the page
     // once it has played (an invisible layer can keep iOS from opening the keyboard).
     const splash = window.setTimeout(() => document.querySelector<HTMLElement>(".app-splash")?.style.setProperty("display", "none", "important"), 1500);
-    return () => window.clearTimeout(splash);
+    return () => {
+      window.clearTimeout(splash);
+      window.clearTimeout(gift);
+    };
   }, []);
 
   // Settings & shop sheet: from the header gear, or from a locked theme.
