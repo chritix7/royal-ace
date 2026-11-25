@@ -589,9 +589,10 @@ useEffect(() => {
   // Text of the gold message plaque under the reels (desktop).
   const messageContent = s.fs ? (
     <>
-      <span className="font-black tracking-widest text-[#ffd166]">{skin.labels.freeSpins} ×{FS_MULT}</span>
-      <span className="tabular-nums text-[#ffd166]/85">Spin {Math.min(s.fs.played, s.fs.total)} / {s.fs.total}</span>
-      <span className="tabular-nums text-[#ffd166]/85">Won ◈ {money(s.fs.win)}</span>
+      <span className="min-w-0 truncate font-black tracking-widest text-[#ffd166]">{skin.labels.freeSpins}</span>
+      <span className="shrink-0 whitespace-nowrap tabular-nums text-[#ffd166]/85" title="Sticky wilds on the reels">{`🔒 ${s.sticky ? s.sticky.flat().filter(Boolean).length : 0}`}</span>
+      <span className="shrink-0 whitespace-nowrap tabular-nums text-[#ffd166]/85">{`${Math.min(s.fs.played, s.fs.total)}/${s.fs.total}`}</span>
+      <span className="shrink-0 whitespace-nowrap tabular-nums text-[#ffd166]/85">{`◈ ${money(s.fs.win)}`}</span>
     </>
   ) : activeLine ? (
     <span className="truncate text-[#ffe9b0]">
@@ -754,7 +755,7 @@ useEffect(() => {
       boxShadow: "0 0 0 1px #f0d38b, 0 0 0 3px #0a0709, 0 0 0 4px rgba(215,180,91,0.5), 0 10px 22px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,243,196,0.2)",
     }}
   >
-    <span key={msgKey} className="animate-msg-slide flex min-w-0 items-center justify-center gap-3">
+    <span key={msgKey} className="animate-msg-slide flex min-w-0 items-center justify-center gap-2.5 lg:gap-3">
       {messageContent}
     </span>
   </div>

@@ -48,7 +48,7 @@ const MS_PER_CELL = 45;
 const LAND_CELLS = 8;
 
 export function Reel({
-  spinId, prev, target, stopAt, landMs, spinning, anticipate, cells, skin, held = false, full = false, expanding = false, anyWin = false,
+  spinId, prev, target, stopAt, landMs, spinning, anticipate, cells, skin, held = false, full = false, expanding = false, anyWin = false, turbo = false, sticky, stickyNew,
 }: {
   spinId: number; prev: Sym[]; target: Sym[]; stopAt: number; landMs: number;
   spinning: boolean; anticipate: boolean; cells: boolean[]; skin: Skin;
@@ -56,6 +56,10 @@ export function Reel({
   full?: boolean;
   expanding?: boolean;
   anyWin?: boolean;
+  turbo?: boolean;
+  /** Penthouse Spins: wilds locked on this reel (one flag per row). */
+  sticky?: boolean[] | null;
+  stickyNew?: boolean[] | null;
 }) {
   const [strip, setStrip] = useState<Sym[]>(prev);
   const stripEl = useRef<HTMLDivElement>(null);
@@ -100,11 +104,25 @@ export function Reel({
         </div>
       </div>
       {full && !spinning && (
-        <div className={`absolute inset-0 z-[5] ${skin.reel} ${expanding ? "wild-expand" : ""}`}>
+        <div className={`absolute inset-0 z-[5] ${skin.reel} ${expanding ? "wild-expand" : ""}`} style={expanding && turbo ? { animationDuration: "300ms" } : undefined}>
           {[0, 1, 2, 3].map((i) => (
             <SymbolCell key={i} sym="wild" skin={skin} win={!!cells?.[i]} />
           ))}
         </div>
+      )}
+      {sticky?.map((on, row) =>
+        on ? (
+          <div
+            key={row}
+            className={`sticky-wild absolute inset-x-0 z-[5] ${skin.reel} ${stickyNew?.[row] ? "is-new" : ""}`}
+            style={{ top: `calc(var(--cell) * ${row})`, height: "var(--cell)", ...(turbo ? { ["--sticky-ms" as string]: "360ms" } : {}) }}
+          >
+            <SymbolCell sym="wild" skin={skin} win={!!cells?.[row]} dim={anyWin && !spinning && !cells?.[row]} />
+            <span className="sticky-wild__lock" aria-hidden="true">
+              <svg viewBox="0 0 12 12" fill="currentColor"><path d="M3.5 5V3.8a2.5 2.5 0 0 1 5 0V5h.5a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.2 0h2.6V3.8a1.3 1.3 0 0 0-2.6 0z" /></svg>
+            </span>
+          </div>
+        ) : null,
       )}
       {/* Éclairage latéral : léger volume sur chaque rouleau */}
 <div
@@ -335,6 +353,9 @@ const shownLine =
                 full={s.grid[k].every((x) => x === "wild")}
                 expanding={s.expanding.includes(k)}
                 anyWin={s.cells.some((col) => col.some(Boolean))}
+                turbo={s.turbo}
+                sticky={s.sticky?.[k]}
+                stickyNew={s.stickyNew?.[k]}
               />
             ))}
             {shownLine && (

@@ -177,9 +177,13 @@ export default function SlotsSidePanel({
             <Glyph sym="wild" skin={skin} className="h-8 w-8 shrink-0" />
             <p><b className="text-white">Wild · {skin.names.wild}.</b> Replaces every symbol except the scatter. Lands on reels 2, 3 and 4, expands to fill the reel and gives a free re-spin (up to 3 in a row).</p>
           </div>
+          <div className={`${rule} border-[#d7b45b]/45`}>
+            <span className="w-8 shrink-0 text-center text-xl">🔒</span>
+            <p><b className="text-white">{`Sticky wilds · ${skin.labels.freeSpins}.`}</b> During the free spins, wilds can land on every reel. Each one locks in place until the last free spin and the next ones pile up with it: 1, 2, 3 wilds or more stay on the reels and pay on every line they touch. About 3 per bonus on average.</p>
+          </div>
           <div className={rule}>
             <Glyph sym="scatter" skin={skin} className="h-8 w-8 shrink-0" />
-            <p><b className="text-white">Scatter · {skin.names.scatter}.</b> 3, 4 or 5 anywhere pay {SCATTER_PAYS[3]}×, {SCATTER_PAYS[4]}× or {SCATTER_PAYS[5]}× the bet and award {FS_AWARD[3]}, {FS_AWARD[4]} or {FS_AWARD[5]} free spins with every win ×{FS_MULT}. Retrigger +{FS_RETRIGGER[3]} / +{FS_RETRIGGER[4]} / +{FS_RETRIGGER[5]} (max {FS_CAP}).</p>
+            <p><b className="text-white">Scatter · {skin.names.scatter}.</b> 3, 4 or 5 anywhere pay {SCATTER_PAYS[3]}×, {SCATTER_PAYS[4]}× or {SCATTER_PAYS[5]}× the bet and award {FS_AWARD[3]}, {FS_AWARD[4]} or {FS_AWARD[5]} free spins with sticky wilds. Retrigger +{FS_RETRIGGER[3]} / +{FS_RETRIGGER[4]} / +{FS_RETRIGGER[5]} (max {FS_CAP}).</p>
           </div>
           <div className={rule}>
             <span className="w-8 shrink-0 text-center text-xl">👑</span>

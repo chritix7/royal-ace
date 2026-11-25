@@ -56,7 +56,7 @@ export const PAYS: Record<Paying, [number, number, number]> = {
 /** Le scatter paie n'importe où, en multiples de la mise TOTALE. */
 export const SCATTER_PAYS: Record<number, number> = { 3: 3, 4: 15, 5: 100 };
 export const FS_AWARD: Record<number, number> = { 3: 10, 4: 15, 5: 20 };
-export const FS_MULT = 2;
+export const FS_MULT = 1; // free spins pay like the base game: the sticky wilds make the difference
 /** Free spins ajoutés quand 3, 4 ou 5 scatters tombent PENDANT les free spins. */
 export const FS_RETRIGGER: Record<number, number> = { 3: 5, 4: 8, 5: 12 };
 export const FS_CAP = 60;
@@ -81,11 +81,11 @@ export const COUNTS: Record<Sym, number[]> = {
 const ORDER = Object.keys(COUNTS) as Sym[];
 
 /** Construit une bande par rouleau en répartissant les symboles le plus régulièrement possible. */
-export function buildStrips(): Sym[][] {
+export function buildStrips(counts: Record<Sym, number[]> = COUNTS): Sym[][] {
   return Array.from({ length: REELS }, (_, r) => {
     const items: { key: number; si: number; sym: Sym }[] = [];
     ORDER.forEach((sym, si) => {
-      const n = COUNTS[sym][r];
+      const n = counts[sym][r];
       const offset = (si * 0.381966 + r * 0.2) % 1;
       for (let j = 0; j < n; j++) items.push({ key: (j + offset) / n, si, sym });
     });
@@ -94,6 +94,18 @@ export function buildStrips(): Sym[][] {
   });
 }
 export const STRIPS: Sym[][] = buildStrips();
+
+/**
+ * Penthouse Spins (free spins): STICKY WILDS. The reels are the same, with a
+ * few more wilds, on every reel. A wild that lands stays where it is until the
+ * last free spin, and the next ones pile up with it. No expansion and no
+ * re-spin during the free spins.
+ */
+export const FS_WILDS = [1, 2, 1, 2, 1];
+export const FS_COUNTS: Record<Sym, number[]> = { ...COUNTS, wild: FS_WILDS };
+export const FS_STRIPS: Sym[][] = buildStrips(FS_COUNTS);
+export type Sticky = boolean[][];
+export const noSticky = (): Sticky => Array.from({ length: REELS }, () => Array<boolean>(ROWS).fill(false));
 
 export type LineWin = { line: number; sym: Sym; count: number; pay: number };
 /** Wild qui s'étend : sur les rouleaux 2, 3 et 4, un wild remplit tout le rouleau et déclenche un re-spin. */
@@ -217,6 +229,29 @@ export function playSequence(rng: () => number, bet: number, mult = 1): SpinResu
   return steps;
 }
 
+/**
+ * One free spin with sticky wilds. `sticky` = the wilds already on the reels
+ * (they cover whatever spins under them). The new wilds join them.
+ */
+export function stickyFromRaw(raw: Sym[][], sticky: Sticky, bet: number, mult: number, stops: number[] = []) {
+  const grid = raw.map((col, r) => col.map((s, row): Sym => (sticky[r][row] ? "wild" : s)));
+  // Scatters count only where no sticky wild covers the reel.
+  const scatterGrid = raw.map((col, r) => col.map((s, row): Sym => (sticky[r][row] ? "cherry" : s)));
+  const res = evaluate(grid, bet, mult, stops, scatterGrid);
+  const landed: [number, number][] = [];
+  raw.forEach((col, r) => col.forEach((s, row) => { if (s === "wild" && !sticky[r][row]) landed.push([r, row]); }));
+  const next = sticky.map((col, r) => col.map((v, row) => v || raw[r][row] === "wild"));
+  return { ...res, raw, landed, sticky: next };
+}
+export function freeSpin(rng: () => number, bet: number, mult: number, sticky: Sticky) {
+  const stops = FS_STRIPS.map((s) => Math.floor(rng() * s.length));
+  const raw: Sym[][] = FS_STRIPS.map((strip, r) => {
+    const L = strip.length;
+    return Array.from({ length: ROWS }, (_, row) => strip[(stops[r] - 1 + row + L) % L]);
+  });
+  return stickyFromRaw(raw, sticky, bet, mult, stops);
+}
+
 /** Free spins ajoutés par un retrigger (0 si le plafond serait dépassé). */
 export function retriggerSpins(scatters: number, used: number, left: number) {
   if (scatters < 3) return 0;
@@ -235,15 +270,13 @@ export function reelTimings(
   held: boolean[] = [],
   respin = false,
 ) {
-  // Durées de base (en ms). Le mode turbo divise tout par deux ;
-  // les re-spins conservent les durées normales.
-  const first = respin ? 900 : (turbo ? 450 : 900);
-
-  const step = respin ? 325 : (turbo ? 162.5 : 325);
-
-  const suspense = turbo ? 325 : 650;
-
-  const landMs = respin ? 280 : (turbo ? 140 : 280);
+  // Durées de base (en ms). Le mode turbo divise tout par deux, re-spins compris.
+  // Turbo halves the re-spins too.
+  const k = turbo ? 0.5 : 1;
+  const first = 900 * k;
+  const step = 325 * k;
+  const suspense = 650 * k;
+  const landMs = 280 * k;
 
   const stopAt: number[] = [];
   const anticipate: boolean[] = [];
@@ -281,20 +314,21 @@ export function reelTimings(
 /** Un bonus de free spins complet (avec re-spins et retriggers). Renvoie le gain total du bonus. */
 export function playBonus(rng: () => number, bet: number, initialSpins = FS_AWARD[3]) {
   let total = 0;
-  let respins = 0;
   let spins = 0;
   let left = initialSpins;
   let used = 0;
+  let sticky = noSticky();
   while (left > 0) {
     left--;
     used++;
     spins++;
-    const seq = playSequence(rng, bet, FS_MULT);
-    total += seq.reduce((a, s) => a + s.total, 0);
-    respins += seq.length - 1;
-    left += retriggerSpins(seq[0].scatters, used, left);
+    const r = freeSpin(rng, bet, FS_MULT, sticky);
+    sticky = r.sticky;
+    total += r.total;
+    left += retriggerSpins(r.scatters, used, left);
   }
-  return { total, respins, spins };
+  const wilds = sticky.flat().filter(Boolean).length;
+  return { total, respins: 0, spins, wilds };
 }
 
 /** Une manche complète (tour de base + re-spins + free spins éventuels). Sert aux simulations. */

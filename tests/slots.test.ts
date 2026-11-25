@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   BASE_RTP, BET_LEVELS, FS_CAP, MAX_RESPINS, PAYLINES, PAYS, REELS, ROWS, STRIPS,
-  evaluate, mulberry32, playSequence, reelTimings, resolveSpin, retriggerSpins, simulate, type Sym,
+  averageBonus, evaluate, mulberry32, noSticky, playSequence, reelTimings, resolveSpin, retriggerSpins, simulate, stickyFromRaw, type Sym,
 } from "../lib/slots";
 import { wallet } from "../lib/wallet";
 
@@ -176,6 +176,33 @@ describe("reel timings", () => {
     const normal = reelTimings(g);
     const fast = reelTimings(g, true);
     fast.stopAt.forEach((t, i) => expect(Math.abs(t - normal.stopAt[i] / 2)).toBeLessThanOrEqual(1));
+  });
+});
+
+describe("sticky wilds (free spins)", () => {
+  it("keeps every landed wild until the end, without expanding, and hides scatters under it", () => {
+    let g = base();
+    g[0][2] = "wild";
+    const a = stickyFromRaw(g, noSticky(), 20, 1);
+    expect(a.sticky[0][2]).toBe(true);
+    expect(a.grid[1].includes("wild")).toBe(false);
+    g = base();
+    g[0][2] = "scatter";
+    g[3][1] = "wild";
+    const b = stickyFromRaw(g, a.sticky, 20, 1);
+    expect(b.grid[0][2]).toBe("wild");
+    expect(b.grid[3][1]).toBe("wild");
+    expect(b.scatters).toBe(0);
+    expect(b.sticky.flat().filter(Boolean).length).toBe(2);
+  });
+  it("keeps the bonus worth about its buy price", () => {
+    expect(Math.abs(averageBonus(20_000, 9) - 15.75)).toBeLessThan(1.5);
+  });
+  it("halves re-spins in turbo mode too", () => {
+    const held = [false, true, false, false, false];
+    const n = reelTimings(base(), false, held, true);
+    const t = reelTimings(base(), true, held, true);
+    expect(t.stopAt[0]).toBe(n.stopAt[0] / 2);
   });
 });
 

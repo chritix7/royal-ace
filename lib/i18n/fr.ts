@@ -1181,4 +1181,11 @@ export const FR: Record<string, string> = {
 "Cash-out cancelled — the score changed": "Cash-out annulé — le score a changé",
 "Claim all": "Tout récupérer",
 "Promoted": "Promotion",
+"Sticky wild!": "Wild collant !",
+"Sticky wilds: every wild stays until the last spin": "Wilds collants : chaque wild reste jusqu'au dernier tour",
+"Sticky wilds: every wild that lands stays until the last spin": "Wilds collants : chaque wild qui tombe reste jusqu'au dernier tour",
+"Free spin…": "Tour gratuit…",
+"Three scatters start the free spins with sticky wilds; crowns fill the vault.": "Trois scatters lancent les tours gratuits avec wilds collants ; les couronnes remplissent le coffre.",
+"During the free spins, wilds can land on every reel. Each one locks in place until the last free spin and the next ones pile up with it: 1, 2, 3 wilds or more stay on the reels and pay on every line they touch. About 3 per bonus on average.": "Pendant les tours gratuits, les wilds peuvent tomber sur tous les rouleaux. Chacun se verrouille sur place jusqu'au dernier tour gratuit et les suivants s'ajoutent : 1, 2, 3 wilds ou plus restent sur les rouleaux et paient sur chaque ligne qu'ils touchent. Environ 3 par bonus en moyenne.",
+"Sticky wilds on the reels": "Wilds collants sur les rouleaux",
 };

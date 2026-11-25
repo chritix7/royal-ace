@@ -13,6 +13,9 @@ import {
   STRIPS,
   reelTimings,
   playSequence,
+  freeSpin,
+  noSticky,
+  type Sticky,
   retriggerSpins,
   type LineWin,
   type Sym,
@@ -53,6 +56,10 @@ type S = {
   anticipate: boolean[];
   held: boolean[];
   expanding: number[];
+  /** Penthouse Spins: wilds that stay on the reels until the last free spin. */
+  sticky: Sticky | null;
+  /** Wilds that just locked (for their animation). */
+  stickyNew: Sticky | null;
   winBanner: { label: string; amount: number; tier: Tier } | null;
   pools: Pools;
   vault: VaultState | null;
@@ -92,6 +99,8 @@ const INITIAL: S = {
   anticipate: Array(REELS).fill(false),
   held: Array(REELS).fill(false),
   expanding: [],
+  sticky: null,
+  stickyNew: null,
   winBanner: null,
   pools: freshPools(),
   vault: null,
@@ -202,7 +211,75 @@ function bonusContinue() {
 
   const bet = BET_LEVELS[s.betIdx];
 
+  /** One Penthouse Spin: the wilds that land stay where they are. */
+  async function runStickySpin() {
+    const b = BET_LEVELS[ref.current.betIdx];
+    const before = ref.current.sticky ?? noSticky();
+    const st = freeSpin(Math.random, b, FS_MULT, before);
+    const held = before.map((col) => col.every(Boolean));
+    const { stopAt, anticipate, landMs } = reelTimings(st.raw, ref.current.turbo, held);
+    set({
+      target: st.raw.map((col, k) => (held[k] ? ref.current.grid[k] : col)),
+      spinId: ref.current.spinId + 1,
+      stopAt,
+      landMs,
+      anticipate,
+      held,
+      expanding: [],
+      stickyNew: null,
+      spinning: held.map((h) => !h),
+      cells: emptyCells(),
+      lineWins: [],
+      winBanner: null,
+      lastWin: 0,
+      message: "Free spin…",
+    });
+    sfx.spin();
+    const t0 = performance.now();
+    let scatters = 0;
+    for (let k = 0; k < REELS; k++) {
+      if (held[k]) continue;
+      if (anticipate[k] && !anticipate[k - 1]) sfx.tension();
+      await sleep(Math.max(0, stopAt[k] - (performance.now() - t0)));
+      set({
+        grid: ref.current.grid.map((col, r) => (r === k ? st.raw[k] : col)),
+        spinning: ref.current.spinning.map((v, r) => (r === k ? false : v)),
+      });
+      sfx.reelStop();
+      if (st.landed.some(([r]) => r === k)) sfx.wildLand();
+      const sc = st.raw[k].filter((x, row) => x === "scatter" && !before[k][row]).length;
+      if (sc > 0) {
+        scatters += sc;
+        sfx.scatterLand(scatters);
+      }
+      collectionStore.addCrowns(b, sc);
+    }
+    await sleep(220 * speed());
+    if (st.landed.length > 0) {
+      // The new wilds lock in place, for the rest of the free spins.
+      const fresh = noSticky();
+      for (const [r, row] of st.landed) fresh[r][row] = true;
+      track("wildExpand");
+      sfx.wildExpand();
+      haptic(HAPTIC.big);
+      set({ sticky: st.sticky, stickyNew: fresh, message: st.landed.length > 1 ? `${st.landed.length} sticky wilds!` : "Sticky wild!" });
+      await sleep(700 * speed());
+    }
+    let total = 0;
+    if (st.total > 0) {
+      wallet.add(st.total);
+      total = st.total;
+      const ratio = st.total / b;
+      set({ cells: st.cells, lineWins: st.lineWins, lastWin: total, message: `You won ◈ ${fmt(total)}` });
+      if (ratio >= 20) sfx.bigWin();
+      else sfx.win();
+      haptic(ratio >= 20 ? HAPTIC.big : HAPTIC.win);
+    }
+    return { total, scatters: st.scatters, freeSpins: st.freeSpins };
+  }
+
   async function runSpin(free: boolean, mult: number) {
+    if (free) return runStickySpin();
     const b = BET_LEVELS[ref.current.betIdx];
     if (!free) {
       wallet.add(-b);
@@ -303,7 +380,9 @@ function bonusContinue() {
     set({
       banner: `${initial} ${labelsRef.current.freeSpins}!`,
       fs: { left: initial, played: 0, total: initial, win: 0 },
-      message: `All wins ×${FS_MULT} during free spins`,
+      sticky: noSticky(),
+      stickyNew: null,
+      message: "Sticky wilds: every wild stays until the last spin",
     });
     await sleep(1900 * speed());
     set({ banner: null });
@@ -340,6 +419,8 @@ function bonusContinue() {
   slotBonuses.add({ at: Date.now(), win: fsWin, spins: used, bet: BET_LEVELS[ref.current.betIdx], retriggers, best, bought });
   set({
     fs: null,
+    sticky: null,
+    stickyNew: null,
     bonusResult: {
       win: fsWin,
       spins: used,
