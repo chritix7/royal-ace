@@ -360,7 +360,7 @@ export default function ShopView({ focus }: { focus?: string }) {
         <p className="mt-1 text-[10px] text-white/40">{`Credit: ◈ ${money(balance)} · everything is paid in virtual chips`}</p>
       </div>
 
-      <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0" role="tablist" aria-label="Categories">
+      <div className="shop-catbar" role="tablist" aria-label="Categories">
         {([["all", "All"], ...SHOP_CATS.filter((c) => c.id !== "boost").map((c) => [c.id, c.label])] as ["all" | ShopCat, string][]).map(([id, label]) => (
           <button key={id} type="button" role="tab" aria-selected={cat === id} onClick={() => setCat(id)} className={`st-chip ${cat === id ? "is-on" : ""}`}>
             {label}

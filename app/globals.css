@@ -3349,3 +3349,22 @@ textarea.st-input { border-radius: 12px; }
   .lb-tile__k { letter-spacing: 0.12em; }
   .lb-hero__eyebrow { letter-spacing: 0.12em; }
 }
+/* Shop: the categories stay at hand while browsing, on one line */
+.shop-catbar { position: sticky; top: 0; z-index: 12; display: flex; gap: 0.4rem; overflow-x: auto; scrollbar-width: none; margin: 0 -1rem; padding: 0.55rem 1rem; background: linear-gradient(180deg, rgba(10, 10, 12, 0.97) 70%, rgba(10, 10, 12, 0)); }
+.shop-catbar::-webkit-scrollbar { display: none; }
+@media (min-width: 1024px) { .shop-catbar { margin: 0; padding: 0.55rem 0; } .shop-catbar .st-chip { padding: 0 0.8rem; font-size: 10px; letter-spacing: 0.12em; } }
+/* Settings: shortcuts and about */
+.st-keys { display: grid; gap: 0.45rem; }
+.st-keys > div { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr); align-items: baseline; gap: 0.5rem; padding-bottom: 0.45rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+.st-keys > div:last-child { border-bottom: 0; padding-bottom: 0; }
+.st-keys dt { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(229, 199, 121, 0.75); }
+.st-keys dd { display: flex; flex-wrap: wrap; gap: 0.25rem 0.6rem; font-size: 11px; color: rgba(255, 255, 255, 0.6); }
+.st-key { display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap; }
+.st-key kbd { display: inline-grid; min-width: 1.3rem; height: 1.2rem; place-items: center; border-radius: 5px; border: 1px solid rgba(240, 211, 139, 0.35); border-bottom-width: 2px; background: rgba(0, 0, 0, 0.45); padding: 0 0.3rem; font-family: inherit; font-size: 10px; font-weight: 800; color: #f1e3bb; }
+.st-about { display: grid; gap: 0.45rem; font-size: 11.5px; line-height: 1.45; color: rgba(255, 255, 255, 0.55); }
+.st-about li { position: relative; padding-left: 0.9rem; }
+.st-about li::before { content: "◆"; position: absolute; left: 0; top: 0.1rem; font-size: 7px; color: #d9b05a; }
+.st-about b { color: rgba(255, 255, 255, 0.85); font-weight: 700; }
+@media (min-width: 1024px) { .st-keys { gap: 0.3rem; } .st-keys > div { padding-bottom: 0.3rem; grid-template-columns: 4.6rem minmax(0, 1fr); } .st-keys dd { gap: 0.2rem 0.5rem; font-size: 10.5px; } .st-key kbd { height: 1.1rem; min-width: 1.15rem; font-size: 9.5px; } }
+@media (min-width: 1024px) and (max-height: 859px) { .st-tall { display: none !important; } }
+.shop-catbar { background: #0a0a0c; border-bottom: 1px solid rgba(240, 211, 139, 0.1); }

@@ -168,6 +168,16 @@ function CloudSection() {
   );
 }
 
+const SHORTCUTS: [string, [string, string][]][] = [
+  ["Everywhere", [["Space", "play"], ["F", "focus"], ["Esc", "close"], ["1–0", "chips"]]],
+  ["Blackjack", [["H", "hit"], ["S", "stand"], ["D", "double"], ["P", "split"]]],
+  ["Slots", [["T", "turbo"], ["← →", "bet"]]],
+  ["Roulette", [["T", "quick"], ["L", "Lightning"], ["X", "×2"], ["R", "rebet"]]],
+  ["Craps", [["O", "max odds"], ["R", "rebet"], ["H", "hints"]]],
+  ["Hold'em", [["C", "call"], ["D", "fold"], ["H", "hints"]]],
+  ["Penalty", [["1–5", "corner"], ["X", "×2"], ["H", "½"]]],
+];
+
 function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => void }) {
   const a = useAudioSettings();
   const amb = useAmbienceMode();
@@ -212,6 +222,24 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
           ))}
         </div>
       </section>
+      <section className="st-card st-tall hidden lg:block">
+        <p className="st-head">Keyboard shortcuts</p>
+        <dl className="st-keys">
+          {SHORTCUTS.map(([game, keys]) => (
+            <div key={game}>
+              <dt>{game}</dt>
+              <dd>
+                {keys.map(([k, what]) => (
+                  <span key={k + what} className="st-key">
+                    <kbd>{k}</kbd>
+                    {what}
+                  </span>
+                ))}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
       </div>
       <div className="st-col">
       <section className="st-card">
@@ -255,6 +283,23 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
             </button>
           ))}
         </div>
+      </section>
+      <section className="st-card st-tall">
+        <p className="st-head">About Royal Ace</p>
+        <ul className="st-about">
+          <li>
+            <b>Virtual chips only.</b> No real money, nothing to buy and nothing to cash out: everything is free.
+          </li>
+          <li>
+            <b>Fair games.</b> Every game shows its return to player (RTP); the odds are the real casino odds.
+          </li>
+          <li>
+            <b>Sports.</b> Real matches and scores (football-data.org, API-Sports); odds computed by Royal Ace.
+          </li>
+          <li>
+            <b>Play well.</b> Take breaks: the tables wait for you.
+          </li>
+        </ul>
       </section>
       </div>
       <div className="st-col">
