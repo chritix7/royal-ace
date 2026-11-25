@@ -128,7 +128,7 @@ function getShoeStatus(g: Game): {
     <>
       {/* Phones / tablets: the table runs down to just above the home bar */}
       <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl max-lg:flex max-lg:h-[calc(100dvh_-_10.15rem_-_env(safe-area-inset-top))] max-lg:min-h-[440px] max-lg:flex-col lg:flex lg:h-full lg:min-h-0 lg:flex-col">
-        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 max-lg:flex max-lg:min-h-0 max-lg:flex-1 max-lg:flex-col max-lg:pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-9 sm:py-4 lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:justify-between lg:pb-7 lg:pt-14`}>
+        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 max-lg:flex max-lg:min-h-0 max-lg:flex-1 max-lg:flex-col max-lg:pb-3 sm:px-9 sm:py-4 lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:justify-between lg:pb-7 lg:pt-14`}>
           {/* ☰ Table menu (music, rules, explore…) — phones and tablets */}
           {onMenu && (
             <span className="absolute right-3 top-[86px] z-20 lg:hidden">
@@ -531,7 +531,7 @@ function getShoeStatus(g: Game): {
   bettingOpen={canBet && (editBet || s.phase === "betting")}
   setEditBet={setEditBet}
   onOpenSide={setSideBetOpen}
-  className="relative z-10 mx-auto w-[min(640px,100%)] lg:w-[min(800px,100%)]"
+  className="relative z-10 mx-auto w-[min(640px,100%)] max-lg:-mb-1.5 lg:w-[min(800px,100%)]"
 />
 </div>
         </div>

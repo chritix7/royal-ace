@@ -14,7 +14,7 @@ import Penalty from "../components/Penalty";
 import Sportsbook from "../components/Sportsbook";
 import StatsPanel from "../components/StatsPanel";
 import { Counter } from "../components/ui";
-import { achievementsStore, challengeView, extrasView, useAchievements } from "../lib/achievementsStore";
+import { achievementsStore, challengeView, extrasView, milestoneView, useAchievements } from "../lib/achievementsStore";
 import { today } from "../lib/clock";
 import { dailyStatus, dailyStore, useDaily } from "../lib/daily";
 import { statsStore, useStats } from "../lib/statsStore";
@@ -196,6 +196,13 @@ export default function Home() {
     return () => mq.removeEventListener("change", sync);
   }, []);
 
+  // A challenge notice opens the panel.
+  useEffect(() => {
+    const open = () => setAchievementsOpen(true);
+    window.addEventListener("royal-ace:open-challenges", open);
+    return () => window.removeEventListener("royal-ace:open-challenges", open);
+  }, []);
+
   // Live figures for the header cards.
   const stats = useStats();
   const rounds = stats.bjHands + stats.spins + (stats.rouletteSpins ?? 0) + (stats.pokerHands ?? 0) + (stats.crapsRolls ?? 0) + (stats.penaltyRounds ?? 0) + (stats.betsPlaced ?? 0);
@@ -204,7 +211,8 @@ export default function Home() {
   const challenges = challengeView(achState);
   const extrasToClaim = extrasView(achState).filter((x) => x.done && !x.claimed).length;
   const challengesDone = challenges.filter((c) => c.done).length;
-  const challengesToClaim = challenges.filter((c) => c.done && !c.claimed).length + extrasToClaim;
+  const careerToClaim = milestoneView().filter((m) => m.done && !m.claimed).length;
+  const challengesToClaim = challenges.filter((c) => c.done && !c.claimed).length + extrasToClaim + careerToClaim;
   const daily = useDaily();
   const progression = useProgression();
   // Is today's daily bonus still waiting? Depends on today's date, so

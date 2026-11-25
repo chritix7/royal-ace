@@ -1179,4 +1179,6 @@ export const FR: Record<string, string> = {
 "The score changed (or the market closed) during the check": "Le score a changé (ou le marché a fermé) pendant la vérification",
 "Cash-out · checking the score…": "Cash-out · vérification du score…",
 "Cash-out cancelled — the score changed": "Cash-out annulé — le score a changé",
+"Claim all": "Tout récupérer",
+"Promoted": "Promotion",
 };

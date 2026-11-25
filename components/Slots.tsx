@@ -36,6 +36,7 @@ import ClassicRoom from "./slots/ClassicRoom";
 import BonusResultModal from "./slots/BonusResultModal";
 import BuyBonusModal from "./slots/BuyBonusModal";
 import { useEco } from "../lib/motion";
+import { toast as showToast } from "./GameToasts";
 
 function Led({
   label,
@@ -447,15 +448,13 @@ useEffect(() => {
 
   const rank = rankOf(s.stats.won);
   const prevRank = useRef(rank.index);
-  const [rankToast, setRankToast] = useState<string | null>(null);
   useEffect(() => {
     if (s.busy && rank.index > prevRank.current) {
       const bonus = "bonus" in rank.current ? (rank.current as { bonus: number }).bonus : 0;
       if (bonus > 0) wallet.add(bonus);
-      setRankToast(`Promoted: ${rank.current.name}${bonus > 0 ? ` · +◈ ${money(bonus)}` : ""}`);
-      const id = window.setTimeout(() => setRankToast(null), 4000);
+      showToast({ kind: "rank", eyebrow: "Promoted", title: rank.current.name, amount: bonus || undefined });
       prevRank.current = rank.index;
-      return () => window.clearTimeout(id);
+      return;
     }
     prevRank.current = rank.index;
   }, [rank.index, rank.current.name, s.busy]);
@@ -1240,11 +1239,6 @@ useEffect(() => {
       </section>
 
       {/* Desktop: paytable, theme, rank and session in a slide-over panel */}
-      {rankToast && (
-        <div role="status" className="blur-in pointer-events-none fixed left-1/2 top-[calc(env(safe-area-inset-top)+4.5rem)] z-[95] -translate-x-1/2 lg:top-4 rounded-2xl border border-[#ff4fa3]/70 bg-[#1a0d2e] px-5 py-3 text-sm font-semibold text-[#ff9fd0] shadow-2xl lg:left-auto lg:right-4 lg:translate-x-0">
-          ★ {rankToast}
-        </div>
-      )}
       {infoOpen && (
         <div className="backdrop-in fixed inset-0 z-[90]">
           <button aria-label="Close game info" className="absolute inset-0 cursor-default bg-black/60 backdrop-blur-[2px]" onClick={() => setInfoOpen(false)} />

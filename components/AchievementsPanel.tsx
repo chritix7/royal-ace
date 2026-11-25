@@ -68,7 +68,11 @@ export default function AchievementsPanel({ open, onClose }: Props) {
 
   // A new day may have started since the page was opened.
   useEffect(() => {
-    if (open) achievementsStore.refresh();
+    if (!open) return;
+    achievementsStore.refresh();
+    const s0 = achievementsStore.get();
+    const today = challengeView(s0).some((v) => v.done && !v.claimed) || extrasView(s0).some((x) => x.done && !x.claimed);
+    setTab(!today && milestoneView().some((m) => m.done && !m.claimed) ? "career" : "today");
   }, [open]);
 
   useEffect(() => {
@@ -100,6 +104,17 @@ export default function AchievementsPanel({ open, onClose }: Props) {
     views.filter((v) => v.done && !v.claimed).reduce((sum, v) => sum + v.def.reward, 0) +
     extras.filter((x) => x.done && !x.claimed).reduce((sum, x) => sum + x.reward, 0);
   const careerToClaim = career.filter((m) => m.done && !m.claimed).length;
+  const todayToClaim = views.filter((v) => v.done && !v.claimed).length + extras.filter((x) => x.done && !x.claimed).length;
+  const careerReward = career.filter((m) => m.done && !m.claimed).reduce((sum, m) => sum + m.def.reward, 0);
+  const totalReward = toClaim + careerReward;
+  const claimAll = () => {
+    // Twice: the bonus chest unlocks once every daily challenge is claimed.
+    for (let i = 0; i < 2; i++) {
+      for (const v of challengeView(achievementsStore.get())) achievementsStore.claim(v.def.id);
+      for (const x of extrasView(achievementsStore.get())) achievementsStore.claim(x.id);
+    }
+    for (const m of milestoneView()) if (m.done && !m.claimed) achievementsStore.claimMilestone(m.def.id);
+  };
 
   return createPortal(
     <div
@@ -171,23 +186,40 @@ export default function AchievementsPanel({ open, onClose }: Props) {
           </div>
         </div>
 
+        {/* Rewards waiting */}
+        {totalReward > 0 && (
+          <div className="relative px-5 pt-3 sm:px-6">
+            <div className="ach-claimbar">
+              <span className="ach-claimbar__icon" aria-hidden="true">◈</span>
+              <div className="min-w-0 flex-1">
+                <p className="ach-claimbar__title">{`◈ ${totalReward.toLocaleString("en-US")} waiting for you`}</p>
+                <p className="ach-claimbar__sub">{[todayToClaim ? `Today · ${todayToClaim}` : "", careerToClaim ? `Career · ${careerToClaim}` : ""].filter(Boolean).join("  ·  ")}</p>
+              </div>
+              <button type="button" onClick={claimAll} disabled={locked} title={locked ? "Finish the round in progress to claim" : undefined} className="pr-btn is-sm shrink-0">
+                Claim all
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="relative px-5 pt-3 sm:px-6">
           <div className="grid grid-cols-2 gap-1 rounded-full border border-white/10 bg-black/40 p-1">
             {(
               [
-                ["today", "Today"],
-                ["career", `Career${careerToClaim ? ` · ${careerToClaim} to claim` : ""}`],
+                ["today", "Today", todayToClaim],
+                ["career", "Career", careerToClaim],
               ] as const
-            ).map(([id, label]) => (
+            ).map(([id, label, n]) => (
               <button
                 key={id}
                 type="button"
                 onClick={() => setTab(id)}
                 aria-pressed={tab === id}
-                className={`rounded-full py-1.5 text-[10px] font-black uppercase tracking-[0.18em] transition ${tab === id ? "bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e]" : "text-white/55 hover:text-[#e5c779]"}`}
+                className={`relative flex items-center justify-center gap-1.5 rounded-full py-1.5 text-[10px] font-black uppercase tracking-[0.18em] transition ${tab === id ? "bg-gradient-to-b from-[#f0d38b] to-[#c89a3f] text-[#10130e]" : "text-white/55 hover:text-[#e5c779]"}`}
               >
                 {label}
+                {n > 0 && <span className={`ach-tabcount ${tab === id ? "is-on" : ""}`} aria-label={`${n} to claim`}>{n}</span>}
               </button>
             ))}
           </div>

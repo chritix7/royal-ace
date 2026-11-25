@@ -1234,7 +1234,7 @@ export default function Roulette({
               </div>
             </div>
             {/* Table column */}
-            <div className={`flex min-h-0 flex-col gap-3 ${focus ? "rl-focus-col justify-end" : "justify-center"}`}>
+            <div className="flex min-h-0 flex-col justify-end gap-3">
               <div className="flex items-center justify-between gap-3">
                 <p
                   key={`m-${g.refused}`}

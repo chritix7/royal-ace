@@ -179,9 +179,13 @@ export default function BetConsole({
           width with inset margins. */}
       <footer
         className={`${className} rounded-[22px] border border-[#d7b45b]/45 bg-gradient-to-b from-[#17130e]/95 via-[#0f0d0a]/95 to-[#080706]/95 px-2.5 pt-2.5 shadow-[0_24px_60px_rgba(0,0,0,0.65),0_0_0_1px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(245,215,120,0.18)] lg:backdrop-blur-md sm:px-4 lg:px-5 lg:pt-3`}
-        style={{
-          paddingBottom: "max(env(safe-area-inset-bottom), 0.625rem)",
-        }}
+        style={
+          className === CONSOLE_FOCUS
+            ? // Focus: the tray floats just above the home indicator, with no
+              // dead space inside it.
+              { paddingBottom: "0.625rem", bottom: "max(0.75rem, calc(env(safe-area-inset-bottom) - 0.4rem))" }
+            : { paddingBottom: "0.625rem" }
+        }
       >
         {/* House rules printed on the felt, riding just above the
             console so it never covers them, whatever its height. */}
