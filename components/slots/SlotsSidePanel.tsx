@@ -187,7 +187,7 @@ export default function SlotsSidePanel({
           <div className={rule}>
             <Glyph sym="wild" skin={skin} className="h-8 w-8 shrink-0" />
             <p translate="no"><b className="text-white">{`Wild · ${skin.names.wild}.`}</b> {skinId === "gold"
-                ? L("Replaces every symbol except the scatter and carries a ×2, ×3 or ×5 multiplier. Two wilds on one line multiply together (×3 and ×5 = ×15), up to ×50.", "Remplace tous les symboles sauf le scatter et porte un multiplicateur ×2, ×3 ou ×5. Deux wilds sur une même ligne se multiplient entre eux (×3 et ×5 = ×15), jusqu'à ×50.")
+                ? L("Lands on every reel (about one spin in 4), replaces every symbol except the scatter and carries a ×2, ×3 or ×5 multiplier. Two wilds on one line multiply together (×3 and ×5 = ×15), up to ×50.", "Tombe sur tous les rouleaux (environ un tour sur 4), remplace tous les symboles sauf le scatter et porte un multiplicateur ×2, ×3 ou ×5. Deux wilds sur une même ligne se multiplient entre eux (×3 et ×5 = ×15), jusqu'à ×50.")
                 : L("Replaces every symbol except the scatter. Lands on reels 2, 3 and 4, expands to fill the reel and gives a free re-spin (up to 3 in a row).", "Remplace tous les symboles sauf le scatter. Tombe sur les rouleaux 2, 3 et 4, s'étend sur tout le rouleau et offre un re-spin gratuit (jusqu'à 3 de suite).")}</p>
           </div>
           {skinId === "pharaoh" ? (

@@ -66,6 +66,7 @@ const PATTERNS: [RegExp, (...m: string[]) => string][] = [
   [/^Player wins (\d+) of (\d+) hands$/, (_, a, b) => `Tu gagnes ${a} mains sur ${b}`],
   [/^Push on (\d+) of (\d+) hands$/, (_, a, b) => `Égalité sur ${a} mains sur ${b}`],
   [/^Dealer wins all (\d+) hands$/, (_, n) => `Le croupier gagne les ${n} mains`],
+  [/^Golden wild ×(\d+)!$/, (_, n) => `Wild doré ×${n} !`],
   [/^1 in (\d+)$/, (_, n) => `1 sur ${n}`],
   [/^([\d,]+) spins?$/, (_, n) => `${n} tour${n === "1" ? "" : "s"}`],
   [/^Best ◈ (.+)$/, (_, v) => `Record ◈ ${v}`],

@@ -127,6 +127,8 @@ export type Machine = {
   mults?: { v: number; w: number }[];
   /** Highest multiplier on one line. */
   cap?: number;
+  /** Wilds per reel strip in the base game (default COUNTS.wild). */
+  wilds?: number[];
   /** false: the wild stays in its cell (no expansion, no re-spin). */
   expand?: boolean;
   /** Pharaoh: scale of the expanding symbol's pay. */
@@ -135,11 +137,18 @@ export type Machine = {
 export const MACHINES: Record<MachineId, Machine> = {
   classic: { pay: 1, fs: "sticky", fsPay: 1, fsWilds: FS_WILDS },
   miami: { pay: 1, fs: "sticky", fsPay: 1, fsWilds: FS_WILDS },
-  // Gold: the wild stays in its cell with its multiplier; line pays ×1.47 make up for the lost expansion.
-  gold: { pay: 1.47, fs: "sticky", fsPay: 1.27, fsWilds: [0, 1, 1, 1, 0], expand: false, mults: [{ v: 2, w: 60 }, { v: 3, w: 28 }, { v: 5, w: 12 }], cap: 50 },
+  // Gold: wilds on every reel (about one spin in 4), each with its multiplier; it stays in its cell.
+  gold: { pay: 1.02, wilds: [1, 1, 1, 1, 1], fs: "sticky", fsPay: 1.27, fsWilds: [0, 1, 1, 1, 0], expand: false, mults: [{ v: 2, w: 60 }, { v: 3, w: 28 }, { v: 5, w: 12 }], cap: 50 },
   pharaoh: { pay: 1, fs: "expand", fsPay: 1, fsWilds: [0, 1, 1, 1, 0], bookPay: 0.048 },
 };
 const STRIP_CACHE = new Map<string, Sym[][]>();
+function baseStrips(m: Machine): Sym[][] {
+  if (!m.wilds) return STRIPS;
+  const key = "b" + m.wilds.join(",");
+  let st = STRIP_CACHE.get(key);
+  if (!st) STRIP_CACHE.set(key, (st = buildStrips({ ...COUNTS, wild: m.wilds })));
+  return st;
+}
 function fsStrips(m: Machine): Sym[][] {
   const key = m.fsWilds.join(",");
   let st = STRIP_CACHE.get(key);
@@ -283,14 +292,15 @@ export function resolveSpin(raw: Sym[][], bet: number, mult = 1, held: boolean[]
 }
 
 export function spin(rng: () => number, bet: number, mult = 1, held: boolean[] = Array(REELS).fill(false), m: Machine = MACHINES.miami, reelMult: number[] = Array(REELS).fill(1)): SpinResult & { reelMult: number[] } {
-  const stops = STRIPS.map((s) => Math.floor(rng() * s.length));
-  const raw: Sym[][] = STRIPS.map((strip, r) => {
+  const strips = baseStrips(m);
+  const stops = strips.map((s) => Math.floor(rng() * s.length));
+  const raw: Sym[][] = strips.map((strip, r) => {
     if (held[r]) return Array<Sym>(ROWS).fill("wild"); // rouleau gardé : il ne tourne pas
     const L = strip.length;
     return Array.from({ length: ROWS }, (_, row) => strip[(stops[r] - 1 + row + L) % L]);
   });
   const rm = [...reelMult];
-  if (m.mults) for (const k of WILD_REELS) if (!held[k] && raw[k].includes("wild")) rm[k] = drawMult(rng, m);
+  if (m.mults) for (let k = 0; k < REELS; k++) if (!held[k] && raw[k].includes("wild")) rm[k] = drawMult(rng, m);
   // (one multiplier per reel: a reel shows at most one wild in a 4-row window)
   return { ...resolveSpin(raw, bet, mult, held, stops, m, rm), reelMult: rm };
 }

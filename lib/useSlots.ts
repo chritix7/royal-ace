@@ -374,7 +374,12 @@ function bonusContinue() {
       }
       await sleep(250 * speed());
       // Royal Ace Gold: the multiplier of each wild shows once the reels stop.
-      if (st.mults && st.raw.some((col) => col.includes("wild"))) set({ mults: st.mults });
+      if (st.mults && st.raw.some((col) => col.includes("wild"))) {
+        const top = Math.max(...st.raw.flatMap((col, k) => col.map((x, row) => (x === "wild" ? st.mults![k][row] : 1))));
+        set({ mults: st.mults, message: `Golden wild ×${top}!` });
+        haptic(HAPTIC.tick);
+        await sleep(350 * speed());
+      }
 
       if (st.expanded.length > 0) {
   // Pause pour bien voir le wild avant qu'il s'étende
