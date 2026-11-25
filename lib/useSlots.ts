@@ -14,7 +14,12 @@ import {
   reelTimings,
   playSequence,
   freeSpin,
+  freshFs,
   noSticky,
+  MACHINES,
+  type FsState,
+  type MachineId,
+  type Paying,
   type Sticky,
   retriggerSpins,
   type LineWin,
@@ -60,6 +65,11 @@ type S = {
   sticky: Sticky | null;
   /** Wilds that just locked (for their animation). */
   stickyNew: Sticky | null;
+  /** Royal Ace Gold: multiplier shown on each wild cell. */
+  mults: number[][] | null;
+  /** Pharaoh's free spins: the expanding symbol, and the reels it fills now. */
+  book: Paying | null;
+  bookReels: number[];
   winBanner: { label: string; amount: number; tier: Tier } | null;
   pools: Pools;
   vault: VaultState | null;
@@ -101,6 +111,9 @@ const INITIAL: S = {
   expanding: [],
   sticky: null,
   stickyNew: null,
+  mults: null,
+  book: null,
+  bookReels: [],
   winBanner: null,
   pools: freshPools(),
   vault: null,
@@ -128,7 +141,7 @@ const INITIAL: S = {
 
 /** Croupier-style lines so the strip doesn't repeat the same sentence. */
 const LINES = {
-  idle: ["No win this time. Spin again!", "The reels keep their secrets… for now.", "Close one. The next spin could be it.", "Nothing this round. Fortune favours the bold.", "Quiet reels. The kingpin is watching."],
+  idle: ["No win this time. Spin again!", "The reels keep their secrets… for now.", "Close one. The next spin could be it.", "Nothing this round. Fortune favours the bold.", "Quiet reels. The next one could pay."],
   luck: ["Good luck…", "Here we go…", "Reels are rolling…", "Fortune, show your hand…"],
   win: ["Winner! ◈ {n}", "Nice hit: ◈ {n}", "The house pays ◈ {n}", "Cash on the reels: ◈ {n}"],
 };
@@ -152,7 +165,11 @@ export function useSlots(
   active: boolean,
   labels: SlotLabels = DEFAULT_LABELS,
   gambleScreen = false,
+  machineId: MachineId = "miami",
 ) {
+  const machineRef = useRef(MACHINES[machineId]);
+  machineRef.current = MACHINES[machineId];
+  const fsState = useRef<FsState | null>(null);
   const labelsRef = useRef(labels);
   labelsRef.current = labels;
   const ref = useRef<S>(INITIAL);
@@ -214,8 +231,11 @@ function bonusContinue() {
   /** One Penthouse Spin: the wilds that land stay where they are. */
   async function runStickySpin() {
     const b = BET_LEVELS[ref.current.betIdx];
-    const before = ref.current.sticky ?? noSticky();
-    const st = freeSpin(Math.random, b, FS_MULT, before);
+    const m = machineRef.current;
+    if (!fsState.current) fsState.current = freshFs(m);
+    const before = fsState.current.sticky;
+    const st = freeSpin(Math.random, b, FS_MULT, fsState.current, m);
+    fsState.current = st.state;
     const held = before.map((col) => col.every(Boolean));
     const { stopAt, anticipate, landMs } = reelTimings(st.raw, ref.current.turbo, held);
     set({
@@ -227,6 +247,7 @@ function bonusContinue() {
       held,
       expanding: [],
       stickyNew: null,
+      bookReels: [],
       spinning: held.map((h) => !h),
       cells: emptyCells(),
       lineWins: [],
@@ -258,7 +279,14 @@ function bonusContinue() {
     // The new wilds count on this very spin: their wins show while they lock
     // in place (and they stay for the rest of the free spins).
     const total = st.total;
-    const patch: Partial<S> = {};
+    const patch: Partial<S> = m.mults ? { mults: st.state.mults } : {};
+    // Pharaoh: the symbol fills its reels before the win shows.
+    if (st.bookReels.length) {
+      sfx.wildExpand();
+      haptic(HAPTIC.big);
+      set({ bookReels: st.bookReels, message: "EXPANDING SYMBOL!" });
+      await sleep(750 * speed());
+    }
     if (st.landed.length > 0) {
       const fresh = noSticky();
       for (const [r, row] of st.landed) fresh[r][row] = true;
@@ -267,7 +295,7 @@ function bonusContinue() {
       haptic(HAPTIC.big);
       Object.assign(patch, { sticky: st.sticky, stickyNew: fresh });
     }
-    const label = st.landed.length > 1 ? `${st.landed.length} sticky wilds!` : st.landed.length ? "Sticky wild!" : "";
+    const label = st.landed.length > 1 ? `${st.landed.length} sticky wilds!` : st.landed.length ? "Sticky wild!" : st.bookReels.length ? "Expanding symbol!" : "";
     if (total > 0) {
       wallet.add(total);
       const ratio = total / b;
@@ -278,7 +306,9 @@ function bonusContinue() {
       else sfx.win();
       haptic(ratio >= 20 ? HAPTIC.big : HAPTIC.win);
     } else if (label) set({ ...patch, message: label });
+    else if (patch.mults) set(patch);
     if (st.landed.length > 0) await sleep(700 * speed());
+    else if (st.bookReels.length && total > 0) await sleep(600 * speed());
     return { total, scatters: st.scatters, freeSpins: st.freeSpins };
   }
 
@@ -289,7 +319,7 @@ function bonusContinue() {
       wallet.add(-b);
       set({ pools: growPools(foldLive(ref.current.pools)) });
     }
-    const steps = playSequence(Math.random, b, mult);
+    const steps = playSequence(Math.random, b, mult, machineRef.current);
     let spinTotal = 0;
 
     for (let i = 0; i < steps.length; i++) {
@@ -313,6 +343,7 @@ function bonusContinue() {
         anticipate,
         held: st.held,
         expanding: [],
+        mults: null,
         spinning: st.held.map((h) => !h),
         cells: emptyCells(),
         lineWins: [],
@@ -342,6 +373,8 @@ function bonusContinue() {
         collectionStore.addCrowns(b, sc);
       }
       await sleep(250 * speed());
+      // Royal Ace Gold: the multiplier of each wild shows once the reels stop.
+      if (st.mults && st.raw.some((col) => col.includes("wild"))) set({ mults: st.mults });
 
       if (st.expanded.length > 0) {
   // Pause pour bien voir le wild avant qu'il s'étende
@@ -384,10 +417,23 @@ function bonusContinue() {
     set({
       banner: `${initial} ${labelsRef.current.freeSpins}!`,
       fs: { left: initial, played: 0, total: initial, win: 0 },
-      sticky: noSticky(),
+      sticky: machineRef.current.fs === "sticky" ? noSticky() : null,
       stickyNew: null,
-      message: "Sticky wilds: every wild stays until the last spin",
+      mults: null,
+      bookReels: [],
+      book: null,
+      message: machineRef.current.fs === "expand" ? "One symbol expands on every free spin" : machineRef.current.mults ? "Multiplier wilds stay until the last spin" : "Sticky wilds: every wild stays until the last spin",
     });
+    fsState.current = freshFs(machineRef.current);
+    if (fsState.current.book) {
+      // The Pharaoh picks the symbol for the whole bonus.
+      await sleep(1100 * speed());
+      set({ banner: null });
+      await sleep(150);
+      set({ book: fsState.current.book, banner: "EXPANDING SYMBOL" });
+      sfx.wildExpand();
+      await sleep(1500 * speed());
+    }
     await sleep(1900 * speed());
     set({ banner: null });
 
@@ -421,10 +467,14 @@ function bonusContinue() {
   bonusDone.current = resolve;
 
   slotBonuses.add({ at: Date.now(), win: fsWin, spins: used, bet: BET_LEVELS[ref.current.betIdx], retriggers, best, bought });
+  fsState.current = null;
   set({
     fs: null,
     sticky: null,
     stickyNew: null,
+    mults: null,
+    book: null,
+    bookReels: [],
     bonusResult: {
       win: fsWin,
       spins: used,

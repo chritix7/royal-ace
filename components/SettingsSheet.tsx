@@ -181,7 +181,7 @@ const SHORTCUTS: [string, [string, string][]][] = [
 
 const FAV_GAMES: [string, string][] = [
   ["bjHands", "Blackjack"],
-  ["spins", "Miami Kingpin"],
+  ["spins", "Slot machines"],
   ["rouletteSpins", "Roulette"],
   ["pokerHands", "Casino Hold'em"],
   ["crapsRolls", "Craps"],

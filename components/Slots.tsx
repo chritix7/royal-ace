@@ -14,7 +14,7 @@ import { Counter, machineSmall } from "./ui";
 import { money } from "../lib/game";
 import { wallet } from "../lib/wallet";
 import { exitFullscreenSettled, isNarrowScreen, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
-import { SKINS, rankOf, type SkinId } from "../lib/skins";
+import { SKINS, SKIN_IDS, rankOf, type SkinId } from "../lib/skins";
 import { useSlots } from "../lib/useSlots";
 import {
   BET_LEVELS,
@@ -199,6 +199,14 @@ const IconTicket = () => (
   </svg>
 );
 
+/** What makes each machine different, one line. */
+const MACHINE_LINE: Record<SkinId, string> = {
+  miami: "Expanding Boss wilds · sticky wilds in free spins",
+  gold: "Multiplier wilds ×2 ×3 ×5 · they multiply together",
+  pharaoh: "One symbol expands on every free spin",
+  classic: "Fruits & sevens · the old-school machine",
+};
+
 export default function Slots({
   active = true,
   focus = false,
@@ -209,6 +217,7 @@ export default function Slots({
   onFocusChange?: (v: boolean) => void;
 }) {
   const [skinId, setSkinId] = useState<SkinId>("miami");
+  const [picker, setPicker] = useState(false);
   const [gambleScreen, setGambleScreen] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
@@ -370,7 +379,7 @@ export default function Slots({
   s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, setAutoStops, refill,
   bonusPrice, buyBonus, vaultPick, vaultCollect, gambleChoose, gambleCollect, bonusContinue,
   collectionRewardOpen, claimCollectionReward,
-} = useSlots(active, skin.labels, gambleScreen);
+} = useSlots(active, skin.labels, gambleScreen, skinId);
 const flash = useBalanceFlash();
 const session = useSession();
 
@@ -387,13 +396,14 @@ const collection = useCollection(bet);
   // Esc closes the bet picker / auto menu first (and only them: it must
   // not also close Focus or spin).
   useEffect(() => {
-    if (!autoOpen && !betOpen) return;
+    if (!autoOpen && !betOpen && !picker) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       e.preventDefault();
       e.stopImmediatePropagation();
       setAutoOpen(false);
       setBetOpen(false);
+      setPicker(false);
     };
     // A press anywhere else (header included) closes them too; their own
     // toggle keys keep toggling.
@@ -402,6 +412,7 @@ const collection = useCollection(bet);
       if (t?.closest?.("[data-slots-popover], [aria-expanded]")) return;
       setAutoOpen(false);
       setBetOpen(false);
+      setPicker(false);
     };
     window.addEventListener("keydown", onKey, true);
     document.addEventListener("pointerdown", onDown, true);
@@ -409,7 +420,7 @@ const collection = useCollection(bet);
       window.removeEventListener("keydown", onKey, true);
       document.removeEventListener("pointerdown", onDown, true);
     };
-  }, [autoOpen, betOpen]);
+  }, [autoOpen, betOpen, picker]);
   const startAuto = (n: AutoCount) => {
     setAutoCount(n);
     saveAutoCount(n);
@@ -436,9 +447,16 @@ useEffect(() => {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("royalace:skin");
-      if (saved === "classic" || saved === "miami") setSkinId(saved);
+      if (saved && (SKIN_IDS as string[]).includes(saved)) setSkinId(saved as SkinId);
     } catch {}
     skinLoaded.current = true;
+    // The lobby can open a given machine.
+    const pick = (e: Event) => {
+      const id = (e as CustomEvent<string>).detail;
+      if ((SKIN_IDS as string[]).includes(id)) setSkinId(id as SkinId);
+    };
+    window.addEventListener("royal-ace:slots-machine", pick);
+    return () => window.removeEventListener("royal-ace:slots-machine", pick);
   }, []);
   useEffect(() => {
     if (!skinLoaded.current) return;
@@ -591,7 +609,13 @@ useEffect(() => {
   const messageContent = s.fs ? (
     <>
       <span className="min-w-0 truncate font-black tracking-widest text-[#ffd166]">{skin.labels.freeSpins}</span>
-      <span className="shrink-0 whitespace-nowrap tabular-nums text-[#ffd166]/85" title="Sticky wilds on the reels">{`🔒 ${s.sticky ? s.sticky.flat().filter(Boolean).length : 0}`}</span>
+      {s.book ? (
+        <span className="flex shrink-0 items-center gap-1" title="Expanding symbol">
+          <Glyph sym={s.book} skin={skin} className="h-6 w-6" />
+        </span>
+      ) : (
+        <span className="shrink-0 whitespace-nowrap tabular-nums text-[#ffd166]/85" title="Sticky wilds on the reels">{`🔒 ${s.sticky ? s.sticky.flat().filter(Boolean).length : 0}`}</span>
+      )}
       <span className="shrink-0 whitespace-nowrap tabular-nums text-[#ffd166]/85">{`${Math.min(s.fs.played, s.fs.total)}/${s.fs.total}`}</span>
       <span className="shrink-0 whitespace-nowrap tabular-nums text-[#ffd166]/85">{`◈ ${money(s.fs.win)}`}</span>
     </>
@@ -661,6 +685,8 @@ useEffect(() => {
         >
           {/* Phones: the plain room colour only (no animated room behind the machine) */}
           {!phoneScreen && !eco && skinId === "classic" && <ClassicRoom party={s.fs !== null} />}
+          {!phoneScreen && skinId === "gold" && <div className="room-gold" aria-hidden="true" />}
+          {!phoneScreen && skinId === "pharaoh" && <div className="room-pharaoh" aria-hidden="true" />}
           {!phoneScreen && !eco && skinId === "miami" && <KingpinRoom party={s.fs !== null} />}
           {/* The room melts into the control deck instead of being cut */}
           <div
@@ -688,8 +714,15 @@ useEffect(() => {
             className="absolute -top-[15px] left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border border-[#f0d38b]"
             style={{ background: "linear-gradient(135deg,#fff3c4,#b8873a)", boxShadow: "0 0 10px rgba(240,211,139,0.6)" }}
           />
-          <div
-            className="shine-loop relative rounded-xl px-5 pb-1 pt-1.5 lg:px-8 lg:pb-1.5 lg:pt-2"
+          <button
+            type="button"
+            onClick={() => setPicker((v) => !v)}
+            disabled={s.busy || !!s.fs}
+            aria-expanded={picker}
+            aria-label={`${skin.title} — change machine`}
+            title="Change machine"
+            data-slots-popover=""
+            className="shine-loop relative block rounded-xl px-5 pb-1 pt-1.5 disabled:cursor-default lg:px-8 lg:pb-1.5 lg:pt-2"
             style={{
               background: "linear-gradient(180deg, #1b141d 0%, #0b080d 55%, #120d13 100%)",
               boxShadow:
@@ -721,7 +754,38 @@ useEffect(() => {
               <p className="whitespace-nowrap text-[7px] uppercase leading-none tracking-[0.16em] text-[#e5c779]/75 lg:text-[8px] lg:tracking-[0.3em]">{skin.tagline}</p>
               <span aria-hidden="true" className="h-px w-4 bg-gradient-to-l from-transparent to-[#d7b45b]/70 lg:w-8" />
             </div>
-          </div>
+            {!s.busy && !s.fs && <span className="machine-chev" aria-hidden="true">▾</span>}
+          </button>
+          {picker && (
+            <div className="machine-pick" role="menu" data-slots-popover="">
+              <p className="machine-pick__title">Machines</p>
+              {SKIN_IDS.map((id) => {
+                const k = SKINS[id];
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={skinId === id}
+                    onClick={() => {
+                      setSkinId(id);
+                      setPicker(false);
+                    }}
+                    className={`machine-pick__item is-${id} ${skinId === id ? "is-on" : ""}`}
+                  >
+                    <span className="machine-pick__art">
+                      <Glyph sym="wild" skin={k} className="h-9 w-9" />
+                    </span>
+                    <span className="min-w-0 flex-1 text-left">
+                      <span className="machine-pick__name">{k.title}</span>
+                      <span className="machine-pick__tag">{MACHINE_LINE[id]}</span>
+                    </span>
+                    {skinId === id && <span className="machine-pick__on">✓</span>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </header>
     }
@@ -851,9 +915,16 @@ useEffect(() => {
           {s.banner && (
             <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center overflow-hidden bg-black/65 backdrop-blur-[2px]" role="status">
               <div aria-hidden="true" className="win-rays" />
-              <p className="win-title-in font-display gold-text relative px-4 text-center text-3xl font-bold tracking-[0.12em] drop-shadow-[0_4px_0_rgba(0,0,0,0.6)] sm:text-6xl lg:text-7xl">
-                {s.banner}
-              </p>
+              <div className="relative flex flex-col items-center gap-4">
+                {s.book && s.banner === "EXPANDING SYMBOL" && (
+                  <span className="book-reveal">
+                    <Glyph sym={s.book} skin={skin} className="h-24 w-24 sm:h-36 sm:w-36" />
+                  </span>
+                )}
+                <p className="win-title-in font-display gold-text relative px-4 text-center text-3xl font-bold tracking-[0.12em] drop-shadow-[0_4px_0_rgba(0,0,0,0.6)] sm:text-6xl lg:text-7xl">
+                  {s.banner}
+                </p>
+              </div>
             </div>
           )}
 

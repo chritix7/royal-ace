@@ -52,12 +52,12 @@ export const LOBBY_GAMES: Info[] = [
   },
   {
     id: "slots",
-    name: "Miami Kingpin",
-    tag: "5-reel video slot",
-    facts: ["4 progressive jackpots", "Free spins · Boss wilds", "Crowns & the vault"],
+    name: "Slot machines",
+    tag: "3 machines · 5 reels",
+    facts: ["4 progressive jackpots", "Miami · Gold · Pharaoh"],
     limits: "◈ 20 – 100K",
     rtp: "96%",
-    about: ["Twenty paylines on five reels, with expanding Boss wilds and re-spins.", "Three scatters start the free spins with sticky wilds; crowns fill the vault.", "Four jackpots grow with every spin: Mini, Minor, Major, Kingpin."],
+    about: ["Miami Kingpin: expanding Boss wilds and re-spins, sticky wilds in the free spins.", "Royal Ace Gold: multiplier wilds ×2, ×3, ×5 that multiply together.", "Pharaoh's Vault: one symbol expands on every free spin and pays on all lines.", "Four jackpots grow with every spin: Mini, Minor, Major, Kingpin."],
     challenge: "slots",
     stat: ["spins", "slotWins", "spins"],
     session: "slots",
@@ -301,7 +301,12 @@ function Detail({ g, onClose, onPlay }: { g: Info; onClose: () => void; onPlay: 
 
 /* ───────── A game card ───────── */
 type Badge = { text: string; kind: "todo" | "claim" | "done" } | null;
-function GameCard({ g, i, onOpen, onPlay, badge, compact, day, fav, onFav }: { g: Info; i: number; onOpen: () => void; onPlay: () => void; badge: Badge; compact: boolean; day: boolean; fav: boolean; onFav: () => void }) {
+const LOBBY_MACHINES: [string, string][] = [
+  ["miami", "Miami"],
+  ["gold", "Gold"],
+  ["pharaoh", "Pharaoh"],
+];
+function GameCard({ g, i, onOpen, onPlay, badge, compact, day, fav, onFav, onMachine }: { g: Info; i: number; onOpen: () => void; onPlay: () => void; badge: Badge; compact: boolean; day: boolean; fav: boolean; onFav: () => void; onMachine?: (id: string) => void }) {
   return (
     <article className={`lb-card ${g.soon ? "is-soon" : ""} ${g.id === "sports" ? "is-wide" : ""} ${day ? "is-day" : ""}`} style={{ "--i": i } as CSSProperties}>
       <button type="button" onClick={onOpen} className="lb-card__hit" aria-label={`${g.name} — details`} />
@@ -312,6 +317,15 @@ function GameCard({ g, i, onOpen, onPlay, badge, compact, day, fav, onFav }: { g
           {fav ? "★" : "☆"}
         </button>
         {day && <span className="lb-day">{`★ Game of the day · XP ×${DAY_XP_MULT}`}</span>}
+        {g.id === "slots" && onMachine && (
+          <span className="lb-machines" role="group" aria-label="Machines">
+            {LOBBY_MACHINES.map(([id, label]) => (
+              <button key={id} type="button" onClick={() => onMachine(id)} className={`lb-machine is-${id}`} translate="no">
+                {label}
+              </button>
+            ))}
+          </span>
+        )}
         {g.soon && <span className="lb-badge is-soon">Coming soon</span>}
       </div>
       <div className="lb-card__body">
@@ -370,7 +384,7 @@ function LiveJackpots({ onOpen, compact }: { onOpen: () => void; compact: boolea
           </span>
         </span>
       ))}
-      {!compact && <span className="lb-jp__bet">{`At your bet ◈ ${bet.toLocaleString("en-US")} · Miami Kingpin ›`}</span>}
+      {!compact && <span className="lb-jp__bet">{`At your bet ◈ ${bet.toLocaleString("en-US")} · Slots ›`}</span>}
     </button>
   );
 }
@@ -447,7 +461,14 @@ export default function Lobby({
     profileStore.setFavorite(fav === g.id ? null : g.id);
     setFlash(fav === g.id ? `${g.name} unpinned` : `${g.name} pinned first`);
   };
-  const cardProps = (g: Info) => ({ day: dayGame === g.id, fav: fav === g.id, onFav: () => toggleFav(g) });
+  const openMachine = (id: string) => {
+    try {
+      localStorage.setItem("royalace:skin", id);
+    } catch {}
+    window.dispatchEvent(new CustomEvent("royal-ace:slots-machine", { detail: id }));
+    play(LOBBY_GAMES.find((x) => x.id === "slots")!);
+  };
+  const cardProps = (g: Info) => ({ day: dayGame === g.id, fav: fav === g.id, onFav: () => toggleFav(g), onMachine: g.id === "slots" ? openMachine : undefined });
   const play = (g: Info) => {
     if (g.soon) return;
     if (inProgress && inProgress !== g.id) {

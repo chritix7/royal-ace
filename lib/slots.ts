@@ -106,8 +106,71 @@ export const FS_COUNTS: Record<Sym, number[]> = { ...COUNTS, wild: FS_WILDS };
 export const FS_STRIPS: Sym[][] = buildStrips(FS_COUNTS);
 export type Sticky = boolean[][];
 export const noSticky = (): Sticky => Array.from({ length: REELS }, () => Array<boolean>(ROWS).fill(false));
+export const noMults = (): number[][] => Array.from({ length: REELS }, () => Array<number>(ROWS).fill(1));
 
-export type LineWin = { line: number; sym: Sym; count: number; pay: number };
+/**
+ * The machines share this engine; each has one signature feature.
+ * - classic / miami: expanding wild + re-spins; free spins with sticky wilds.
+ * - gold: every wild carries a ×2, ×3 or ×5 multiplier (they multiply
+ *   together on a line, up to ×50); it stays in its cell (no expansion);
+ *   free spins with sticky multiplier wilds.
+ * - pharaoh: expanding wild + re-spins; free spins with one EXPANDING SYMBOL
+ *   drawn at the start, which fills its reels and pays on every line.
+ * `pay` and `fsPay` scale the line pays so every machine returns the same.
+ */
+export type MachineId = "classic" | "miami" | "gold" | "pharaoh";
+export type Machine = {
+  pay: number;
+  fs: "sticky" | "expand";
+  fsPay: number;
+  fsWilds: number[];
+  mults?: { v: number; w: number }[];
+  /** Highest multiplier on one line. */
+  cap?: number;
+  /** false: the wild stays in its cell (no expansion, no re-spin). */
+  expand?: boolean;
+  /** Pharaoh: scale of the expanding symbol's pay. */
+  bookPay?: number;
+};
+export const MACHINES: Record<MachineId, Machine> = {
+  classic: { pay: 1, fs: "sticky", fsPay: 1, fsWilds: FS_WILDS },
+  miami: { pay: 1, fs: "sticky", fsPay: 1, fsWilds: FS_WILDS },
+  // Gold: the wild stays in its cell with its multiplier; line pays ×1.47 make up for the lost expansion.
+  gold: { pay: 1.47, fs: "sticky", fsPay: 1.27, fsWilds: [0, 1, 1, 1, 0], expand: false, mults: [{ v: 2, w: 60 }, { v: 3, w: 28 }, { v: 5, w: 12 }], cap: 50 },
+  pharaoh: { pay: 1, fs: "expand", fsPay: 1, fsWilds: [0, 1, 1, 1, 0], bookPay: 0.048 },
+};
+const STRIP_CACHE = new Map<string, Sym[][]>();
+function fsStrips(m: Machine): Sym[][] {
+  const key = m.fsWilds.join(",");
+  let st = STRIP_CACHE.get(key);
+  if (!st) STRIP_CACHE.set(key, (st = buildStrips({ ...COUNTS, wild: m.fsWilds })));
+  return st;
+}
+export function drawMult(rng: () => number, m: Machine): number {
+  if (!m.mults) return 1;
+  const total = m.mults.reduce((t, x) => t + x.w, 0);
+  let r = rng() * total;
+  for (const x of m.mults) if ((r -= x.w) <= 0) return x.v;
+  return m.mults[m.mults.length - 1].v;
+}
+/** Symbols the Pharaoh can pick for the free spins (lower ones more often). */
+export const BOOK_SYMS: { sym: Paying; w: number }[] = [
+  { sym: "cherry", w: 26 },
+  { sym: "lemon", w: 26 },
+  { sym: "grape", w: 20 },
+  { sym: "bell", w: 14 },
+  { sym: "gem", w: 9 },
+  { sym: "seven", w: 5 },
+];
+export function drawBook(rng: () => number): Paying {
+  const total = BOOK_SYMS.reduce((t, x) => t + x.w, 0);
+  let r = rng() * total;
+  for (const x of BOOK_SYMS) if ((r -= x.w) <= 0) return x.sym;
+  return "cherry";
+}
+export const LINE_MULT_CAP = 50;
+
+export type LineWin = { line: number; sym: Sym; count: number; pay: number; mult?: number };
 /** Wild qui s'étend : sur les rouleaux 2, 3 et 4, un wild remplit tout le rouleau et déclenche un re-spin. */
 export const WILD_REELS = [1, 2, 3];
 export const MAX_RESPINS = 3;
@@ -124,7 +187,10 @@ export type SpinResult = {
   scatterPay: number; // en multiples de la mise totale
   freeSpins: number; // free spins gagnés par ce tour
   total: number; // gain total en chips (mult. free spins inclus)
-};
+  /** Royal Ace Gold: multiplier of each wild cell (1 elsewhere). */
+  mults?: number[][];
+}; 
+export type EvalOpts = { mults?: number[][] | null; pay?: number; cap?: number };
 
 function evalLine(syms: Sym[]): { sym: Sym; count: number; pay: number } | null {
   let target: Paying | null = null;
@@ -155,7 +221,9 @@ function evalLine(syms: Sym[]): { sym: Sym; count: number; pay: number } | null 
 }
 
 /** `scatterGrid` : où compter les scatters (null = pas de scatter, ex. pendant un re-spin). */
-export function evaluate(grid: Sym[][], bet: number, mult = 1, stops: number[] = [], scatterGrid: Sym[][] | null = grid): SpinResult {
+export function evaluate(grid: Sym[][], bet: number, mult = 1, stops: number[] = [], scatterGrid: Sym[][] | null = grid, opts: EvalOpts = {}): SpinResult {
+  const scale = opts.pay ?? 1;
+  const mg = opts.mults ?? null;
   const lineBet = bet / PAYLINES.length;
   const cells = grid.map((col) => col.map(() => false));
   const lineWins: LineWin[] = [];
@@ -164,8 +232,11 @@ export function evaluate(grid: Sym[][], bet: number, mult = 1, stops: number[] =
   PAYLINES.forEach((rows, li) => {
     const w = evalLine(rows.map((row, reel) => grid[reel][row]));
     if (!w) return;
-    lineWins.push({ line: li + 1, ...w });
-    linesPay += w.pay * lineBet;
+    let lm = 1;
+    if (mg) for (let reel = 0; reel < w.count; reel++) if (grid[reel][rows[reel]] === "wild") lm *= mg[reel][rows[reel]] || 1;
+    lm = Math.min(opts.cap ?? LINE_MULT_CAP, lm);
+    lineWins.push({ line: li + 1, ...w, ...(lm > 1 ? { mult: lm } : {}) });
+    linesPay += w.pay * lineBet * lm * scale;
     for (let reel = 0; reel < w.count; reel++) cells[reel][rows[reel]] = true;
   });
 
@@ -187,44 +258,56 @@ export function evaluate(grid: Sym[][], bet: number, mult = 1, stops: number[] =
     scatters,
     scatterPay,
     freeSpins: scatters >= 3 ? FS_AWARD[Math.min(scatters, 5)] : 0,
-    total: (linesPay + scatterPay * bet) * mult,
+    total: Math.round((linesPay + scatterPay * bet) * mult),
+    ...(mg ? { mults: mg } : {}),
   };
 }
 
-/** Applique l'expansion des wilds puis calcule les gains, à partir de ce que les rouleaux affichent. */
-export function resolveSpin(raw: Sym[][], bet: number, mult = 1, held: boolean[] = Array(REELS).fill(false), stops: number[] = []): SpinResult {
+/** Applique l'expansion des wilds puis calcule les gains, à partir de ce que les rouleaux affichent.
+ *  `reelMult`: Royal Ace Gold, the multiplier of each expanded (or held) wild reel. */
+export function resolveSpin(raw: Sym[][], bet: number, mult = 1, held: boolean[] = Array(REELS).fill(false), stops: number[] = [], m: Machine = MACHINES.miami, reelMult: number[] = Array(REELS).fill(1)): SpinResult {
   // Un wild qui tombe sur les rouleaux 2, 3 ou 4 remplit tout le rouleau
   const grid = raw.map((col) => [...col]);
   const expanded: number[] = [];
-  for (const k of WILD_REELS) {
-    if (!held[k] && raw[k].includes("wild")) {
-      grid[k] = Array<Sym>(ROWS).fill("wild");
-      expanded.push(k);
+  if (m.expand !== false)
+    for (const k of WILD_REELS) {
+      if (!held[k] && raw[k].includes("wild")) {
+        grid[k] = Array<Sym>(ROWS).fill("wild");
+        expanded.push(k);
+      }
     }
-  }
   const isRespin = held.some(Boolean);
-  const res = evaluate(grid, bet, mult, stops, isRespin ? null : raw);
+  const mults = m.mults ? grid.map((col, k) => col.map((x) => (x === "wild" ? reelMult[k] || 1 : 1))) : null;
+  const res = evaluate(grid, bet, mult, stops, isRespin ? null : raw, { mults, pay: m.pay, cap: m.cap });
   return { ...res, raw, held: [...held], expanded };
 }
 
-export function spin(rng: () => number, bet: number, mult = 1, held: boolean[] = Array(REELS).fill(false)): SpinResult {
+export function spin(rng: () => number, bet: number, mult = 1, held: boolean[] = Array(REELS).fill(false), m: Machine = MACHINES.miami, reelMult: number[] = Array(REELS).fill(1)): SpinResult & { reelMult: number[] } {
   const stops = STRIPS.map((s) => Math.floor(rng() * s.length));
   const raw: Sym[][] = STRIPS.map((strip, r) => {
     if (held[r]) return Array<Sym>(ROWS).fill("wild"); // rouleau gardé : il ne tourne pas
     const L = strip.length;
     return Array.from({ length: ROWS }, (_, row) => strip[(stops[r] - 1 + row + L) % L]);
   });
-  return resolveSpin(raw, bet, mult, held, stops);
+  const rm = [...reelMult];
+  if (m.mults) for (const k of WILD_REELS) if (!held[k] && raw[k].includes("wild")) rm[k] = drawMult(rng, m);
+  // (one multiplier per reel: a reel shows at most one wild in a 4-row window)
+  return { ...resolveSpin(raw, bet, mult, held, stops, m, rm), reelMult: rm };
 }
 
 /** Un tour complet : le tour de base, puis les re-spins déclenchés par les wilds étendus (3 maximum). */
-export function playSequence(rng: () => number, bet: number, mult = 1): SpinResult[] {
-  const steps = [spin(rng, bet, mult)];
+export function playSequence(rng: () => number, bet: number, mult = 1, m: Machine = MACHINES.miami): SpinResult[] {
+  let rm: number[] = Array(REELS).fill(1);
+  const first = spin(rng, bet, mult, undefined, m, rm);
+  rm = first.reelMult;
+  const steps: SpinResult[] = [first];
   let held: boolean[] = Array(REELS).fill(false);
   while (steps[steps.length - 1].expanded.length > 0 && steps.length - 1 < MAX_RESPINS) {
     const last = steps[steps.length - 1];
     held = held.map((h, k) => h || last.expanded.includes(k));
-    steps.push(spin(rng, bet, mult, held));
+    const next = spin(rng, bet, mult, held, m, rm);
+    rm = next.reelMult;
+    steps.push(next);
   }
   return steps;
 }
@@ -232,24 +315,63 @@ export function playSequence(rng: () => number, bet: number, mult = 1): SpinResu
 /**
  * One free spin with sticky wilds. `sticky` = the wilds already on the reels
  * (they cover whatever spins under them). The new wilds join them.
+ * `mults` (Royal Ace Gold): the multiplier of each wild cell, new ones included.
  */
-export function stickyFromRaw(raw: Sym[][], sticky: Sticky, bet: number, mult: number, stops: number[] = []) {
+export function stickyFromRaw(raw: Sym[][], sticky: Sticky, bet: number, mult: number, stops: number[] = [], mults: number[][] | null = null, pay = 1, cap = LINE_MULT_CAP) {
   const grid = raw.map((col, r) => col.map((s, row): Sym => (sticky[r][row] ? "wild" : s)));
   // Scatters count only where no sticky wild covers the reel.
   const scatterGrid = raw.map((col, r) => col.map((s, row): Sym => (sticky[r][row] ? "cherry" : s)));
-  const res = evaluate(grid, bet, mult, stops, scatterGrid);
+  const res = evaluate(grid, bet, mult, stops, scatterGrid, { mults, pay, cap });
   const landed: [number, number][] = [];
   raw.forEach((col, r) => col.forEach((s, row) => { if (s === "wild" && !sticky[r][row]) landed.push([r, row]); }));
   const next = sticky.map((col, r) => col.map((v, row) => v || raw[r][row] === "wild"));
   return { ...res, raw, landed, sticky: next };
 }
-export function freeSpin(rng: () => number, bet: number, mult: number, sticky: Sticky) {
-  const stops = FS_STRIPS.map((s) => Math.floor(rng() * s.length));
-  const raw: Sym[][] = FS_STRIPS.map((strip, r) => {
+
+/** State carried from one free spin to the next. */
+export type FsState = { sticky: Sticky; mults: number[][]; book: Paying | null };
+export const freshFs = (m: Machine, rng: () => number = Math.random): FsState => ({ sticky: noSticky(), mults: noMults(), book: m.fs === "expand" ? drawBook(rng) : null });
+
+export type FreeSpinResult = SpinResult & {
+  landed: [number, number][];
+  sticky: Sticky;
+  /** Pharaoh: reels the book symbol fills, and what it paid. */
+  bookReels: number[];
+  bookPay: number;
+  state: FsState;
+};
+
+/** Pharaoh's free spin: plain wilds, then the book symbol expands on its reels and pays on every line. */
+export function expandFromRaw(raw: Sym[][], book: Paying, bet: number, mult: number, stops: number[] = [], pay = 1, bookScale = 1) {
+  const res = evaluate(raw, bet, mult, stops, raw, { pay });
+  const bookReels = raw.map((col, r) => (col.includes(book) ? r : -1)).filter((r) => r >= 0);
+  let bookPay = 0;
+  if (bookReels.length >= 3) {
+    bookPay = Math.round(PAYS[book][Math.min(bookReels.length, 5) - 3] * (bet / PAYLINES.length) * PAYLINES.length * bookScale * mult);
+    for (const r of bookReels) for (let row = 0; row < ROWS; row++) res.cells[r][row] = true;
+  }
+  return { ...res, total: res.total + bookPay, bookReels: bookReels.length >= 3 ? bookReels : [], bookPay };
+}
+
+export function freeSpin(rng: () => number, bet: number, mult: number, st: FsState | Sticky, m: Machine = MACHINES.miami): FreeSpinResult {
+  const state: FsState = Array.isArray(st) ? { sticky: st, mults: noMults(), book: null } : st;
+  const strips = fsStrips(m);
+  const stops = strips.map((s) => Math.floor(rng() * s.length));
+  const raw: Sym[][] = strips.map((strip, r) => {
     const L = strip.length;
     return Array.from({ length: ROWS }, (_, row) => strip[(stops[r] - 1 + row + L) % L]);
   });
-  return stickyFromRaw(raw, sticky, bet, mult, stops);
+  if (m.fs === "expand" && state.book) {
+    const r = expandFromRaw(raw, state.book, bet, mult, stops, m.fsPay, m.bookPay ?? 1);
+    return { ...r, raw, landed: [], sticky: state.sticky, state };
+  }
+  let mults = state.mults;
+  if (m.mults) {
+    mults = state.mults.map((col) => [...col]);
+    raw.forEach((col, r) => col.forEach((s, row) => { if (s === "wild" && !state.sticky[r][row]) mults[r][row] = drawMult(rng, m); }));
+  }
+  const r = stickyFromRaw(raw, state.sticky, bet, mult, stops, m.mults ? mults : null, m.fsPay, m.cap);
+  return { ...r, bookReels: [], bookPay: 0, state: { sticky: r.sticky, mults, book: null } };
 }
 
 /** Free spins ajoutés par un retrigger (0 si le plafond serait dépassé). */
@@ -312,34 +434,34 @@ export function reelTimings(
 }
 
 /** Un bonus de free spins complet (avec re-spins et retriggers). Renvoie le gain total du bonus. */
-export function playBonus(rng: () => number, bet: number, initialSpins = FS_AWARD[3]) {
+export function playBonus(rng: () => number, bet: number, initialSpins = FS_AWARD[3], m: Machine = MACHINES.miami) {
   let total = 0;
   let spins = 0;
   let left = initialSpins;
   let used = 0;
-  let sticky = noSticky();
+  let st = freshFs(m, rng);
   while (left > 0) {
     left--;
     used++;
     spins++;
-    const r = freeSpin(rng, bet, FS_MULT, sticky);
-    sticky = r.sticky;
+    const r = freeSpin(rng, bet, FS_MULT, st, m);
+    st = r.state;
     total += r.total;
     left += retriggerSpins(r.scatters, used, left);
   }
-  const wilds = sticky.flat().filter(Boolean).length;
+  const wilds = st.sticky.flat().filter(Boolean).length;
   return { total, respins: 0, spins, wilds };
 }
 
 /** Une manche complète (tour de base + re-spins + free spins éventuels). Sert aux simulations. */
-export function playRound(rng: () => number, bet: number) {
-  const baseSeq = playSequence(rng, bet, 1);
+export function playRound(rng: () => number, bet: number, m: Machine = MACHINES.miami) {
+  const baseSeq = playSequence(rng, bet, 1, m);
   const base = baseSeq[0];
   const baseTotal = baseSeq.reduce((a, s) => a + s.total, 0);
   let total = baseTotal;
   let respins = baseSeq.length - 1;
   if (base.freeSpins > 0) {
-    const bonus = playBonus(rng, bet, base.freeSpins);
+    const bonus = playBonus(rng, bet, base.freeSpins, m);
     total += bonus.total;
     respins += bonus.respins;
   }
@@ -347,10 +469,10 @@ export function playRound(rng: () => number, bet: number) {
 }
 
 /** Gain moyen d'un bonus de 10 free spins, en multiples de la mise (sert à fixer le prix de l'achat de bonus). */
-export function averageBonus(rounds: number, seed = 1, bet = 20) {
+export function averageBonus(rounds: number, seed = 1, bet = 20, m: Machine = MACHINES.miami) {
   const rng = mulberry32(seed);
   let sum = 0;
-  for (let i = 0; i < rounds; i++) sum += playBonus(rng, bet).total;
+  for (let i = 0; i < rounds; i++) sum += playBonus(rng, bet, undefined, m).total;
   return sum / rounds / bet;
 }
 
@@ -367,11 +489,11 @@ export function mulberry32(seed: number) {
 }
 
 /** Simule `rounds` manches et résume : RTP, fréquence de gain, plus gros gain, free spins. */
-export function simulate(rounds: number, seed = 1, bet = 10) {
+export function simulate(rounds: number, seed = 1, bet = 10, m: Machine = MACHINES.miami) {
   const rng = mulberry32(seed);
   let won = 0, hits = 0, max = 0, triggers = 0, big = 0, expands = 0, respins = 0;
   for (let i = 0; i < rounds; i++) {
-    const r = playRound(rng, bet);
+    const r = playRound(rng, bet, m);
     won += r.total;
     if (r.total > 0) hits++;
     if (r.total > max) max = r.total;

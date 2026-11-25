@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   BASE_RTP, BET_LEVELS, FS_CAP, MAX_RESPINS, PAYLINES, PAYS, REELS, ROWS, STRIPS,
-  averageBonus, evaluate, mulberry32, noSticky, playSequence, reelTimings, resolveSpin, retriggerSpins, simulate, stickyFromRaw, type Sym,
+  MACHINES, averageBonus, evaluate, expandFromRaw, noMults, mulberry32, noSticky, playSequence, reelTimings, resolveSpin, retriggerSpins, simulate, stickyFromRaw, type Sym,
 } from "../lib/slots";
 import { wallet } from "../lib/wallet";
 
@@ -203,6 +203,32 @@ describe("sticky wilds (free spins)", () => {
     const n = reelTimings(base(), false, held, true);
     const t = reelTimings(base(), true, held, true);
     expect(t.stopAt[0]).toBe(n.stopAt[0] / 2);
+  });
+});
+
+describe("Royal Ace Gold and Pharaoh's Vault", () => {
+  it("multiplies the wilds of one line together (Gold)", () => {
+    const g = put(base(), 1, ["cherry", "wild", "wild", "cherry", null]);
+    const m = noMults();
+    m[1][1] = 3;
+    m[2][1] = 5;
+    const w = evaluate(g, 20, 1, [], g, { mults: m }).lineWins.find((x) => x.line === 2)!;
+    expect(w.mult).toBe(15);
+  });
+  it("expands the Pharaoh's symbol on its reels and pays every line", () => {
+    const g = base();
+    g[0][0] = "cherry";
+    g[2][3] = "cherry";
+    g[4][2] = "cherry";
+    const r = expandFromRaw(g, "cherry", 20, 1, [], 1, 1);
+    expect(r.bookReels).toEqual([0, 2, 4]);
+    expect(r.bookPay).toBe(100);
+  });
+  it("keeps both new machines at the same return", () => {
+    for (const id of ["gold", "pharaoh"] as const) {
+      expect(Math.abs(averageBonus(10_000, 4, 20, MACHINES[id]) - 15.8)).toBeLessThan(2);
+      expect(Math.abs(simulate(100_000, 6, 20, MACHINES[id]).rtp - BASE_RTP)).toBeLessThan(0.035);
+    }
   });
 });
 

@@ -75,7 +75,7 @@ const PATTERNS: [RegExp, (...m: string[]) => string][] = [
   [/^Buy · ◈ (.+)$/, (_, v) => `Acheter · ◈ ${v}`],
   [/^VIP · (.+)$/, (_, v) => `VIP · ${tr(v)}`],
   [/^★ Game of the day · XP ×(\d+)$/, (_, n) => `★ Jeu du jour · XP ×${n}`],
-  [/^At your bet ◈ (.+) · Miami Kingpin ›$/, (_, v) => `À ta mise ◈ ${v} · Miami Kingpin ›`],
+  [/^At your bet ◈ (.+) · Slots ›$/, (_, v) => `À ta mise ◈ ${v} · Machines ›`],
   [/^(.+) pinned first$/, (_, v) => `${v} épinglé en premier`],
   [/^(.+) unpinned$/, (_, v) => `${v} n'est plus épinglé`],
   [/^Challenges (\d+)\/(\d+)$/, (_, a, b) => `Défis ${a}/${b}`],

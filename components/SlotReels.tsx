@@ -48,7 +48,7 @@ const MS_PER_CELL = 45;
 const LAND_CELLS = 8;
 
 export function Reel({
-  spinId, prev, target, stopAt, landMs, spinning, anticipate, cells, skin, held = false, full = false, expanding = false, anyWin = false, turbo = false, sticky, stickyNew,
+  spinId, prev, target, stopAt, landMs, spinning, anticipate, cells, skin, held = false, full = false, expanding = false, anyWin = false, turbo = false, sticky, stickyNew, fullSym = "wild", mults,
 }: {
   spinId: number; prev: Sym[]; target: Sym[]; stopAt: number; landMs: number;
   spinning: boolean; anticipate: boolean; cells: boolean[]; skin: Skin;
@@ -60,6 +60,10 @@ export function Reel({
   /** Penthouse Spins: wilds locked on this reel (one flag per row). */
   sticky?: boolean[] | null;
   stickyNew?: boolean[] | null;
+  /** The symbol filling the reel (the wild, or Pharaoh's expanding symbol). */
+  fullSym?: Sym;
+  /** Royal Ace Gold: multiplier on the wild of each row. */
+  mults?: number[] | null;
 }) {
   const [strip, setStrip] = useState<Sym[]>(prev);
   const stripEl = useRef<HTMLDivElement>(null);
@@ -106,7 +110,7 @@ export function Reel({
       {full && !spinning && (
         <div className={`absolute inset-0 z-[5] ${skin.reel} ${expanding ? "wild-expand" : ""}`} style={expanding && turbo ? { animationDuration: "300ms" } : undefined}>
           {[0, 1, 2, 3].map((i) => (
-            <SymbolCell key={i} sym="wild" skin={skin} win={!!cells?.[i]} />
+            <SymbolCell key={i} sym={fullSym} skin={skin} win={!!cells?.[i]} />
           ))}
         </div>
       )}
@@ -124,6 +128,14 @@ export function Reel({
           </div>
         ) : null,
       )}
+      {!spinning &&
+        mults?.map((v, row) =>
+          v > 1 && (sticky?.[row] || target[row] === "wild" || full) ? (
+            <span key={`m${row}`} className="wild-mult" style={{ top: `calc(var(--cell) * ${row} + 4px)` }} aria-label={`Multiplier ×${v}`}>
+              {`×${v}`}
+            </span>
+          ) : null,
+        )}
       {/* Éclairage latéral : léger volume sur chaque rouleau */}
 <div
   aria-hidden="true"
@@ -350,8 +362,10 @@ const shownLine =
                 cells={s.cells[k]}
                 skin={skin}
                 held={s.held[k]}
-                full={s.grid[k].every((x) => x === "wild")}
-                expanding={s.expanding.includes(k)}
+                full={s.grid[k].every((x) => x === "wild") || s.bookReels.includes(k)}
+                fullSym={s.bookReels.includes(k) && s.book ? s.book : "wild"}
+                mults={s.mults?.[k]}
+                expanding={s.expanding.includes(k) || s.bookReels.includes(k)}
                 anyWin={s.cells.some((col) => col.some(Boolean))}
                 turbo={s.turbo}
                 sticky={s.sticky?.[k]}

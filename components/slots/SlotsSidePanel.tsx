@@ -8,13 +8,14 @@ import { COLLECTION_CHIP_MULT } from "../../lib/collection";
 import { money } from "../../lib/game";
 import { useSession } from "../../lib/sessionStore";
 import { useSlotBonuses } from "../../lib/slotBonuses";
-import { RANKS, SKINS, type SkinId, type Skin } from "../../lib/skins";
+import { RANKS, SKIN_IDS, type SkinId, type Skin } from "../../lib/skins";
 import {
   BONUS_PRICE_MULT,
   FS_AWARD,
   FS_CAP,
   FS_MULT,
   FS_RETRIGGER,
+  MACHINES,
   PAYLINES,
   PAYS,
   SCATTER_PAYS,
@@ -22,6 +23,8 @@ import {
   type Paying,
 } from "../../lib/slots";
 import { VAULT_TRIGGER } from "../../lib/vault";
+
+const SHORT: Record<SkinId, string> = { miami: "Miami", gold: "Gold", pharaoh: "Pharaoh", classic: "Classic" };
 
 const PAY_ROWS: Paying[] = ["seven", "wild", "gem", "bell", "grape", "lemon", "cherry"];
 
@@ -103,17 +106,18 @@ export default function SlotsSidePanel({
 
       {/* Theme */}
       <div className={`${card} flex items-center justify-between gap-3 lg:py-2`}>
-        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#d7b45b]/80">Theme</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#d7b45b]/80">Machine</p>
         <div className="flex gap-1.5" role="group" aria-label="Machine theme">
-          {Object.values(SKINS).map((k) => (
+          {SKIN_IDS.map((id) => (
             <button
-              key={k.id}
-              onClick={() => !busy && setSkinId(k.id)}
+              key={id}
+              onClick={() => !busy && setSkinId(id)}
               disabled={busy}
-              aria-pressed={skinId === k.id}
-              className="lux-btn !rounded-full px-4 py-1.5 text-xs"
+              aria-pressed={skinId === id}
+              className="lux-btn !rounded-full px-3 py-1.5 text-xs"
+              translate="no"
             >
-              {k.id === "miami" ? "Miami" : "Classic"}
+              {SHORT[id]}
             </button>
           ))}
         </div>
@@ -159,12 +163,15 @@ export default function SlotsSidePanel({
                       <span className="text-[11px] text-white/60">{skin.names[sym]}</span>
                     </span>
                   </td>
-                  {PAYS[sym].map((p, i) => (
+                  {PAYS[sym].map((p0, i) => {
+                    const p = Math.round(p0 * MACHINES[skinId].pay * 10) / 10;
+                    return (
                     <td key={i} className="py-1.5 text-right font-mono font-bold text-[#e5c779] lg:py-1">
                       {p}
-                      <span className="block text-[10px] font-normal text-white/35">◈ {money(p * lineBet)}</span>
+                      <span className="block text-[10px] font-normal text-white/35">◈ {money(Math.round(p0 * MACHINES[skinId].pay * lineBet))}</span>
                     </td>
-                  ))}
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>
@@ -179,15 +186,26 @@ export default function SlotsSidePanel({
         <div className="space-y-2 lg:grid lg:grid-cols-2 lg:gap-2 lg:space-y-0">
           <div className={rule}>
             <Glyph sym="wild" skin={skin} className="h-8 w-8 shrink-0" />
-            <p translate="no"><b className="text-white">{`Wild · ${skin.names.wild}.`}</b> {L("Replaces every symbol except the scatter. Lands on reels 2, 3 and 4, expands to fill the reel and gives a free re-spin (up to 3 in a row).", "Remplace tous les symboles sauf le scatter. Tombe sur les rouleaux 2, 3 et 4, s'étend sur tout le rouleau et offre un re-spin gratuit (jusqu'à 3 de suite).")}</p>
+            <p translate="no"><b className="text-white">{`Wild · ${skin.names.wild}.`}</b> {skinId === "gold"
+                ? L("Replaces every symbol except the scatter and carries a ×2, ×3 or ×5 multiplier. Two wilds on one line multiply together (×3 and ×5 = ×15), up to ×50.", "Remplace tous les symboles sauf le scatter et porte un multiplicateur ×2, ×3 ou ×5. Deux wilds sur une même ligne se multiplient entre eux (×3 et ×5 = ×15), jusqu'à ×50.")
+                : L("Replaces every symbol except the scatter. Lands on reels 2, 3 and 4, expands to fill the reel and gives a free re-spin (up to 3 in a row).", "Remplace tous les symboles sauf le scatter. Tombe sur les rouleaux 2, 3 et 4, s'étend sur tout le rouleau et offre un re-spin gratuit (jusqu'à 3 de suite).")}</p>
           </div>
-          <div className={`${rule} border-[#d7b45b]/45`}>
-            <span className="w-8 shrink-0 text-center text-xl">🔒</span>
-            <p><b className="text-white">{`Sticky wilds · ${skin.labels.freeSpins}.`}</b> During the free spins, wilds can land on every reel. Each one locks in place until the last free spin and the next ones pile up with it: 1, 2, 3 wilds or more stay on the reels and pay on every line they touch. About 3 per bonus on average.</p>
-          </div>
+          {skinId === "pharaoh" ? (
+            <div className={`${rule} border-[#d7b45b]/45`}>
+              <span className="w-8 shrink-0 text-center text-xl">📜</span>
+              <p translate="no"><b className="text-white">{L(`Expanding symbol · ${skin.labels.freeSpins}.`, `Symbole extensible · ${skin.labels.freeSpins}.`)}</b> {L("At the start of the free spins the Pharaoh picks one symbol. On every free spin, when it shows on 3 reels or more, it fills those reels and pays on all 20 lines, wherever the reels are.", "Au début des tours gratuits, le Pharaon choisit un symbole. À chaque tour gratuit, s'il apparaît sur 3 rouleaux ou plus, il remplit ces rouleaux et paie sur les 20 lignes, même si les rouleaux ne se suivent pas.")}</p>
+            </div>
+          ) : (
+            <div className={`${rule} border-[#d7b45b]/45`}>
+              <span className="w-8 shrink-0 text-center text-xl">🔒</span>
+              <p translate="no"><b className="text-white">{L(`Sticky wilds · ${skin.labels.freeSpins}.`, `Wilds collants · ${skin.labels.freeSpins}.`)}</b> {skinId === "gold"
+                ? L("Each wild that lands locks in place with its multiplier until the last free spin, and the next ones pile up with it.", "Chaque wild qui tombe se verrouille avec son multiplicateur jusqu'au dernier tour gratuit, et les suivants s'ajoutent.")
+                : L("During the free spins, wilds can land on every reel. Each one locks in place until the last free spin and the next ones pile up with it: 1, 2, 3 wilds or more stay on the reels and pay on every line they touch. About 3 per bonus on average.", "Pendant les tours gratuits, les wilds peuvent tomber sur tous les rouleaux. Chacun se verrouille sur place jusqu'au dernier tour gratuit et les suivants s'ajoutent : 1, 2, 3 wilds ou plus restent sur les rouleaux et paient sur chaque ligne qu'ils touchent. Environ 3 par bonus en moyenne.")}</p>
+            </div>
+          )}
           <div className={rule}>
             <Glyph sym="scatter" skin={skin} className="h-8 w-8 shrink-0" />
-            <p translate="no"><b className="text-white">{`Scatter · ${skin.names.scatter}.`}</b> {L(`3, 4 or 5 anywhere pay ${SCATTER_PAYS[3]}×, ${SCATTER_PAYS[4]}× or ${SCATTER_PAYS[5]}× the bet and award ${FS_AWARD[3]}, ${FS_AWARD[4]} or ${FS_AWARD[5]} free spins with sticky wilds. Retrigger +${FS_RETRIGGER[3]} / +${FS_RETRIGGER[4]} / +${FS_RETRIGGER[5]} (max ${FS_CAP}).`, `3, 4 ou 5 n'importe où paient ${SCATTER_PAYS[3]}×, ${SCATTER_PAYS[4]}× ou ${SCATTER_PAYS[5]}× la mise et donnent ${FS_AWARD[3]}, ${FS_AWARD[4]} ou ${FS_AWARD[5]} tours gratuits avec wilds collants. Relance +${FS_RETRIGGER[3]} / +${FS_RETRIGGER[4]} / +${FS_RETRIGGER[5]} (max ${FS_CAP}).`)}</p>
+            <p translate="no"><b className="text-white">{`Scatter · ${skin.names.scatter}.`}</b> {L(`3, 4 or 5 anywhere pay ${SCATTER_PAYS[3]}×, ${SCATTER_PAYS[4]}× or ${SCATTER_PAYS[5]}× the bet and award ${FS_AWARD[3]}, ${FS_AWARD[4]} or ${FS_AWARD[5]} free spins. Retrigger +${FS_RETRIGGER[3]} / +${FS_RETRIGGER[4]} / +${FS_RETRIGGER[5]} (max ${FS_CAP}).`, `3, 4 ou 5 n'importe où paient ${SCATTER_PAYS[3]}×, ${SCATTER_PAYS[4]}× ou ${SCATTER_PAYS[5]}× la mise et donnent ${FS_AWARD[3]}, ${FS_AWARD[4]} ou ${FS_AWARD[5]} tours gratuits. Relance +${FS_RETRIGGER[3]} / +${FS_RETRIGGER[4]} / +${FS_RETRIGGER[5]} (max ${FS_CAP}).`)}</p>
           </div>
           <div className={rule}>
             <span className="w-8 shrink-0 text-center text-xl">👑</span>
