@@ -214,7 +214,7 @@ export default function BlackjackImmersive({
   const tableStyle = {
   "--bj-card-h": compact
     ? "clamp(46px, 9.5dvh, 96px)"
-    : "clamp(52px, 12dvh, 124px)",
+    : "clamp(52px, 14dvh, 144px)",
 } as CSSProperties;
 
   const handCount = Math.max(1, s.hands.length);

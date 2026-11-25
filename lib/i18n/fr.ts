@@ -1261,4 +1261,6 @@ export const FR: Record<string, string> = {
 "Gold dice, black pips": "Dés dorés, points noirs",
 "Playing since": "Depuis le",
 "Play time": "Temps de jeu",
+"Golden Round": "Tour doré",
+"Golden": "Doré",
 };

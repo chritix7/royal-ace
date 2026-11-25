@@ -128,7 +128,7 @@ function getShoeStatus(g: Game): {
     <>
       {/* Phones / tablets: the table runs down to just above the home bar */}
       <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl max-lg:flex max-lg:h-[calc(100dvh_-_10.15rem_-_env(safe-area-inset-top))] max-lg:min-h-[440px] max-lg:flex-col lg:flex lg:h-full lg:min-h-0 lg:flex-col">
-        <div className={`felt-texture relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 max-lg:flex max-lg:min-h-0 max-lg:flex-1 max-lg:flex-col max-lg:pb-3 sm:px-9 sm:py-4 lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:justify-between lg:pb-7 lg:pt-14`}>
+        <div className={`felt-texture bj-felt relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 max-lg:flex max-lg:min-h-0 max-lg:flex-1 max-lg:flex-col max-lg:pb-3 sm:px-9 sm:py-4 lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:justify-between lg:pb-7 lg:pt-14`}>
           {/* ☰ Table menu (music, rules, explore…) — phones and tablets */}
           {onMenu && (
             <span className="absolute right-3 top-[86px] z-20 lg:hidden">
@@ -275,7 +275,7 @@ function getShoeStatus(g: Game): {
               ResultRail on the left owns the result); on mobile the
               fused pill fills it. */}
           <div
-            className="my-2 flex min-h-[48px] flex-col items-center justify-center gap-1 max-lg:my-auto max-lg:pb-1 max-lg:pt-5 sm:my-3 lg:my-0 lg:mt-6 lg:min-h-[88px]"
+            className="bj-msg my-2 flex min-h-[48px] flex-col items-center justify-center gap-1 max-lg:my-auto max-lg:pb-1 max-lg:pt-5 sm:my-3 lg:my-0 lg:mt-6 lg:min-h-[88px]"
             role="status"
             aria-live="polite"
           >
@@ -404,11 +404,11 @@ function getShoeStatus(g: Game): {
               labels) can't push the bet zone and its buttons down past
               the bottom edge of the felt. */}
           <div
-            className={`flex flex-wrap items-start justify-center gap-2 max-lg:mt-auto sm:gap-5 lg:mt-4 lg:h-[156px] lg:flex-nowrap lg:gap-3 ${phone && s.hands.length > 1 ? "!gap-x-1 !gap-y-1.5" : ""}`}
+            className={`bj-hands flex flex-wrap items-start justify-center gap-2 max-lg:mt-auto sm:gap-5 lg:mt-4 lg:h-[156px] lg:flex-nowrap lg:gap-3 ${phone && s.hands.length > 1 ? "!gap-x-1 !gap-y-1.5" : ""}`}
             style={
               phone && s.hands.length > 1
                 ? ({
-                    "--bj-card-h": `min(${s.hands.length > 2 ? "9.5dvh" : "12dvh"}, 104px, calc((100vw - ${48 + Math.min(2, s.hands.length) * 30}px) / ${Math.min(2, s.hands.length) * (0.44 * Math.max(2, ...s.hands.map((h) => h.cards.length)) + 0.28)}))`,
+                    "--bj-card-h": `min(${s.hands.length > 2 ? "9.5dvh" : "12dvh"}, 116px, calc((100vw - ${48 + Math.min(2, s.hands.length) * 30}px) / ${Math.min(2, s.hands.length) * (0.44 * Math.max(2, ...s.hands.map((h) => h.cards.length)) + 0.28)}))`,
                   } as CSSProperties)
                 : undefined
             }

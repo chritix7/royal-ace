@@ -1,8 +1,7 @@
 "use client";
 
-import { MIN_BET, money } from "../../lib/game";
 import type { Game } from "../../lib/useBlackjack";
-import { control, gold, signed } from "./styles";
+import { signed } from "./styles";
 import CountUp from "../CountUp";
 
 export default function ResultRail({
@@ -12,10 +11,10 @@ export default function ResultRail({
   g: Game;
   onNewRound: () => void;
 }) {
-  const { s, roundBreakdown, canBet, stake, outOfChips } = g;
+  // The next round starts from the console (Deal again): this panel only reads the result.
+  void onNewRound;
+  const { s, roundBreakdown } = g;
   const showResult = s.phase === "settled" && roundBreakdown;
-  const canStartRound =
-    canBet && !outOfChips && s.bet >= MIN_BET && stake <= s.balance;
 
   return (
     <aside
@@ -78,16 +77,6 @@ export default function ResultRail({
               ))}
             </dl>
 
-            <div className="border-t border-white/10 p-2">
-              <button
-                type="button"
-                onClick={onNewRound}
-                disabled={!canStartRound}
-                className={`${control} ${gold} !min-h-8 h-8 w-full !text-[11px] uppercase tracking-wider`}
-              >
-                New round · ◈ {money(stake)}
-              </button>
-            </div>
           </div>
         ) : null}
       </div>
