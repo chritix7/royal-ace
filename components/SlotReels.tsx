@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { BELL_RESPINS, BELL_X3_AT, BET_LEVELS, CELLS, PAYLINES, REELS, ROWS, STRIPS, type Bell, type LineWin, type Sym } from "../lib/slots";
+import { BELL_RESPINS, BELL_X3_AT, BET_LEVELS, CELLS, PAYLINES_40, REELS, ROWS, STRIPS, type Bell, type LineWin, type Sym } from "../lib/slots";
 import { BELL_ICON } from "../lib/symbolArt2";
 import type { Skin } from "../lib/skins";
 import type { SlotsGame } from "../lib/useSlots";
 
-const randomSym = (noScatter = false): Sym => {
+const randomSym = (): Sym => {
   const strip = STRIPS[Math.floor(Math.random() * REELS)];
-  const s = strip[Math.floor(Math.random() * strip.length)];
-  return noScatter && s === "scatter" ? "bell" : s;
+  return strip[Math.floor(Math.random() * strip.length)];
 };
 
 export function SymbolCell({ sym, skin, win, dim = false }: { sym: Sym; skin: Skin; win: boolean; dim?: boolean }) {
@@ -80,7 +79,7 @@ export function Reel({
     const land = Math.min(landMs, total * 0.6);
     const filler = Math.max(LAND_CELLS, Math.round((total - land) / MS_PER_CELL) + LAND_CELLS - ROWS);
     job.current = { total, land };
-    setStrip([...target, ...Array.from({ length: filler }, () => randomSym(skin.id === "classic")), ...prev]);
+    setStrip([...target, ...Array.from({ length: filler }, randomSym), ...prev]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spinId]);
 
@@ -399,7 +398,7 @@ const shownLine =
                   key={`${shownLine.line}-${s.spinId}`}
                   className="line-draw"
                   pathLength={1}
-                  points={PAYLINES[shownLine.line - 1].map((row, reel) => `${reel + 0.5},${row + 0.5}`).join(" ")}
+                  points={PAYLINES_40[shownLine.line - 1].map((row, reel) => `${reel + 0.5},${row + 0.5}`).join(" ")}
                   fill="none"
                   stroke={skin.lineColor}
                   strokeWidth={5}
@@ -439,6 +438,7 @@ const JP_LABEL = { mini: "MINI", minor: "MINOR", major: "MAJOR", kingpin: "GRAND
 function BellBoardView({ b, bet }: { b: NonNullable<SlotsGame["s"]["bells"]>; bet: number }) {
   const count = b.board.filter(Boolean).length;
   const m = b.mult;
+  const grands = b.board.filter((x) => x?.jp === "kingpin").length;
   return (
     <div className={`bell-board ${b.spinning ? "is-spinning" : ""} ${m > 1 ? "is-x3" : ""}`} role="status" aria-label={`${count} bells, ${b.left} respins left`}>
       {Array.from({ length: CELLS }, (_, i) => {
@@ -472,12 +472,13 @@ function BellBoardView({ b, bet }: { b: NonNullable<SlotsGame["s"]["bells"]>; be
             <i key={i} className={i < b.left ? "is-on" : ""} />
           ))}
         </span>
-        {b.boost && m === 1 && <span className="bell-hud__boost">{`SLOT REELS ×3 @${BELL_X3_AT}`}</span>}
+        {b.boost && m === 1 && <span className="bell-hud__boost">{`SLOT REELS ×2 @${BELL_X3_AT}`}</span>}
         {m > 1 && <span className="bell-hud__x3">{`×${m}`}</span>}
+        {grands > 0 && <span className="bell-hud__grand">{`GRAND ${grands}/3`}</span>}
       </div>
       {b.total !== null && (
         <div className="bell-total">
-          <span className="bell-total__k">{b.board.some((x) => x?.jp === "kingpin") ? "GRAND JACKPOT" : count === CELLS ? `FULL SCREEN ×${m}` : "BELL BONUS"}</span>
+          <span className="bell-total__k">{grands >= 3 ? "GRAND JACKPOT" : count === CELLS ? `FULL SCREEN ×${m}` : "BELL BONUS"}</span>
           <span className="bell-total__v">{`◈ ${b.total.toLocaleString("en-US")}`}</span>
         </div>
       )}

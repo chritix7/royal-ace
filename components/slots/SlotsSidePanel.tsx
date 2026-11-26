@@ -13,6 +13,9 @@ import {
   BELL_BUY_MULT,
   BELL_X3_AT,
   BOOST_VALUE,
+  BELLS_SCATTER_PAYS,
+  GRAND_BELLS,
+  JP_FIXED,
   BONUS_PRICE_MULT,
   FS_AWARD,
   FS_CAP,
@@ -143,10 +146,10 @@ export default function SlotsSidePanel({
         ))}
       </div>
 
-      {current === "pay" && (
+      {current === "pay" && (() => { const nLines = (MACHINES[skinId].lines ?? PAYLINES).length; return (
         <div className={card}>
           <p className="text-[12px] leading-5 text-white/55">
-            {L(`${PAYLINES.length} lines, wins pay left to right in multiples of the line bet (◈ ${money(lineBet)} now).`, `${PAYLINES.length} lignes, les gains se lisent de gauche à droite, en multiples de la mise par ligne (◈ ${money(lineBet)} en ce moment).`)}
+            {L(`${nLines} lines, wins pay left to right in multiples of the line bet (◈ ${money(lineBet)} now).`, `${nLines} lignes, les gains se lisent de gauche à droite, en multiples de la mise par ligne (◈ ${money(lineBet)} en ce moment).`)}
           </p>
           <table className="mt-3 w-full text-sm">
             <thead>
@@ -158,7 +161,7 @@ export default function SlotsSidePanel({
               </tr>
             </thead>
             <tbody>
-              {PAY_ROWS.map((sym) => (
+              {PAY_ROWS.filter((sym) => !(skinId === "classic" && sym === "bell")).map((sym) => (
                 <tr key={sym} className="border-t border-white/5">
                   <td className="py-1.5 lg:py-1" title={skin.names[sym]}>
                     <span className="flex items-center gap-2">
@@ -166,7 +169,7 @@ export default function SlotsSidePanel({
                       <span className="text-[11px] text-white/60">{skin.names[sym]}</span>
                     </span>
                   </td>
-                  {PAYS[sym].map((p0, i) => {
+                  {(MACHINES[skinId].pays ?? PAYS)[sym].map((p0, i) => {
                     const p = Math.round(p0 * MACHINES[skinId].pay * 10) / 10;
                     return (
                     <td key={i} className="py-1.5 text-right font-mono font-bold text-[#e5c779] lg:py-1">
@@ -183,7 +186,7 @@ export default function SlotsSidePanel({
             {L(`Theoretical return ${(THEORETICAL_RTP * 100).toFixed(0)}% including the vault and the jackpots.`, `Retour théorique ${(THEORETICAL_RTP * 100).toFixed(0)} %, coffre et jackpots compris.`)}
           </p>
         </div>
-      )}
+      ); })()}
 
       {current === "features" && (
         <div className="space-y-2 lg:grid lg:grid-cols-2 lg:gap-2 lg:space-y-0">
@@ -192,17 +195,21 @@ export default function SlotsSidePanel({
             <p translate="no"><b className="text-white">{`Wild · ${skin.names.wild}.`}</b> {skinId === "gold"
                 ? L("Lands on every reel (about one spin in 4), replaces every symbol except the scatter and carries a ×2, ×3 or ×5 multiplier. Two wilds on one line multiply together (×3 and ×5 = ×15), up to ×50.", "Tombe sur tous les rouleaux (environ un tour sur 4), remplace tous les symboles sauf le scatter et porte un multiplicateur ×2, ×3 ou ×5. Deux wilds sur une même ligne se multiplient entre eux (×3 et ×5 = ×15), jusqu'à ×50.")
                 : skinId === "classic"
-                ? L("The hot 7 lands on every reel and replaces every symbol except the bells and the star. It stays put, no expansion: stack several on a line for the big wins.", "Le 7 brûlant tombe sur tous les rouleaux et remplace tous les symboles sauf les cloches et l'étoile. Il ne s'étend pas : aligne-en plusieurs sur une ligne pour les gros gains.")
+                ? L("The hot 7 lands on every reel, often stacked, and replaces every symbol except the bells and the star. It also pays on its own: 5 on a line pay the top prize. Every symbol can land stacked, so a full screen of one fruit pays on all 40 lines.", "Le 7 brûlant tombe sur tous les rouleaux, souvent empilé, et remplace tous les symboles sauf les cloches et l'étoile. Il paie aussi tout seul : 5 sur une ligne, c'est le plus gros gain. Tous les symboles peuvent tomber empilés : un écran plein d'un même fruit paie sur les 40 lignes.")
                 : L("Replaces every symbol except the scatter. Lands on reels 2, 3 and 4, expands to fill the reel and gives a free re-spin (up to 3 in a row).", "Remplace tous les symboles sauf le scatter. Tombe sur les rouleaux 2, 3 et 4, s'étend sur tout le rouleau et offre un re-spin gratuit (jusqu'à 3 de suite).")}</p>
           </div>
           {skinId === "classic" ? (<>
             <div className={`${rule} border-[#d7b45b]/45`}>
               <Glyph sym="bell" skin={skin} className="h-8 w-8 shrink-0" />
-              <p translate="no"><b className="text-white">{L("Bell bonus.", "Bonus cloches.")}</b> {L("Bells land anywhere, even stacked on one reel, and each one shows its value (×1 to ×25 the bet) or a jackpot: Mini, Minor, Major or Grand. 5 bells or more start the bonus with those same values. The bells stay and you get 3 respins: every new bell stays and puts the respins back to 3. With no Slot Reels bell, a full screen (20 bells) doubles every value. Bells do not pay on the lines.", "Les cloches tombent n'importe où, même plusieurs sur un même rouleau, et chacune affiche sa valeur (×1 à ×25 la mise) ou un jackpot : Mini, Minor, Major ou Grand. 5 cloches ou plus lancent le bonus avec ces mêmes valeurs. Les cloches restent et tu as 3 relances : chaque nouvelle cloche reste et remet les relances à 3. Sans cloche Slot Reels, un écran plein (20 cloches) double toutes les valeurs. Les cloches ne paient pas sur les lignes.")}</p>
+              <p translate="no"><b className="text-white">{L("Bell bonus.", "Bonus cloches.")}</b> {L("Bells land anywhere, even stacked, and each one shows its value (×1 to ×100 the bet) or a jackpot. 5 bells or more start the bonus with those same values, on special reels: the bells stay and you get 3 respins, every new bell stays and puts the respins back to 3. It ends when the respins run out or the screen is full. A full screen multiplies every prize ×3 (except the Major and the Grand). Then every visible value is added up and paid. Bells do not pay on the lines.", "Les cloches tombent n'importe où, même empilées, et chacune affiche sa valeur (×1 à ×100 la mise) ou un jackpot. 5 cloches ou plus lancent le bonus avec ces mêmes valeurs, sur des rouleaux spéciaux : les cloches restent et tu as 3 relances, chaque nouvelle cloche reste et remet les relances à 3. Le bonus s'arrête quand il n'y a plus de relances ou que l'écran est plein. Un écran plein multiplie tous les gains ×3 (sauf le Major et le Grand). Puis toutes les valeurs visibles s'additionnent et sont payées. Les cloches ne paient pas sur les lignes.")}</p>
             </div>
             <div className={`${rule} border-[#ff7a2a]/50`}>
               <Glyph sym="bell" skin={skin} className="h-8 w-8 shrink-0 [filter:hue-rotate(-28deg)_saturate(1.7)]" />
-              <p translate="no"><b className="text-white">{L("Slot Reels bell.", "Cloche Slot Reels.")}</b> {L(`A fiery bell marked SLOT REELS, worth ${BOOST_VALUE}× the bet. If it is among the bells that start the bonus, every value is ×3 from ${BELL_X3_AT} bells, and ×4 on a full screen. Jackpots are never multiplied.`, `Une cloche en feu marquée SLOT REELS, qui vaut ${BOOST_VALUE}× la mise. Si elle fait partie des cloches qui lancent le bonus, toutes les valeurs passent ×3 dès ${BELL_X3_AT} cloches, et ×4 si l'écran est plein. Les jackpots ne sont jamais multipliés.`)}</p>
+              <p translate="no"><b className="text-white">{L("Slot Reels bell.", "Cloche Slot Reels.")}</b> {L(`A fiery bell marked SLOT REELS, on the reels of the base game only. If it is among the bells that start the bonus: every prize ×2 from ${BELL_X3_AT} bells, ×4 on a full screen (except the Major and the Grand). At the end it becomes a bell worth ${BOOST_VALUE}× the bet.`, `Une cloche en feu marquée SLOT REELS, uniquement sur les rouleaux du jeu normal. Si elle fait partie des cloches qui lancent le bonus : tous les gains ×2 dès ${BELL_X3_AT} cloches, ×4 si l'écran est plein (sauf le Major et le Grand). À la fin, elle devient une cloche qui vaut ${BOOST_VALUE}× la mise.`)}</p>
+            </div>
+            <div className={`${rule} border-[#b77cff]/45`}>
+              <span className="w-8 shrink-0 text-center text-xl">🏆</span>
+              <p translate="no"><b className="text-white">{L("Jackpot bells.", "Cloches jackpot.")}</b> {L(`MINI pays ${JP_FIXED.mini}× the bet and MINOR ${JP_FIXED.minor}×: both can land several times. MAJOR (progressive) can be won once per bonus. GRAND (the Kingpin, progressive) needs ${GRAND_BELLS} Grand bells in one bonus; with fewer, each Grand bell pays 50× to 100× the bet.`, `MINI paie ${JP_FIXED.mini}× la mise et MINOR ${JP_FIXED.minor}× : les deux peuvent tomber plusieurs fois. MAJOR (progressif) se gagne une fois par bonus. GRAND (le Kingpin, progressif) demande ${GRAND_BELLS} cloches Grand dans le même bonus ; avec moins, chaque cloche Grand paie 50× à 100× la mise.`)}</p>
             </div>
           </>) : skinId === "pharaoh" ? (
             <div className={`${rule} border-[#d7b45b]/45`}>
@@ -217,6 +224,10 @@ export default function SlotsSidePanel({
                 : L("During the free spins, wilds can land on every reel. Each one locks in place until the last free spin and the next ones pile up with it: 1, 2, 3 wilds or more stay on the reels and pay on every line they touch. About 3 per bonus on average.", "Pendant les tours gratuits, les wilds peuvent tomber sur tous les rouleaux. Chacun se verrouille sur place jusqu'au dernier tour gratuit et les suivants s'ajoutent : 1, 2, 3 wilds ou plus restent sur les rouleaux et paient sur chaque ligne qu'ils touchent. Environ 3 par bonus en moyenne.")}</p>
             </div>
           )}
+          {skinId === "classic" && <div className={rule}>
+            <Glyph sym="scatter" skin={skin} className="h-8 w-8 shrink-0" />
+            <p translate="no"><b className="text-white">{`Scatter · ${skin.names.scatter}.`}</b> {L(`3, 4 or 5 anywhere pay ${BELLS_SCATTER_PAYS[3]}×, ${BELLS_SCATTER_PAYS[4]}× or ${BELLS_SCATTER_PAYS[5]}× the total bet. No free spins on this machine.`, `3, 4 ou 5 n'importe où paient ${BELLS_SCATTER_PAYS[3]}×, ${BELLS_SCATTER_PAYS[4]}× ou ${BELLS_SCATTER_PAYS[5]}× la mise totale. Pas de tours gratuits sur cette machine.`)}</p>
+          </div>}
           {skinId !== "classic" && <div className={rule}>
             <Glyph sym="scatter" skin={skin} className="h-8 w-8 shrink-0" />
             <p translate="no"><b className="text-white">{`Scatter · ${skin.names.scatter}.`}</b> {L(`3, 4 or 5 anywhere pay ${SCATTER_PAYS[3]}×, ${SCATTER_PAYS[4]}× or ${SCATTER_PAYS[5]}× the bet and award ${FS_AWARD[3]}, ${FS_AWARD[4]} or ${FS_AWARD[5]} free spins. Retrigger +${FS_RETRIGGER[3]} / +${FS_RETRIGGER[4]} / +${FS_RETRIGGER[5]} (max ${FS_CAP}).`, `3, 4 ou 5 n'importe où paient ${SCATTER_PAYS[3]}×, ${SCATTER_PAYS[4]}× ou ${SCATTER_PAYS[5]}× la mise et donnent ${FS_AWARD[3]}, ${FS_AWARD[4]} ou ${FS_AWARD[5]} tours gratuits. Relance +${FS_RETRIGGER[3]} / +${FS_RETRIGGER[4]} / +${FS_RETRIGGER[5]} (max ${FS_CAP}).`)}</p>

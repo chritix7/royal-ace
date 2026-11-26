@@ -41,6 +41,14 @@ export const PAYLINES: number[][] = [
   [1, 2, 2, 2, 1],
   [2, 1, 1, 1, 2],
 ];
+/** Royal Bells plays 40 lines: the 20 above, then 20 more. */
+export const PAYLINES_40: number[][] = [
+  ...PAYLINES,
+  [0, 1, 0, 1, 0], [1, 0, 1, 0, 1], [1, 2, 1, 2, 1], [2, 1, 2, 1, 2], [2, 3, 2, 3, 2],
+  [3, 2, 3, 2, 3], [0, 0, 2, 0, 0], [3, 3, 1, 3, 3], [1, 1, 2, 1, 1], [2, 2, 1, 2, 2],
+  [0, 0, 0, 1, 2], [3, 3, 3, 2, 1], [2, 1, 0, 0, 0], [1, 2, 3, 3, 3], [0, 1, 2, 2, 2],
+  [3, 2, 1, 1, 1], [0, 2, 0, 2, 0], [3, 1, 3, 1, 3], [1, 3, 1, 3, 1], [2, 0, 2, 0, 2],
+];
 
 /** Gains pour 3, 4 et 5 symboles identiques, en multiples de la mise PAR LIGNE. */
 export const PAYS: Record<Paying, [number, number, number]> = {
@@ -53,6 +61,18 @@ export const PAYS: Record<Paying, [number, number, number]> = {
   wild: [36, 180, 900],
 };
 
+/** Royal Bells (40 lines): the hot-fruit paytable, in multiples of the line bet.
+ *  Same ladder as the hot-fruit classics: grapes pay 4× the cherries, melon and plum 2×, the hot 7 10×. */
+export const BELLS_PAYS: Record<Paying, [number, number, number]> = {
+  cherry: [4, 10, 25],
+  lemon: [4, 10, 25],
+  grape: [10, 40, 100],
+  bell: [0, 0, 0],
+  gem: [8, 20, 50],
+  seven: [8, 20, 50],
+  wild: [20, 50, 250],
+};
+export const BELLS_SCATTER_PAYS: Record<number, number> = { 3: 5, 4: 20, 5: 100 };
 /** Le scatter paie n'importe où, en multiples de la mise TOTALE. */
 export const SCATTER_PAYS: Record<number, number> = { 3: 3, 4: 15, 5: 100 };
 export const FS_AWARD: Record<number, number> = { 3: 10, 4: 15, 5: 20 };
@@ -82,13 +102,13 @@ const ORDER = Object.keys(COUNTS) as Sym[];
 const STACK_SIZES = [1, 2, 3, 1, 2];
 
 /** Construit une bande par rouleau en répartissant les symboles le plus régulièrement possible. */
-export function buildStrips(counts: Record<Sym, number[]> = COUNTS, stack?: Sym): Sym[][] {
+export function buildStrips(counts: Record<Sym, number[]> = COUNTS, stack?: Sym | "all"): Sym[][] {
   return Array.from({ length: REELS }, (_, r) => {
     const items: { key: number; si: number; sym: Sym }[] = [];
     ORDER.forEach((sym, si) => {
       const n = counts[sym][r];
       const offset = (si * 0.381966 + r * 0.2) % 1;
-      if (sym === stack) {
+      if (sym === stack || (stack === "all" && sym !== "scatter")) {
         // Stacked: groups of 1, 2 or 3 in a row, so one reel can show several.
         const sizes: number[] = [];
         for (let left = n, i = 0; left > 0; i++) {
@@ -148,8 +168,12 @@ export type Machine = {
   counts?: Partial<Record<Sym, number[]>>;
   /** Royal Bells: the bell is the link symbol (no line pay); 5+ start the bell bonus. */
   link?: boolean;
-  /** This symbol comes in stacks of 1 to 3 on the strips. */
-  stack?: Sym;
+  /** Symbols in stacks of 1 to 3 on the strips ("all": every symbol but the scatter). */
+  stack?: Sym | "all";
+  /** 40 lines and their own paytable (Royal Bells). */
+  lines?: number[][];
+  pays?: Record<Paying, [number, number, number]>;
+  scatterPays?: Record<number, number>;
   /** No free spins from scatters (they still pay). */
   noFs?: boolean;
   /** false: the wild stays in its cell (no expansion, no re-spin). */
@@ -157,13 +181,17 @@ export type Machine = {
   /** Pharaoh: scale of the expanding symbol's pay. */
   bookPay?: number;
 };
-export const BELLS_ON_REELS = [2, 7, 7, 7, 2];
-export const setBellsOnReels = (b: number[]) => { BELLS_ON_REELS.splice(0, 5, ...b); STRIP_CACHE.clear(); };
+/** Royal Bells strips: the same on every reel, every symbol stacked. */
+export const BELLS_COUNTS: Record<Sym, number[]> = {
+  cherry: [10, 10, 10, 10, 10], lemon: [10, 10, 10, 10, 10], grape: [6, 6, 6, 6, 6], gem: [8, 8, 8, 8, 8],
+  seven: [8, 8, 8, 8, 8], wild: [2, 3, 2, 3, 2], bell: [2, 3, 2, 3, 2], scatter: [1, 2, 2, 2, 1],
+};
+export const setBellsCounts = (c: Partial<Record<Sym, number[]>>) => { Object.assign(BELLS_COUNTS, c); MACHINES.classic.wilds = BELLS_COUNTS.wild; STRIP_CACHE.clear(); };
 export const MACHINES: Record<MachineId, Machine> = {
   // Royal Bells (the old Classic): fruit lines, the red 7 as a wild on every
   // reel, bells that show their value, and the bell bonus. Scatters pay
   // anywhere but give no free spins.
-  classic: { fs: "sticky", fsPay: 1, fsWilds: FS_WILDS, link: true, noFs: true, counts: { bell: BELLS_ON_REELS, scatter: [0, 0, 0, 0, 0] }, stack: "bell", wilds: [2, 6, 6, 6, 2], expand: false, pay: 0.593 },
+  classic: { fs: "sticky", fsPay: 1, fsWilds: FS_WILDS, link: true, noFs: true, counts: BELLS_COUNTS, stack: "all", wilds: BELLS_COUNTS.wild, expand: false, lines: PAYLINES_40, pays: BELLS_PAYS, scatterPays: BELLS_SCATTER_PAYS, pay: 1 },
   miami: { pay: 1, fs: "sticky", fsPay: 1, fsWilds: FS_WILDS },
   // Gold: wilds on every reel (about one spin in 4), each with its multiplier; it stays in its cell.
   gold: { pay: 1.02, wilds: [1, 1, 1, 1, 1], fs: "sticky", fsPay: 0.55, fsWilds: [1, 2, 1, 2, 1], expand: false, mults: [{ v: 2, w: 60 }, { v: 3, w: 28 }, { v: 5, w: 12 }], cap: 50, fsMults: [{ v: 2, w: 1 }], fsCap: 2 },
@@ -231,9 +259,9 @@ export type SpinResult = {
   /** Royal Bells: the value shown on each bell (index = reel * ROWS + row). */
   bellVals?: (Bell | null)[];
 }; 
-export type EvalOpts = { mults?: number[][] | null; pay?: number; cap?: number };
+export type EvalOpts = { mults?: number[][] | null; pay?: number; cap?: number; lines?: number[][]; pays?: Record<Paying, [number, number, number]>; scatterPays?: Record<number, number> };
 
-function evalLine(syms: Sym[]): { sym: Sym; count: number; pay: number } | null {
+function evalLine(syms: Sym[], PAYS: Record<Paying, [number, number, number]>): { sym: Sym; count: number; pay: number } | null {
   let target: Paying | null = null;
   let count = 0;
   let lead = 0; // wilds au tout début de la ligne
@@ -265,13 +293,14 @@ function evalLine(syms: Sym[]): { sym: Sym; count: number; pay: number } | null 
 export function evaluate(grid: Sym[][], bet: number, mult = 1, stops: number[] = [], scatterGrid: Sym[][] | null = grid, opts: EvalOpts = {}): SpinResult {
   const scale = opts.pay ?? 1;
   const mg = opts.mults ?? null;
-  const lineBet = bet / PAYLINES.length;
+  const lines = opts.lines ?? PAYLINES;
+  const lineBet = bet / lines.length;
   const cells = grid.map((col) => col.map(() => false));
   const lineWins: LineWin[] = [];
   let linesPay = 0;
 
-  PAYLINES.forEach((rows, li) => {
-    const w = evalLine(rows.map((row, reel) => grid[reel][row]));
+  lines.forEach((rows, li) => {
+    const w = evalLine(rows.map((row, reel) => grid[reel][row]), opts.pays ?? PAYS);
     if (!w) return;
     let lm = 1;
     if (mg) for (let reel = 0; reel < w.count; reel++) if (grid[reel][rows[reel]] === "wild") lm *= mg[reel][rows[reel]] || 1;
@@ -283,7 +312,7 @@ export function evaluate(grid: Sym[][], bet: number, mult = 1, stops: number[] =
 
   const sg = scatterGrid ?? grid.map((col) => col.map((): Sym => "cherry"));
   const scatters = sg.reduce((n, col) => n + col.filter((s) => s === "scatter").length, 0);
-  const scatterPay = scatters >= 3 ? SCATTER_PAYS[Math.min(scatters, 5)] : 0;
+  const scatterPay = scatters >= 3 ? (opts.scatterPays ?? SCATTER_PAYS)[Math.min(scatters, 5)] : 0;
   if (scatters >= 3) {
     sg.forEach((col, reel) => col.forEach((s, row) => { if (s === "scatter") cells[reel][row] = true; }));
   }
@@ -321,7 +350,7 @@ export function resolveSpin(raw: Sym[][], bet: number, mult = 1, held: boolean[]
   const mults = m.mults ? grid.map((col, k) => col.map((x) => (x === "wild" ? reelMult[k] || 1 : 1))) : null;
   // Royal Bells: bells are not a line symbol (they break the line, like a scatter).
   const lineGrid = m.link ? grid.map((col) => col.map((x): Sym => (x === "bell" ? "scatter" : x))) : grid;
-  const res = evaluate(lineGrid, bet, mult, stops, isRespin ? null : raw, { mults, pay: m.pay, cap: m.cap });
+  const res = evaluate(lineGrid, bet, mult, stops, isRespin ? null : raw, { mults, pay: m.pay, cap: m.cap, lines: m.lines, pays: m.pays, scatterPays: m.scatterPays });
   const bells = m.link && !isRespin ? raw.reduce((n, col) => n + col.filter((x) => x === "bell").length, 0) : 0;
   return { ...res, grid, raw, held: [...held], expanded, ...(m.noFs ? { freeSpins: 0 } : {}), ...(m.link ? { bells } : {}) };
 }
@@ -595,56 +624,78 @@ export const BONUS_PRICE_MULT = 16.5;
 export const SEED_POOLS = { mini: 5, minor: 20, major: 100, kingpin: 500 };
 export const BELL_TRIGGER = 5;
 /** Price of a bought bell bonus (6 bells, no Slot Reels), in multiples of the bet: it returns about 96%. */
-export const BELL_BUY_MULT = 29;
+export const BELL_BUY_MULT = 33;
 export const BELL_RESPINS = 3;
 export const BELL_X3_AT = 15;
 export const CELLS = REELS * ROWS;
-/** Jackpot bells: kingpin is the GRAND. They can land at any moment, like the others. */
+/**
+ * Jackpot bells, like the Bell Link machines: MINI (10× the bet) and MINOR
+ * (50×) are fixed and can land several times; MAJOR (progressive) at most
+ * once per bonus; GRAND (kingpin, progressive) needs 3 Grand bells in one
+ * bonus, otherwise each one turns into a bell worth 50× to 100×.
+ */
 export type JpTier = "mini" | "minor" | "major" | "kingpin";
-/** A bell: a value in multiples of the total bet, or a jackpot. `boost`: the SLOT REELS bell. */
+/** A bell: a value in multiples of the total bet, or a jackpot. `boost`: the SLOT REELS bell.
+ *  A Grand bell keeps in `v` what it is worth if the Grand is not won. */
 export type Bell = { v: number; jp?: JpTier; boost?: boolean };
 export const BELL_VALUES: { v: number; w: number }[] = [
   { v: 1, w: 40 }, { v: 2, w: 28 }, { v: 3, w: 12 }, { v: 4, w: 7 }, { v: 5, w: 5 },
   { v: 8, w: 3 }, { v: 10, w: 2 }, { v: 15, w: 1.2 }, { v: 20, w: 0.6 }, { v: 25, w: 0.4 },
+  { v: 50, w: 0.12 }, { v: 100, w: 0.04 },
 ];
 export const BELL_JP: { jp: JpTier; w: number }[] = [
-  { jp: "mini", w: 1.0 }, { jp: "minor", w: 0.3 }, { jp: "major", w: 0.05 }, { jp: "kingpin", w: 0.008 },
+  { jp: "mini", w: 1.2 }, { jp: "minor", w: 0.25 }, { jp: "major", w: 0.05 }, { jp: "kingpin", w: 0.3 },
 ];
-/** The SLOT REELS bell: only on the reels of the base game, worth 5× the bet. */
+export const JP_FIXED = { mini: 10, minor: 50 } as const;
+export const GRAND_BELLS = 3;
+/** The SLOT REELS bell: only on the reels of the base game; it turns into a 10× bell at the end. */
 export const BOOST_P = 0.05;
-export const BOOST_VALUE = 5;
+export const BOOST_VALUE = 10;
 /** Chance for each empty cell to get a bell on a respin. */
 export let BELL_P = 0.042;
 export const setBellP = (p: number) => { BELL_P = p; };
-export function drawBell(rng: () => number): Bell {
+export function drawBell(rng: () => number, noMajor = false): Bell {
+  const jps = noMajor ? BELL_JP.filter((x) => x.jp !== "major") : BELL_JP;
   const tv = BELL_VALUES.reduce((t, x) => t + x.w, 0);
-  const tj = BELL_JP.reduce((t, x) => t + x.w, 0);
+  const tj = jps.reduce((t, x) => t + x.w, 0);
   let r = rng() * (tv + tj);
   for (const x of BELL_VALUES) if ((r -= x.w) <= 0) return { v: x.v };
-  for (const x of BELL_JP) if ((r -= x.w) <= 0) return { v: 0, jp: x.jp };
+  for (const x of jps) if ((r -= x.w) <= 0) return x.jp === "kingpin" ? { v: 50 + 10 * Math.floor(rng() * 6), jp: "kingpin" } : { v: 0, jp: x.jp };
   return { v: 1 };
 }
 export type BellBoard = (Bell | null)[]; // 20 cells, index = reel * ROWS + row
 export type BellStep = { board: BellBoard; added: number[]; left: number };
 /**
- * Multiplier on the bell values (not on the jackpots).
- * With a SLOT REELS bell in the trigger: ×3 from 15 bells, ×4 on a full screen.
- * Without: ×2 on a full screen only.
+ * Multiplier on every prize but the Major and the Grand.
+ * With a SLOT REELS bell in the trigger: ×2 from 15 bells, ×4 on a full screen.
+ * Without: ×3 on a full screen.
  */
 export function bellMult(count: number, boost: boolean): number {
-  if (count >= CELLS) return boost ? 4 : 2;
-  return boost && count >= BELL_X3_AT ? 3 : 1;
+  if (count >= CELLS) return boost ? 4 : 3;
+  return boost && count >= BELL_X3_AT ? 2 : 1;
+}
+/** What one bell adds before the multiplier (the Major and a won Grand are paid apart). */
+export function bellCoins(b: Bell, grandWon: boolean): number {
+  if (b.boost) return BOOST_VALUE;
+  if (b.jp === "mini" || b.jp === "minor") return JP_FIXED[b.jp];
+  if (b.jp === "major") return 0;
+  if (b.jp === "kingpin") return grandWon ? 0 : b.v;
+  return b.v;
 }
 /** Values of a finished board, in multiples of the bet. `pools`: jackpots in multiples of the bet. */
 export function bellPay(board: BellBoard, pools: { mini: number; minor: number; major: number; kingpin: number }) {
   const bells = board.filter(Boolean) as Bell[];
   const boost = bells.some((b) => b.boost);
   const mult = bellMult(bells.length, boost);
-  const coins = bells.reduce((t, b) => t + b.v, 0) * mult;
-  const jps = bells.filter((b) => b.jp).map((b) => b.jp!) as JpTier[];
+  const grands = bells.filter((b) => b.jp === "kingpin").length;
+  const grandWon = grands >= GRAND_BELLS;
+  const coins = bells.reduce((t, b) => t + bellCoins(b, grandWon), 0) * mult;
+  const jps: JpTier[] = [];
+  if (bells.some((b) => b.jp === "major")) jps.push("major");
+  if (grandWon) jps.push("kingpin");
   const jp = jps.reduce((t, j) => t + pools[j], 0);
   const full = bells.length === CELLS;
-  return { coins, jps, jp, full, boost, mult, total: coins + jp, count: bells.length };
+  return { coins, jps, jp, full, boost, mult, grands, grandWon, total: coins + jp, count: bells.length };
 }
 /** Plays the respins from a starting board; returns every step (for the show). */
 export function playBells(rng: () => number, start: BellBoard): BellStep[] {
@@ -655,7 +706,7 @@ export function playBells(rng: () => number, start: BellBoard): BellStep[] {
     left--;
     const added: number[] = [];
     for (let i = 0; i < CELLS; i++) if (!board[i] && rng() < BELL_P) {
-      board[i] = drawBell(rng);
+      board[i] = drawBell(rng, board.some((b) => b?.jp === "major"));
       added.push(i);
     }
     if (added.length) left = BELL_RESPINS;
@@ -672,7 +723,7 @@ export function startBoard(raw: Sym[][], rng: () => number): BellBoard {
     if (!boost && rng() < BOOST_P) {
       boost = true;
       b[r * ROWS + row] = { v: BOOST_VALUE, boost: true };
-    } else b[r * ROWS + row] = drawBell(rng);
+    } else b[r * ROWS + row] = drawBell(rng, b.some((x) => x?.jp === "major"));
   }));
   return b;
 }
@@ -680,6 +731,6 @@ export function startBoard(raw: Sym[][], rng: () => number): BellBoard {
 export function boughtBoard(rng: () => number, n = 6): BellBoard {
   const b: BellBoard = Array(CELLS).fill(null);
   const idx = Array.from({ length: CELLS }, (_, i) => i).sort(() => rng() - 0.5).slice(0, n);
-  for (const i of idx) b[i] = drawBell(rng);
+  for (const i of idx) b[i] = drawBell(rng, b.some((x) => x?.jp === "major"));
   return b;
 }

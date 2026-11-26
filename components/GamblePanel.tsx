@@ -65,7 +65,7 @@ export default function GamblePanel({
   onCollect: () => void;
   onClose: () => void;
 }) {
-    const canContinue = g.won === true && g.rounds < GAMBLE_MAX_ROUNDS;
+    const canContinue = g.won === true && g.rounds < (g.max ?? GAMBLE_MAX_ROUNDS);
   // Cards drawn while this panel is open (newest last, max 5).
   const [seen, setSeen] = useState<NonNullable<GambleState["card"]>[]>([]);
   const lastCard = useRef<GambleState["card"]>(null);
@@ -165,7 +165,7 @@ export default function GamblePanel({
         </h3>
 
         <p className="mt-1 text-[10px] font-bold tracking-[0.18em] text-white/45">
-          ROUND {g.rounds} / {GAMBLE_MAX_ROUNDS}
+          ROUND {g.rounds} / {g.max ?? GAMBLE_MAX_ROUNDS}
         </p>
 
         {/* Afficheur du montant */}

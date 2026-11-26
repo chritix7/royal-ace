@@ -22,6 +22,7 @@ import {
   FS_AWARD,
   FS_MULT,
   PAYLINES,
+  JP_FIXED,
 } from "../lib/slots";
 import { sfx } from "../lib/sound";
 import { AUTO_COUNTS, loadAutoCount, saveAutoCount, type AutoCount } from "../lib/autoSpin";
@@ -701,6 +702,7 @@ useEffect(() => {
   <JackpotBar
     pools={s.pools}
     bet={bet}
+    fixed={skinId === "classic" ? JP_FIXED : undefined}
     center={
       <header className="relative z-30 -mb-4 flex flex-col items-center text-center lg:-mb-5 lg:px-3">
         {/* Desktop: black-lacquer and gold pediment resting on the cabinet */}
@@ -796,7 +798,7 @@ useEffect(() => {
           <div className="relative flex flex-1 flex-col items-center justify-center pb-10 lg:mt-0 lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-start lg:gap-5 lg:pb-[1.6rem]">
   {/* Left tower: the jackpot ladder */}
   <div className="hidden justify-self-end lg:flex lg:w-[180px] lg:self-center">
-    <JackpotLadder pools={s.pools} bet={bet} />
+    <JackpotLadder pools={s.pools} bet={bet} fixed={skinId === "classic" ? JP_FIXED : undefined} />
   </div>
   <div ref={reelsBoxRef} className="relative flex justify-center">
   <SlotReels
@@ -843,7 +845,7 @@ useEffect(() => {
     {skinId === "classic" ? (
 <button type="button" onClick={() => openInfo("features")} className={towerCard} style={towerStyle}>
       <span className="text-[9px] font-black tracking-[0.25em] text-[#ffb36b]/90"><span aria-hidden="true">🔔 </span>BELL LINK</span>
-      <span className="mt-1.5 block text-[11px] leading-snug text-white/70" translate="no">{fr ? "5+ cloches lancent le bonus. Slot Reels : ×3 dès 15, ×4 écran plein." : "5+ bells start the bonus. Slot Reels: ×3 from 15, ×4 full."}</span>
+      <span className="mt-1.5 block text-[11px] leading-snug text-white/70" translate="no">{fr ? "5+ cloches lancent le bonus. Écran plein ×3. Avec Slot Reels : ×2 dès 15, ×4 écran plein." : "5+ bells start the bonus. Full screen ×3. With Slot Reels: ×2 from 15, ×4 full."}</span>
     </button>
 ) : (
 <button

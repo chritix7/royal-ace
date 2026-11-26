@@ -8,8 +8,8 @@ export const GAMBLE_MAX_ROUNDS = 3;
 export const GAMBLE_MAX_MULT = 50;
 export const SUITS: Record<CardColor, string[]> = { red: ["♥", "♦"], black: ["♠", "♣"] };
 
-export function canGamble(total: number, bet: number, bonusOrVault: boolean) {
-  return total > 0 && !bonusOrVault && total <= GAMBLE_MAX_MULT * bet;
+export function canGamble(total: number, bet: number, bonusOrVault: boolean, maxMult = GAMBLE_MAX_MULT) {
+  return total > 0 && !bonusOrVault && total <= maxMult * bet;
 }
 
 /** Tire une carte : renvoie sa couleur, sa famille, et si le joueur a deviné juste. */
@@ -18,3 +18,5 @@ export function drawGambleCard(rng: () => number, guess: CardColor) {
   const suits = SUITS[color];
   return { color, suit: suits[Math.floor(rng() * suits.length)], won: color === guess };
 }
+/** Royal Bells plays the classic gamble: wins up to 35× the bet, up to 5 times in a row. */
+export const BELLS_GAMBLE = { maxMult: 35, rounds: 5 };

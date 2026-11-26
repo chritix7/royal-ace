@@ -38,7 +38,7 @@ import {
   type Sym,
 } from "./slots";
 import { track } from "./events";
-import { GAMBLE_MAX_ROUNDS, canGamble, drawGambleCard, type CardColor } from "./gamble";
+import { BELLS_GAMBLE, GAMBLE_MAX_ROUNDS, canGamble, drawGambleCard, type CardColor } from "./gamble";
 import { HAPTIC, haptic } from "./haptics";
 import { JACKPOTS, foldLive, growPools, resetPool, sanitizePools, freshPools, type JackpotTier, type Pools } from "./jackpot";
 import { VAULT_PICKS, VAULT_TRIGGER, drawVault, settleVault, type VaultPrize } from "./vault";
@@ -58,6 +58,8 @@ export type VaultState = { prizes: VaultPrize[]; picks: number[]; done: boolean;
 export type GambleState = {
   amount: number;
   rounds: number;
+  /** Most rounds in a row on this machine. */
+  max?: number;
   phase: "choose" | "flip" | "result";
   guess?: CardColor;
   card: { color: CardColor; suit: string } | null;
@@ -405,7 +407,8 @@ function bonusContinue() {
           scatters += sc;
           sfx.scatterLand(scatters);
         }
-        collectionStore.addCrowns(b, sc);
+        // Royal Bells has no crown collection (its star only pays).
+        if (!machineRef.current.link) collectionStore.addCrowns(b, sc);
       }
       await sleep(250 * speed());
       // Royal Ace Gold: the multiplier of each wild shows once the reels stop.
@@ -541,7 +544,7 @@ return fsWin;
     const multOf = (board: BellBoard) => bellMult(board.filter(Boolean).length, boost);
     set({ banner: "BELL BONUS", lineWins: [], cells: emptyCells(), bells: { board: start, added: [], left: BELL_RESPINS, spinning: false, stopped: REELS, total: null, mult: multOf(start), boost } });
     await sleep(1700 * sp);
-    set({ banner: null, message: boost ? `Slot Reels · ×3 from ${BELL_X3_AT} bells, ×4 on a full screen` : `${start.filter(Boolean).length} bells · ${BELL_RESPINS} respins` });
+    set({ banner: null, message: boost ? `Slot Reels · ×2 from ${BELL_X3_AT} bells, ×4 on a full screen` : `${start.filter(Boolean).length} bells · ${BELL_RESPINS} respins` });
     await sleep(900 * sp);
     const steps = playBells(Math.random, start);
     for (const st of steps) {
@@ -584,7 +587,11 @@ return fsWin;
       wins.push({ tier: j, amount: Math.round(pools[j] * b) });
       pools = resetPool(pools, j);
     }
-    set({ pools, bells: { ...ref.current.bells!, total: amount, mult: pay.mult }, message: pay.jps.includes("kingpin") ? "GRAND JACKPOT!" : pay.full ? `Full screen · ×${pay.mult} · ◈ ${fmt(amount)}` : `Bell bonus · ◈ ${fmt(amount)}` });
+    if (pay.grands && !pay.grandWon) {
+      set({ message: `${pay.grands}/3 Grand bells · they pay their value` });
+      await sleep(1100 * sp);
+    }
+    set({ pools, bells: { ...ref.current.bells!, total: amount, mult: pay.mult }, message: pay.grandWon ? "GRAND JACKPOT!" : pay.full ? `Full screen · ×${pay.mult} · ◈ ${fmt(amount)}` : `Bell bonus · ◈ ${fmt(amount)}` });
     sfx.bigWin();
     await sleep(1600 * sp);
     wallet.add(amount);
@@ -776,8 +783,9 @@ if (collectionStore.isReady(b)) {
       count,
       async () => {
         const r = await oneRound();
-        if (count === 1 && canGamble(r.total, b0, r.triggered || r.vault)) {
-          set({ gamble: { amount: r.total, rounds: 0, phase: "choose", card: null, won: null } });
+        const link = !!machineRef.current.link;
+        if (count === 1 && canGamble(r.total, b0, r.triggered || r.vault, link ? BELLS_GAMBLE.maxMult : undefined)) {
+          set({ gamble: { amount: r.total, rounds: 0, max: link ? BELLS_GAMBLE.rounds : GAMBLE_MAX_ROUNDS, phase: "choose", card: null, won: null } });
         }
         const c = ref.current;
         return { stop: (c.autoStopBonus && (r.triggered || r.vault)) || (c.autoStopBig && r.ratio >= 20) };
@@ -827,14 +835,14 @@ try {
       sfx.win();
       haptic(HAPTIC.win);
       set({
-        gamble: { amount, rounds, phase: "result", card, won: true, guess },
+        gamble: { amount, rounds, max: g.max, phase: "result", card, won: true, guess },
         lastWin: amount,
         message: `Doubled! ◈ ${fmt(amount)}`,
         stats: { ...st, won: st.won + g.amount, biggest: Math.max(st.biggest, amount) },
       });
       await sleep(1600 * speed());
-      if (rounds < GAMBLE_MAX_ROUNDS) {
-        set({ gamble: { amount, rounds, phase: "choose", card, won: true, guess } });
+      if (rounds < (g.max ?? GAMBLE_MAX_ROUNDS)) {
+        set({ gamble: { amount, rounds, max: g.max, phase: "choose", card, won: true, guess } });
       }
     } else {
       const lost = Math.min(g.amount, wallet.getBalance());
@@ -1009,7 +1017,7 @@ useEffect(() => {
     if (active) music.setMode(bonus ? "bonus" : "normal");
   }, [active, bonus]);
 
-  const lineBet = bet / PAYLINES.length;
+  const lineBet = bet / (MACHINES[machineId].lines ?? PAYLINES).length;
   const collectionRewardOpen = ref.current.collectionRewardOpen;
   const canSpin = !s.busy && balance >= bet;
 

@@ -72,12 +72,15 @@ export default function JackpotBar({
   pools: saved,
   bet,
   center,
+  fixed,
 }: {
   pools: Pools;
   bet: number;
   center?: ReactNode;
+  /** Tiers paid as a fixed multiple of the bet on this machine (Royal Bells: Mini and Minor). */
+  fixed?: Partial<Record<JackpotTier, number>>;
 }) {
-  const pools = useLivePools(saved);
+  const pools = { ...useLivePools(saved), ...fixed };
   const tile = (t: JackpotTier) => (
     <div
       key={t}
@@ -138,8 +141,8 @@ function fitSize(v: number, top: boolean) {
   return n <= 7 ? "text-base" : n <= 9 ? "text-sm" : "text-[13px]";
 }
 
-export function JackpotLadder({ pools: saved, bet }: { pools: Pools; bet: number }) {
-  const pools = useLivePools(saved);
+export function JackpotLadder({ pools: saved, bet, fixed }: { pools: Pools; bet: number; fixed?: Partial<Record<JackpotTier, number>> }) {
+  const pools = { ...useLivePools(saved), ...fixed };
   const order: JackpotTier[] = ["kingpin", "major", "minor", "mini"];
   return (
     <div className="flex w-full flex-col gap-2" role="group" aria-label="Progressive jackpots">

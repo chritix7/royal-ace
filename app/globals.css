@@ -3513,3 +3513,4 @@ textarea.st-input { border-radius: 12px; }
 .bell-cell.is-boost .bell-cell__icon { filter: hue-rotate(-28deg) saturate(1.7) brightness(1.05) drop-shadow(0 0 8px rgba(255, 80, 0, 0.8)); }
 .bell-cell__tag { position: absolute; left: 50%; top: 6%; transform: translateX(-50%); z-index: 1; white-space: nowrap; border-radius: 9999px; padding: 0 0.35rem; font-family: var(--font-display), Georgia, serif; font-size: clamp(7px, calc(var(--cell) * 0.11), 11px); font-weight: 800; line-height: 1.4; }
 .bell-hud__boost { white-space: nowrap; border-radius: 6px; padding: 0 0.35rem; font-size: 10px; font-weight: 800; letter-spacing: 0.04em; color: #fff; background: linear-gradient(180deg, #ff9a3c, #c1300c); }
+.bell-hud__grand { white-space: nowrap; border-radius: 6px; padding: 0 0.35rem; font-size: 10px; font-weight: 800; letter-spacing: 0.04em; color: #fff; background: linear-gradient(180deg, #d89bff, #7a2bbf); }
