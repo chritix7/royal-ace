@@ -144,9 +144,10 @@ export type Machine = {
   bookPay?: number;
 };
 export const MACHINES: Record<MachineId, Machine> = {
-  // Royal Bells (the old Classic): fruit lines, an expanding crown wild, and
-  // the bell bonus. Scatters pay anywhere but give no free spins.
-  classic: { fs: "sticky", fsPay: 1, fsWilds: FS_WILDS, link: true, noFs: true, counts: { bell: [3, 20, 20, 20, 3] }, pay: 0.765 },
+  // Royal Bells (the old Classic): fruit lines, the red 7 as a wild on every
+  // reel, bells that show their value, and the bell bonus. Scatters pay
+  // anywhere but give no free spins.
+  classic: { fs: "sticky", fsPay: 1, fsWilds: FS_WILDS, link: true, noFs: true, counts: { bell: [3, 21, 21, 21, 3] }, wilds: [2, 6, 6, 6, 2], expand: false, pay: 0.752 },
   miami: { pay: 1, fs: "sticky", fsPay: 1, fsWilds: FS_WILDS },
   // Gold: wilds on every reel (about one spin in 4), each with its multiplier; it stays in its cell.
   gold: { pay: 1.02, wilds: [1, 1, 1, 1, 1], fs: "sticky", fsPay: 0.55, fsWilds: [1, 2, 1, 2, 1], expand: false, mults: [{ v: 2, w: 60 }, { v: 3, w: 28 }, { v: 5, w: 12 }], cap: 50, fsMults: [{ v: 2, w: 1 }], fsCap: 2 },
@@ -211,6 +212,8 @@ export type SpinResult = {
   mults?: number[][];
   /** Royal Bells: bells on the screen (5+ start the bell bonus). */
   bells?: number;
+  /** Royal Bells: the value shown on each bell (index = reel * ROWS + row). */
+  bellVals?: (Bell | null)[];
 }; 
 export type EvalOpts = { mults?: number[][] | null; pay?: number; cap?: number };
 
@@ -318,7 +321,10 @@ export function spin(rng: () => number, bet: number, mult = 1, held: boolean[] =
   const rm = [...reelMult];
   if (m.mults) for (let k = 0; k < REELS; k++) if (!held[k] && raw[k].includes("wild")) rm[k] = drawMult(rng, m);
   // (one multiplier per reel: a reel shows at most one wild in a 4-row window)
-  return { ...resolveSpin(raw, bet, mult, held, stops, m, rm), reelMult: rm };
+  const res = resolveSpin(raw, bet, mult, held, stops, m, rm);
+  // Royal Bells: every bell shows its value on the reels already.
+  if (m.link && !held.some(Boolean)) return { ...res, bellVals: startBoard(raw, rng), reelMult: rm };
+  return { ...res, reelMult: rm };
 }
 
 /** Un tour complet : le tour de base, puis les re-spins déclenchés par les wilds étendus (3 maximum). */
@@ -502,8 +508,9 @@ export function playRound(rng: () => number, bet: number, m: Machine = MACHINES.
   }
   let bellTotal = 0;
   if (m.link && (base.bells ?? 0) >= BELL_TRIGGER) {
-    const steps = playBells(rng, startBoard(base.raw, rng));
-    const end = steps.length ? steps[steps.length - 1].board : startBoard(base.raw, rng);
+    const start = base.bellVals ?? startBoard(base.raw, rng);
+    const steps = playBells(rng, start);
+    const end = steps.length ? steps[steps.length - 1].board : start;
     bellTotal = bellPay(end, SEED_POOLS).total * bet;
     total += bellTotal;
   }

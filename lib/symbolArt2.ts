@@ -228,6 +228,21 @@ const STAR = wrap(
    <path d="M50 12 L60 38 L88 38 L65 55 L74 82 L50 66 L26 82 L35 55 L12 38 L40 38 Z" fill="url(#stg)" stroke="#5a3d00" stroke-width="3" stroke-linejoin="round"/>
    <path d="M44 26 L48 38" stroke="#fff" stroke-width="3" opacity=".7" stroke-linecap="round"/>`,
 );
-export const BELLS_ART = art({ cherry: CHERRY, lemon: LEMON, grape: GRAPES, bell: BELL, gem: MELON, seven: SEVEN, wild: CROWN_W, scatter: STAR });
+const PLUM = wrap(
+  grad("pl", "#c47bff", "#4a127a") + grad("pll", "#7bd36a", "#2f6b1f"),
+  `<path d="M52 20 C58 8 74 6 84 12 C76 22 62 24 52 20 Z" fill="url(#pll)" stroke="#1d3a12" stroke-width="2"/>
+   <path d="M50 12 C50 18 50 22 52 28" stroke="#5b3a12" stroke-width="4" fill="none" stroke-linecap="round"/>
+   <path d="M50 26 C26 22 12 42 14 60 C16 80 34 92 50 92 C66 92 84 80 86 60 C88 42 74 22 50 26 Z" fill="url(#pl)" stroke="#2a0a4a" stroke-width="3"/>
+   <path d="M50 30 C46 50 46 72 50 90" stroke="#2a0a4a" stroke-width="2" fill="none" opacity=".5"/>
+   <ellipse cx="32" cy="46" rx="8" ry="13" fill="#fff" opacity=".45" transform="rotate(20 32 46)"/>`,
+);
+const HOT7 = wrap(
+  grad("h7", "#ff8a7a", "#a3000f", "#ff2a2a") + grad("h7g", "#fff4c2", "#c79b40") + grad("fl", "#ffe066", "#ff4d00"),
+  `<path d="M18 86 C10 70 22 60 20 46 C30 54 30 62 34 62 C32 44 42 30 40 14 C56 28 58 44 56 56 C60 52 62 46 62 40 C74 52 78 70 70 86 Z" fill="url(#fl)" opacity=".85"/>
+   <path d="M16 12 H86 V28 C70 44 58 62 52 90 H30 C36 62 48 44 62 30 H34 V38 H16 Z" fill="url(#h7g)" stroke="#2a0608" stroke-width="3.5" stroke-linejoin="round"/>
+   <path d="M22 18 H80 V26 C64 42 52 60 46 84 H37 C43 60 55 42 70 26 H28 V32 H22 Z" fill="url(#h7)"/>
+   <path d="M26 22 H70" stroke="#fff" stroke-width="2.5" opacity=".7" stroke-linecap="round"/>`,
+);
+export const BELLS_ART = art({ cherry: CHERRY, lemon: LEMON, grape: GRAPES, bell: BELL, gem: MELON, seven: PLUM, wild: HOT7, scatter: STAR });
 /** The bell of the bonus board (no outline glare). */
 export const BELL_ICON = toSrc(BELL);

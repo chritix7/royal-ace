@@ -49,7 +49,7 @@ const MS_PER_CELL = 45;
 const LAND_CELLS = 8;
 
 export function Reel({
-  spinId, prev, target, stopAt, landMs, spinning, anticipate, cells, skin, held = false, full = false, expanding = false, anyWin = false, turbo = false, sticky, stickyNew, fullSym = "wild", mults,
+  spinId, prev, target, stopAt, landMs, spinning, anticipate, cells, skin, held = false, full = false, expanding = false, anyWin = false, turbo = false, sticky, stickyNew, fullSym = "wild", mults, bellVals, bet = 0,
 }: {
   spinId: number; prev: Sym[]; target: Sym[]; stopAt: number; landMs: number;
   spinning: boolean; anticipate: boolean; cells: boolean[]; skin: Skin;
@@ -65,6 +65,9 @@ export function Reel({
   fullSym?: Sym;
   /** Royal Ace Gold: multiplier on the wild of each row. */
   mults?: number[] | null;
+  /** Royal Bells: the value shown on the bells of this reel. */
+  bellVals?: (Bell | null)[] | null;
+  bet?: number;
 }) {
   const [strip, setStrip] = useState<Sym[]>(prev);
   const stripEl = useRef<HTMLDivElement>(null);
@@ -129,6 +132,14 @@ export function Reel({
           </div>
         ) : null,
       )}
+      {!spinning &&
+        bellVals?.map((b, row) =>
+          b && target[row] === "bell" ? (
+            <span key={`b${row}`} className={`reel-bell-val ${b.jp ? `is-${b.jp}` : ""}`} style={{ top: `calc(var(--cell) * ${row})` }}>
+              {b.jp ? JP_LABEL[b.jp] : `◈ ${short(b.v * bet)}`}
+            </span>
+          ) : null,
+        )}
       {!spinning &&
         mults?.map((v, row) =>
           v > 1 && (sticky?.[row] || target[row] === "wild" || full) ? (
@@ -366,6 +377,8 @@ const shownLine =
                 full={s.grid[k].every((x) => x === "wild") || s.bookReels.includes(k)}
                 fullSym={s.bookReels.includes(k) && s.book ? s.book : "wild"}
                 mults={s.mults?.[k]}
+                bellVals={s.bellVals ? s.bellVals.slice(k * ROWS, k * ROWS + ROWS) : null}
+                bet={BET_LEVELS[s.betIdx]}
                 expanding={s.expanding.includes(k) || s.bookReels.includes(k)}
                 anyWin={s.cells.some((col) => col.some(Boolean))}
                 turbo={s.turbo}
@@ -430,8 +443,17 @@ function BellBoardView({ b, bet }: { b: NonNullable<SlotsGame["s"]["bells"]>; be
       {Array.from({ length: CELLS }, (_, i) => {
         const bell = b.board[i] as Bell | null;
         const isNew = b.added.includes(i);
+        const rolling = !bell && b.spinning && Math.floor(i / ROWS) > b.stopped;
         return (
-          <div key={i} className={`bell-cell ${bell ? "is-bell" : ""} ${isNew ? "is-new" : ""} ${bell?.jp ? `is-${bell.jp}` : ""}`}>
+          <div key={i} className={`bell-cell ${bell ? "is-bell" : ""} ${isNew ? "is-new" : ""} ${bell?.jp ? `is-${bell.jp}` : ""} ${rolling ? "is-rolling" : ""}`}>
+            {rolling && (
+              <span className="bell-roll" aria-hidden="true">
+                <img src={BELL_ICON} alt="" />
+                <span />
+                <img src={BELL_ICON} alt="" />
+                <span />
+              </span>
+            )}
             {bell && (
               <>
                 <img src={BELL_ICON} alt="" draggable={false} className="bell-cell__icon" />

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   BASE_RTP, BET_LEVELS, FS_CAP, MAX_RESPINS, PAYLINES, PAYS, REELS, ROWS, STRIPS,
-  BELL_X3_AT, CELLS, MACHINES, SEED_POOLS, averageBonus, bellPay, playBells, boughtBoard, evaluate, expandFromRaw, noMults, mulberry32, noSticky, playSequence, reelTimings, resolveSpin, retriggerSpins, simulate, stickyFromRaw, type Sym,
+  BELL_X3_AT, CELLS, MACHINES, SEED_POOLS, averageBonus, bellPay, playBells, boughtBoard, evaluate, expandFromRaw, noMults, mulberry32, noSticky, playSequence, reelTimings, resolveSpin, retriggerSpins, simulate, spin, stickyFromRaw, type Sym,
 } from "../lib/slots";
 import { wallet } from "../lib/wallet";
 
@@ -251,6 +251,16 @@ describe("Royal Bells", () => {
     const last = steps[steps.length - 1];
     expect(last.left === 0 || last.board.every(Boolean)).toBe(true);
     steps.forEach((st) => expect(st.left).toBe(st.added.length ? 3 : st.left));
+  });
+  it("never expands the hot 7 and shows a value on every bell of the reels", () => {
+    const rng = mulberry32(11);
+    for (let i = 0; i < 400; i++) {
+      const r = spin(rng, 20, 1, undefined, MACHINES.classic);
+      expect(r.expanded).toEqual([]);
+      const vals = r.bellVals!;
+      expect(vals.length).toBe(CELLS);
+      r.raw.forEach((col, k) => col.forEach((x, row) => expect(Boolean(vals[k * col.length + row])).toBe(x === "bell")));
+    }
   });
   it("returns like the other machines", () => {
     expect(Math.abs(simulate(150_000, 6, 20, MACHINES.classic).rtp - BASE_RTP)).toBeLessThan(0.04);

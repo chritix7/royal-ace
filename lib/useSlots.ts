@@ -79,7 +79,9 @@ type S = {
   book: Paying | null;
   bookReels: number[];
   /** Royal Bells: the bell bonus in progress. */
-  bells: { board: BellBoard; added: number[]; left: number; spinning: boolean; total: number | null; x3: boolean } | null;
+  bells: { board: BellBoard; added: number[]; left: number; spinning: boolean; stopped: number; total: number | null; x3: boolean } | null;
+  /** Royal Bells: the value shown on each bell of the reels (base game). */
+  bellVals: BellBoard | null;
   winBanner: { label: string; amount: number; tier: Tier } | null;
   pools: Pools;
   vault: VaultState | null;
@@ -125,6 +127,7 @@ const INITIAL: S = {
   book: null,
   bookReels: [],
   bells: null,
+  bellVals: null,
   winBanner: null,
   pools: freshPools(),
   vault: null,
@@ -335,7 +338,7 @@ function bonusContinue() {
     else if (patch.mults) set(patch);
     if (st.landed.length > 0) await sleep(700 * speed());
     else if (st.bookReels.length && total > 0) await sleep(600 * speed());
-    return { total, scatters: st.scatters, freeSpins: st.freeSpins, bells: 0, raw: st.raw };
+    return { total, scatters: st.scatters, freeSpins: st.freeSpins, bells: 0, raw: st.raw, bellVals: null };
   }
 
   async function runSpin(free: boolean, mult: number) {
@@ -370,6 +373,7 @@ function bonusContinue() {
         held: st.held,
         expanding: [],
         mults: null,
+        ...(respin ? {} : { bellVals: st.bellVals ?? null }),
         spinning: st.held.map((h) => !h),
         cells: emptyCells(),
         lineWins: [],
@@ -440,7 +444,7 @@ function bonusContinue() {
   haptic(ratio >= 20 ? HAPTIC.big : HAPTIC.win);
 }
     }
-    return { total: spinTotal, scatters: steps[0].scatters, freeSpins: steps[0].freeSpins, bells: steps[0].bells ?? 0, raw: steps[0].raw };
+    return { total: spinTotal, scatters: steps[0].scatters, freeSpins: steps[0].freeSpins, bells: steps[0].bells ?? 0, raw: steps[0].raw, bellVals: steps[0].bellVals ?? null };
   }
 
   async function runFreeSpins(initial: number, bought = false) {
@@ -528,25 +532,37 @@ return fsWin;
     sfx.freeSpins();
     music.duck(2500);
     haptic(HAPTIC.big);
-    set({ banner: "BELL BONUS", lineWins: [], cells: emptyCells(), bells: { board: start, added: [], left: BELL_RESPINS, spinning: false, total: null, x3: false } });
+    set({ banner: "BELL BONUS", lineWins: [], cells: emptyCells(), bells: { board: start, added: [], left: BELL_RESPINS, spinning: false, stopped: REELS, total: null, x3: false } });
     await sleep(1700 * sp);
     set({ banner: null, message: `${start.filter(Boolean).length} bells · ${BELL_RESPINS} respins` });
     await sleep(900 * sp);
     const steps = playBells(Math.random, start);
     for (const st of steps) {
-      set({ bells: { ...ref.current.bells!, spinning: true, added: [] } });
+      // The empty cells spin, then stop reel by reel, left to right.
+      set({ bells: { ...ref.current.bells!, spinning: true, stopped: -1, added: [] } });
       sfx.spin();
-      await sleep(750 * sp);
+      await sleep(520 * sp);
+      const prev = ref.current.bells!.board;
+      for (let r = 0; r < REELS; r++) {
+        const board = prev.map((x, i) => (Math.floor(i / ROWS) <= r ? st.board[i] : x));
+        const added = st.added.filter((i) => Math.floor(i / ROWS) <= r);
+        const landed = st.added.some((i) => Math.floor(i / ROWS) === r);
+        set({ bells: { ...ref.current.bells!, board, added, stopped: r, spinning: r < REELS - 1, x3: board.filter(Boolean).length >= 15 } });
+        if (landed) {
+          sfx.wildLand();
+          haptic(HAPTIC.tick);
+        } else sfx.reelStop();
+        await sleep((landed ? 260 : 140) * sp);
+      }
       const count = st.board.filter(Boolean).length;
-      set({ bells: { board: st.board, added: st.added, left: st.left, spinning: false, total: null, x3: count >= 15 } });
+      set({ bells: { board: st.board, added: st.added, left: st.left, spinning: false, stopped: REELS, total: null, x3: count >= 15 } });
       if (st.added.length) {
-        sfx.wildLand();
         haptic(HAPTIC.win);
         set({ message: count >= 15 ? `${count} bells · all values ×3!` : `${count} bells · respins back to ${BELL_RESPINS}` });
-        await sleep(700 * sp);
+        await sleep(650 * sp);
       } else {
         set({ message: st.left ? `${st.left} respin${st.left > 1 ? "s" : ""} left` : "Last respin…" });
-        await sleep(350 * sp);
+        await sleep(300 * sp);
       }
     }
     // The bells are counted: values, jackpots (the progressive pools) and the Grand.
@@ -632,7 +648,7 @@ const forceBells = debugFlag("bells");
 if (machineRef.current.link && (base.bells >= BELL_TRIGGER || forceBells)) {
   triggered = true;
   bonusRounds += 1;
-  let start = startBoard(base.raw, Math.random);
+  let start = base.bellVals ?? startBoard(base.raw, Math.random);
   if (forceBells) {
     const extra = boughtBoard(Math.random, 5);
     start = start.map((x, i) => x ?? extra[i]);

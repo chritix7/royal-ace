@@ -1327,4 +1327,7 @@ export const FR: Record<string, string> = {
 "Miami · Gold · Pharaoh · Bells": "Miami · Gold · Pharaoh · Bells",
 "Royal Bells: 5 bells start the bell bonus — fill the screen for the Grand.": "Royal Bells : 5 cloches lancent le bonus cloches — remplis l'écran pour le Grand.",
 "Bells": "Bells",
+"Plum": "Prune",
+"Hot 7": "7 brûlant",
+"Hot sevens. Five bells ring the bonus.": "7 brûlants. Cinq cloches lancent le bonus.",
 };
