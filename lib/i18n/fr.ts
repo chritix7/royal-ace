@@ -1330,4 +1330,7 @@ export const FR: Record<string, string> = {
 "Plum": "Prune",
 "Hot 7": "7 brûlant",
 "Hot sevens. Five bells ring the bonus.": "7 brûlants. Cinq cloches lancent le bonus.",
+"GRAND JACKPOT!": "GRAND JACKPOT !",
+"5+ BELLS · BONUS": "5+ CLOCHES · BONUS",
+"5+ bells start the bonus. Slot Reels: ×3 from 15, ×4 full.": "5+ cloches lancent le bonus. Slot Reels : ×3 dès 15, ×4 écran plein.",
 };

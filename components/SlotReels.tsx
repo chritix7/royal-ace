@@ -6,9 +6,10 @@ import { BELL_ICON } from "../lib/symbolArt2";
 import type { Skin } from "../lib/skins";
 import type { SlotsGame } from "../lib/useSlots";
 
-const randomSym = (): Sym => {
+const randomSym = (noScatter = false): Sym => {
   const strip = STRIPS[Math.floor(Math.random() * REELS)];
-  return strip[Math.floor(Math.random() * strip.length)];
+  const s = strip[Math.floor(Math.random() * strip.length)];
+  return noScatter && s === "scatter" ? "bell" : s;
 };
 
 export function SymbolCell({ sym, skin, win, dim = false }: { sym: Sym; skin: Skin; win: boolean; dim?: boolean }) {
@@ -79,7 +80,7 @@ export function Reel({
     const land = Math.min(landMs, total * 0.6);
     const filler = Math.max(LAND_CELLS, Math.round((total - land) / MS_PER_CELL) + LAND_CELLS - ROWS);
     job.current = { total, land };
-    setStrip([...target, ...Array.from({ length: filler }, randomSym), ...prev]);
+    setStrip([...target, ...Array.from({ length: filler }, () => randomSym(skin.id === "classic")), ...prev]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spinId]);
 
@@ -135,8 +136,8 @@ export function Reel({
       {!spinning &&
         bellVals?.map((b, row) =>
           b && target[row] === "bell" ? (
-            <span key={`b${row}`} className={`reel-bell-val ${b.jp ? `is-${b.jp}` : ""}`} style={{ top: `calc(var(--cell) * ${row})` }}>
-              {b.jp ? JP_LABEL[b.jp] : `◈ ${short(b.v * bet)}`}
+            <span key={`b${row}`} className={`reel-bell-val ${b.jp ? `is-${b.jp}` : ""} ${b.boost ? "is-boost" : ""}`} style={{ top: `calc(var(--cell) * ${row})` }}>
+              {b.boost ? "SLOT REELS" : b.jp ? JP_LABEL[b.jp] : `◈ ${short(b.v * bet)}`}
             </span>
           ) : null,
         )}
@@ -432,20 +433,20 @@ const shownLine =
 }
 
 const short = (n: number) => (n >= 1e6 ? `${+(n / 1e6).toFixed(n >= 1e7 ? 0 : 1)}M` : n >= 1e4 ? `${+(n / 1e3).toFixed(n >= 1e5 ? 0 : 1)}K` : n.toLocaleString("en-US"));
-const JP_LABEL = { mini: "MINI", minor: "MINOR", major: "MAJOR" } as const;
+const JP_LABEL = { mini: "MINI", minor: "MINOR", major: "MAJOR", kingpin: "GRAND" } as const;
 
 /** Royal Bells: the bell bonus board, laid over the reels (one cell per symbol). */
 function BellBoardView({ b, bet }: { b: NonNullable<SlotsGame["s"]["bells"]>; bet: number }) {
   const count = b.board.filter(Boolean).length;
-  const x3 = count >= BELL_X3_AT;
+  const m = b.mult;
   return (
-    <div className={`bell-board ${b.spinning ? "is-spinning" : ""} ${x3 ? "is-x3" : ""}`} role="status" aria-label={`${count} bells, ${b.left} respins left`}>
+    <div className={`bell-board ${b.spinning ? "is-spinning" : ""} ${m > 1 ? "is-x3" : ""}`} role="status" aria-label={`${count} bells, ${b.left} respins left`}>
       {Array.from({ length: CELLS }, (_, i) => {
         const bell = b.board[i] as Bell | null;
         const isNew = b.added.includes(i);
         const rolling = !bell && b.spinning && Math.floor(i / ROWS) > b.stopped;
         return (
-          <div key={i} className={`bell-cell ${bell ? "is-bell" : ""} ${isNew ? "is-new" : ""} ${bell?.jp ? `is-${bell.jp}` : ""} ${rolling ? "is-rolling" : ""}`}>
+          <div key={i} className={`bell-cell ${bell ? "is-bell" : ""} ${isNew ? "is-new" : ""} ${bell?.jp ? `is-${bell.jp}` : ""} ${bell?.boost ? "is-boost" : ""} ${rolling ? "is-rolling" : ""}`}>
             {rolling && (
               <span className="bell-roll" aria-hidden="true">
                 <img src={BELL_ICON} alt="" />
@@ -456,8 +457,9 @@ function BellBoardView({ b, bet }: { b: NonNullable<SlotsGame["s"]["bells"]>; be
             )}
             {bell && (
               <>
+                {bell.boost && <span className="bell-cell__tag">SLOT REELS</span>}
                 <img src={BELL_ICON} alt="" draggable={false} className="bell-cell__icon" />
-                <span className="bell-cell__val">{bell.jp ? JP_LABEL[bell.jp] : `◈ ${short(bell.v * bet * (x3 ? 3 : 1))}`}</span>
+                <span className="bell-cell__val">{bell.jp ? JP_LABEL[bell.jp] : `◈ ${short(bell.v * bet * m)}`}</span>
               </>
             )}
           </div>
@@ -470,11 +472,12 @@ function BellBoardView({ b, bet }: { b: NonNullable<SlotsGame["s"]["bells"]>; be
             <i key={i} className={i < b.left ? "is-on" : ""} />
           ))}
         </span>
-        {x3 && <span className="bell-hud__x3">×3</span>}
+        {b.boost && m === 1 && <span className="bell-hud__boost">{`SLOT REELS ×3 @${BELL_X3_AT}`}</span>}
+        {m > 1 && <span className="bell-hud__x3">{`×${m}`}</span>}
       </div>
       {b.total !== null && (
         <div className="bell-total">
-          <span className="bell-total__k">{count === CELLS ? "GRAND JACKPOT" : "BELL BONUS"}</span>
+          <span className="bell-total__k">{b.board.some((x) => x?.jp === "kingpin") ? "GRAND JACKPOT" : count === CELLS ? `FULL SCREEN ×${m}` : "BELL BONUS"}</span>
           <span className="bell-total__v">{`◈ ${b.total.toLocaleString("en-US")}`}</span>
         </div>
       )}

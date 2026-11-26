@@ -21,6 +21,10 @@ import {
   BELL_RESPINS,
   BELL_TRIGGER,
   bellPay,
+  bellMult,
+  BOOST_VALUE,
+  BELL_X3_AT,
+  CELLS,
   boughtBoard,
   playBells,
   startBoard,
@@ -79,7 +83,7 @@ type S = {
   book: Paying | null;
   bookReels: number[];
   /** Royal Bells: the bell bonus in progress. */
-  bells: { board: BellBoard; added: number[]; left: number; spinning: boolean; stopped: number; total: number | null; x3: boolean } | null;
+  bells: { board: BellBoard; added: number[]; left: number; spinning: boolean; stopped: number; total: number | null; mult: number; boost: boolean } | null;
   /** Royal Bells: the value shown on each bell of the reels (base game). */
   bellVals: BellBoard | null;
   winBanner: { label: string; amount: number; tier: Tier } | null;
@@ -113,8 +117,9 @@ const emptyCells = () => Array.from({ length: REELS }, () => Array<boolean>(ROWS
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 const INITIAL: S = {
-  grid: STRIPS.map((strip) => Array.from({ length: ROWS }, (_, r) => strip[r])),
-  target: STRIPS.map((strip) => Array.from({ length: ROWS }, (_, r) => strip[r])),
+  // The first screen: no scatter, so it fits every machine (Royal Bells has none).
+  grid: STRIPS.map((strip) => Array.from({ length: ROWS }, (_, r): Sym => (strip[r] === "scatter" ? "seven" : strip[r]))),
+  target: STRIPS.map((strip) => Array.from({ length: ROWS }, (_, r): Sym => (strip[r] === "scatter" ? "seven" : strip[r]))),
   spinId: 0,
   stopAt: Array(REELS).fill(0),
   landMs: 560,
@@ -532,9 +537,11 @@ return fsWin;
     sfx.freeSpins();
     music.duck(2500);
     haptic(HAPTIC.big);
-    set({ banner: "BELL BONUS", lineWins: [], cells: emptyCells(), bells: { board: start, added: [], left: BELL_RESPINS, spinning: false, stopped: REELS, total: null, x3: false } });
+    const boost = start.some((x) => x?.boost);
+    const multOf = (board: BellBoard) => bellMult(board.filter(Boolean).length, boost);
+    set({ banner: "BELL BONUS", lineWins: [], cells: emptyCells(), bells: { board: start, added: [], left: BELL_RESPINS, spinning: false, stopped: REELS, total: null, mult: multOf(start), boost } });
     await sleep(1700 * sp);
-    set({ banner: null, message: `${start.filter(Boolean).length} bells · ${BELL_RESPINS} respins` });
+    set({ banner: null, message: boost ? `Slot Reels · ×3 from ${BELL_X3_AT} bells, ×4 on a full screen` : `${start.filter(Boolean).length} bells · ${BELL_RESPINS} respins` });
     await sleep(900 * sp);
     const steps = playBells(Math.random, start);
     for (const st of steps) {
@@ -547,7 +554,7 @@ return fsWin;
         const board = prev.map((x, i) => (Math.floor(i / ROWS) <= r ? st.board[i] : x));
         const added = st.added.filter((i) => Math.floor(i / ROWS) <= r);
         const landed = st.added.some((i) => Math.floor(i / ROWS) === r);
-        set({ bells: { ...ref.current.bells!, board, added, stopped: r, spinning: r < REELS - 1, x3: board.filter(Boolean).length >= 15 } });
+        set({ bells: { ...ref.current.bells!, board, added, stopped: r, spinning: r < REELS - 1, mult: multOf(board) } });
         if (landed) {
           sfx.wildLand();
           haptic(HAPTIC.tick);
@@ -555,10 +562,12 @@ return fsWin;
         await sleep((landed ? 260 : 140) * sp);
       }
       const count = st.board.filter(Boolean).length;
-      set({ bells: { board: st.board, added: st.added, left: st.left, spinning: false, stopped: REELS, total: null, x3: count >= 15 } });
+      const before = ref.current.bells!.mult;
+      const mult = multOf(st.board);
+      set({ bells: { board: st.board, added: st.added, left: st.left, spinning: false, stopped: REELS, total: null, mult, boost } });
       if (st.added.length) {
         haptic(HAPTIC.win);
-        set({ message: count >= 15 ? `${count} bells · all values ×3!` : `${count} bells · respins back to ${BELL_RESPINS}` });
+        set({ message: count >= CELLS ? `Full screen · every value ×${mult}!` : mult > 1 && before === 1 ? `${count} bells · every value ×${mult}!` : `${count} bells · respins back to ${BELL_RESPINS}` });
         await sleep(650 * sp);
       } else {
         set({ message: st.left ? `${st.left} respin${st.left > 1 ? "s" : ""} left` : "Last respin…" });
@@ -575,11 +584,7 @@ return fsWin;
       wins.push({ tier: j, amount: Math.round(pools[j] * b) });
       pools = resetPool(pools, j);
     }
-    if (pay.grand) {
-      wins.push({ tier: "kingpin", amount: Math.round(pools.kingpin * b) });
-      pools = resetPool(pools, "kingpin");
-    }
-    set({ pools, bells: { ...ref.current.bells!, total: amount, x3: pay.x3 }, message: pay.grand ? "FULL SCREEN · GRAND JACKPOT!" : `Bell bonus · ◈ ${fmt(amount)}` });
+    set({ pools, bells: { ...ref.current.bells!, total: amount, mult: pay.mult }, message: pay.jps.includes("kingpin") ? "GRAND JACKPOT!" : pay.full ? `Full screen · ×${pay.mult} · ◈ ${fmt(amount)}` : `Bell bonus · ◈ ${fmt(amount)}` });
     sfx.bigWin();
     await sleep(1600 * sp);
     wallet.add(amount);
@@ -644,7 +649,8 @@ return fsWin;
 
 if (triggered) total += await runFreeSpins(base.freeSpins);
 
-const forceBells = debugFlag("bells");
+const forceBoost = debugFlag("boost");
+const forceBells = debugFlag("bells") || forceBoost;
 if (machineRef.current.link && (base.bells >= BELL_TRIGGER || forceBells)) {
   triggered = true;
   bonusRounds += 1;
@@ -652,6 +658,10 @@ if (machineRef.current.link && (base.bells >= BELL_TRIGGER || forceBells)) {
   if (forceBells) {
     const extra = boughtBoard(Math.random, 5);
     start = start.map((x, i) => x ?? extra[i]);
+    if (forceBoost && !start.some((x) => x?.boost)) {
+      const i = start.findIndex(Boolean);
+      start[i] = { v: BOOST_VALUE, boost: true };
+    }
   }
   const r = await runBells(b, start);
   total += r.total;

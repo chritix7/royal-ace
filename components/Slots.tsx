@@ -1,4 +1,5 @@
 "use client";
+import { useLang } from "../lib/i18n";
 
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import BetBar from "./BetBar";
@@ -373,6 +374,7 @@ export default function Slots({
       }
     };
   }, [focus]);
+  const fr = useLang() === "fr";
   const skin = SKINS[skinId];
   const {
   s, balance, bet, lineBet, canSpin, play, stopAuto, setBetIdx, maxBet, toggleTurbo, setAutoStops, refill,
@@ -838,7 +840,13 @@ useEffect(() => {
   {/* Right tower: crowns, vault, last spins */}
   <div className="hidden justify-self-start lg:flex lg:w-[180px] lg:flex-col lg:gap-2 lg:self-center">
     <p className="flex items-center justify-center gap-2"><span aria-hidden="true" className="h-px w-6 bg-gradient-to-r from-transparent to-[#d7b45b]/70" /><span className="font-display gold-text text-[12px] font-bold uppercase tracking-[0.3em]">Bonuses</span><span aria-hidden="true" className="h-px w-6 bg-gradient-to-l from-transparent to-[#d7b45b]/70" /></p>
-    <button
+    {skinId === "classic" ? (
+<button type="button" onClick={() => openInfo("features")} className={towerCard} style={towerStyle}>
+      <span className="text-[9px] font-black tracking-[0.25em] text-[#ffb36b]/90"><span aria-hidden="true">🔔 </span>BELL LINK</span>
+      <span className="mt-1.5 block text-[11px] leading-snug text-white/70" translate="no">{fr ? "5+ cloches lancent le bonus. Slot Reels : ×3 dès 15, ×4 écran plein." : "5+ bells start the bonus. Slot Reels: ×3 from 15, ×4 full."}</span>
+    </button>
+) : (
+<button
       type="button"
       onClick={() => openInfo("features")}
       title={`Every scatter adds a crown (per bet). At ${collection.target}: 5 free spins or ${COLLECTION_CHIP_MULT}× your bet.`}
@@ -855,6 +863,7 @@ useEffect(() => {
         ))}
       </span>
     </button>
+)}
     <button
       type="button"
       onClick={() => openInfo("features")}
@@ -1156,7 +1165,13 @@ useEffect(() => {
 
               {/* ── Phones / tablets: bonuses strip + compact cabinet deck ── */}
               <div ref={mobileStripRef} className="mx-auto mb-2 flex w-full max-w-md items-center gap-1.5 lg:hidden">
-                <button
+                {skinId === "classic" ? (
+<button type="button" onClick={() => openInfo("features")} className="flex min-w-0 flex-1 items-center gap-1.5 rounded-full border border-[#ff7a2a]/35 bg-black/55 px-2.5 py-1.5 text-[10px] font-black tracking-[0.12em] text-[#ffcf8a] backdrop-blur-sm">
+                  <span aria-hidden="true">🔔</span>
+                  <span className="truncate" translate="no">{fr ? "5+ CLOCHES · BONUS" : "5+ BELLS · BONUS"}</span>
+                </button>
+) : (
+<button
                   type="button"
                   onClick={() => openInfo("features")}
                   className="flex min-w-0 flex-1 items-center gap-1.5 rounded-full border border-[#d7b45b]/25 bg-black/55 px-2.5 py-1.5 backdrop-blur-sm"
@@ -1170,6 +1185,7 @@ useEffect(() => {
                   </span>
                   <span className="text-[10px] font-black tabular-nums text-[#f0d99a]">{collection.crowns}/{collection.target}</span>
                 </button>
+)}
                 <button
                   type="button"
                   onClick={() => openInfo("features")}

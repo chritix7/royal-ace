@@ -238,13 +238,18 @@ describe("Royal Bells", () => {
     const r = evaluate(g.map((c) => c.map((x) => (x === "bell" ? "scatter" : x))) as Sym[][], 20, 1, [], g);
     expect(r.lineWins.length).toBe(0);
   });
-  it("triples the values from 15 bells and pays the Grand on a full screen", () => {
+  it("multiplies the values only with a Slot Reels bell from 15, and on a full screen", () => {
     const b15 = Array.from({ length: CELLS }, (_, i) => (i < BELL_X3_AT ? { v: 1 } : null));
-    expect(bellPay(b15, SEED_POOLS).coins).toBe(BELL_X3_AT * 3);
+    expect(bellPay(b15, SEED_POOLS).coins).toBe(BELL_X3_AT);
+    const boosted = b15.map((x, i) => (i === 0 ? { v: 1, boost: true } : x));
+    expect(bellPay(boosted, SEED_POOLS).coins).toBe(BELL_X3_AT * 3);
     const full = Array.from({ length: CELLS }, () => ({ v: 1 }));
-    const p = bellPay(full, SEED_POOLS);
-    expect(p.grand).toBe(true);
-    expect(p.total).toBe(CELLS * 3 + SEED_POOLS.kingpin);
+    expect(bellPay(full, SEED_POOLS).total).toBe(CELLS * 2);
+    expect(bellPay(full.map((x, i) => (i === 0 ? { v: 1, boost: true } : x)), SEED_POOLS).total).toBe(CELLS * 4);
+  });
+  it("pays a jackpot bell without multiplying it", () => {
+    const b = Array.from({ length: CELLS }, (_, i): { v: number; jp?: "kingpin"; boost?: boolean } => (i === 0 ? { v: 0, jp: "kingpin" } : { v: 1, boost: i === 1 }));
+    expect(bellPay(b, SEED_POOLS).total).toBe((CELLS - 1) * 4 + SEED_POOLS.kingpin);
   });
   it("keeps the respins at 3 while new bells land, and ends with no new bell", () => {
     const steps = playBells(mulberry32(4), boughtBoard(mulberry32(5)));
@@ -260,6 +265,7 @@ describe("Royal Bells", () => {
       const vals = r.bellVals!;
       expect(vals.length).toBe(CELLS);
       r.raw.forEach((col, k) => col.forEach((x, row) => expect(Boolean(vals[k * col.length + row])).toBe(x === "bell")));
+      expect(r.raw.flat()).not.toContain("scatter");
     }
   });
   it("returns like the other machines", () => {
