@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { PAYLINES, REELS, ROWS, STRIPS, type LineWin, type Sym } from "../lib/slots";
+import { BELL_RESPINS, BELL_X3_AT, BET_LEVELS, CELLS, PAYLINES, REELS, ROWS, STRIPS, type Bell, type LineWin, type Sym } from "../lib/slots";
+import { BELL_ICON } from "../lib/symbolArt2";
 import type { Skin } from "../lib/skins";
 import type { SlotsGame } from "../lib/useSlots";
 
@@ -372,6 +373,7 @@ const shownLine =
                 stickyNew={s.stickyNew?.[k]}
               />
             ))}
+            {s.bells && <BellBoardView b={s.bells} bet={BET_LEVELS[s.betIdx]} />}
             {shownLine && (
               <svg
                 className="pointer-events-none absolute inset-0 z-10 h-full w-full"
@@ -412,6 +414,48 @@ const shownLine =
 
     </div>
 
+    </div>
+  );
+}
+
+const short = (n: number) => (n >= 1e6 ? `${+(n / 1e6).toFixed(n >= 1e7 ? 0 : 1)}M` : n >= 1e4 ? `${+(n / 1e3).toFixed(n >= 1e5 ? 0 : 1)}K` : n.toLocaleString("en-US"));
+const JP_LABEL = { mini: "MINI", minor: "MINOR", major: "MAJOR" } as const;
+
+/** Royal Bells: the bell bonus board, laid over the reels (one cell per symbol). */
+function BellBoardView({ b, bet }: { b: NonNullable<SlotsGame["s"]["bells"]>; bet: number }) {
+  const count = b.board.filter(Boolean).length;
+  const x3 = count >= BELL_X3_AT;
+  return (
+    <div className={`bell-board ${b.spinning ? "is-spinning" : ""} ${x3 ? "is-x3" : ""}`} role="status" aria-label={`${count} bells, ${b.left} respins left`}>
+      {Array.from({ length: CELLS }, (_, i) => {
+        const bell = b.board[i] as Bell | null;
+        const isNew = b.added.includes(i);
+        return (
+          <div key={i} className={`bell-cell ${bell ? "is-bell" : ""} ${isNew ? "is-new" : ""} ${bell?.jp ? `is-${bell.jp}` : ""}`}>
+            {bell && (
+              <>
+                <img src={BELL_ICON} alt="" draggable={false} className="bell-cell__icon" />
+                <span className="bell-cell__val">{bell.jp ? JP_LABEL[bell.jp] : `◈ ${short(bell.v * bet * (x3 ? 3 : 1))}`}</span>
+              </>
+            )}
+          </div>
+        );
+      })}
+      <div className="bell-hud">
+        <span className="bell-hud__count">{`${count}/${CELLS}`}</span>
+        <span className="bell-hud__dots" aria-hidden="true">
+          {Array.from({ length: BELL_RESPINS }, (_, i) => (
+            <i key={i} className={i < b.left ? "is-on" : ""} />
+          ))}
+        </span>
+        {x3 && <span className="bell-hud__x3">×3</span>}
+      </div>
+      {b.total !== null && (
+        <div className="bell-total">
+          <span className="bell-total__k">{count === CELLS ? "GRAND JACKPOT" : "BELL BONUS"}</span>
+          <span className="bell-total__v">{`◈ ${b.total.toLocaleString("en-US")}`}</span>
+        </div>
+      )}
     </div>
   );
 }

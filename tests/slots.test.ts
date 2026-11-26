@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   BASE_RTP, BET_LEVELS, FS_CAP, MAX_RESPINS, PAYLINES, PAYS, REELS, ROWS, STRIPS,
-  MACHINES, averageBonus, evaluate, expandFromRaw, noMults, mulberry32, noSticky, playSequence, reelTimings, resolveSpin, retriggerSpins, simulate, stickyFromRaw, type Sym,
+  BELL_X3_AT, CELLS, MACHINES, SEED_POOLS, averageBonus, bellPay, playBells, boughtBoard, evaluate, expandFromRaw, noMults, mulberry32, noSticky, playSequence, reelTimings, resolveSpin, retriggerSpins, simulate, stickyFromRaw, type Sym,
 } from "../lib/slots";
 import { wallet } from "../lib/wallet";
 
@@ -229,6 +229,31 @@ describe("Royal Ace Gold and Pharaoh's Vault", () => {
       expect(Math.abs(averageBonus(10_000, 4, 20, MACHINES[id]) - 15.8)).toBeLessThan(2);
       expect(Math.abs(simulate(100_000, 6, 20, MACHINES[id]).rtp - BASE_RTP)).toBeLessThan(0.035);
     }
+  });
+});
+
+describe("Royal Bells", () => {
+  it("does not pay bells on the lines and counts them for the bonus", () => {
+    const g = put(base(), 1, ["bell", "bell", "bell", "bell", "bell"]);
+    const r = evaluate(g.map((c) => c.map((x) => (x === "bell" ? "scatter" : x))) as Sym[][], 20, 1, [], g);
+    expect(r.lineWins.length).toBe(0);
+  });
+  it("triples the values from 15 bells and pays the Grand on a full screen", () => {
+    const b15 = Array.from({ length: CELLS }, (_, i) => (i < BELL_X3_AT ? { v: 1 } : null));
+    expect(bellPay(b15, SEED_POOLS).coins).toBe(BELL_X3_AT * 3);
+    const full = Array.from({ length: CELLS }, () => ({ v: 1 }));
+    const p = bellPay(full, SEED_POOLS);
+    expect(p.grand).toBe(true);
+    expect(p.total).toBe(CELLS * 3 + SEED_POOLS.kingpin);
+  });
+  it("keeps the respins at 3 while new bells land, and ends with no new bell", () => {
+    const steps = playBells(mulberry32(4), boughtBoard(mulberry32(5)));
+    const last = steps[steps.length - 1];
+    expect(last.left === 0 || last.board.every(Boolean)).toBe(true);
+    steps.forEach((st) => expect(st.left).toBe(st.added.length ? 3 : st.left));
+  });
+  it("returns like the other machines", () => {
+    expect(Math.abs(simulate(150_000, 6, 20, MACHINES.classic).rtp - BASE_RTP)).toBeLessThan(0.04);
   });
 });
 

@@ -3469,3 +3469,29 @@ textarea.st-input { border-radius: 12px; }
 .wild-mult { animation: mult-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.4) both; }
 @keyframes mult-in { 0% { transform: scale(0.2); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .wild-mult { animation: none; } }
+/* Royal Bells · the bell bonus board */
+.room-bells { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(50% 40% at 50% 0%, rgba(255, 77, 94, 0.18), transparent 70%), repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0 2px, transparent 2px 64px), linear-gradient(180deg, transparent 65%, rgba(0, 0, 0, 0.45)); }
+.bell-board { position: absolute; inset: 0; z-index: 20; display: grid; grid-template-rows: repeat(4, var(--cell)); grid-auto-flow: column; grid-auto-columns: var(--cell-w); background: #0a0204; animation: ga-in 0.3s ease-out both; }
+.bell-cell { position: relative; display: grid; place-items: center; border: 1px solid rgba(229, 199, 121, 0.08); background: radial-gradient(circle at 50% 45%, #280a10, #0a0204); }
+.bell-board.is-spinning .bell-cell:not(.is-bell) { animation: bell-empty 0.75s ease-in-out both; }
+@keyframes bell-empty { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+.bell-cell.is-bell { background: radial-gradient(circle at 50% 40%, #6b4a1c, #3c0a10 75%); box-shadow: inset 0 0 0 2px rgba(255, 209, 102, 0.55); }
+.bell-cell.is-new { animation: bell-in 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.4) both; }
+@keyframes bell-in { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.bell-cell__icon { width: 62%; height: 62%; object-fit: contain; transform: translateY(-10%); }
+.bell-cell__val { position: absolute; left: 50%; bottom: 7%; transform: translateX(-50%); white-space: nowrap; border-radius: 9999px; padding: 0 0.4rem; font-family: var(--font-display), Georgia, serif; font-size: clamp(9px, calc(var(--cell) * 0.16), 15px); font-weight: 800; color: #1a1206; background: linear-gradient(180deg, #fff4c2, #d9ae54); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6); }
+.bell-cell.is-mini .bell-cell__val { background: linear-gradient(180deg, #c6f6ff, #36b6d6); }
+.bell-cell.is-minor .bell-cell__val { background: linear-gradient(180deg, #c9ffd9, #2fb36a); }
+.bell-cell.is-major .bell-cell__val { background: linear-gradient(180deg, #ffe0a8, #f08a24); color: #2a0b00; }
+.bell-board.is-x3 .bell-cell.is-bell { box-shadow: inset 0 0 0 2px #ff6b7d, inset 0 0 18px rgba(255, 107, 125, 0.35); }
+.bell-hud { position: absolute; left: 50%; top: 6px; z-index: 2; display: flex; align-items: center; gap: 0.5rem; transform: translateX(-50%); border-radius: 9999px; padding: 0.2rem 0.7rem; background: rgba(0, 0, 0, 0.78); box-shadow: inset 0 0 0 1px rgba(240, 211, 139, 0.55); }
+.bell-hud__count { font-family: var(--font-display), Georgia, serif; font-size: 13px; font-weight: 800; color: #f6e2a8; font-variant-numeric: tabular-nums; }
+.bell-hud__dots { display: flex; gap: 4px; }
+.bell-hud__dots i { width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, 0.15); }
+.bell-hud__dots i.is-on { background: linear-gradient(180deg, #fff4c2, #d9ae54); box-shadow: 0 0 6px rgba(255, 209, 102, 0.7); }
+.bell-hud__x3 { border-radius: 6px; padding: 0 0.35rem; font-size: 12px; font-weight: 900; color: #fff; background: linear-gradient(180deg, #ff6b7d, #c1121f); }
+.bell-total { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.3rem; background: rgba(0, 0, 0, 0.55); animation: ga-in 0.35s ease-out both; }
+.bell-total__k { font-size: 11px; font-weight: 900; letter-spacing: 0.3em; color: rgba(255, 233, 176, 0.85); }
+.bell-total__v { font-family: var(--font-display), Georgia, serif; font-size: clamp(1.8rem, 4vw, 3.4rem); font-weight: 800; color: #ffe9a6; text-shadow: 0 3px 0 rgba(0, 0, 0, 0.6); }
+@media (prefers-reduced-motion: reduce) { .bell-cell.is-new, .bell-board.is-spinning .bell-cell:not(.is-bell) { animation: none; } }
+.lb-machine.is-classic { box-shadow: inset 0 0 0 1px rgba(255, 77, 94, 0.65); }

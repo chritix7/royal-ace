@@ -11,8 +11,11 @@ export default function BuyBonusModal({
   onClose,
   onBuy,
   spins,
+  bells = false,
 }: {
   spins: number;
+  /** Royal Bells: the bell bonus instead of free spins. */
+  bells?: boolean;
   mult: number;
   open: boolean;
   freeSpinsLabel: string;
@@ -69,7 +72,7 @@ export default function BuyBonusModal({
           id="buy-bonus-title"
           className="mt-2 text-xl font-black leading-tight text-[#ead5a3]"
         >
-          Start {freeSpinsLabel}?
+          {bells ? "Start the bell bonus?" : `Start ${freeSpinsLabel}?`}
         </h3>
 
         <div
@@ -92,8 +95,17 @@ export default function BuyBonusModal({
         </div>
 
         <ul className="mt-4 space-y-1.5 text-left text-[12.5px] leading-5 text-white/70">
-          <li className="flex gap-2"><span className="text-[#e5c779]">✦</span> {spins} free spins start right away</li>
-          <li className="flex gap-2"><span className="text-[#e5c779]">✦</span> Sticky wilds: every wild that lands stays until the last spin</li>
+          {bells ? (
+            <>
+              <li className="flex gap-2"><span className="text-[#e5c779]">✦</span> 6 bells start on the screen, with 3 respins</li>
+              <li className="flex gap-2"><span className="text-[#e5c779]">✦</span> Values, jackpots, ×3 from 15 bells, the Grand on a full screen</li>
+            </>
+          ) : (
+            <>
+              <li className="flex gap-2"><span className="text-[#e5c779]">✦</span> {`${spins} free spins start right away`}</li>
+              <li className="flex gap-2"><span className="text-[#e5c779]">✦</span> Sticky wilds: every wild that lands stays until the last spin</li>
+            </>
+          )}
           <li className="flex gap-2"><span className="text-[#e5c779]">✦</span> Average return about 96% of the price: results swing a lot</li>
         </ul>
         {short && <p className="mt-3 text-[12px] text-red-300">Not enough chips for this bonus at the current bet.</p>}

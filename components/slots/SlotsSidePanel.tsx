@@ -10,6 +10,7 @@ import { useSession } from "../../lib/sessionStore";
 import { useSlotBonuses } from "../../lib/slotBonuses";
 import { RANKS, SKIN_IDS, type SkinId, type Skin } from "../../lib/skins";
 import {
+  BELL_BUY_MULT,
   BONUS_PRICE_MULT,
   FS_AWARD,
   FS_CAP,
@@ -24,7 +25,7 @@ import {
 } from "../../lib/slots";
 import { VAULT_TRIGGER } from "../../lib/vault";
 
-const SHORT: Record<SkinId, string> = { miami: "Miami", gold: "Gold", pharaoh: "Pharaoh", classic: "Classic" };
+const SHORT: Record<SkinId, string> = { miami: "Miami", gold: "Gold", pharaoh: "Pharaoh", classic: "Bells" };
 
 const PAY_ROWS: Paying[] = ["seven", "wild", "gem", "bell", "grape", "lemon", "cherry"];
 
@@ -190,7 +191,12 @@ export default function SlotsSidePanel({
                 ? L("Lands on every reel (about one spin in 4), replaces every symbol except the scatter and carries a ×2, ×3 or ×5 multiplier. Two wilds on one line multiply together (×3 and ×5 = ×15), up to ×50.", "Tombe sur tous les rouleaux (environ un tour sur 4), remplace tous les symboles sauf le scatter et porte un multiplicateur ×2, ×3 ou ×5. Deux wilds sur une même ligne se multiplient entre eux (×3 et ×5 = ×15), jusqu'à ×50.")
                 : L("Replaces every symbol except the scatter. Lands on reels 2, 3 and 4, expands to fill the reel and gives a free re-spin (up to 3 in a row).", "Remplace tous les symboles sauf le scatter. Tombe sur les rouleaux 2, 3 et 4, s'étend sur tout le rouleau et offre un re-spin gratuit (jusqu'à 3 de suite).")}</p>
           </div>
-          {skinId === "pharaoh" ? (
+          {skinId === "classic" ? (
+            <div className={`${rule} border-[#d7b45b]/45`}>
+              <Glyph sym="bell" skin={skin} className="h-8 w-8 shrink-0" />
+              <p translate="no"><b className="text-white">{L("Bell bonus.", "Bonus cloches.")}</b> {L("5 golden bells or more on the screen start it. The bells stay, each one shows a value (×1 to ×25 the bet) or a jackpot (Mini, Minor, Major), and you get 3 respins: every new bell stays and puts the respins back to 3. From 15 bells, every value is ×3. Fill the 20 cells for the Grand (the Kingpin jackpot). Bells do not pay on the lines.", "5 cloches dorées ou plus à l'écran le déclenchent. Les cloches restent, chacune affiche une valeur (×1 à ×25 la mise) ou un jackpot (Mini, Minor, Major), et tu as 3 relances : chaque nouvelle cloche reste et remet les relances à 3. Dès 15 cloches, toutes les valeurs sont ×3. Remplis les 20 cases pour le Grand (le jackpot Kingpin). Les cloches ne paient pas sur les lignes.")}</p>
+            </div>
+          ) : skinId === "pharaoh" ? (
             <div className={`${rule} border-[#d7b45b]/45`}>
               <span className="w-8 shrink-0 text-center text-xl">📜</span>
               <p translate="no"><b className="text-white">{L(`Expanding symbol · ${skin.labels.freeSpins}.`, `Symbole extensible · ${skin.labels.freeSpins}.`)}</b> {L("At the start of the free spins the Pharaoh picks one symbol. On every free spin, when it shows on 3 reels or more, it fills those reels and pays on all 20 lines, wherever the reels are. The Pharaoh (wild) lands more often: he fills his whole reel and that reel counts for the expanding symbol too.", "Au début des tours gratuits, le Pharaon choisit un symbole. À chaque tour gratuit, s'il apparaît sur 3 rouleaux ou plus, il remplit ces rouleaux et paie sur les 20 lignes, même si les rouleaux ne se suivent pas. Le Pharaon (wild) tombe plus souvent : il remplit tout son rouleau, et ce rouleau compte aussi pour le symbole extensible.")}</p>
@@ -205,7 +211,7 @@ export default function SlotsSidePanel({
           )}
           <div className={rule}>
             <Glyph sym="scatter" skin={skin} className="h-8 w-8 shrink-0" />
-            <p translate="no"><b className="text-white">{`Scatter · ${skin.names.scatter}.`}</b> {L(`3, 4 or 5 anywhere pay ${SCATTER_PAYS[3]}×, ${SCATTER_PAYS[4]}× or ${SCATTER_PAYS[5]}× the bet and award ${FS_AWARD[3]}, ${FS_AWARD[4]} or ${FS_AWARD[5]} free spins. Retrigger +${FS_RETRIGGER[3]} / +${FS_RETRIGGER[4]} / +${FS_RETRIGGER[5]} (max ${FS_CAP}).`, `3, 4 ou 5 n'importe où paient ${SCATTER_PAYS[3]}×, ${SCATTER_PAYS[4]}× ou ${SCATTER_PAYS[5]}× la mise et donnent ${FS_AWARD[3]}, ${FS_AWARD[4]} ou ${FS_AWARD[5]} tours gratuits. Relance +${FS_RETRIGGER[3]} / +${FS_RETRIGGER[4]} / +${FS_RETRIGGER[5]} (max ${FS_CAP}).`)}</p>
+            <p translate="no"><b className="text-white">{`Scatter · ${skin.names.scatter}.`}</b> {skinId === "classic" ? L(`3, 4 or 5 anywhere pay ${SCATTER_PAYS[3]}×, ${SCATTER_PAYS[4]}× or ${SCATTER_PAYS[5]}× the bet.`, `3, 4 ou 5 n'importe où paient ${SCATTER_PAYS[3]}×, ${SCATTER_PAYS[4]}× ou ${SCATTER_PAYS[5]}× la mise.`) : L(`3, 4 or 5 anywhere pay ${SCATTER_PAYS[3]}×, ${SCATTER_PAYS[4]}× or ${SCATTER_PAYS[5]}× the bet and award ${FS_AWARD[3]}, ${FS_AWARD[4]} or ${FS_AWARD[5]} free spins. Retrigger +${FS_RETRIGGER[3]} / +${FS_RETRIGGER[4]} / +${FS_RETRIGGER[5]} (max ${FS_CAP}).`, `3, 4 ou 5 n'importe où paient ${SCATTER_PAYS[3]}×, ${SCATTER_PAYS[4]}× ou ${SCATTER_PAYS[5]}× la mise et donnent ${FS_AWARD[3]}, ${FS_AWARD[4]} ou ${FS_AWARD[5]} tours gratuits. Relance +${FS_RETRIGGER[3]} / +${FS_RETRIGGER[4]} / +${FS_RETRIGGER[5]} (max ${FS_CAP}).`)}</p>
           </div>
           <div className={rule}>
             <span className="w-8 shrink-0 text-center text-xl">👑</span>
@@ -217,7 +223,9 @@ export default function SlotsSidePanel({
           </div>
           <div className={rule}>
             <span className="w-8 shrink-0 text-center text-xl">🎟️</span>
-            <p translate="no"><b className="text-white">{L("Buy bonus.", "Acheter le bonus.")}</b> {L(`Start ${FS_AWARD[3]} free spins now for ◈ ${money(bonusPrice)} (${BONUS_PRICE_MULT}× the bet). On average it returns about 96% of its price.`, `Lance ${FS_AWARD[3]} tours gratuits tout de suite pour ◈ ${money(bonusPrice)} (${BONUS_PRICE_MULT}× la mise). En moyenne, il rend environ 96 % de son prix.`)}</p>
+            <p translate="no"><b className="text-white">{L("Buy bonus.", "Acheter le bonus.")}</b> {skinId === "classic"
+                ? L(`Start the bell bonus with 6 bells for ◈ ${money(bonusPrice)} (${BELL_BUY_MULT}× the bet). On average it returns about 96% of its price.`, `Lance le bonus cloches avec 6 cloches pour ◈ ${money(bonusPrice)} (${BELL_BUY_MULT}× la mise). En moyenne, il rend environ 96 % de son prix.`)
+                : L(`Start ${FS_AWARD[3]} free spins now for ◈ ${money(bonusPrice)} (${BONUS_PRICE_MULT}× the bet). On average it returns about 96% of its price.`, `Lance ${FS_AWARD[3]} tours gratuits tout de suite pour ◈ ${money(bonusPrice)} (${BONUS_PRICE_MULT}× la mise). En moyenne, il rend environ 96 % de son prix.`)}</p>
           </div>
           <div className={rule}>
             <span className="w-8 shrink-0 text-center text-xl">🃏</span>

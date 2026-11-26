@@ -32,7 +32,6 @@ import { useBalanceFlash } from "../hooks/useBalanceFlash";
 import { useSession } from "../lib/sessionStore";
 import SlotsSidePanel from "./slots/SlotsSidePanel";
 import KingpinRoom from "./slots/KingpinRoom";
-import ClassicRoom from "./slots/ClassicRoom";
 import BonusResultModal from "./slots/BonusResultModal";
 import BuyBonusModal from "./slots/BuyBonusModal";
 import { useEco } from "../lib/motion";
@@ -204,7 +203,7 @@ const MACHINE_LINE: Record<SkinId, string> = {
   miami: "Expanding Boss wilds · sticky wilds in free spins",
   gold: "Multiplier wilds ×2 ×3 ×5 · they multiply together",
   pharaoh: "One symbol expands on every free spin",
-  classic: "Fruits & sevens · the old-school machine",
+  classic: "Fruits & sevens · 5 bells start the bell bonus",
 };
 
 export default function Slots({
@@ -684,7 +683,7 @@ useEffect(() => {
           data-focus={focus ? "" : undefined}
         >
           {/* Phones: the plain room colour only (no animated room behind the machine) */}
-          {!phoneScreen && !eco && skinId === "classic" && <ClassicRoom party={s.fs !== null} />}
+          {!phoneScreen && skinId === "classic" && <div className="room-bells" aria-hidden="true" />}
           {!phoneScreen && skinId === "gold" && <div className="room-gold" aria-hidden="true" />}
           {!phoneScreen && skinId === "pharaoh" && <div className="room-pharaoh" aria-hidden="true" />}
           {!phoneScreen && !eco && skinId === "miami" && <KingpinRoom party={s.fs !== null} />}
@@ -1132,7 +1131,7 @@ useEffect(() => {
                           <button
                             onClick={() => setBuyOpen(true)}
                             disabled={s.busy || !!s.fs || balance < bonusPrice}
-                            title={`Buy ${FS_AWARD[3]} free spins for ◈ ${money(bonusPrice)}`}
+                            title={skinId === "classic" ? `Buy the bell bonus for ◈ ${money(bonusPrice)}` : `Buy ${FS_AWARD[3]} free spins for ◈ ${money(bonusPrice)}`}
                             className="cab-key w-14 flex-col gap-0.5 leading-none"
                           >
                             <IconTicket />
@@ -1311,7 +1310,7 @@ useEffect(() => {
                         <button
                           onClick={() => setBuyOpen(true)}
                           disabled={s.busy || !!s.fs || balance < bonusPrice}
-                          aria-label={`Buy ${FS_AWARD[3]} free spins for ${money(bonusPrice)}`}
+                          aria-label={skinId === "classic" ? `Buy the bell bonus for ${money(bonusPrice)}` : `Buy ${FS_AWARD[3]} free spins for ${money(bonusPrice)}`}
                           className="cab-key !h-10 w-10 flex-col gap-0.5 leading-none"
                         >
                           <IconTicket />
@@ -1380,6 +1379,7 @@ useEffect(() => {
         onBuy={() => buyBonus(true)}
         spins={FS_AWARD[3]}
         mult={FS_MULT}
+        bells={skinId === "classic"}
       />
 
       {s.gamble && gambleScreen && (

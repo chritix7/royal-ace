@@ -53,11 +53,11 @@ export const LOBBY_GAMES: Info[] = [
   {
     id: "slots",
     name: "Slot machines",
-    tag: "3 machines · 5 reels",
-    facts: ["4 progressive jackpots", "Miami · Gold · Pharaoh"],
+    tag: "4 machines · 5 reels",
+    facts: ["4 progressive jackpots", "Miami · Gold · Pharaoh · Bells"],
     limits: "◈ 20 – 100K",
     rtp: "96%",
-    about: ["Miami Kingpin: expanding Boss wilds and re-spins, sticky wilds in the free spins.", "Royal Ace Gold: multiplier wilds ×2, ×3, ×5 that multiply together.", "Pharaoh's Vault: one symbol expands on every free spin and pays on all lines.", "Four jackpots grow with every spin: Mini, Minor, Major, Kingpin."],
+    about: ["Miami Kingpin: expanding Boss wilds and re-spins, sticky wilds in the free spins.", "Royal Ace Gold: multiplier wilds ×2, ×3, ×5 that multiply together.", "Pharaoh's Vault: one symbol expands on every free spin and pays on all lines.", "Royal Bells: 5 bells start the bell bonus — fill the screen for the Grand.", "Four jackpots grow with every spin: Mini, Minor, Major, Kingpin."],
     challenge: "slots",
     stat: ["spins", "slotWins", "spins"],
     session: "slots",
@@ -305,6 +305,7 @@ const LOBBY_MACHINES: [string, string][] = [
   ["miami", "Miami"],
   ["gold", "Gold"],
   ["pharaoh", "Pharaoh"],
+  ["classic", "Bells"],
 ];
 function GameCard({ g, i, onOpen, onPlay, badge, compact, day, fav, onFav, onMachine }: { g: Info; i: number; onOpen: () => void; onPlay: () => void; badge: Badge; compact: boolean; day: boolean; fav: boolean; onFav: () => void; onMachine?: (id: string) => void }) {
   return (

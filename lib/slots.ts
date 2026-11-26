@@ -132,13 +132,21 @@ export type Machine = {
   fsCap?: number;
   /** Wilds per reel strip in the base game (default COUNTS.wild). */
   wilds?: number[];
+  /** Other symbol counts on the strips (base and free spins). */
+  counts?: Partial<Record<Sym, number[]>>;
+  /** Royal Bells: the bell is the link symbol (no line pay); 5+ start the bell bonus. */
+  link?: boolean;
+  /** No free spins from scatters (they still pay). */
+  noFs?: boolean;
   /** false: the wild stays in its cell (no expansion, no re-spin). */
   expand?: boolean;
   /** Pharaoh: scale of the expanding symbol's pay. */
   bookPay?: number;
 };
 export const MACHINES: Record<MachineId, Machine> = {
-  classic: { pay: 1, fs: "sticky", fsPay: 1, fsWilds: FS_WILDS },
+  // Royal Bells (the old Classic): fruit lines, an expanding crown wild, and
+  // the bell bonus. Scatters pay anywhere but give no free spins.
+  classic: { fs: "sticky", fsPay: 1, fsWilds: FS_WILDS, link: true, noFs: true, counts: { bell: [3, 20, 20, 20, 3] }, pay: 0.765 },
   miami: { pay: 1, fs: "sticky", fsPay: 1, fsWilds: FS_WILDS },
   // Gold: wilds on every reel (about one spin in 4), each with its multiplier; it stays in its cell.
   gold: { pay: 1.02, wilds: [1, 1, 1, 1, 1], fs: "sticky", fsPay: 0.55, fsWilds: [1, 2, 1, 2, 1], expand: false, mults: [{ v: 2, w: 60 }, { v: 3, w: 28 }, { v: 5, w: 12 }], cap: 50, fsMults: [{ v: 2, w: 1 }], fsCap: 2 },
@@ -146,16 +154,16 @@ export const MACHINES: Record<MachineId, Machine> = {
 };
 const STRIP_CACHE = new Map<string, Sym[][]>();
 function baseStrips(m: Machine): Sym[][] {
-  if (!m.wilds) return STRIPS;
-  const key = "b" + m.wilds.join(",");
+  if (!m.wilds && !m.counts) return STRIPS;
+  const key = "b" + JSON.stringify([m.wilds, m.counts]);
   let st = STRIP_CACHE.get(key);
-  if (!st) STRIP_CACHE.set(key, (st = buildStrips({ ...COUNTS, wild: m.wilds })));
+  if (!st) STRIP_CACHE.set(key, (st = buildStrips({ ...COUNTS, ...(m.counts ?? {}), ...(m.wilds ? { wild: m.wilds } : {}) } as Record<Sym, number[]>)));
   return st;
 }
 function fsStrips(m: Machine): Sym[][] {
-  const key = m.fsWilds.join(",");
+  const key = JSON.stringify([m.fsWilds, m.counts]);
   let st = STRIP_CACHE.get(key);
-  if (!st) STRIP_CACHE.set(key, (st = buildStrips({ ...COUNTS, wild: m.fsWilds })));
+  if (!st) STRIP_CACHE.set(key, (st = buildStrips({ ...COUNTS, ...(m.counts ?? {}), wild: m.fsWilds } as Record<Sym, number[]>)));
   return st;
 }
 export function drawMult(rng: () => number, m: Machine): number {
@@ -201,6 +209,8 @@ export type SpinResult = {
   total: number; // gain total en chips (mult. free spins inclus)
   /** Royal Ace Gold: multiplier of each wild cell (1 elsewhere). */
   mults?: number[][];
+  /** Royal Bells: bells on the screen (5+ start the bell bonus). */
+  bells?: number;
 }; 
 export type EvalOpts = { mults?: number[][] | null; pay?: number; cap?: number };
 
@@ -290,8 +300,11 @@ export function resolveSpin(raw: Sym[][], bet: number, mult = 1, held: boolean[]
     }
   const isRespin = held.some(Boolean);
   const mults = m.mults ? grid.map((col, k) => col.map((x) => (x === "wild" ? reelMult[k] || 1 : 1))) : null;
-  const res = evaluate(grid, bet, mult, stops, isRespin ? null : raw, { mults, pay: m.pay, cap: m.cap });
-  return { ...res, raw, held: [...held], expanded };
+  // Royal Bells: bells are not a line symbol (they break the line, like a scatter).
+  const lineGrid = m.link ? grid.map((col) => col.map((x): Sym => (x === "bell" ? "scatter" : x))) : grid;
+  const res = evaluate(lineGrid, bet, mult, stops, isRespin ? null : raw, { mults, pay: m.pay, cap: m.cap });
+  const bells = m.link && !isRespin ? raw.reduce((n, col) => n + col.filter((x) => x === "bell").length, 0) : 0;
+  return { ...res, grid, raw, held: [...held], expanded, ...(m.noFs ? { freeSpins: 0 } : {}), ...(m.link ? { bells } : {}) };
 }
 
 export function spin(rng: () => number, bet: number, mult = 1, held: boolean[] = Array(REELS).fill(false), m: Machine = MACHINES.miami, reelMult: number[] = Array(REELS).fill(1)): SpinResult & { reelMult: number[] } {
@@ -487,7 +500,14 @@ export function playRound(rng: () => number, bet: number, m: Machine = MACHINES.
     total += bonus.total;
     respins += bonus.respins;
   }
-  return { total, triggered: base.freeSpins > 0, baseTotal, respins, expanded: base.expanded.length > 0 };
+  let bellTotal = 0;
+  if (m.link && (base.bells ?? 0) >= BELL_TRIGGER) {
+    const steps = playBells(rng, startBoard(base.raw, rng));
+    const end = steps.length ? steps[steps.length - 1].board : startBoard(base.raw, rng);
+    bellTotal = bellPay(end, SEED_POOLS).total * bet;
+    total += bellTotal;
+  }
+  return { total, triggered: base.freeSpins > 0 || bellTotal > 0, baseTotal, respins, expanded: base.expanded.length > 0, bellTotal };
 }
 
 /** Gain moyen d'un bonus de 10 free spins, en multiples de la mise (sert à fixer le prix de l'achat de bonus). */
@@ -546,3 +566,76 @@ export const THEORETICAL_RTP = 0.96;
 
 /** Prix de l'achat de bonus : 10 free spins directs, en multiples de la mise (retour d'environ 96 %). */
 export const BONUS_PRICE_MULT = 16.5;
+
+/* ───────────── Royal Bells · the bell bonus (hold & win) ───────────── */
+/** Jackpots at their starting value, in multiples of the bet (for the simulations). */
+export const SEED_POOLS = { mini: 5, minor: 20, major: 100, kingpin: 500 };
+export const BELL_TRIGGER = 5;
+/** Price of a bought bell bonus (6 bells), in multiples of the bet: it returns about 96%. */
+export const BELL_BUY_MULT = 36;
+export const BELL_RESPINS = 3;
+export const BELL_X3_AT = 15;
+export const CELLS = REELS * ROWS;
+export type JpTier = "mini" | "minor" | "major";
+/** A bell: a value in multiples of the total bet, or a jackpot. */
+export type Bell = { v: number; jp?: JpTier };
+export const BELL_VALUES: { v: number; w: number }[] = [
+  { v: 1, w: 40 }, { v: 2, w: 28 }, { v: 3, w: 12 }, { v: 4, w: 7 }, { v: 5, w: 5 },
+  { v: 8, w: 3 }, { v: 10, w: 2 }, { v: 15, w: 1.2 }, { v: 20, w: 0.6 }, { v: 25, w: 0.4 },
+];
+export const BELL_JP: { jp: JpTier; w: number }[] = [
+  { jp: "mini", w: 1.0 }, { jp: "minor", w: 0.3 }, { jp: "major", w: 0.05 },
+];
+/** Chance for each empty cell to get a bell on a respin. */
+export let BELL_P = 0.042;
+export const setBellP = (p: number) => { BELL_P = p; };
+export function drawBell(rng: () => number): Bell {
+  const tv = BELL_VALUES.reduce((t, x) => t + x.w, 0);
+  const tj = BELL_JP.reduce((t, x) => t + x.w, 0);
+  let r = rng() * (tv + tj);
+  for (const x of BELL_VALUES) if ((r -= x.w) <= 0) return { v: x.v };
+  for (const x of BELL_JP) if ((r -= x.w) <= 0) return { v: 0, jp: x.jp };
+  return { v: 1 };
+}
+export type BellBoard = (Bell | null)[]; // 20 cells, index = reel * ROWS + row
+export type BellStep = { board: BellBoard; added: number[]; left: number };
+/** Values of a finished board, in multiples of the bet. `pools`: jackpots in multiples of the bet. */
+export function bellPay(board: BellBoard, pools: { mini: number; minor: number; major: number; kingpin: number }) {
+  const bells = board.filter(Boolean) as Bell[];
+  const x3 = bells.length >= BELL_X3_AT;
+  const coins = bells.reduce((t, b) => t + b.v, 0) * (x3 ? 3 : 1);
+  const jps = bells.filter((b) => b.jp).map((b) => b.jp!) as JpTier[];
+  const jp = jps.reduce((t, j) => t + pools[j], 0);
+  const grand = bells.length === CELLS;
+  return { coins, jps, jp, grand, x3, total: coins + jp + (grand ? pools.kingpin : 0), count: bells.length };
+}
+/** Plays the respins from a starting board; returns every step (for the show). */
+export function playBells(rng: () => number, start: BellBoard): BellStep[] {
+  const board = [...start];
+  const steps: BellStep[] = [];
+  let left = BELL_RESPINS;
+  while (left > 0 && board.some((b) => !b)) {
+    left--;
+    const added: number[] = [];
+    for (let i = 0; i < CELLS; i++) if (!board[i] && rng() < BELL_P) {
+      board[i] = drawBell(rng);
+      added.push(i);
+    }
+    if (added.length) left = BELL_RESPINS;
+    steps.push({ board: [...board], added, left });
+  }
+  return steps;
+}
+/** The board that starts the bonus, from the bells on the screen. */
+export function startBoard(raw: Sym[][], rng: () => number): BellBoard {
+  const b: BellBoard = Array(CELLS).fill(null);
+  raw.forEach((col, r) => col.forEach((x, row) => { if (x === "bell") b[r * ROWS + row] = drawBell(rng); }));
+  return b;
+}
+/** A bought bell bonus: 6 bells at random places. */
+export function boughtBoard(rng: () => number, n = 6): BellBoard {
+  const b: BellBoard = Array(CELLS).fill(null);
+  const idx = Array.from({ length: CELLS }, (_, i) => i).sort(() => rng() - 0.5).slice(0, n);
+  for (const i of idx) b[i] = drawBell(rng);
+  return b;
+}

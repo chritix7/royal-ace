@@ -166,3 +166,68 @@ const SUN = wrap(
    <path d="M34 36 Q42 28 54 30" stroke="#fff" stroke-width="2.5" fill="none" opacity=".7"/>`,
 );
 export const PHARAOH_ART = art({ cherry: ANKH, lemon: LOTUS, grape: EYE, bell: SCARAB, gem: PYRAMID, seven: CAT, wild: MASK, scatter: SUN });
+
+/* ───────── Royal Bells: glossy fruits on velvet, a golden bell ───────── */
+const R = "#2a0608";
+const gloss = `<ellipse cx="0" cy="0" rx="1" ry="1" fill="#fff" opacity=".0"/>`;
+const CHERRY = wrap(
+  grad("ch", "#ff6b6b", "#9b0d1e") + grad("st", "#7bd36a", "#2f6b1f"),
+  `<path d="M50 14 C46 30 36 44 30 58 M50 14 C56 32 66 44 72 56" stroke="url(#st)" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+   <path d="M50 14 C60 6 76 8 82 16 C72 22 60 22 50 14 Z" fill="url(#st)" stroke="${R}" stroke-width="2"/>
+   <circle cx="30" cy="70" r="20" fill="url(#ch)" stroke="${R}" stroke-width="3"/><circle cx="71" cy="68" r="20" fill="url(#ch)" stroke="${R}" stroke-width="3"/>
+   <ellipse cx="23" cy="62" rx="6" ry="4" fill="#fff" opacity=".7" transform="rotate(-30 23 62)"/><ellipse cx="64" cy="60" rx="6" ry="4" fill="#fff" opacity=".7" transform="rotate(-30 64 60)"/>${gloss}`,
+);
+const LEMON = wrap(
+  grad("le", "#fff27a", "#e0a800"),
+  `<path d="M10 52 C10 30 30 16 50 16 C70 16 90 30 90 52 C90 74 70 86 50 86 C30 86 10 74 10 52 Z" fill="url(#le)" stroke="#5a3d00" stroke-width="3"/>
+   <path d="M8 52 L2 50 L8 46 M92 52 L98 50 L92 46" stroke="#5a3d00" stroke-width="3" fill="#e0a800" stroke-linejoin="round"/>
+   <ellipse cx="34" cy="34" rx="14" ry="6" fill="#fff" opacity=".65" transform="rotate(-20 34 34)"/>
+   <g fill="#c78f00" opacity=".5"><circle cx="60" cy="60" r="1.6"/><circle cx="68" cy="50" r="1.4"/><circle cx="52" cy="70" r="1.4"/><circle cx="72" cy="66" r="1.2"/></g>`,
+);
+const GRAPES = wrap(
+  grad("gr", "#c78cff", "#4b1585") + grad("lf2", "#7bd36a", "#2f6b1f"),
+  `<path d="M52 18 C60 6 78 6 86 14 C76 22 64 24 52 18 Z" fill="url(#lf2)" stroke="#1d3a12" stroke-width="2"/>
+   <path d="M50 10 V24" stroke="#5b3a12" stroke-width="4" stroke-linecap="round"/>
+   <g fill="url(#gr)" stroke="#2a0a4a" stroke-width="2.5">
+     ${[[30,32],[50,30],[70,32],[40,48],[60,48],[24,50],[76,50],[32,64],[50,64],[68,64],[42,79],[58,79],[50,92]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="11"/>`).join("")}
+   </g>
+   <g fill="#fff" opacity=".55">${[[26,28],[46,26],[66,28],[36,44],[56,44],[28,60],[46,60],[64,60]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="2.6"/>`).join("")}</g>`,
+);
+const MELON = wrap(
+  grad("rind", "#4fc35a", "#1a5a22") + grad("flesh", "#ff5d6c", "#d11b3a"),
+  `<path d="M6 34 H94 C94 66 74 88 50 88 C26 88 6 66 6 34 Z" fill="url(#rind)" stroke="#0f2a12" stroke-width="3"/>
+   <path d="M13 34 H87 C86 60 70 79 50 79 C30 79 14 60 13 34 Z" fill="#f3fbe8"/>
+   <path d="M17 34 H83 C82 56 68 73 50 73 C32 73 18 56 17 34 Z" fill="url(#flesh)"/>
+   <g fill="#2a0608">${[[34,44],[50,52],[66,44],[42,60],[58,60],[50,40]].map(([x,y]) => `<ellipse cx="${x}" cy="${y}" rx="2.2" ry="3.6"/>`).join("")}</g>
+   <path d="M20 38 H60" stroke="#fff" stroke-width="2.5" opacity=".55" stroke-linecap="round"/>`,
+);
+const SEVEN = wrap(
+  grad("sv", "#ff7a7a", "#b3001b", "#ff2a3c") + grad("svg", "#fff4c2", "#c79b40"),
+  `<path d="M16 14 H86 V30 C70 46 58 64 52 90 H30 C36 64 48 46 62 32 H34 V40 H16 Z" fill="url(#svg)" stroke="${R}" stroke-width="3.5" stroke-linejoin="round"/>
+   <path d="M22 20 H80 V28 C64 44 52 62 46 84 H37 C43 62 55 44 70 28 H28 V34 H22 Z" fill="url(#sv)"/>
+   <path d="M26 24 H70" stroke="#fff" stroke-width="2.5" opacity=".6" stroke-linecap="round"/>`,
+);
+const BELL = wrap(
+  grad("bl", "#fff4c2", "#a87a2c", "#f0c95c") + grad("bk", "#7a2a10", "#3a0f05"),
+  `<path d="M50 8 V16" stroke="#5a3d00" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="8" r="5" fill="url(#bl)" stroke="#5a3d00" stroke-width="2"/>
+   <path d="M50 16 C30 16 24 34 24 52 C24 64 18 70 12 76 H88 C82 70 76 64 76 52 C76 34 70 16 50 16 Z" fill="url(#bl)" stroke="#5a3d00" stroke-width="3" stroke-linejoin="round"/>
+   <rect x="10" y="74" width="80" height="10" rx="5" fill="url(#bl)" stroke="#5a3d00" stroke-width="3"/>
+   <circle cx="50" cy="88" r="7" fill="url(#bk)" stroke="#5a3d00" stroke-width="2"/>
+   <path d="M36 26 C30 34 30 46 31 58" stroke="#fff" stroke-width="4" fill="none" opacity=".7" stroke-linecap="round"/>`,
+);
+const CROWN_W = wrap(
+  grad("cw", "#fff4c2", "#a87a2c", "#e6bd5c") + grad("cr", "#ff8a9a", "#a3122a"),
+  `<path d="M10 72 L6 26 L30 46 L50 12 L70 46 L94 26 L90 72 Z" fill="url(#cw)" stroke="#5a3d00" stroke-width="3.5" stroke-linejoin="round"/>
+   <rect x="10" y="70" width="80" height="16" rx="3" fill="url(#cw)" stroke="#5a3d00" stroke-width="3.5"/>
+   <g stroke="#5a3d00" stroke-width="2"><circle cx="6" cy="24" r="5" fill="url(#cr)"/><circle cx="50" cy="10" r="6" fill="url(#cr)"/><circle cx="94" cy="24" r="5" fill="url(#cr)"/></g>
+   <g stroke="#5a3d00" stroke-width="2"><circle cx="30" cy="78" r="4" fill="url(#cr)"/><circle cx="50" cy="78" r="4.5" fill="#3fb6dd"/><circle cx="70" cy="78" r="4" fill="url(#cr)"/></g>`,
+);
+const STAR = wrap(
+  grad("stg", "#fff7c2", "#e0a800") + grad("stb", "#3a6dff", "#0b1f6a"),
+  `<circle cx="50" cy="50" r="44" fill="url(#stb)" stroke="#e5c779" stroke-width="3"/>
+   <path d="M50 12 L60 38 L88 38 L65 55 L74 82 L50 66 L26 82 L35 55 L12 38 L40 38 Z" fill="url(#stg)" stroke="#5a3d00" stroke-width="3" stroke-linejoin="round"/>
+   <path d="M44 26 L48 38" stroke="#fff" stroke-width="3" opacity=".7" stroke-linecap="round"/>`,
+);
+export const BELLS_ART = art({ cherry: CHERRY, lemon: LEMON, grape: GRAPES, bell: BELL, gem: MELON, seven: SEVEN, wild: CROWN_W, scatter: STAR });
+/** The bell of the bonus board (no outline glare). */
+export const BELL_ICON = toSrc(BELL);

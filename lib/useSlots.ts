@@ -17,6 +17,14 @@ import {
   freshFs,
   noSticky,
   MACHINES,
+  BELL_BUY_MULT,
+  BELL_RESPINS,
+  BELL_TRIGGER,
+  bellPay,
+  boughtBoard,
+  playBells,
+  startBoard,
+  type BellBoard,
   type FsState,
   type MachineId,
   type Paying,
@@ -70,6 +78,8 @@ type S = {
   /** Pharaoh's free spins: the expanding symbol, and the reels it fills now. */
   book: Paying | null;
   bookReels: number[];
+  /** Royal Bells: the bell bonus in progress. */
+  bells: { board: BellBoard; added: number[]; left: number; spinning: boolean; total: number | null; x3: boolean } | null;
   winBanner: { label: string; amount: number; tier: Tier } | null;
   pools: Pools;
   vault: VaultState | null;
@@ -114,6 +124,7 @@ const INITIAL: S = {
   mults: null,
   book: null,
   bookReels: [],
+  bells: null,
   winBanner: null,
   pools: freshPools(),
   vault: null,
@@ -151,6 +162,12 @@ const line = (k: keyof typeof LINES, n?: string) => {
 };
 
 const DEFAULT_LABELS: SlotLabels = { big: "BIG WIN", mega: "MEGA WIN", epic: "EPIC WIN", freeSpins: "FREE SPINS" };
+function debugFlag(v: string) {
+  try {
+    return localStorage.getItem("royalace:debug") === v;
+  } catch {}
+  return false;
+}
 function debugVault() {
   try {
     return localStorage.getItem("royalace:debug") === "vault";
@@ -318,7 +335,7 @@ function bonusContinue() {
     else if (patch.mults) set(patch);
     if (st.landed.length > 0) await sleep(700 * speed());
     else if (st.bookReels.length && total > 0) await sleep(600 * speed());
-    return { total, scatters: st.scatters, freeSpins: st.freeSpins };
+    return { total, scatters: st.scatters, freeSpins: st.freeSpins, bells: 0, raw: st.raw };
   }
 
   async function runSpin(free: boolean, mult: number) {
@@ -423,7 +440,7 @@ function bonusContinue() {
   haptic(ratio >= 20 ? HAPTIC.big : HAPTIC.win);
 }
     }
-    return { total: spinTotal, scatters: steps[0].scatters, freeSpins: steps[0].freeSpins };
+    return { total: spinTotal, scatters: steps[0].scatters, freeSpins: steps[0].freeSpins, bells: steps[0].bells ?? 0, raw: steps[0].raw };
   }
 
   async function runFreeSpins(initial: number, bought = false) {
@@ -505,6 +522,55 @@ function bonusContinue() {
 return fsWin;
   }
 
+  /** Royal Bells: the bells stay, 3 respins, each new bell resets them. */
+  async function runBells(b: number, start: BellBoard) {
+    const sp = speed();
+    sfx.freeSpins();
+    music.duck(2500);
+    haptic(HAPTIC.big);
+    set({ banner: "BELL BONUS", lineWins: [], cells: emptyCells(), bells: { board: start, added: [], left: BELL_RESPINS, spinning: false, total: null, x3: false } });
+    await sleep(1700 * sp);
+    set({ banner: null, message: `${start.filter(Boolean).length} bells · ${BELL_RESPINS} respins` });
+    await sleep(900 * sp);
+    const steps = playBells(Math.random, start);
+    for (const st of steps) {
+      set({ bells: { ...ref.current.bells!, spinning: true, added: [] } });
+      sfx.spin();
+      await sleep(750 * sp);
+      const count = st.board.filter(Boolean).length;
+      set({ bells: { board: st.board, added: st.added, left: st.left, spinning: false, total: null, x3: count >= 15 } });
+      if (st.added.length) {
+        sfx.wildLand();
+        haptic(HAPTIC.win);
+        set({ message: count >= 15 ? `${count} bells · all values ×3!` : `${count} bells · respins back to ${BELL_RESPINS}` });
+        await sleep(700 * sp);
+      } else {
+        set({ message: st.left ? `${st.left} respin${st.left > 1 ? "s" : ""} left` : "Last respin…" });
+        await sleep(350 * sp);
+      }
+    }
+    // The bells are counted: values, jackpots (the progressive pools) and the Grand.
+    const board = steps.length ? steps[steps.length - 1].board : start;
+    let pools = foldLive(ref.current.pools);
+    const pay = bellPay(board, pools);
+    const amount = Math.round(pay.total * b);
+    const wins: { tier: JackpotTier; amount: number }[] = [];
+    for (const j of pay.jps) {
+      wins.push({ tier: j, amount: Math.round(pools[j] * b) });
+      pools = resetPool(pools, j);
+    }
+    if (pay.grand) {
+      wins.push({ tier: "kingpin", amount: Math.round(pools.kingpin * b) });
+      pools = resetPool(pools, "kingpin");
+    }
+    set({ pools, bells: { ...ref.current.bells!, total: amount, x3: pay.x3 }, message: pay.grand ? "FULL SCREEN · GRAND JACKPOT!" : `Bell bonus · ◈ ${fmt(amount)}` });
+    sfx.bigWin();
+    await sleep(1600 * sp);
+    wallet.add(amount);
+    set({ bells: null });
+    return { total: amount, wins };
+  }
+
   const vaultDone = useRef<(() => void) | null>(null);
   async function runVault(b: number) {
     sfx.vault();
@@ -561,6 +627,20 @@ return fsWin;
 }
 
 if (triggered) total += await runFreeSpins(base.freeSpins);
+
+const forceBells = debugFlag("bells");
+if (machineRef.current.link && (base.bells >= BELL_TRIGGER || forceBells)) {
+  triggered = true;
+  bonusRounds += 1;
+  let start = startBoard(base.raw, Math.random);
+  if (forceBells) {
+    const extra = boughtBoard(Math.random, 5);
+    start = start.map((x, i) => x ?? extra[i]);
+  }
+  const r = await runBells(b, start);
+  total += r.total;
+  jackpots = [...jackpots, ...r.wins];
+}
 
 if (collectionStore.isReady(b)) {
   const choice = await new Promise<"spins" | "chips">((resolve) => {
@@ -770,14 +850,20 @@ useEffect(() => {
   }
 }, [active]);
 
-  const bonusPrice = BONUS_PRICE_MULT * bet;
+  const bonusPrice = (MACHINES[machineId].link ? BELL_BUY_MULT : BONUS_PRICE_MULT) * bet;
   async function runBuy(price: number) {
     const b = BET_LEVELS[ref.current.betIdx];
     set({ confirmBuy: false, gamble: null, busy: true, celebrate: 0, banner: null });
     wallet.setLocked(true);
     wallet.add(-price);
     sfx.lever();
-    const win = await runFreeSpins(FS_AWARD[3], true);
+    let win: number;
+    if (machineRef.current.link) {
+      const r = await runBells(b, boughtBoard(Math.random));
+      win = r.total;
+      for (const w of r.wins) winHistory.record({ game: "slots", kind: "jackpot", amount: w.amount });
+      track("jackpot", r.wins.length);
+    } else win = await runFreeSpins(FS_AWARD[3], true);
     sessionStore.recordSlots(price, win - price);
     track("bonus");
     const r = win / price;

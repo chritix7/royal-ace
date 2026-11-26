@@ -1,6 +1,6 @@
 import type { Sym } from "./slots";
 import { MIAMI_ART } from "./symbolArt";
-import { GOLD_ART, PHARAOH_ART } from "./symbolArt2";
+import { BELLS_ART, GOLD_ART, PHARAOH_ART } from "./symbolArt2";
 
 export type SkinId = "classic" | "miami" | "gold" | "pharaoh";
 export const SKIN_IDS: SkinId[] = ["miami", "gold", "pharaoh", "classic"];
@@ -37,32 +37,33 @@ export type Skin = {
 };
 
 export const SKINS: Record<SkinId, Skin> = {
+  // Royal Bells (the old Classic): glossy fruits on dark velvet, the bell bonus.
   classic: {
     id: "classic",
-    title: "Golden Reels",
-    tagline: "Classic casino",
-    emoji: { cherry: "🍒", lemon: "🍋", grape: "🍇", bell: "🔔", gem: "💎", seven: "7️⃣", wild: "👑", scatter: "⭐" },
-    art: null,
-    names: { cherry: "Cherry", lemon: "Lemon", grape: "Grapes", bell: "Bell", gem: "Diamond", seven: "Seven", wild: "Crown", scatter: "Star" },
+    title: "Royal Bells",
+    tagline: "Five bells ring the bonus.",
+    emoji: { cherry: "🍒", lemon: "🍋", grape: "🍇", bell: "🔔", gem: "🍉", seven: "7️⃣", wild: "👑", scatter: "⭐" },
+    art: BELLS_ART,
+    names: { cherry: "Cherries", lemon: "Lemon", grape: "Grapes", bell: "Golden bell", gem: "Watermelon", seven: "Seven", wild: "Crown", scatter: "Star" },
     labels: { big: "BIG WIN", mega: "MEGA WIN", epic: "EPIC WIN", freeSpins: "FREE SPINS" },
-    confetti: ["#e5c779", "#d7b45b", "#34d399", "#f87171", "#60a5fa", "#ffffff"],
-    stage: "bg-[radial-gradient(ellipse_at_center,#254336_0%,#12271e_48%,#0a120e_100%)]",
-    titleClass: "text-[#e5c779] [text-shadow:0_0_16px_#c8a65b88]",
-    signBox: "border-[#c8a65b]/60 shadow-[0_0_24px_#c8a65b44]",
-    bezel: "bg-[linear-gradient(145deg,#ffe9a3_0%,#b8860b_35%,#ffe9a3_55%,#8a6508_100%)] shadow-[0_0_30px_#c8a65b55]",
-    reel: "bg-[#f5eedc]",
-    divider: "border-[#c8a65b]/50",
-    win: "animate-pulse bg-[#e5c779]/45 ring-2 ring-inset ring-[#c8a65b]",
-    wildBg: "bg-[radial-gradient(circle,#fff6cf_0%,#f5d778_100%)]",
-    scatterBg: "bg-[radial-gradient(circle,#d9ffe9_0%,#86efac_100%)]",
-    wildTag: "from-[#f5d778] to-[#c8a65b] text-black",
-    scatterTag: "from-[#34d399] to-[#10b981] text-black",
-    led: "text-[#ffb347] [text-shadow:0_0_8px_#ff9f1c]",
-    ledBox: "bg-black/70 border-white/10",
-    spinBtn: "bg-[radial-gradient(circle_at_35%_30%,#ffe9a3,#d7b45b_55%,#8a6508)] text-[#10130e] ring-4 ring-white/50 shadow-[0_0_26px_#d7b45b88]",
-    betOn: "border-white/60 bg-[linear-gradient(180deg,#ffe9a3,#d7b45b)] text-[#10130e]",
-    accent: "text-[#e5c779]",
-    lineColor: "#dc2626",
+    confetti: ["#f6dd94", "#ff4d5e", "#ffd166", "#ffffff", "#c78cff", "#7bd36a"],
+    stage: "bg-[radial-gradient(ellipse_at_50%_20%,#4a0c14_0%,#22050a_55%,#0c0204_100%)]",
+    titleClass: "text-[#ffd98a] [text-shadow:0_0_16px_#ff4d5e88]",
+    signBox: "border-[#e5c779]/70 bg-black/40 shadow-[0_0_26px_#ff4d5e44]",
+    bezel: "bg-[linear-gradient(145deg,#fff4c2_0%,#a87a2c_35%,#fff4c2_55%,#6b4f1d_100%)] shadow-[0_0_34px_#ff4d5e44]",
+    reel: "bg-[linear-gradient(180deg,#1a0408,#2c0810_50%,#1a0408)]",
+    divider: "border-[#e5c779]/25",
+    win: "animate-pulse bg-[#ffd166]/25 ring-2 ring-inset ring-[#ffd166]",
+    wildBg: "bg-[radial-gradient(circle_at_50%_40%,#ffd16655_0%,#2c0810_78%)]",
+    scatterBg: "bg-[radial-gradient(circle_at_50%_40%,#3a6dff55_0%,#2c0810_78%)]",
+    wildTag: "from-[#fff4c2] to-[#c79b40] text-black",
+    scatterTag: "from-[#5a8cff] to-[#2f5fd6] text-white",
+    led: "text-[#ffd166] [text-shadow:0_0_8px_#ff9f1c]",
+    ledBox: "bg-black/70 border-[#e5c779]/25",
+    spinBtn: "bg-[radial-gradient(circle_at_35%_30%,#ffb3b3,#d11b3a_55%,#5e0610)] text-white ring-4 ring-[#ffd166]/70 shadow-[0_0_26px_#ff4d5e88]",
+    betOn: "border-[#ffd166] bg-[linear-gradient(180deg,#ffe9a3,#d7b45b)] text-[#10130e]",
+    accent: "text-[#ffd98a]",
+    lineColor: "#ffd166",
     bulb: "#fff1b0",
   },
   // Tribut original aux polars des années 80 : Miami, néons, ascension d'un parrain.
