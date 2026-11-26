@@ -91,7 +91,7 @@ export const LOBBY_GAMES: Info[] = [
     name: "Craps",
     tag: "Las Vegas dice",
     facts: ["3-4-5× odds, no edge", "Place, hardways, props", "Hints for newcomers"],
-    limits: "◈ 10 – 500K",
+    limits: "◈ 10 – 2M",
     rtp: "98.6%",
     about: ["Come-out: 7 or 11 wins on the Pass line, 2, 3 or 12 loses.", "Any other number is the point — hit it again before a 7.", "Odds behind your bets pay true odds: no house edge."],
     challenge: "craps",

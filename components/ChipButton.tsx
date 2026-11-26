@@ -47,6 +47,7 @@ const SCHEMES: Record<number, Scheme> = {
 /** Short label on the center disc. Keeps the SVG from overflowing for
  *  the big denominations by switching to k-suffix notation at $1,000. */
 function chipLabel(value: number): string {
+  if (value >= 1000000) return `${value / 1000000}M`;
   if (value >= 1000) return `${value / 1000}K`;
   return String(value);
 }

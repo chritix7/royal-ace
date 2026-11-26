@@ -15,7 +15,7 @@ import { canPlace, kindOf, TABLE_MAX, limitFor, maxOdds, MIN_BET, numOf, removab
  * the very same roll.
  */
 
-export const CRAPS_CHIPS = [10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000, 500000];
+export const CRAPS_CHIPS = [10, 100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000];
 const HISTORY_MAX = 120;
 const KEY = "royalace:craps";
 

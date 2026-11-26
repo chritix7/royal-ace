@@ -53,10 +53,10 @@ export const ratio = (stake: number, [w, per]: [number, number]) => Math.floor((
  * lower the limit, so the most a single bet can win stays around ◈ 450–600K
  * (odds come on top, capped at 3-4-5× the flat bet).
  */
-export const LIMITS = { line: 500000, field: 200000, hard: { 6: 50000, 8: 50000, 4: 60000, 10: 60000 }, place: { 6: 300000, 8: 300000, 5: 250000, 9: 250000, 4: 200000, 10: 200000 } } as const;
-export const PROP_LIMITS: Record<string, number> = { any7: 100000, anyCraps: 60000, two: 15000, twelve: 15000, three: 30000, eleven: 30000 };
+export const LIMITS = { line: 2000000, field: 800000, hard: { 6: 200000, 8: 200000, 4: 240000, 10: 240000 }, place: { 6: 1200000, 8: 1200000, 5: 1000000, 9: 1000000, 4: 800000, 10: 800000 } } as const;
+export const PROP_LIMITS: Record<string, number> = { any7: 400000, anyCraps: 240000, two: 60000, twelve: 60000, three: 120000, eleven: 120000 };
 /** Most chips on the layout at once. */
-export const TABLE_MAX = 5000000;
+export const TABLE_MAX = 20000000;
 
 /**
  * Bets that cancel each other out cannot be on the table together, like red
