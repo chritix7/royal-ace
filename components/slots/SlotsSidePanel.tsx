@@ -193,7 +193,7 @@ export default function SlotsSidePanel({
           {skinId === "pharaoh" ? (
             <div className={`${rule} border-[#d7b45b]/45`}>
               <span className="w-8 shrink-0 text-center text-xl">📜</span>
-              <p translate="no"><b className="text-white">{L(`Expanding symbol · ${skin.labels.freeSpins}.`, `Symbole extensible · ${skin.labels.freeSpins}.`)}</b> {L("At the start of the free spins the Pharaoh picks one symbol. On every free spin, when it shows on 3 reels or more, it fills those reels and pays on all 20 lines, wherever the reels are.", "Au début des tours gratuits, le Pharaon choisit un symbole. À chaque tour gratuit, s'il apparaît sur 3 rouleaux ou plus, il remplit ces rouleaux et paie sur les 20 lignes, même si les rouleaux ne se suivent pas.")}</p>
+              <p translate="no"><b className="text-white">{L(`Expanding symbol · ${skin.labels.freeSpins}.`, `Symbole extensible · ${skin.labels.freeSpins}.`)}</b> {L("At the start of the free spins the Pharaoh picks one symbol. On every free spin, when it shows on 3 reels or more, it fills those reels and pays on all 20 lines, wherever the reels are. The Pharaoh (wild) lands more often: he fills his whole reel and that reel counts for the expanding symbol too.", "Au début des tours gratuits, le Pharaon choisit un symbole. À chaque tour gratuit, s'il apparaît sur 3 rouleaux ou plus, il remplit ces rouleaux et paie sur les 20 lignes, même si les rouleaux ne se suivent pas. Le Pharaon (wild) tombe plus souvent : il remplit tout son rouleau, et ce rouleau compte aussi pour le symbole extensible.")}</p>
             </div>
           ) : (
             <div className={`${rule} border-[#d7b45b]/45`}>

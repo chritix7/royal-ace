@@ -1308,4 +1308,6 @@ export const FR: Record<string, string> = {
 "Pharaoh's Vault: one symbol expands on every free spin and pays on all lines.": "Pharaoh's Vault : un symbole s'étend à chaque tour gratuit et paie sur toutes les lignes.",
 "Machine": "Machine",
 "Every wild stays as a ×2 until the last spin": "Chaque wild reste en ×2 jusqu'au dernier tour",
+"THE PHARAOH EXPANDS!": "LE PHARAON S'ÉTEND !",
+"The Pharaoh expands!": "Le Pharaon s'étend !",
 };

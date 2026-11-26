@@ -142,7 +142,7 @@ export const MACHINES: Record<MachineId, Machine> = {
   miami: { pay: 1, fs: "sticky", fsPay: 1, fsWilds: FS_WILDS },
   // Gold: wilds on every reel (about one spin in 4), each with its multiplier; it stays in its cell.
   gold: { pay: 1.02, wilds: [1, 1, 1, 1, 1], fs: "sticky", fsPay: 0.55, fsWilds: [1, 2, 1, 2, 1], expand: false, mults: [{ v: 2, w: 60 }, { v: 3, w: 28 }, { v: 5, w: 12 }], cap: 50, fsMults: [{ v: 2, w: 1 }], fsCap: 2 },
-  pharaoh: { pay: 1, fs: "expand", fsPay: 1, fsWilds: [0, 1, 1, 1, 0], bookPay: 0.048 },
+  pharaoh: { pay: 1, fs: "expand", fsPay: 1, fsWilds: [0, 3, 3, 3, 0], bookPay: 0.03 },
 };
 const STRIP_CACHE = new Map<string, Sym[][]>();
 function baseStrips(m: Machine): Sym[][] {
@@ -348,22 +348,30 @@ export const freshFs = (m: Machine, rng: () => number = Math.random): FsState =>
 export type FreeSpinResult = SpinResult & {
   landed: [number, number][];
   sticky: Sticky;
-  /** Pharaoh: reels the book symbol fills, and what it paid. */
+  /** Pharaoh: reels the book symbol fills, the reels the Pharaoh fills, and what the symbol paid. */
   bookReels: number[];
+  wildReels?: number[];
   bookPay: number;
   state: FsState;
 };
 
 /** Pharaoh's free spin: plain wilds, then the book symbol expands on its reels and pays on every line. */
 export function expandFromRaw(raw: Sym[][], book: Paying, bet: number, mult: number, stops: number[] = [], pay = 1, bookScale = 1) {
-  const res = evaluate(raw, bet, mult, stops, raw, { pay });
-  const bookReels = raw.map((col, r) => (col.includes(book) ? r : -1)).filter((r) => r >= 0);
+  // The Pharaoh (wild) fills his reel during the tomb spins, and his reel
+  // also counts for the expanding symbol.
+  const grid = raw.map((col) => (col.includes("wild") ? Array<Sym>(ROWS).fill("wild") : [...col]));
+  const wildReels = raw.map((col, r) => (col.includes("wild") ? r : -1)).filter((r) => r >= 0);
+  const res = evaluate(grid, bet, mult, stops, raw, { pay });
+  const withBook = raw.map((col, r) => (col.includes(book) ? r : -1)).filter((r) => r >= 0);
+  const reels = [...new Set([...withBook, ...wildReels])].sort((a, b) => a - b);
+  // At least one real book symbol is needed (wilds alone do not pay it).
   let bookPay = 0;
-  if (bookReels.length >= 3) {
-    bookPay = Math.round(PAYS[book][Math.min(bookReels.length, 5) - 3] * (bet / PAYLINES.length) * PAYLINES.length * bookScale * mult);
-    for (const r of bookReels) for (let row = 0; row < ROWS; row++) res.cells[r][row] = true;
+  if (reels.length >= 3 && withBook.length > 0) {
+    bookPay = Math.round(PAYS[book][Math.min(reels.length, 5) - 3] * (bet / PAYLINES.length) * PAYLINES.length * bookScale * mult);
+    for (const r of reels) for (let row = 0; row < ROWS; row++) res.cells[r][row] = true;
   }
-  return { ...res, total: res.total + bookPay, bookReels: bookReels.length >= 3 ? bookReels : [], bookPay };
+  const bookReels = bookPay ? withBook.filter((r) => !wildReels.includes(r)) : [];
+  return { ...res, raw, grid, total: res.total + bookPay, bookReels, wildReels, bookPay };
 }
 
 export function freeSpin(rng: () => number, bet: number, mult: number, st: FsState | Sticky, m: Machine = MACHINES.miami): FreeSpinResult {
@@ -376,7 +384,7 @@ export function freeSpin(rng: () => number, bet: number, mult: number, st: FsSta
   });
   if (m.fs === "expand" && state.book) {
     const r = expandFromRaw(raw, state.book, bet, mult, stops, m.fsPay, m.bookPay ?? 1);
-    return { ...r, raw, landed: [], sticky: state.sticky, state };
+    return { ...r, landed: [], sticky: state.sticky, state };
   }
   let mults = state.mults;
   if (m.mults) {

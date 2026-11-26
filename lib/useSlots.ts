@@ -280,7 +280,16 @@ function bonusContinue() {
     // in place (and they stay for the rest of the free spins).
     const total = st.total;
     const patch: Partial<S> = m.mults ? { mults: st.state.mults } : {};
-    // Pharaoh: the symbol fills its reels before the win shows.
+    // Pharaoh's tomb spins: the Pharaoh fills his reel first…
+    if (st.wildReels?.length) {
+      track("wildExpand");
+      sfx.wildExpand();
+      haptic(HAPTIC.big);
+      set({ expanding: st.wildReels, grid: st.grid, message: "THE PHARAOH EXPANDS!" });
+      await sleep(650 * speed());
+      set({ expanding: [] });
+    }
+    // …then the symbol fills its reels before the win shows.
     if (st.bookReels.length) {
       sfx.wildExpand();
       haptic(HAPTIC.big);
@@ -295,7 +304,7 @@ function bonusContinue() {
       haptic(HAPTIC.big);
       Object.assign(patch, { sticky: st.sticky, stickyNew: fresh });
     }
-    const label = st.landed.length > 1 ? `${st.landed.length} sticky wilds!` : st.landed.length ? "Sticky wild!" : st.bookReels.length ? "Expanding symbol!" : "";
+    const label = st.landed.length > 1 ? `${st.landed.length} sticky wilds!` : st.landed.length ? "Sticky wild!" : st.bookReels.length ? "Expanding symbol!" : st.wildReels?.length ? "The Pharaoh expands!" : "";
     if (total > 0) {
       wallet.add(total);
       const ratio = total / b;
