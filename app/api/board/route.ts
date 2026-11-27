@@ -9,7 +9,12 @@ import { boardName, countRound, MAX_BATCH, MAX_PER_MIN, suspicious, weekEnds, we
 import { getUser, json, sessionUser } from "../../../lib/server/account";
 import { pipeline, redis, redisReady } from "../../../lib/server/redis";
 
-const ADMIN_EMAILS = ["christianxpro7@gmail.com"];
+/** Owner accounts (by sign-in e-mail), set in the ADMIN_EMAILS env var, comma-separated. */
+const adminEmails = () =>
+  (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
 const KEEP = 60 * 60 * 24 * 21; // weeks stay readable for three weeks
 const TOP = 50;
 
@@ -18,7 +23,7 @@ const k = (wk: string) => ({ board: `lb:${wk}`, names: `lbn:${wk}`, review: `lbr
 async function isAdmin(uid: string | null) {
   if (!uid) return false;
   const u = await getUser(uid);
-  return !!u?.email && ADMIN_EMAILS.includes(u.email.toLowerCase());
+  return !!u?.email && adminEmails().includes(u.email.toLowerCase());
 }
 
 const num = (v: unknown) => (typeof v === "string" || typeof v === "number" ? Number(v) || 0 : 0);
