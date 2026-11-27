@@ -42,3 +42,23 @@ export function H({ children }: { children: ReactNode }) {
 export function Todo({ children }: { children: ReactNode }) {
   return <mark className="rounded bg-[#ffcf5a]/20 px-1 text-[#ffd77a]">[{children}]</mark>;
 }
+
+/** One quiet line at the bottom of the lobby: 18+, virtual chips, the legal pages. */
+export function LegalFooter({ fr, compact = false }: { fr: boolean; compact?: boolean }) {
+  return (
+    <nav className="lb-legal" aria-label={fr ? "Informations légales" : "Legal"} translate="no">
+      <span className="lb-legal__age">18+</span>
+      {!compact && <span>{fr ? "Jetons virtuels sans valeur réelle" : "Virtual chips, no real value"}</span>}
+      {LEGAL_LINKS.map((l) => (
+        <a key={l.href} href={l.href}>
+          {compact && l.href === "/conditions" ? (fr ? "Conditions" : "Terms") : fr ? l.fr : l.en}
+        </a>
+      ))}
+      {!compact && (
+        <span>
+          {HELP_LINE.name} <span className="whitespace-nowrap">{HELP_LINE.phone}</span>
+        </span>
+      )}
+    </nav>
+  );
+}

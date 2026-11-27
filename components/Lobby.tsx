@@ -1,4 +1,6 @@
 "use client";
+import { useLang } from "../lib/i18n";
+import { LegalFooter } from "./LegalDoc";
 
 import ProfileSheet from "./ProfileSheet";
 import { careerStore, useCareer, weeklyRanking } from "../lib/career";
@@ -405,6 +407,7 @@ export default function Lobby({
   /** A game holding a round in progress (it must be finished first). */
   inProgress: LobbyGame | null;
 }) {
+  const fr = useLang() === "fr";
   const profile = useProfile();
   const progression = useProgression();
   const daily = useDaily();
@@ -636,6 +639,7 @@ export default function Lobby({
               <GameCard key={g.id} g={g} i={i} badge={badgeFor(g)} compact={false} onOpen={() => setDetail(g)} onPlay={() => play(g)} {...cardProps(g)} />
             ))}
           </div>
+          <LegalFooter fr={fr} />
         </div>
       ) : (
         <div className="flex h-full min-h-0 flex-col gap-2.5">
@@ -652,6 +656,7 @@ export default function Lobby({
             ))}
           </div>
           {summary}
+          <LegalFooter fr={fr} compact />
         </div>
       )}
       {flash && (
