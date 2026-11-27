@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { H, LegalDoc, Todo } from "../../components/LegalDoc";
+import { H, LegalDoc } from "../../components/LegalDoc";
 
 export const metadata: Metadata = { title: "Confidentialité · Royal Ace" };
 
@@ -20,7 +20,7 @@ export default function Page() {
           <section>
             <H>Responsable du traitement</H>
             <p>
-              L&apos;éditeur du site (voir les mentions légales), joignable à <Todo>adresse e-mail de contact</Todo>.
+              Christian Constantin, éditeur du site, joignable à <a href="mailto:christianxpro7@gmail.com" className="text-[#e5c779] underline">christianxpro7@gmail.com</a>.
             </p>
           </section>
           <section>
@@ -62,8 +62,7 @@ export default function Page() {
           <section>
             <H>Tes droits</H>
             <p>
-              Tu peux accéder à tes données, les rectifier, les effacer, en limiter l&apos;usage, t&apos;y opposer et les récupérer. Écris à{" "}
-              <Todo>adresse e-mail de contact</Todo>. Tu peux aussi saisir la CNIL (cnil.fr).
+              Tu peux accéder à tes données, les rectifier, les effacer, en limiter l&apos;usage, t&apos;y opposer et les récupérer. Écris à <a href="mailto:christianxpro7@gmail.com" className="text-[#e5c779] underline">christianxpro7@gmail.com</a>. Tu peux aussi saisir la CNIL (cnil.fr).
             </p>
           </section>
           <section>
@@ -79,7 +78,7 @@ export default function Page() {
             If you turn on the optional cloud save, we keep your nickname, your passkey&apos;s public key and your game data, with one strictly
             necessary session cookie (&quot;ra_sess&quot;, 1 year), until you delete the save from the game. Our host processes IP addresses and
             technical logs to run the service. Providers: Vercel Inc. (hosting) and Upstash, Inc. (cloud save), possibly in the USA under GDPR
-            safeguards. To use your rights (access, correction, deletion, objection, portability), write to <Todo>contact e-mail</Todo>; you can also
+            safeguards. To use your rights (access, correction, deletion, objection, portability), write to <a href="mailto:christianxpro7@gmail.com" className="text-[#e5c779] underline">christianxpro7@gmail.com</a>; you can also
             complain to the CNIL. Royal Ace is for adults (18+).
           </p>
         </>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { H, HELP_LINE, LegalDoc, Todo } from "../../components/LegalDoc";
+import { H, HELP_LINE, LegalDoc } from "../../components/LegalDoc";
 
 export const metadata: Metadata = { title: "Mentions légales · Royal Ace" };
 
@@ -13,11 +13,13 @@ export default function Page() {
           <section>
             <H>Éditeur du site</H>
             <p>
-              Royal Ace est édité par <Todo>nom et prénom, ou dénomination sociale et forme juridique</Todo>, <Todo>adresse</Todo>,{" "}
-              <Todo>adresse e-mail de contact</Todo>, <Todo>n° SIREN / RCS, le cas échéant</Todo>.
+              Royal Ace est un projet personnel et non commercial, édité par Christian Constantin, particulier. Contact : <a href="mailto:christianxpro7@gmail.com" className="text-[#e5c779] underline">christianxpro7@gmail.com</a>.
             </p>
+            <p>Directeur de la publication : Christian Constantin.</p>
             <p>
-              Directeur de la publication : <Todo>nom et prénom</Todo>.
+              Conformément à l&apos;article 6, III, 2 de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l&apos;économie numérique,
+              l&apos;éditeur, personne physique agissant à titre non professionnel, a communiqué ses coordonnées complètes à l&apos;hébergeur
+              ci-dessous.
             </p>
           </section>
           <section>
@@ -54,8 +56,8 @@ export default function Page() {
           <section>
             <H>Publisher</H>
             <p>
-              Royal Ace is published by <Todo>name or company</Todo>, <Todo>address</Todo>, <Todo>contact e-mail</Todo>. Publication director:{" "}
-              <Todo>name</Todo>.
+              Royal Ace is a personal, non-commercial project published by Christian Constantin, a private individual. Contact: <a href="mailto:christianxpro7@gmail.com" className="text-[#e5c779] underline">christianxpro7@gmail.com</a>.
+              Publication director: Christian Constantin.
             </p>
           </section>
           <section>
