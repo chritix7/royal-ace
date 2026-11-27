@@ -3483,7 +3483,7 @@ textarea.st-input { border-radius: 12px; }
 .bell-cell.is-minor .bell-cell__val { background: linear-gradient(180deg, #c9ffd9, #2fb36a); }
 .bell-cell.is-major .bell-cell__val { background: linear-gradient(180deg, #ffe0a8, #f08a24); color: #2a0b00; }
 .bell-board.is-x3 .bell-cell.is-bell { box-shadow: inset 0 0 0 2px #ff6b7d, inset 0 0 18px rgba(255, 107, 125, 0.35); }
-.bell-hud { position: absolute; left: 50%; top: 6px; z-index: 2; display: flex; align-items: center; gap: 0.5rem; transform: translateX(-50%); border-radius: 9999px; padding: 0.2rem 0.7rem; background: rgba(0, 0, 0, 0.78); box-shadow: inset 0 0 0 1px rgba(240, 211, 139, 0.55); }
+.bell-hud { display: inline-flex; flex-shrink: 0; align-items: center; gap: 0.4rem; white-space: nowrap; }
 .bell-hud__count { font-family: var(--font-display), Georgia, serif; font-size: 13px; font-weight: 800; color: #f6e2a8; font-variant-numeric: tabular-nums; }
 .bell-hud__dots { display: flex; gap: 4px; }
 .bell-hud__dots i { width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, 0.15); }

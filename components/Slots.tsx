@@ -10,7 +10,7 @@ import JackpotBar, { JackpotLadder } from "./JackpotBar";
 import VaultGame from "./VaultGame";
 import RollingNumber from "./RollingNumber";
 import Glyph from "./Glyph";
-import SlotReels from "./SlotReels";
+import SlotReels, { BellHud } from "./SlotReels";
 import { Counter, machineSmall } from "./ui";
 import { money } from "../lib/game";
 import { wallet } from "../lib/wallet";
@@ -608,7 +608,12 @@ useEffect(() => {
                         </>
                       ) : null;
   // Text of the gold message plaque under the reels (desktop).
-  const messageContent = s.fs ? (
+  const messageContent = s.bells ? (
+    <>
+      <BellHud b={s.bells} />
+      <span className="truncate text-white/85">{s.message}</span>
+    </>
+  ) : s.fs ? (
     <>
       <span className="min-w-0 truncate font-black tracking-widest text-[#ffd166]">{skin.labels.freeSpins}</span>
       {s.book ? (

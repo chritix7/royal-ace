@@ -434,6 +434,26 @@ const shownLine =
 const short = (n: number) => (n >= 1e6 ? `${+(n / 1e6).toFixed(n >= 1e7 ? 0 : 1)}M` : n >= 1e4 ? `${+(n / 1e3).toFixed(n >= 1e5 ? 0 : 1)}K` : n.toLocaleString("en-US"));
 const JP_LABEL = { mini: "MINI", minor: "MINOR", major: "MAJOR", kingpin: "GRAND" } as const;
 
+/** Royal Bells: bells on the board, respins left and multipliers. Shown in the message plaque, so it never covers a cell. */
+export function BellHud({ b }: { b: NonNullable<SlotsGame["s"]["bells"]> }) {
+  const count = b.board.filter(Boolean).length;
+  const m = b.mult;
+  const grands = b.board.filter((x) => x?.jp === "kingpin").length;
+  return (
+    <span className="bell-hud" translate="no">
+      <span className="bell-hud__count">{`${count}/${CELLS}`}</span>
+      <span className="bell-hud__dots" aria-hidden="true">
+        {Array.from({ length: BELL_RESPINS }, (_, i) => (
+          <i key={i} className={i < b.left ? "is-on" : ""} />
+        ))}
+      </span>
+      {b.boost && m === 1 && <span className="bell-hud__boost">{`SLOT REELS ×2 @${BELL_X3_AT}`}</span>}
+      {m > 1 && <span className="bell-hud__x3">{`×${m}`}</span>}
+      {grands > 0 && <span className="bell-hud__grand">{`GRAND ${grands}/3`}</span>}
+    </span>
+  );
+}
+
 /** Royal Bells: the bell bonus board, laid over the reels (one cell per symbol). */
 function BellBoardView({ b, bet }: { b: NonNullable<SlotsGame["s"]["bells"]>; bet: number }) {
   const count = b.board.filter(Boolean).length;
@@ -465,17 +485,6 @@ function BellBoardView({ b, bet }: { b: NonNullable<SlotsGame["s"]["bells"]>; be
           </div>
         );
       })}
-      <div className="bell-hud">
-        <span className="bell-hud__count">{`${count}/${CELLS}`}</span>
-        <span className="bell-hud__dots" aria-hidden="true">
-          {Array.from({ length: BELL_RESPINS }, (_, i) => (
-            <i key={i} className={i < b.left ? "is-on" : ""} />
-          ))}
-        </span>
-        {b.boost && m === 1 && <span className="bell-hud__boost">{`SLOT REELS ×2 @${BELL_X3_AT}`}</span>}
-        {m > 1 && <span className="bell-hud__x3">{`×${m}`}</span>}
-        {grands > 0 && <span className="bell-hud__grand">{`GRAND ${grands}/3`}</span>}
-      </div>
       {b.total !== null && (
         <div className="bell-total">
           <span className="bell-total__k">{grands >= 3 ? "GRAND JACKPOT" : count === CELLS ? `FULL SCREEN ×${m}` : "BELL BONUS"}</span>
