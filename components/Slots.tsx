@@ -844,7 +844,7 @@ useEffect(() => {
     <p className="flex items-center justify-center gap-2"><span aria-hidden="true" className="h-px w-6 bg-gradient-to-r from-transparent to-[#d7b45b]/70" /><span className="font-display gold-text text-[12px] font-bold uppercase tracking-[0.3em]">Bonuses</span><span aria-hidden="true" className="h-px w-6 bg-gradient-to-l from-transparent to-[#d7b45b]/70" /></p>
     {skinId === "classic" ? (
 <button type="button" onClick={() => openInfo("features")} className={towerCard} style={towerStyle}>
-      <span className="text-[9px] font-black tracking-[0.25em] text-[#ffb36b]/90"><span aria-hidden="true">🔔 </span>BELL LINK</span>
+      <span className="text-[9px] font-black tracking-[0.25em] text-[#ffb36b]/90"><span aria-hidden="true">🔔 </span>ROYAL BELLS</span>
       <span className="mt-1.5 block text-[11px] leading-snug text-white/70" translate="no">{fr ? "5+ cloches lancent le bonus. Écran plein ×3. Avec Slot Reels : ×2 dès 15, ×4 écran plein." : "5+ bells start the bonus. Full screen ×3. With Slot Reels: ×2 from 15, ×4 full."}</span>
     </button>
 ) : (

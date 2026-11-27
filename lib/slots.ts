@@ -629,7 +629,7 @@ export const BELL_RESPINS = 3;
 export const BELL_X3_AT = 15;
 export const CELLS = REELS * ROWS;
 /**
- * Jackpot bells, like the Bell Link machines: MINI (10× the bet) and MINOR
+ * Jackpot bells: MINI (10× the bet) and MINOR
  * (50×) are fixed and can land several times; MAJOR (progressive) at most
  * once per bonus; GRAND (kingpin, progressive) needs 3 Grand bells in one
  * bonus, otherwise each one turns into a bell worth 50× to 100×.

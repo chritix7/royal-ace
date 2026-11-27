@@ -17,6 +17,7 @@ import { useStats } from "../lib/statsStore";
  * Settings and the cosmetics shop, in one sheet opened from the header
  * gear (or from a locked theme in a game, straight on that item).
  */
+import { HELP_LINE, LEGAL_LINKS } from "./LegalDoc";
 export type SettingsTab = "settings" | "shop";
 
 function Row({ title, sub, children }: { title: string; sub?: string; children: ReactNode }) {
@@ -339,7 +340,20 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
           <li>
             <b>Play well.</b> Take breaks: the tables wait for you.
           </li>
+          <li translate="no">
+            <b>{lang === "fr" ? "18 ans et plus." : "18+ only."}</b>{" "}
+            {lang === "fr"
+              ? `Si le jeu te pose problème, ${HELP_LINE.name} répond au ${HELP_LINE.phone} (appel non surtaxé).`
+              : `If gaming is a problem for you, ${HELP_LINE.name} can help: ${HELP_LINE.phone} (France).`}
+          </li>
         </ul>
+        <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[12px]" translate="no">
+          {LEGAL_LINKS.map((l) => (
+            <a key={l.href} href={l.href} className="text-[#e5c779] hover:underline">
+              {lang === "fr" ? l.fr : l.en}
+            </a>
+          ))}
+        </nav>
       </section>
       </div>
       <div className="st-col">

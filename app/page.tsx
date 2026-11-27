@@ -31,6 +31,7 @@ import Lobby from "../components/Lobby";
 import { profileStore, useProfile } from "../lib/profile";
 import { SettingsPage, ShopPage, type SettingsTab } from "../components/SettingsSheet";
 import WelcomeTour, { WELCOME_KEY } from "../components/WelcomeTour";
+import AgeGate from "../components/AgeGate";
 import { i18n } from "../lib/i18n";
 import { motion, startRest } from "../lib/motion";
 import { cloud } from "../lib/cloud";
@@ -552,6 +553,7 @@ export default function Home() {
       {settings?.tab === "settings" && <SettingsPage onClose={() => setSettings(null)} onTour={() => setTourOpen(true)} />}
       {settings?.tab === "shop" && <ShopPage item={settings.item} onClose={() => setSettings(null)} />}
       {tourOpen && inLobby && <WelcomeTour onClose={() => setTourOpen(false)} />}
+      <AgeGate />
     </main>
   );
 }
