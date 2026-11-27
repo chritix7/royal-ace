@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   title: { default: "Chrysonyx · Free casino with virtual chips", template: "%s · Chrysonyx" },
   description: DESCRIPTION,
   applicationName: "Chrysonyx",
-  verification: { google: "2StTLGlxR5b6XE8JepRdQzfzF2YKVJvat8g8iZfVOo4" },
+  verification: { google: ["2StTLGlxR5b6XE8JepRdQzfzF2YKVJvat8g8iZfVOo4", "eJQfAbGRAg6QGjkBgxeJL8UvwUE178hoiiRfjkqA-Ps"] },
   keywords: ["free casino", "social casino", "free slots", "blackjack", "roulette", "poker", "virtual chips", "casino gratuit", "machine à sous gratuite"],
   alternates: { canonical: "/" },
   openGraph: {
