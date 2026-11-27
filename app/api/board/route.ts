@@ -7,23 +7,16 @@
  */
 import { boardName, countRound, MAX_BATCH, MAX_PER_MIN, suspicious, weekEnds, weekKey, type WeekStats } from "../../../lib/board";
 import { getUser, json, sessionUser } from "../../../lib/server/account";
+import { isAdminUser } from "../../../lib/server/admin";
 import { pipeline, redis, redisReady } from "../../../lib/server/redis";
 
-/** Owner accounts (by sign-in e-mail), set in the ADMIN_EMAILS env var, comma-separated. */
-const adminEmails = () =>
-  (process.env.ADMIN_EMAILS ?? "")
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
 const KEEP = 60 * 60 * 24 * 21; // weeks stay readable for three weeks
 const TOP = 50;
 
 const k = (wk: string) => ({ board: `lb:${wk}`, names: `lbn:${wk}`, review: `lbrev:${wk}`, stats: (uid: string) => `lbs:${wk}:${uid}` });
 
 async function isAdmin(uid: string | null) {
-  if (!uid) return false;
-  const u = await getUser(uid);
-  return !!u?.email && adminEmails().includes(u.email.toLowerCase());
+  return !!uid && isAdminUser(await getUser(uid));
 }
 
 const num = (v: unknown) => (typeof v === "string" || typeof v === "number" ? Number(v) || 0 : 0);
@@ -48,8 +41,9 @@ export async function GET(req: Request) {
     const uid = await sessionUser(req);
     const [top, total] = (await pipeline([["ZREVRANGE", K.board, 0, TOP - 1, "WITHSCORES"], ["ZCARD", K.board]])) as [unknown, number];
     const list = pairs(top);
-    const names = list.length ? ((await redis<(string | null)[]>(["HMGET", K.names, ...list.map(([u]) => u)])) ?? []) : [];
-    const rows = list.map(([u, score], i) => ({ pos: i + 1, name: names[i] || "Player", score: Math.round(score), you: u === uid }));
+    const ids = list.map(([u]) => u);
+    const [names, founders] = ids.length ? ((await pipeline([["HMGET", K.names, ...ids], ["SMISMEMBER", "founders", ...ids]])) as [(string | null)[], number[]]) : [[], []];
+    const rows = list.map(([u, score], i) => ({ pos: i + 1, name: names[i] || "Player", score: Math.round(score), you: u === uid, founder: founders[i] === 1 }));
     let me = null;
     let review: { uid: string; name: string; score: number; rounds: number; why: string }[] | undefined;
     if (uid) {
@@ -123,7 +117,8 @@ export async function POST(req: Request) {
       ])) as unknown[];
       const s = parseStats(out[6]);
       if (max > s.max) s.max = max;
-      const name = boardName(body.name);
+      const user = await getUser(uid);
+      const name = boardName(user?.nick);
       const why = suspicious(s);
       const cmds: (string | number)[][] = [
         ["HSET", S, "max", s.max],

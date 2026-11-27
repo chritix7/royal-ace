@@ -6,7 +6,8 @@ import { audio, useAudioSettings } from "../lib/audio";
 import { AMBIENCE_MODES, ambience, useAmbienceMode } from "../lib/ambience";
 import { i18n, useLang } from "../lib/i18n";
 import { ecoMode, motion, useEco, useReducedMotion } from "../lib/motion";
-import { cleanName, profileStore, useProfile } from "../lib/profile";
+import { useProfile } from "../lib/profile";
+import { nick, useNickCheck } from "../lib/nick";
 import ShopView from "./ShopView";
 import { useBalance } from "../lib/wallet";
 import { cloud, useCloud } from "../lib/cloud";
@@ -285,11 +286,11 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
     } catch {}
   };
   useEffect(() => setName(profile.name), [profile.name]);
-  const saveName = () => {
-    const c = cleanName(name);
-    if (!c) return setNameMsg("2 to 16 letters or digits");
-    profileStore.setName(c);
-    setNameMsg("Saved ✓");
+  const linkedNow = useCloud().linked;
+  const live = useNickCheck(name, profile.name, linkedNow, lang === "fr");
+  const saveName = async () => {
+    const err = await nick.save(name, lang === "fr");
+    setNameMsg(err ?? (lang === "fr" ? "Enregistré ✓" : "Saved ✓"));
   };
   const resetAll = () => {
     try {
@@ -451,11 +452,15 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
         <p className="st-head">Profile & account</p>
         <div className="flex gap-1.5">
           <input value={name} onChange={(e) => setName(e.target.value)} onPointerDown={(e) => { if (e.pointerType === "touch" && document.activeElement === e.currentTarget) e.currentTarget.blur(); }} maxLength={16} aria-label="Your name" className="st-input min-w-0 flex-1" translate="no" />
-          <button type="button" className="pr-btn is-sm" onClick={saveName}>
+          <button type="button" className="pr-btn is-sm" onClick={() => void saveName()}>
             Save
           </button>
         </div>
-        {nameMsg && <p className="st-sub mt-1">{nameMsg}</p>}
+        {(live?.msg || nameMsg) && (
+          <p className={`st-sub mt-1 ${live ? (live.ok ? "!text-emerald-300" : "!text-red-300") : ""}`} translate="no">
+            {live?.msg ?? nameMsg}
+          </p>
+        )}
         <AccountStats />
         <div className="st-danger mt-3">
           <p className="st-row__title">Reset account</p>

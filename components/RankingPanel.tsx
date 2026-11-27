@@ -66,6 +66,11 @@ export default function RankingPanel({ onJoin }: { onJoin?: () => void }) {
               <span className="flex min-w-0 flex-1 items-center gap-1.5 truncate">
                 {r.you && <AvatarBadge size="sm" />}
                 <span className="truncate">{r.you ? `${r.name} (${fr ? "toi" : "you"})` : r.name}</span>
+                {r.founder && (
+                  <span className="rk-founder" title={fr ? "Fondateur de Chrysonyx" : "Founder of Chrysonyx"}>
+                    ✦ {fr ? "Fondateur" : "Founder"}
+                  </span>
+                )}
               </span>
               <span className="rk-row__net">{signed(r.score)}</span>
             </li>

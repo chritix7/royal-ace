@@ -8,6 +8,7 @@ import { mailReady, sendLoginLink } from "../../../lib/server/mail";
 import { pipeline, redis, redisReady } from "../../../lib/server/redis";
 import { randomId, verifyAssertion, verifyRegistration } from "../../../lib/server/webauthn";
 import { weekKey } from "../../../lib/board";
+import { nickKey } from "../../../lib/nickRules";
 
 const MAX_SAVE = 900_000;
 const providers = () => ({ google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET), email: mailReady() });
@@ -147,6 +148,8 @@ export async function POST(req: Request) {
           ...(user?.keys ?? []).map((k) => ["DEL", `cred:${k.id}`]),
           ...(user?.google ? [["DEL", `idp:google:${user.google}`]] : []),
           ...(user?.email ? [["DEL", `idp:email:${user.email}`]] : []),
+          ...(user?.nick ? [["DEL", `nick:${nickKey(user.nick)}`]] : []),
+          ["SREM", "founders", uid],
           // The ranking: this week's line and counters, and the admin log.
           ["ZREM", `lb:${weekKey()}`, uid],
           ["HDEL", `lbn:${weekKey()}`, uid],

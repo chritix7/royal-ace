@@ -2,7 +2,6 @@ import { useSyncExternalStore } from "react";
 import { MAX_BATCH, toRound, type Round } from "./board";
 import { onRound } from "./career";
 import { cloud } from "./cloud";
-import { profileStore } from "./profile";
 import { wallet } from "./wallet";
 
 /**
@@ -11,7 +10,7 @@ import { wallet } from "./wallet";
  * outside the cloud save (its key has no "royalace:" prefix) so a restore
  * on another device never sends the same rounds twice.
  */
-export type BoardRow = { pos: number; name: string; score: number; you: boolean };
+export type BoardRow = { pos: number; name: string; score: number; you: boolean; founder?: boolean };
 export type BoardMe = { rank: number; score: number; rounds: number; status: "ok" | "review" | "hidden" };
 export type ReviewRow = { uid: string; name: string; score: number; rounds: number; why: string };
 export type BoardState = {
@@ -55,7 +54,7 @@ async function flush(keepalive = false) {
     const r = await fetch("/api/board", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ op: "report", rounds: batch, name: profileStore.get().name }),
+      body: JSON.stringify({ op: "report", rounds: batch }),
       keepalive,
     });
     // Sent (or refused for good): drop the batch. Keep it on network/server trouble.

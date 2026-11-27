@@ -16,7 +16,9 @@ import { useProgression, xpForNextLevel, xpInLevel } from "../lib/progression";
 import { dailyStatus, dailyStore, useDaily, vipTierForLevel } from "../lib/daily";
 import { today } from "../lib/clock";
 import { useWeekly, WEEKLY_TIERS } from "../lib/weekly";
-import { cleanName, profileStore, useProfile } from "../lib/profile";
+import { profileStore, useProfile } from "../lib/profile";
+import { nick, useNickCheck } from "../lib/nick";
+import { useCloud } from "../lib/cloud";
 import { useLocked } from "../lib/wallet";
 import { AvatarBadge, useTitle } from "./Avatar";
 import { GrowingValue, SUIT, useLivePools } from "./JackpotBar";
@@ -134,9 +136,13 @@ function greeting() {
 const fmt = (n: number) => n.toLocaleString("en-US");
 
 /* ───────── Nickname ───────── */
-export function NameModal({ initial, onDone }: { initial: string; onDone: () => void }) {
+export function NameModal({ initial, onDone, notice }: { initial: string; onDone: () => void; notice?: string | null }) {
   const [value, setValue] = useState(initial);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(notice ?? null);
+  const [busy, setBusy] = useState(false);
+  const linked = useCloud().linked;
+  const fr = useLang() === "fr";
+  const live = useNickCheck(value, notice ? "" : initial, linked, fr);
   const input = useRef<HTMLInputElement>(null);
   // Auto-focus only with a mouse: on iPhone a focus without a tap shows no
   // keyboard, and the field then ignores taps because it is "already" focused.
@@ -145,12 +151,16 @@ export function NameModal({ initial, onDone }: { initial: string; onDone: () => 
     const t = window.setTimeout(() => input.current?.focus(), 60);
     return () => window.clearTimeout(t);
   }, []);
-  const submit = () => {
-    const n = cleanName(value);
-    if (!n) return setError("2 to 16 letters or numbers");
-    profileStore.setName(n);
+  const submit = async () => {
+    if (busy) return;
+    setBusy(true);
+    const err = await nick.save(value, fr);
+    setBusy(false);
+    if (err) return setError(err);
     onDone();
   };
+  const hint = error ?? live?.msg ?? (linked ? (fr ? "Ton pseudo public, unique dans tout le casino" : "Your public nickname, unique across the casino") : fr ? "Affiché dans le lobby · unique une fois connecté" : "Shown in the lobby · made unique once you sign in");
+  const tone = error || (live && !live.ok) ? "text-red-300" : live?.ok ? "text-emerald-300" : "text-white/35";
   if (typeof document === "undefined") return null;
   return createPortal(
     <div className="safe-y fixed inset-0 z-[190] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Your name">
@@ -159,7 +169,7 @@ export function NameModal({ initial, onDone }: { initial: string; onDone: () => 
         className="lb-name relative w-full max-w-sm p-6 text-center"
         onSubmit={(e) => {
           e.preventDefault();
-          submit();
+          void submit();
         }}
       >
         <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[#d7b45b]/80">Welcome to</p>
@@ -182,8 +192,10 @@ export function NameModal({ initial, onDone }: { initial: string; onDone: () => 
           className="lb-input mt-4 w-full"
           autoComplete="nickname"
         />
-        <p className={`mt-1.5 h-4 text-[11px] ${error ? "text-red-300" : "text-white/35"}`}>{error ?? "Shown in the lobby only, kept on this device"}</p>
-        <button type="submit" className="lb-play mt-3 w-full">
+        <p className={`mt-1.5 min-h-4 text-[11px] ${tone}`} translate="no">
+          {hint}
+        </p>
+        <button type="submit" disabled={busy} className="lb-play mt-3 w-full">
           Enter the casino
         </button>
         {!initial && (
@@ -417,6 +429,16 @@ export default function Lobby({
   const locked = useLocked();
   const [detail, setDetail] = useState<Info | null>(null);
   const [nameOpen, setNameOpen] = useState(false);
+  const [nameNotice, setNameNotice] = useState<string | null>(null);
+  useEffect(() => {
+    const onNeed = (e: Event) => {
+      const err = (e as CustomEvent<{ error: string }>).detail?.error ?? "taken";
+      setNameNotice(err === "reserved" ? "reserved" : "taken");
+      setNameOpen(true);
+    };
+    window.addEventListener("royal-ace:nick-needed", onNeed);
+    return () => window.removeEventListener("royal-ace:nick-needed", onNeed);
+  }, []);
   const [profileTab, setProfileTab] = useState<null | "card" | "rank">(null);
   const career = useCareer();
   const boardMe = useBoard().me;
@@ -666,7 +688,16 @@ export default function Lobby({
         </p>
       )}
       {detail && <Detail g={detail} onClose={() => setDetail(null)} onPlay={() => play(detail)} />}
-      {hydrated && (nameOpen || !profile.asked) && <NameModal initial={profile.name} onDone={() => setNameOpen(false)} />}
+      {hydrated && (nameOpen || !profile.asked) && (
+        <NameModal
+          initial={profile.name}
+          notice={nameNotice ? (fr ? (nameNotice === "reserved" ? `« ${profile.name} » est réservé : choisis un autre pseudo` : `« ${profile.name} » est déjà pris : choisis un autre pseudo`) : nameNotice === "reserved" ? `"${profile.name}" is reserved: pick another nickname` : `"${profile.name}" is already taken: pick another nickname`) : null}
+          onDone={() => {
+            setNameOpen(false);
+            setNameNotice(null);
+          }}
+        />
+      )}
       {profileTab && <ProfileSheet tab={profileTab} onClose={() => setProfileTab(null)} />}
     </div>
   );

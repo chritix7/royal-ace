@@ -6,7 +6,7 @@
 import { pipeline, redis } from "./redis";
 import { randomId, type StoredKey } from "./webauthn";
 
-export type User = { name: string; created: number; keys: StoredKey[]; email?: string; google?: string };
+export type User = { name: string; created: number; keys: StoredKey[]; email?: string; google?: string; nick?: string; nickAt?: number };
 export const COOKIE = "ra_sess";
 export const SESSION_TTL = 60 * 60 * 24 * 365;
 
