@@ -5,7 +5,7 @@
  *  POST grant     → admin only: chips for the admin's own wallet (logged, never ranked)
  *  POST review    → admin only: { uid, action: "approve" | "hide" }
  */
-import { boardName, countRound, MAX_BATCH, MAX_PER_MIN, suspicious, weekEnds, weekKey, type WeekStats } from "../../../lib/board";
+import { boardName, countRound, MAX_BATCH, PODIUM_PRIZES, prevWeek, type Trophy, MAX_PER_MIN, suspicious, weekEnds, weekKey, type WeekStats } from "../../../lib/board";
 import { getUser, json, sessionUser } from "../../../lib/server/account";
 import { isAdminUser } from "../../../lib/server/admin";
 import { pipeline, redis, redisReady } from "../../../lib/server/redis";
@@ -33,23 +33,48 @@ const pairs = (raw: unknown): [string, number][] => {
   return out;
 };
 
+/**
+ * Close last week once (the first visit of the new week does it): its top 3
+ * with a positive score get a permanent trophy and a chip prize to claim.
+ */
+async function settle(wk: string) {
+  const last = prevWeek(wk);
+  const ok = await redis<string | null>(["SET", `lbdone:${last}`, "1", "NX", "EX", 60 * 60 * 24 * 60]);
+  if (ok !== "OK") return;
+  const podium = pairs(await redis(["ZREVRANGE", `lb:${last}`, 0, 2, "WITHSCORES"])).filter(([, sc]) => sc > 0);
+  const cmds: (string | number)[][] = [];
+  podium.forEach(([u, sc], i) => {
+    const t: Trophy = { week: last, place: (i + 1) as 1 | 2 | 3, score: Math.round(sc) };
+    cmds.push(["LPUSH", `trophies:${u}`, JSON.stringify(t)], ["HINCRBY", "tcount", u, 1], ["SET", `prize:${u}:${last}`, PODIUM_PRIZES[i], "EX", 60 * 60 * 24 * 30]);
+  });
+  if (cmds.length) await pipeline(cmds);
+}
+
 export async function GET(req: Request) {
   const wk = weekKey();
   const K = k(wk);
   if (!redisReady()) return json({ week: wk, ends: weekEnds(), rows: [], me: null });
   try {
     const uid = await sessionUser(req);
-    const [top, total] = (await pipeline([["ZREVRANGE", K.board, 0, TOP - 1, "WITHSCORES"], ["ZCARD", K.board]])) as [unknown, number];
+    await settle(wk).catch(() => {});
+    const last = prevWeek(wk);
+    const [top, total, lastTop] = (await pipeline([["ZREVRANGE", K.board, 0, TOP - 1, "WITHSCORES"], ["ZCARD", K.board], ["ZREVRANGE", `lb:${last}`, 0, 2, "WITHSCORES"]])) as [unknown, number, unknown];
+    const podium = pairs(lastTop).filter(([, sc]) => sc > 0);
+    const podiumNames = podium.length ? ((await redis<(string | null)[]>(["HMGET", `lbn:${last}`, ...podium.map(([u]) => u)])) ?? []) : [];
+    const champions = podium.map(([u, sc], i) => ({ place: i + 1, name: podiumNames[i] || "Player", score: Math.round(sc), you: u === uid }));
     const list = pairs(top);
     const ids = list.map(([u]) => u);
-    const [names, founders] = ids.length ? ((await pipeline([["HMGET", K.names, ...ids], ["SMISMEMBER", "founders", ...ids]])) as [(string | null)[], number[]]) : [[], []];
-    const rows = list.map(([u, score], i) => ({ pos: i + 1, name: names[i] || "Player", score: Math.round(score), you: u === uid, founder: founders[i] === 1 }));
+    const [names, founders, cups] = ids.length
+      ? ((await pipeline([["HMGET", K.names, ...ids], ["SMISMEMBER", "founders", ...ids], ["HMGET", "tcount", ...ids]])) as [(string | null)[], number[], (string | null)[]])
+      : [[], [], []];
+    const rows = list.map(([u, score], i) => ({ pos: i + 1, name: names[i] || "Player", score: Math.round(score), you: u === uid, founder: founders[i] === 1, cups: Number(cups[i]) || 0 }));
     let me = null;
     let review: { uid: string; name: string; score: number; rounds: number; why: string }[] | undefined;
     if (uid) {
-      const [rank, raw] = (await pipeline([["ZREVRANK", K.board, uid], ["HGETALL", K.stats(uid)]])) as [number | null, unknown];
+      const [rank, raw, tro, prize] = (await pipeline([["ZREVRANK", K.board, uid], ["HGETALL", K.stats(uid)], ["LRANGE", `trophies:${uid}`, 0, 99], ["GET", `prize:${uid}:${last}`]])) as [number | null, unknown, string[], string | null];
       const s = parseStats(raw);
-      me = { rank: rank === null ? 0 : rank + 1, score: Math.round(s.score), rounds: s.rounds, status: s.hidden ? "hidden" : rank === null && s.rounds > 0 ? "review" : "ok" };
+      const trophies = (tro ?? []).map((t) => JSON.parse(t) as Trophy);
+      me = { rank: rank === null ? 0 : rank + 1, score: Math.round(s.score), rounds: s.rounds, status: s.hidden ? "hidden" : rank === null && s.rounds > 0 ? "review" : "ok", trophies, prize: prize ? { week: last, amount: Number(prize), place: trophies.find((t) => t.week === last)?.place ?? 3 } : null };
       if (await isAdmin(uid)) {
         const ids = (await redis<string[]>(["SMEMBERS", K.review])) ?? [];
         review = await Promise.all(
@@ -61,7 +86,7 @@ export async function GET(req: Request) {
         );
       }
     }
-    return json({ week: wk, ends: weekEnds(), total, rows, me, admin: review !== undefined, review });
+    return json({ week: wk, ends: weekEnds(), total, rows, champions, me, admin: review !== undefined, review });
   } catch {
     return json({ week: wk, ends: weekEnds(), rows: [], me: null, error: "unavailable" }, 503);
   }
@@ -131,6 +156,12 @@ export async function POST(req: Request) {
       } else cmds.push(["ZADD", K.board, Math.round(s.score), uid], ["EXPIRE", K.board, KEEP]);
       await pipeline(cmds);
       return json({ ok: true, counted: count, held: !!why || !!s.hidden });
+    }
+
+    if (body.op === "claim-prize") {
+      const amount = await redis<string | null>(["GETDEL", `prize:${uid}:${prevWeek(wk)}`]);
+      if (!amount) return json({ error: "nothing" }, 404);
+      return json({ ok: true, amount: Number(amount) });
     }
 
     if (body.op === "grant") {

@@ -83,3 +83,9 @@ export function toRound(game: string, wagered: number, net: number): Round | nul
   if (wagered === 0 && game === "slots" && net !== 0) return ["gamble", Math.abs(Math.round(net)), Math.round(net)];
   return null;
 }
+
+/** Weekly podium prizes (chips) — paid once, the trophy stays forever. */
+export const PODIUM_PRIZES = [250_000, 100_000, 50_000];
+/** The week before `wk` ("2026-11-23" → "2026-11-16"). */
+export const prevWeek = (wk: string) => new Date(Date.parse(`${wk}T00:00:00Z`) - 7 * 86400000).toISOString().slice(0, 10);
+export type Trophy = { week: string; place: 1 | 2 | 3; score: number };

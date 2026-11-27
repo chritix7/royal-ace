@@ -9,6 +9,21 @@ import { useProfile } from "../lib/profile";
 import { AvatarBadge } from "./Avatar";
 
 const fmt = (n: number) => Math.floor(n).toLocaleString("en-US");
+const CUP = ["#f5d778", "#d9d9e0", "#d39a62"];
+
+/** A small engraved cup, gold / silver / bronze. */
+export function Cup({ place = 1, size = 14 }: { place?: number; size?: number }) {
+  const c = CUP[(place - 1) % 3];
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className="inline-block shrink-0">
+      <path d="M7 3h10v4.5a5 5 0 0 1-10 0V3Z" fill={c} />
+      <path d="M7 5H4.2a.7.7 0 0 0-.7.8C3.8 8.6 5.4 10 7.6 10.3M17 5h2.8a.7.7 0 0 1 .7.8c-.3 2.8-1.9 4.2-4.1 4.5" fill="none" stroke={c} strokeWidth="1.6" />
+      <path d="M10.5 12.3h3l.6 4.2h-4.2l.6-4.2ZM8 17.5h8l.8 3.5H7.2l.8-3.5Z" fill={c} />
+      <path d="M9.3 4.6v3.2" stroke="#fff" strokeOpacity=".55" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+const PLACE = { en: ["1st", "2nd", "3rd"], fr: ["1er", "2e", "3e"] };
 const signed = (n: number) => `${n >= 0 ? "+" : "−"}◈ ${fmt(Math.abs(n))}`;
 
 function left(ends: number, fr: boolean) {
@@ -38,6 +53,23 @@ export default function RankingPanel({ onJoin }: { onJoin?: () => void }) {
           : `Real players · net winnings this week · resets Monday (in ${left(b.ends, fr)}). Stakes above ${fmt(STAKE_CAP)} count as ${fmt(STAKE_CAP)}.`}
       </p>
 
+      {linked && me?.prize && <PrizeBanner prize={me.prize} fr={fr} />}
+
+      {b.champions.length > 0 && (
+        <div className="rk-champs">
+          <p className="rk-champs__h">{fr ? "Champions de la semaine dernière" : "Last week's champions"}</p>
+          <div className="rk-champs__row">
+            {b.champions.map((c) => (
+              <div key={c.place} className={`rk-champ is-${c.place} ${c.you ? "is-you" : ""}`}>
+                <Cup place={c.place} size={c.place === 1 ? 26 : 20} />
+                <span className="rk-champ__n">{c.name}</span>
+                <span className="rk-champ__s">{signed(c.score)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {!linked && (
         <button type="button" onClick={() => {
             onJoin?.();
@@ -66,6 +98,12 @@ export default function RankingPanel({ onJoin }: { onJoin?: () => void }) {
               <span className="flex min-w-0 flex-1 items-center gap-1.5 truncate">
                 {r.you && <AvatarBadge size="sm" />}
                 <span className="truncate">{r.you ? `${r.name} (${fr ? "toi" : "you"})` : r.name}</span>
+                {!!r.cups && (
+                  <span className="rk-cups" title={fr ? `${r.cups} trophée${r.cups > 1 ? "s" : ""}` : `${r.cups} troph${r.cups > 1 ? "ies" : "y"}`}>
+                    <Cup size={12} />
+                    {r.cups > 1 && r.cups}
+                  </span>
+                )}
                 {r.founder && (
                   <span className="rk-founder" title={fr ? "Fondateur de Chrysonyx" : "Founder of Chrysonyx"}>
                     ✦ {fr ? "Fondateur" : "Founder"}
@@ -97,6 +135,20 @@ export default function RankingPanel({ onJoin }: { onJoin?: () => void }) {
       <p className="mt-3 text-center text-[10px] text-white/35">
         {fr ? `${b.total} joueur${b.total > 1 ? "s" : ""} classé${b.total > 1 ? "s" : ""} · seul ton pseudo est affiché · jetons virtuels uniquement` : `${b.total} ranked player${b.total === 1 ? "" : "s"} · only your nickname is shown · virtual chips only`}
       </p>
+
+      {linked && !!me?.trophies?.length && (
+        <div className="rk-shelf">
+          <p className="rk-champs__h">{fr ? "Mes trophées" : "My trophies"}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {me.trophies.map((t) => (
+              <span key={t.week} className="rk-trophy" title={`${fr ? "Semaine du" : "Week of"} ${t.week} · ${signed(t.score)}`}>
+                <Cup place={t.place} size={16} />
+                {PLACE[fr ? "fr" : "en"][t.place - 1]} · {new Date(`${t.week}T00:00:00Z`).toLocaleDateString(fr ? "fr-FR" : "en-GB", { day: "numeric", month: "short" })}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {b.admin && <AdminTools fr={fr} />}
     </div>
@@ -151,5 +203,28 @@ function AdminTools({ fr }: { fr: boolean }) {
         </>
       )}
     </section>
+  );
+}
+
+function PrizeBanner({ prize, fr }: { prize: { amount: number; place: number }; fr: boolean }) {
+  const [busy, setBusy] = useState(false);
+  const claim = async () => {
+    setBusy(true);
+    try {
+      await board.claimPrize();
+    } catch {}
+    setBusy(false);
+  };
+  return (
+    <div className="rk-prize">
+      <Cup place={prize.place} size={34} />
+      <div className="min-w-0 flex-1">
+        <p className="rk-prize__t">{fr ? `${PLACE.fr[prize.place - 1]} la semaine dernière !` : `${PLACE.en[prize.place - 1]} last week!`}</p>
+        <p className="rk-prize__s">{fr ? "Ton trophée est sur ton profil pour toujours." : "Your trophy stays on your profile for good."}</p>
+      </div>
+      <button type="button" onClick={claim} disabled={busy} className="rk-admin__btn">
+        ◈ {fmt(prize.amount)}
+      </button>
+    </div>
   );
 }

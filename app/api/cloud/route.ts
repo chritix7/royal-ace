@@ -150,6 +150,8 @@ export async function POST(req: Request) {
           ...(user?.email ? [["DEL", `idp:email:${user.email}`]] : []),
           ...(user?.nick ? [["DEL", `nick:${nickKey(user.nick)}`]] : []),
           ["SREM", "founders", uid],
+          ["DEL", `trophies:${uid}`],
+          ["HDEL", "tcount", uid],
           // The ranking: this week's line and counters, and the admin log.
           ["ZREM", `lb:${weekKey()}`, uid],
           ["HDEL", `lbn:${weekKey()}`, uid],

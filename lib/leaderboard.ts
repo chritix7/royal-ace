@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { MAX_BATCH, toRound, type Round } from "./board";
+import { MAX_BATCH, toRound, type Round, type Trophy } from "./board";
 import { onRound } from "./career";
 import { cloud } from "./cloud";
 import { wallet } from "./wallet";
@@ -10,8 +10,9 @@ import { wallet } from "./wallet";
  * outside the cloud save (its key has no "royalace:" prefix) so a restore
  * on another device never sends the same rounds twice.
  */
-export type BoardRow = { pos: number; name: string; score: number; you: boolean; founder?: boolean };
-export type BoardMe = { rank: number; score: number; rounds: number; status: "ok" | "review" | "hidden" };
+export type BoardRow = { pos: number; name: string; score: number; you: boolean; founder?: boolean; cups?: number };
+export type Champion = { place: number; name: string; score: number; you: boolean };
+export type BoardMe = { rank: number; score: number; rounds: number; status: "ok" | "review" | "hidden"; trophies?: Trophy[]; prize?: { week: string; amount: number; place: number } | null };
 export type ReviewRow = { uid: string; name: string; score: number; rounds: number; why: string };
 export type BoardState = {
   loaded: boolean;
@@ -21,6 +22,7 @@ export type BoardState = {
   ends: number;
   total: number;
   rows: BoardRow[];
+  champions: Champion[];
   me: BoardMe | null;
   admin: boolean;
   review: ReviewRow[];
@@ -28,7 +30,7 @@ export type BoardState = {
 
 const QKEY = "chrysonyx:lb-queue";
 const MAX_QUEUE = 600;
-let state: BoardState = { loaded: false, loading: false, error: false, week: "", ends: 0, total: 0, rows: [], me: null, admin: false, review: [] };
+let state: BoardState = { loaded: false, loading: false, error: false, week: "", ends: 0, total: 0, rows: [], champions: [], me: null, admin: false, review: [] };
 const listeners = new Set<() => void>();
 const set = (p: Partial<BoardState>) => {
   state = { ...state, ...p };
@@ -117,7 +119,7 @@ export const board = {
     try {
       const r = await fetch("/api/board", { cache: "no-store" });
       const d = (await r.json()) as Partial<BoardState> & { review?: ReviewRow[] };
-      set({ loaded: true, loading: false, error: !r.ok, week: d.week ?? "", ends: d.ends ?? 0, total: d.total ?? 0, rows: d.rows ?? [], me: d.me ?? null, admin: !!d.admin, review: d.review ?? [] });
+      set({ loaded: true, loading: false, error: !r.ok, week: d.week ?? "", ends: d.ends ?? 0, total: d.total ?? 0, rows: d.rows ?? [], champions: d.champions ?? [], me: d.me ?? null, admin: !!d.admin, review: d.review ?? [] });
     } catch {
       set({ loaded: true, loading: false, error: true });
     }
@@ -126,6 +128,13 @@ export const board = {
   async grant(amount: number) {
     const r = await post<{ amount: number }>({ op: "grant", amount });
     wallet.add(r.amount);
+    return r.amount;
+  },
+  /** Last week's podium prize: once. */
+  async claimPrize() {
+    const r = await post<{ amount: number }>({ op: "claim-prize" });
+    wallet.add(r.amount);
+    if (state.me) set({ me: { ...state.me, prize: null } });
     return r.amount;
   },
   async review(uid: string, action: "approve" | "hide") {

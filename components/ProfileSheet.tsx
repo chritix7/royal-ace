@@ -10,7 +10,7 @@ import { useProgression } from "../lib/progression";
 import { useStats } from "../lib/statsStore";
 import { useShop } from "../lib/shop";
 import { AvatarBadge, useTitle } from "./Avatar";
-import RankingPanel from "./RankingPanel";
+import RankingPanel, { Cup } from "./RankingPanel";
 
 const fmt = (n: number) => Math.floor(n).toLocaleString("en-US");
 const signed = (n: number) => `${n >= 0 ? "+" : "−"}◈ ${fmt(Math.abs(n))}`;
@@ -83,7 +83,15 @@ export default function ProfileSheet({ tab: first, onClose }: { tab: "card" | "r
                 </div>
                 <div className="flex items-end justify-between">
                   <span className="vip-card__meta">Level {prog.level} · member since {career.since || "today"}</span>
-                  <span className="vip-card__rank">#{myRank || "—"} this week</span>
+                  <span className="vip-card__rank inline-flex items-center gap-1">
+                    #{myRank || "—"} this week
+                    {!!me?.trophies?.length && (
+                      <>
+                        {" · "}
+                        <Cup size={12} /> {me.trophies.length}
+                      </>
+                    )}
+                  </span>
                 </div>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2">
