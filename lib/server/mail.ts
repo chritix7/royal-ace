@@ -2,8 +2,7 @@
 export const mailReady = () => !!process.env.RESEND_API_KEY;
 
 export async function sendLoginLink(to: string, link: string, fr: boolean) {
-  // Sender: chrysonyx.club once verified in Resend (set EMAIL_FROM), royal-ace.club until then.
-  const from = process.env.EMAIL_FROM || "Chrysonyx <login@royal-ace.club>";
+  const from = process.env.EMAIL_FROM || "Chrysonyx <login@chrysonyx.club>";
   const subject = fr ? "Ton lien de connexion Chrysonyx" : "Your Chrysonyx sign-in link";
   const lead = fr ? "Appuie sur le bouton pour te connecter à Chrysonyx. Le lien marche une seule fois, pendant 15 minutes." : "Tap the button to sign in to Chrysonyx. The link works once, for 15 minutes.";
   const btn = fr ? "Me connecter" : "Sign me in";
