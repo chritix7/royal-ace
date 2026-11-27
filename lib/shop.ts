@@ -53,7 +53,7 @@ export const SHOP: ShopItem[] = [
   { id: "title:striker", cat: "title", name: "Penalty King", note: "Never misses a corner", price: 40000, swatch: ["#0b1a0e", "#2c6b35", "#f2f2f2"], glyph: "Penalty King" },
   { id: "title:roller", cat: "title", name: "High Roller", note: "Bets big, smiles bigger", price: 80000, swatch: ["#140c02", "#6b4a12", "#ffd76a"], glyph: "High Roller" },
   { id: "title:whale", cat: "title", name: "The Whale", note: "The casino knows your name", price: 250000, swatch: ["#020a14", "#0f3a6b", "#9be7ff"], glyph: "The Whale" },
-  { id: "title:legend", cat: "title", name: "Royal Ace Legend", note: "The ultimate flex", price: 1000000, swatch: ["#120d02", "#c99b42", "#fff3c4"], glyph: "Royal Ace Legend" },
+  { id: "title:legend", cat: "title", name: "Chrysonyx Legend", note: "The ultimate flex", price: 1000000, swatch: ["#120d02", "#c99b42", "#fff3c4"], glyph: "Chrysonyx Legend" },
   // VIP card finishes.
   { id: "card:gold", cat: "card", name: "Carbon gold", note: "The house finish", price: 0, swatch: ["#08080a", "#1d1d21", "#e5c779"] },
   { id: "card:platinum", cat: "card", name: "Platinum", note: "Brushed steel, silver", price: 100000, swatch: ["#0d0f12", "#2c3036", "#e6ebf2"] },

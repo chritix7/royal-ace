@@ -381,7 +381,7 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
         </div>
       </section>
       <section className="st-card st-tall">
-        <p className="st-head">About Royal Ace</p>
+        <p className="st-head">About Chrysonyx</p>
         <ul className="st-about">
           <li>
             <b>Virtual chips only.</b> No real money, nothing to buy and nothing to cash out: everything is free.
@@ -390,7 +390,7 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
             <b>Fair games.</b> Every game shows its return to player (RTP); the odds are the real casino odds.
           </li>
           <li>
-            <b>Sports.</b> Real matches and scores (football-data.org, API-Sports); odds computed by Royal Ace.
+            <b>Sports.</b> Real matches and scores (football-data.org, API-Sports); odds computed by Chrysonyx.
           </li>
           <li>
             <b>Play well.</b> Take breaks: the tables wait for you.

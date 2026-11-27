@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 /**
- * Royal Ace × House Edition — "Sanctum" dealer shoe.
+ * Chrysonyx × House Edition — "Sanctum" dealer shoe.
  *
  * Volumetric matte-black body (top / front / right / left faces, directionally
  * lit) sitting at the current rotateX(56°) rotateZ(-28°) perspective. Big
@@ -1005,7 +1005,7 @@ export default function DealerShoe({
                 />
               ))}
             </div>
-            {/* Engraved ROYAL ACE brand plate centered on the track */}
+            {/* Engraved CHRYSONYX brand plate centered on the track */}
             <div
               className="absolute left-1/2 top-[6px] -translate-x-1/2 whitespace-nowrap text-center uppercase"
               style={{
@@ -1018,7 +1018,7 @@ export default function DealerShoe({
                 textShadow: "0 0 3px rgba(229, 199, 121, 0.4), 0 1px 0 rgba(0,0,0,0.9)",
               }}
             >
-              Royal Ace
+              Chrysonyx
             </div>
           </div>
           {/* Exit slit — the card flight animation starts here */}

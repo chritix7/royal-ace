@@ -2,19 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { cloud } from "../lib/cloud";
-import { DOMAIN, OLD_HOST } from "../lib/domain";
+import { DOMAIN, OLD_HOSTS } from "../lib/domain";
 
 const MOVED = "ra-moved";
 
 /**
- * Royal Ace moved to its own domain. Progress lives in the browser, per
+ * Chrysonyx moved to its own domain (from the Vercel address, then from royal-ace.club). Progress lives in the browser, per
  * address, so the old address packs the save into the link (after the #,
  * never sent to a server) and the new one unpacks it once.
  */
 export default function DomainMove() {
   const [moving, setMoving] = useState(false);
   useEffect(() => {
-    if (location.hostname === OLD_HOST) {
+    if (OLD_HOSTS.includes(location.hostname)) {
       setMoving(true);
       cloud
         .exportCode()
@@ -42,7 +42,7 @@ export default function DomainMove() {
   return (
     <div className="age-gate" role="status" translate="no">
       <div className="age-gate__card">
-        <p className="font-display gold-text text-xl font-bold">Royal Ace</p>
+        <p className="font-display gold-text text-xl font-bold">Chrysonyx</p>
         <p className="mt-2 text-sm text-white/70">Moving to {DOMAIN} with your chips and progress…</p>
       </div>
     </div>

@@ -252,7 +252,7 @@ export type SpinResult = {
   scatterPay: number; // en multiples de la mise totale
   freeSpins: number; // free spins gagnés par ce tour
   total: number; // gain total en chips (mult. free spins inclus)
-  /** Royal Ace Gold: multiplier of each wild cell (1 elsewhere). */
+  /** Chrysonyx Gold: multiplier of each wild cell (1 elsewhere). */
   mults?: number[][];
   /** Royal Bells: bells on the screen (5+ start the bell bonus). */
   bells?: number;
@@ -334,7 +334,7 @@ export function evaluate(grid: Sym[][], bet: number, mult = 1, stops: number[] =
 }
 
 /** Applique l'expansion des wilds puis calcule les gains, à partir de ce que les rouleaux affichent.
- *  `reelMult`: Royal Ace Gold, the multiplier of each expanded (or held) wild reel. */
+ *  `reelMult`: Chrysonyx Gold, the multiplier of each expanded (or held) wild reel. */
 export function resolveSpin(raw: Sym[][], bet: number, mult = 1, held: boolean[] = Array(REELS).fill(false), stops: number[] = [], m: Machine = MACHINES.miami, reelMult: number[] = Array(REELS).fill(1)): SpinResult {
   // Un wild qui tombe sur les rouleaux 2, 3 ou 4 remplit tout le rouleau
   const grid = raw.map((col) => [...col]);
@@ -392,7 +392,7 @@ export function playSequence(rng: () => number, bet: number, mult = 1, m: Machin
 /**
  * One free spin with sticky wilds. `sticky` = the wilds already on the reels
  * (they cover whatever spins under them). The new wilds join them.
- * `mults` (Royal Ace Gold): the multiplier of each wild cell, new ones included.
+ * `mults` (Chrysonyx Gold): the multiplier of each wild cell, new ones included.
  */
 export function stickyFromRaw(raw: Sym[][], sticky: Sticky, bet: number, mult: number, stops: number[] = [], mults: number[][] | null = null, pay = 1, cap = LINE_MULT_CAP) {
   const grid = raw.map((col, r) => col.map((s, row): Sym => (sticky[r][row] ? "wild" : s)));

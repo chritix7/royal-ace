@@ -11,7 +11,7 @@ import { ANTE_MAX, ANTE_MIN, BONUS_MAX, bonusOf, evaluate, freshDeck, hint, sett
 import { brag } from "./brag";
 
 /**
- * Casino Hold'em at the Royal Ace table: bets, the deal, Call / Fold, the
+ * Casino Hold'em at the Chrysonyx table: bets, the deal, Call / Fold, the
  * showdown and the payout. All nine cards are drawn when the hand is
  * dealt (and saved), so a reload never changes a hand: it resumes at the
  * decision, or settles a hand that was already called or folded.

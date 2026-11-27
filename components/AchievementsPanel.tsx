@@ -252,7 +252,7 @@ export default function AchievementsPanel({ open, onClose }: Props) {
           ) : (
             <div className="space-y-3 lg:grid lg:grid-cols-4 lg:gap-3 lg:space-y-0">
               <p className="text-[11px] text-white/50 lg:col-span-4">Milestones earned once for good, from everything you have played so far.</p>
-              {[...GAMES, { id: "all" as const, label: "Royal Ace" }].map((g) => {
+              {[...GAMES, { id: "all" as const, label: "Chrysonyx" }].map((g) => {
                 const list = career.filter((m) => m.def.game === g.id);
                 if (!list.length) return null;
                 return (

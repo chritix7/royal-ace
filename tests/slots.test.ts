@@ -206,7 +206,7 @@ describe("sticky wilds (free spins)", () => {
   });
 });
 
-describe("Royal Ace Gold and Pharaoh's Vault", () => {
+describe("Chrysonyx Gold and Pharaoh's Vault", () => {
   it("multiplies the wilds of one line together (Gold)", () => {
     const g = put(base(), 1, ["cherry", "wild", "wild", "cherry", null]);
     const m = noMults();

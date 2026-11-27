@@ -1,5 +1,5 @@
 /**
- * Royal Ace odds engine. No bookmaker feed: prices come from a model of
+ * Chrysonyx odds engine. No bookmaker feed: prices come from a model of
  * each match, fed by the league tables, with a fixed house margin.
  *
  * - Football: two Poisson scorers (attack × defence, home advantage).

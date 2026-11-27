@@ -1,7 +1,7 @@
 import type { Sym } from "./slots";
 
 /**
- * Symbols of Royal Ace Gold and Pharaoh's Vault, drawn in SVG (data: URIs,
+ * Symbols of Chrysonyx Gold and Pharaoh's Vault, drawn in SVG (data: URIs,
  * nothing to download). Kept simple on purpose: flat shapes, two or three
  * gradients each, no filters — light to paint, even on phones.
  */
@@ -14,7 +14,7 @@ const grad = (id: string, a: string, b: string, mid?: string, horizontal = false
 const toSrc = (svg: string) => `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 const art = (m: Record<Sym, string>) => Object.fromEntries((Object.keys(m) as Sym[]).map((s) => [s, toSrc(m[s])])) as Record<Sym, string>;
 
-/* ───────── Royal Ace Gold: black lacquer, gold and ivory ───────── */
+/* ───────── Chrysonyx Gold: black lacquer, gold and ivory ───────── */
 const K = "#1a1206"; // outline
 const GOLD = grad("g", "#fff4c2", "#a87a2c", "#e6bd5c");
 const GOLD_H = grad("gh", "#a87a2c", "#a87a2c", "#fff4c2", true);

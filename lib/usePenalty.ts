@@ -11,7 +11,7 @@ import { MAX_BET, MAX_SHOTS, MIN_BET, PENALTY_CHIPS, multiplierAt, payout, shoot
 import { brag } from "./brag";
 
 /**
- * Penalty at the Royal Ace: the bet leaves the credit at kick-off, every
+ * Penalty at the Chrysonyx: the bet leaves the credit at kick-off, every
  * shot is drawn before its animation and saved with the round, so a
  * reload never changes a shot: it resumes the round (or settles a shot
  * that was in the air).

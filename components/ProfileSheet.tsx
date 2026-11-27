@@ -71,7 +71,7 @@ export default function ProfileSheet({ tab: first, onClose }: { tab: "card" | "r
             <>
               <div className={`vip-card ${cardFinish}`}>
                 <div className="flex items-start justify-between">
-                  <span className="vip-card__brand">ROYAL ACE</span>
+                  <span className="vip-card__brand">CHRYSONYX</span>
                   <span className="vip-card__tier">VIP · {vip.label}</span>
                 </div>
                 <div className="flex items-center justify-between">

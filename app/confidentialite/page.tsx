@@ -55,7 +55,7 @@ export default function Page() {
           <section>
             <H>Cookies</H>
             <p>
-              Royal Ace only uses the cloud save&apos;s session cookie, which is strictly necessary for the service you ask for. It needs no
+              Chrysonyx only uses the cloud save&apos;s session cookie, which is strictly necessary for the service you ask for. It needs no
               consent, so there is no cookie banner.
             </p>
           </section>
@@ -76,7 +76,7 @@ export default function Page() {
           </section>
           <section>
             <H>Minors</H>
-            <p>Royal Ace is for people aged 18 and over. We do not knowingly collect data about minors.</p>
+            <p>Chrysonyx is for people aged 18 and over. We do not knowingly collect data about minors.</p>
           </section>
         </>
       }
@@ -131,7 +131,7 @@ export default function Page() {
           <section>
             <H>Cookies</H>
             <p>
-              Royal Ace n&apos;utilise que le cookie de session de la sauvegarde en ligne, strictement nécessaire au service demandé. Il est donc
+              Chrysonyx n&apos;utilise que le cookie de session de la sauvegarde en ligne, strictement nécessaire au service demandé. Il est donc
               dispensé de consentement, et il n&apos;y a pas de bandeau cookies.
             </p>
           </section>
@@ -152,7 +152,7 @@ export default function Page() {
           </section>
           <section>
             <H>Mineurs</H>
-            <p>Royal Ace est réservé aux personnes de 18 ans et plus. Nous ne collectons pas sciemment de données concernant des mineurs.</p>
+            <p>Chrysonyx est réservé aux personnes de 18 ans et plus. Nous ne collectons pas sciemment de données concernant des mineurs.</p>
           </section>
         </>
       }

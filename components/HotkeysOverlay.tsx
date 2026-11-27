@@ -109,7 +109,7 @@ export default function HotkeysOverlay() {
 
         <div className="relative px-5 pb-4 pt-5">
           <p className="text-[9px] font-black uppercase tracking-[0.25em] text-[#d7b45b]/70">
-            Royal Ace
+            Chrysonyx
           </p>
           <h2 className="font-display mt-0.5 text-lg font-black uppercase tracking-wider text-[#f5d778]">
             Keyboard Shortcuts

@@ -59,7 +59,7 @@ export const LOBBY_GAMES: Info[] = [
     facts: ["4 progressive jackpots", "Miami · Gold · Pharaoh · Bells"],
     limits: "◈ 20 – 100K",
     rtp: "96%",
-    about: ["Miami Kingpin: expanding Boss wilds and re-spins, sticky wilds in the free spins.", "Royal Ace Gold: multiplier wilds ×2, ×3, ×5 that multiply together.", "Pharaoh's Vault: one symbol expands on every free spin and pays on all lines.", "Royal Bells: 5 bells start the bell bonus — fill the screen for the Grand.", "Four jackpots grow with every spin: Mini, Minor, Major, Kingpin."],
+    about: ["Miami Kingpin: expanding Boss wilds and re-spins, sticky wilds in the free spins.", "Chrysonyx Gold: multiplier wilds ×2, ×3, ×5 that multiply together.", "Pharaoh's Vault: one symbol expands on every free spin and pays on all lines.", "Royal Bells: 5 bells start the bell bonus — fill the screen for the Grand.", "Four jackpots grow with every spin: Mini, Minor, Major, Kingpin."],
     challenge: "slots",
     stat: ["spins", "slotWins", "spins"],
     session: "slots",
@@ -162,7 +162,7 @@ export function NameModal({ initial, onDone }: { initial: string; onDone: () => 
         }}
       >
         <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[#d7b45b]/80">Welcome to</p>
-        <p className="font-display gold-text mt-1 text-3xl font-bold tracking-[0.18em]">ROYAL ACE</p>
+        <p className="font-display gold-text mt-1 text-3xl font-bold tracking-[0.18em]">CHRYSONYX</p>
         <p className="mt-3 text-sm text-white/65">What should the croupier call you?</p>
         <input
           ref={input}

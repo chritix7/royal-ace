@@ -291,11 +291,11 @@ export default function Home() {
   <div className="mx-auto max-w-screen-2xl px-4 py-2 sm:px-8 sm:py-3">
     <div className="flex items-center gap-3">
       <h1 className="font-display header-shine truncate text-lg font-black tracking-[0.12em] sm:text-3xl">
-        ROYAL{" "}
-        <span className="animate-header-breathe text-[#d7b45b]">ACE</span>
+        CHRYSO
+        <span className="animate-header-breathe text-[#d7b45b]">NYX</span>
       </h1>
 
-      {/* Desktop quick-nav — sits on the same row between ROYAL ACE and the
+      {/* Desktop quick-nav — sits on the same row between CHRYSONYX and the
           chips counter, in order: Stats · Achievements · Rewards · Chips. */}
       <div className="ml-auto hidden items-stretch gap-2 sm:flex">
         <HeaderCard

@@ -23,7 +23,7 @@ const cinzel = Cinzel({
   subsets: ["latin"],
 });
 
-// Fallback blackletter for the dealer shoe's "ROYAL ACE" wordmark.
+// Fallback blackletter for the dealer shoe's "CHRYSONYX" wordmark.
 // Drop a Cloister Black .woff2 into /public/fonts/ and add an @font-face
 // in globals.css if you want the real Cloister Black — the component's
 // font stack lists it first and falls back to this one.
@@ -41,29 +41,29 @@ const shareTechMono = Share_Tech_Mono({
 });
 
 const DESCRIPTION =
-  "Royal Ace is a free online casino with virtual chips: slot machines, blackjack, roulette, Hold'em poker, craps, penalty shoot-out and sports betting on real matches. No sign-up, no real money. 18+.";
+  "Chrysonyx is a free online casino with virtual chips: slot machines, blackjack, roulette, Hold'em poker, craps, penalty shoot-out and sports betting on real matches. No sign-up, no real money. 18+.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
-  title: { default: "Royal Ace · Free casino with virtual chips", template: "%s · Royal Ace" },
+  title: { default: "Chrysonyx · Free casino with virtual chips", template: "%s · Chrysonyx" },
   description: DESCRIPTION,
-  applicationName: "Royal Ace",
+  applicationName: "Chrysonyx",
   verification: { google: "2StTLGlxR5b6XE8JepRdQzfzF2YKVJvat8g8iZfVOo4" },
   keywords: ["free casino", "social casino", "free slots", "blackjack", "roulette", "poker", "virtual chips", "casino gratuit", "machine à sous gratuite"],
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
-    siteName: "Royal Ace",
-    title: "Royal Ace · Your free casino",
+    siteName: "Chrysonyx",
+    title: "Chrysonyx · Your free casino",
     description: "Slots, blackjack, roulette, poker and sports betting with virtual chips. 100% free, no sign-up, no real money.",
     url: "/",
     locale: "en_US",
     alternateLocale: ["fr_FR"],
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Royal Ace: the Royal Bells slot machine" }],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Chrysonyx: the Royal Bells slot machine" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Royal Ace · Your free casino",
+    title: "Chrysonyx · Your free casino",
     description: "Slots, blackjack, roulette, poker and sports betting with virtual chips. 100% free, no real money.",
     images: ["/og-image.jpg"],
   },
@@ -73,7 +73,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "Royal Ace",
+    title: "Chrysonyx",
     statusBarStyle: "black-translucent",
   },
 };
@@ -99,7 +99,7 @@ export default function RootLayout({
             gone after a moment (CSS only, nothing to load). */}
         <div className="app-splash" aria-hidden="true">
           <img src="/icon-192.png" alt="" width={96} height={96} loading="lazy" decoding="async" />
-          <span>ROYAL ACE</span>
+          <span>CHRYSONYX</span>
         </div>
         {children}
         <ServiceWorkerRegistrar />

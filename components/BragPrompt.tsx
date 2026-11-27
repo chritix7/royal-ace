@@ -37,7 +37,7 @@ export default function BragPrompt() {
     let file: File | null = null;
     try {
       const blob = await bragCard(b, profile.name);
-      file = new File([blob], "royal-ace-big-win.png", { type: "image/png" });
+      file = new File([blob], "chrysonyx-big-win.png", { type: "image/png" });
     } catch {}
     const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
     try {

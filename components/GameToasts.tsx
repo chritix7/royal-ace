@@ -6,7 +6,7 @@ import { money } from "../lib/game";
 import { wallet } from "../lib/wallet";
 
 /**
- * Every notice of Royal Ace goes through here (sports tickets, level up,
+ * Every notice of Chrysonyx goes through here (sports tickets, level up,
  * challenges, career badges, slot ranks…), so they all look the same:
  * a slim gold card at the top, two at most, gone in a few seconds.
  * Tap to act or dismiss, swipe up to dismiss.

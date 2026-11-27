@@ -100,7 +100,7 @@ export function ItemPreview({ it, big = false }: { it: ShopItem; big?: boolean }
         <div className={`${cls} shop-prev--card`}>
           <div className={`vip-card shop-vip ${fin}`}>
             <div className="flex items-start justify-between">
-              <span className="vip-card__brand">ROYAL ACE</span>
+              <span className="vip-card__brand">CHRYSONYX</span>
               <span className="vip-card__tier">VIP</span>
             </div>
             <span className="vip-card__chip" aria-hidden="true" />
@@ -284,7 +284,7 @@ function TryScene({ it }: { it: ShopItem }) {
         <div className="try-scene" style={{ background: "radial-gradient(90% 90% at 50% 20%, #1b1b20, #070708)" }}>
           <div className={`vip-card try-vip ${fin}`}>
             <div className="flex items-start justify-between">
-              <span className="vip-card__brand">ROYAL ACE</span>
+              <span className="vip-card__brand">CHRYSONYX</span>
               <span className="vip-card__tier">{`VIP · ${vipTierForLevel(level).label}`}</span>
             </div>
             <span className="vip-card__chip" aria-hidden="true" />

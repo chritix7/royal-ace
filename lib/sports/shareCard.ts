@@ -67,7 +67,7 @@ export function drawTicket(t: Ticket): HTMLCanvasElement {
   ctx.textAlign = "center";
   ctx.fillStyle = gold(ctx, 0, 90, 0, 170);
   ctx.font = "700 64px Georgia, 'Times New Roman', serif";
-  ctx.fillText("ROYAL ACE", W / 2, 160);
+  ctx.fillText("CHRYSONYX", W / 2, 160);
   ctx.fillStyle = "rgba(255,255,255,0.5)";
   ctx.font = "800 24px system-ui, sans-serif";
   ctx.fillText("S P O R T S B O O K", W / 2, 205);
@@ -132,11 +132,11 @@ export async function shareTicket(t: Ticket) {
   const c = drawTicket(t);
   const blob = await new Promise<Blob | null>((r) => c.toBlob(r, "image/png"));
   if (!blob) return;
-  const file = new File([blob], `royal-ace-ticket-${t.id}.png`, { type: "image/png" });
+  const file = new File([blob], `chrysonyx-ticket-${t.id}.png`, { type: "image/png" });
   const nav = navigator as Navigator & { canShare?: (d: unknown) => boolean };
   try {
     if (nav.share && nav.canShare?.({ files: [file] })) {
-      await nav.share({ files: [file], title: "Royal Ace ticket" });
+      await nav.share({ files: [file], title: "Chrysonyx ticket" });
       return;
     }
   } catch {

@@ -258,8 +258,8 @@ const playerCardStyle = (
       >
         <div className="min-w-0">
           <h2 className="font-display header-shine truncate text-sm font-black tracking-[0.18em] sm:text-base">
-            <span className="text-white">ROYAL </span>
-            <span className="animate-header-breathe text-[#d7b45b]">ACE</span>
+            <span className="text-white">CHRYSO</span>
+            <span className="animate-header-breathe text-[#d7b45b]">NYX</span>
             <span className="hidden font-bold tracking-wider text-white/40 sm:inline">
               {" · "}BLACKJACK
             </span>

@@ -8,7 +8,7 @@ export const LEGAL_LINKS = [
 ] as const;
 
 export const CONTACT_EMAIL = "christianxpro7@gmail.com";
-export const FEEDBACK_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Royal Ace feedback")}`;
+export const FEEDBACK_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Chrysonyx feedback")}`;
 
 /** Help line shown wherever we talk about playing responsibly (France, free call). */
 export const HELP_LINE = { name: "Joueurs Info Service", phone: "09 74 75 13 13", url: "https://www.joueurs-info-service.fr" };
@@ -17,7 +17,7 @@ export function LegalDoc({ title, titleFr, updated, en, fr }: { title: string; t
   return (
     <main translate="no" lang="en" className="legal mx-auto w-full max-w-3xl flex-1 px-5 py-10 text-[15px] leading-7 text-white/80 sm:px-8">
       <a href="/" className="text-sm font-semibold text-[#e5c779] hover:underline">
-        ← Royal Ace
+        ← Chrysonyx
       </a>
       <h1 className="font-display mt-6 text-3xl font-bold text-[#f0d99a]">{title}</h1>
       <p className="mt-1 text-sm text-white/45">Last updated: {updated}</p>

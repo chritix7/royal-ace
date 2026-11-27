@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { DOMAIN } from "../lib/domain";
 
 /** Key set when the player turns visit statistics off (Settings > About). */
 export const NO_STATS_KEY = "royalace:no-stats";
@@ -15,7 +16,7 @@ export default function SiteStats() {
     try {
       if (localStorage.getItem(NO_STATS_KEY) === "1") return;
     } catch {}
-    if (location.hostname !== "royal-ace.club") return;
+    if (location.hostname !== DOMAIN) return;
     const w = window as unknown as { va?: (...a: unknown[]) => void; vaq?: unknown[][] };
     w.va = w.va || ((...a: unknown[]) => (w.vaq = w.vaq || []).push(a));
     const s = document.createElement("script");

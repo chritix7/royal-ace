@@ -63,7 +63,7 @@ export function Reel({
   stickyNew?: boolean[] | null;
   /** The symbol filling the reel (the wild, or Pharaoh's expanding symbol). */
   fullSym?: Sym;
-  /** Royal Ace Gold: multiplier on the wild of each row. */
+  /** Chrysonyx Gold: multiplier on the wild of each row. */
   mults?: number[] | null;
   /** Royal Bells: the value shown on the bells of this reel. */
   bellVals?: (Bell | null)[] | null;

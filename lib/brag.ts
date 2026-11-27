@@ -1,10 +1,10 @@
 "use client";
 
-import { DOMAIN } from "./domain";
+import { DISPLAY_DOMAIN, DOMAIN } from "./domain";
 
 /**
  * Big-win sharing. Games call brag() on a big win; BragPrompt offers to
- * share it, with a picture card and a link back to Royal Ace. Each share
+ * share it, with a picture card and a link back to Chrysonyx. Each share
  * is a free invitation to the site.
  */
 export type Brag = { game: string; amount: number; mult: number; jackpot?: string };
@@ -25,8 +25,8 @@ const fmt = (n: number) => Math.round(n).toLocaleString("en-US");
 export function bragText(b: Brag, fr: boolean) {
   const what = b.jackpot ? `${b.jackpot} jackpot` : b.mult >= 2 ? `×${Math.round(b.mult)}` : "";
   return fr
-    ? `Je viens de gagner ◈ ${fmt(b.amount)}${what ? ` (${what})` : ""} au ${b.game} sur Royal Ace 🎰 Casino gratuit, jetons virtuels. Viens me battre :`
-    : `I just won ◈ ${fmt(b.amount)}${what ? ` (${what})` : ""} on ${b.game} at Royal Ace 🎰 Free casino, virtual chips. Come beat me:`;
+    ? `Je viens de gagner ◈ ${fmt(b.amount)}${what ? ` (${what})` : ""} au ${b.game} sur Chrysonyx 🎰 Casino gratuit, jetons virtuels. Viens me battre :`
+    : `I just won ◈ ${fmt(b.amount)}${what ? ` (${what})` : ""} on ${b.game} at Chrysonyx 🎰 Free casino, virtual chips. Come beat me:`;
 }
 export const BRAG_URL = `https://${DOMAIN}/?ref=share`;
 
@@ -88,7 +88,7 @@ export async function bragCard(b: Brag, name: string): Promise<Blob> {
   ctx.textAlign = "center";
   ctx.fillStyle = gold(100, 170);
   ctx.font = `700 64px ${display}`;
-  ctx.fillText("ROYAL  ACE", W / 2, 165);
+  ctx.fillText("CHRYSONYX", W / 2, 165);
   ctx.fillStyle = "rgba(255,255,255,0.6)";
   ctx.font = `700 30px ${sans}`;
   ctx.fillText(b.game.toUpperCase(), W / 2, 240);
@@ -127,7 +127,7 @@ export async function bragCard(b: Brag, name: string): Promise<Blob> {
   }
   ctx.fillStyle = gold(880, 930);
   ctx.font = `700 46px ${display}`;
-  ctx.fillText(DOMAIN, W / 2, 925);
+  ctx.fillText(DISPLAY_DOMAIN, W / 2, 925);
   ctx.fillStyle = "rgba(255,255,255,0.45)";
   ctx.font = `500 24px ${sans}`;
   ctx.fillText("Free casino · Virtual chips, no real money · 18+", W / 2, 975);

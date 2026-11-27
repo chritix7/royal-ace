@@ -109,7 +109,7 @@ export default function PwaInstallBanner() {
     <div
       className="pointer-events-none fixed inset-x-0 bottom-0 z-[150] flex justify-center p-3 sm:hidden"
       role="dialog"
-      aria-label="Install Royal Ace"
+      aria-label="Install Chrysonyx"
     >
       <style>{`
         @keyframes pwa-slide-up {
@@ -162,7 +162,7 @@ export default function PwaInstallBanner() {
                 textShadow: "0 1px 0 rgba(0,0,0,0.9)",
               }}
             >
-              Install Royal Ace
+              Install Chrysonyx
             </p>
             <p className="mt-0.5 text-[11px] leading-4 text-white/70">
               {iosHint

@@ -13,12 +13,12 @@ export default function Page() {
         <>
           <section>
             <H>1. Access</H>
-            <p>Royal Ace is free and for people aged 18 and over only. By playing, you confirm you are 18 or older and accept these terms.</p>
+            <p>Chrysonyx is free and for people aged 18 and over only. By playing, you confirm you are 18 or older and accept these terms.</p>
           </section>
           <section>
             <H>2. Virtual chips</H>
             <p>
-              Chips, tickets, shop items and jackpots in Royal Ace are virtual. They have no monetary value, cannot be bought, sold or traded
+              Chips, tickets, shop items and jackpots in Chrysonyx are virtual. They have no monetary value, cannot be bought, sold or traded
               between players, and can never be turned into money or prizes. They may be adjusted, reset or lost (for example if you clear your
               browser data).
             </p>
@@ -26,8 +26,8 @@ export default function Page() {
           <section>
             <H>3. This is not gambling</H>
             <p>
-              Royal Ace is an entertainment simulation. Doing well in Royal Ace does not mean you would do well in a real casino or with a real
-              bookmaker. Sports bets are fictional: they are settled in virtual chips on real results, with odds computed by Royal Ace.
+              Chrysonyx is an entertainment simulation. Doing well in Chrysonyx does not mean you would do well in a real casino or with a real
+              bookmaker. Sports bets are fictional: they are settled in virtual chips on real results, with odds computed by Chrysonyx.
             </p>
           </section>
           <section>
@@ -65,12 +65,12 @@ export default function Page() {
         <>
           <section>
             <H>1. Accès</H>
-            <p>Royal Ace est gratuit et réservé aux personnes de 18 ans et plus. En jouant, tu confirmes avoir 18 ans ou plus et accepter ces conditions.</p>
+            <p>Chrysonyx est gratuit et réservé aux personnes de 18 ans et plus. En jouant, tu confirmes avoir 18 ans ou plus et accepter ces conditions.</p>
           </section>
           <section>
             <H>2. Jetons virtuels</H>
             <p>
-              Les jetons, tickets, objets de la boutique et jackpots de Royal Ace sont virtuels. Ils n&apos;ont aucune valeur monétaire, ne
+              Les jetons, tickets, objets de la boutique et jackpots de Chrysonyx sont virtuels. Ils n&apos;ont aucune valeur monétaire, ne
               s&apos;achètent pas, ne se vendent pas, ne s&apos;échangent pas entre joueurs et ne se convertissent ni en argent ni en lots. Ils
               peuvent être ajustés, réinitialisés ou perdus (par exemple si tu effaces les données de ton navigateur).
             </p>
@@ -78,9 +78,9 @@ export default function Page() {
           <section>
             <H>3. Ce n&apos;est pas un jeu d&apos;argent</H>
             <p>
-              Royal Ace est une simulation de divertissement. Réussir dans Royal Ace ne veut pas dire réussir dans un vrai casino ou chez un vrai
+              Chrysonyx est une simulation de divertissement. Réussir dans Chrysonyx ne veut pas dire réussir dans un vrai casino ou chez un vrai
               bookmaker. Les paris sportifs sont fictifs : ils se règlent en jetons virtuels selon des résultats réels, avec des cotes calculées par
-              Royal Ace.
+              Chrysonyx.
             </p>
           </section>
           <section>

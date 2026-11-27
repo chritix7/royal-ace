@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
  * settings and shop). Shown once; can be replayed from Settings.
  */
 const STEPS: { target: string; title: string; text: string }[] = [
-  { target: ".lb-hero", title: "Welcome to Royal Ace", text: "Your lounge: name, level and VIP status. Tap your name to see your VIP card. Everything is played with virtual chips." },
+  { target: ".lb-hero", title: "Welcome to Chrysonyx", text: "Your lounge: name, level and VIP status. Tap your name to see your VIP card. Everything is played with virtual chips." },
   { target: ".lb-bonus", title: "A bonus every day", text: "Claim free chips once a day. Come back the next day: the streak raises the bonus." },
   { target: ".lb-grid, .lb-rail", title: "Seven games", text: "Blackjack, slots, roulette, Hold'em, craps, penalty and the sportsbook. Tap a card for its details, or Play to sit down." },
   { target: ".lb-summary", title: "Challenges and rewards", text: "Two challenges per game every day, a weekly chest to fill and a ranking against the house regulars." },

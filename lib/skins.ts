@@ -95,10 +95,10 @@ export const SKINS: Record<SkinId, Skin> = {
     lineColor: "#22d3ee",
     bulb: "#ffd166",
   },
-  // Royal Ace Gold: the house machine. Black lacquer, gold and ivory.
+  // Chrysonyx Gold: the house machine. Black lacquer, gold and ivory.
   gold: {
     id: "gold",
-    title: "Royal Ace Gold",
+    title: "Chrysonyx Gold",
     tagline: "Every wild multiplies.",
     emoji: { cherry: "🥂", lemon: "💍", grape: "⌚", bell: "🪙", gem: "💎", seven: "👑", wild: "🂡", scatter: "⚜️" },
     art: GOLD_ART,

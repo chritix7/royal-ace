@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Royal Ace",
-    short_name: "Royal Ace",
+    name: "Chrysonyx",
+    short_name: "Chrysonyx",
     description: "A free casino with virtual chips: slots, blackjack, roulette, poker and sports. No real money.",
     lang: "en",
     start_url: "/?source=app",

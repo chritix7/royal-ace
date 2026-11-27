@@ -755,7 +755,7 @@ function MyBets({ g }: { g: SportsGame }) {
         {list.map((t) => (
           <TicketCard key={t.id} g={g} t={t} />
         ))}
-        <p className="pb-1 pt-1 text-center text-[9.5px] leading-relaxed text-white/30">Virtual chips only — no real money. Odds by the Royal Ace model. Data: football-data.org, API-Sports.</p>
+        <p className="pb-1 pt-1 text-center text-[9.5px] leading-relaxed text-white/30">Virtual chips only — no real money. Odds by the Chrysonyx model. Data: football-data.org, API-Sports.</p>
       </div>
     </div>
   );

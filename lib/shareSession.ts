@@ -62,7 +62,7 @@ export async function renderSessionShare({
   ctx.fillStyle = "rgba(215,180,91,0.7)";
   ctx.font = "900 20px system-ui, -apple-system, 'Segoe UI', sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("ROYAL  ACE  ·  PLAYER  CARD", W / 2, 130);
+  ctx.fillText("CHRYSONYX  ·  PLAYER  CARD", W / 2, 130);
 
   // Title
   const grad = ctx.createLinearGradient(0, 160, 0, 240);
@@ -166,7 +166,7 @@ export async function renderSessionShare({
   ctx.textAlign = "center";
   ctx.fillStyle = "rgba(215,180,91,0.55)";
   ctx.font = "900 14px system-ui, -apple-system, sans-serif";
-  ctx.fillText("ROYAL  ACE  ·  PLAY  THE  NIGHT", W / 2, H - 80);
+  ctx.fillText("CHRYSONYX  ·  PLAY  THE  NIGHT", W / 2, H - 80);
 
   return await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -198,7 +198,7 @@ export async function downloadSessionShare(input: SessionShareInput) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `royal-ace-session-${new Date().toISOString().slice(0, 10)}.png`;
+  a.download = `chrysonyx-session-${new Date().toISOString().slice(0, 10)}.png`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

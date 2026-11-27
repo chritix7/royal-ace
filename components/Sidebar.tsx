@@ -114,7 +114,7 @@ export default function Sidebar({ g }: { g: Game }) {
     const sign = s.stats.profit >= 0 ? "+" : "−";
     const abs = Math.abs(s.stats.profit);
     const lines = [
-      "♠ Royal Ace · Session summary",
+      "♠ Chrysonyx · Session summary",
       `Net: ${sign}◈ ${money(abs)} · ${s.stats.played} rounds`,
       `W / L / P: ${s.stats.won} / ${s.stats.lost} / ${s.stats.pushed} (${winRateNum}% win)`,
       `Biggest win: ◈ ${money(s.records.biggestWin)} · ${s.stats.blackjacks} blackjack${s.stats.blackjacks === 1 ? "" : "s"}`,
@@ -127,7 +127,7 @@ export default function Sidebar({ g }: { g: Game }) {
     const text = buildShareText();
     try {
       if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({ title: "Royal Ace · Session", text });
+        await navigator.share({ title: "Chrysonyx · Session", text });
       } else if (
         typeof navigator !== "undefined" &&
         navigator.clipboard &&
@@ -1038,7 +1038,7 @@ export default function Sidebar({ g }: { g: Game }) {
                 className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-[#d7b45b]/25 to-transparent"
               />
               <p className="mt-3 text-center text-[10px] uppercase tracking-[0.3em] text-white/35">
-                Royal Ace · Vegas Edition
+                Chrysonyx · Vegas Edition
               </p>
             </div>
           </div>,

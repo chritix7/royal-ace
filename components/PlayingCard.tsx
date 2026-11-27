@@ -4,7 +4,7 @@ import { CardBackArt, CourtArt } from "./CardArt";
 import { itemOf, useShop } from "../lib/shop";
 
 /**
- * A playing card for Royal Ace Blackjack.
+ * A playing card for Chrysonyx Blackjack.
  *
  * Design notes:
  * - All ranks use a classical serif stack — crisp and readable at every

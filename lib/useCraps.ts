@@ -10,7 +10,7 @@ import { canPlace, kindOf, TABLE_MAX, limitFor, maxOdds, MIN_BET, numOf, removab
 import { brag } from "./brag";
 
 /**
- * Craps at the Royal Ace table. Chips leave the credit when they are
+ * Craps at the Chrysonyx table. Chips leave the credit when they are
  * placed and come back with the payouts. The dice are thrown when Roll is
  * pressed and saved with the table, so a reload during the throw settles
  * the very same roll.

@@ -63,8 +63,8 @@ export async function POST(req: Request) {
           cid,
           options: {
             challenge,
-            rp: { name: "Royal Ace", id: rpId },
-            user: { id: uid, name: `${name} · Royal Ace`, displayName: name },
+            rp: { name: "Chrysonyx", id: rpId },
+            user: { id: uid, name: `${name} · Chrysonyx`, displayName: name },
             pubKeyCredParams: [
               { type: "public-key", alg: -7 },
               { type: "public-key", alg: -257 },

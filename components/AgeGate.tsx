@@ -6,7 +6,7 @@ import { HELP_LINE, LEGAL_LINKS } from "./LegalDoc";
 
 export const AGE_KEY = "royalace:age-ok";
 
-/** First visit: Royal Ace is for adults only, and the chips are worth nothing. */
+/** First visit: Chrysonyx is for adults only, and the chips are worth nothing. */
 export default function AgeGate() {
   const fr = useLang() === "fr";
   const [open, setOpen] = useState(false);
@@ -30,11 +30,11 @@ export default function AgeGate() {
       <div className="age-gate__card">
         <p className="age-gate__badge" aria-hidden="true">18+</p>
         <h2 id="age-title" className="font-display gold-text text-2xl font-bold">
-          {minor ? (fr ? "Réservé aux adultes" : "Adults only") : fr ? "Bienvenue au Royal Ace" : "Welcome to Royal Ace"}
+          {minor ? (fr ? "Réservé aux adultes" : "Adults only") : fr ? "Bienvenue au Chrysonyx" : "Welcome to Chrysonyx"}
         </h2>
         {minor ? (
           <p className="mt-3 text-sm leading-6 text-white/75">
-            {fr ? "Royal Ace est réservé aux personnes de 18 ans et plus. Reviens nous voir à tes 18 ans !" : "Royal Ace is for people aged 18 and over. Come back when you turn 18!"}
+            {fr ? "Chrysonyx est réservé aux personnes de 18 ans et plus. Reviens nous voir à tes 18 ans !" : "Chrysonyx is for people aged 18 and over. Come back when you turn 18!"}
           </p>
         ) : (
           <>

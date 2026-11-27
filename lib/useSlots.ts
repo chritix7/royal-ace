@@ -81,7 +81,7 @@ type S = {
   sticky: Sticky | null;
   /** Wilds that just locked (for their animation). */
   stickyNew: Sticky | null;
-  /** Royal Ace Gold: multiplier shown on each wild cell. */
+  /** Chrysonyx Gold: multiplier shown on each wild cell. */
   mults: number[][] | null;
   /** Pharaoh's free spins: the expanding symbol, and the reels it fills now. */
   book: Paying | null;
@@ -415,7 +415,7 @@ function bonusContinue() {
         if (!machineRef.current.link) collectionStore.addCrowns(b, sc);
       }
       await sleep(250 * speed());
-      // Royal Ace Gold: the multiplier of each wild shows once the reels stop.
+      // Chrysonyx Gold: the multiplier of each wild shows once the reels stop.
       if (st.mults && st.raw.some((col) => col.includes("wild"))) {
         const top = Math.max(...st.raw.flatMap((col, k) => col.map((x, row) => (x === "wild" ? st.mults![k][row] : 1))));
         set({ mults: st.mults, message: `Golden wild ×${top}!` });
@@ -736,7 +736,7 @@ if (collectionStore.isReady(b)) {
       winHistory.record({ game: "slots", kind: "jackpot", amount: jackpot.amount });
     }
     {
-      const game = SKINS[idRef.current]?.title ?? "Royal Ace slots";
+      const game = SKINS[idRef.current]?.title ?? "Chrysonyx slots";
       const top = [...jackpots].sort((a, c) => c.amount - a.amount)[0];
       if (top) brag({ game, amount: Math.max(total, top.amount), mult: ratio, jackpot: JACKPOTS[top.tier].label });
       else if (ratio >= 20) brag({ game, amount: total, mult: ratio });
