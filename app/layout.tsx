@@ -39,9 +39,33 @@ const shareTechMono = Share_Tech_Mono({
   subsets: ["latin"],
 });
 
+const SITE = process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000";
+const DESCRIPTION =
+  "Royal Ace is a free online casino with virtual chips: slot machines, blackjack, roulette, Hold'em poker, craps, penalty shoot-out and sports betting on real matches. No sign-up, no real money. 18+.";
+
 export const metadata: Metadata = {
-  title: "Royal Ace",
-  description: "A private virtual game room",
+  metadataBase: new URL(SITE),
+  title: { default: "Royal Ace · Free casino with virtual chips", template: "%s · Royal Ace" },
+  description: DESCRIPTION,
+  applicationName: "Royal Ace",
+  keywords: ["free casino", "social casino", "free slots", "blackjack", "roulette", "poker", "virtual chips", "casino gratuit", "machine à sous gratuite"],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "Royal Ace",
+    title: "Royal Ace · Your free casino",
+    description: "Slots, blackjack, roulette, poker and sports betting with virtual chips. 100% free, no sign-up, no real money.",
+    url: "/",
+    locale: "en_US",
+    alternateLocale: ["fr_FR"],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Royal Ace: the Royal Bells slot machine" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Royal Ace · Your free casino",
+    description: "Slots, blackjack, roulette, poker and sports betting with virtual chips. 100% free, no real money.",
+    images: ["/og-image.jpg"],
+  },
   icons: {
     icon: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],

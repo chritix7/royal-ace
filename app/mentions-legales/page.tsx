@@ -1,14 +1,55 @@
 import type { Metadata } from "next";
 import { H, HELP_LINE, LegalDoc } from "../../components/LegalDoc";
 
-export const metadata: Metadata = { title: "Mentions légales · Royal Ace" };
+export const metadata: Metadata = { title: "Legal notice" };
 
 export default function Page() {
   return (
     <LegalDoc
-      title="Mentions légales"
-      updated="27 novembre 2026"
+      title="Legal notice"
+      titleFr="Mentions légales"
+      updated="27 November 2026"
+      en={
+        <>
+          <section>
+            <H>Publisher</H>
+            <p>Royal Ace is a personal, non-commercial project published by Christian Constantin, a private individual. Contact: <a href="mailto:christianxpro7@gmail.com" className="text-[#e5c779] underline">christianxpro7@gmail.com</a>.</p>
+            <p>Publication director: Christian Constantin.</p>
+            <p>
+              Under article 6, III, 2 of French law no. 2004-575 of 21 June 2004 (LCEN), the publisher, a private individual acting on a
+              non-professional basis, has given his full contact details to the host below.
+            </p>
+          </section>
+          <section>
+            <H>Hosting</H>
+            <p>Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA (vercel.com).</p>
+            <p>Optional cloud save: Upstash, Inc. (upstash.com).</p>
+          </section>
+          <section>
+            <H>What Royal Ace is</H>
+            <p>
+              Royal Ace is a free casino simulation for adults aged 18 and over. It is played with virtual chips only: they have no value, cannot
+              be bought, cannot be exchanged and can never be turned into money or prizes. There is nothing to pay and nothing to win: Royal Ace is
+              not gambling (in France, article L. 320-1 of the Internal Security Code).
+            </p>
+            <p>
+              Keep it fun. If gaming, even free, becomes a problem for you, talk to someone you trust or a support service. In France, 
+              {HELP_LINE.name} answers on {HELP_LINE.phone} (free of extra charge) and at {HELP_LINE.url.replace("https://", "")}.
+            </p>
+          </section>
+          <section>
+            <H>Intellectual property</H>
+            <p>
+              The name, visuals, symbols, sounds and code of Royal Ace are protected; reproducing them without permission is forbidden. Royal Ace is
+              not affiliated with any casino, game studio, machine maker, club, league or bookmaker. Team and competition names only identify the
+              matches; no logo is used.
+            </p>
+            <p>Sports data: football-data.org and API-Sports. Odds are computed by Royal Ace and are not bookmaker odds.</p>
+          </section>
+        </>
+      }
       fr={
+
         <>
           <section>
             <H>Éditeur du site</H>
@@ -48,29 +89,6 @@ export default function Page() {
               de compétitions ne servent qu&apos;à identifier les matchs ; aucun logo n&apos;est utilisé.
             </p>
             <p>Données sportives : football-data.org et API-Sports. Les cotes sont calculées par Royal Ace et ne sont pas des cotes de bookmaker.</p>
-          </section>
-        </>
-      }
-      en={
-        <>
-          <section>
-            <H>Publisher</H>
-            <p>
-              Royal Ace is a personal, non-commercial project published by Christian Constantin, a private individual. Contact: <a href="mailto:christianxpro7@gmail.com" className="text-[#e5c779] underline">christianxpro7@gmail.com</a>.
-              Publication director: Christian Constantin.
-            </p>
-          </section>
-          <section>
-            <H>Hosting</H>
-            <p>Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA. Optional cloud save: Upstash, Inc.</p>
-          </section>
-          <section>
-            <H>What Royal Ace is</H>
-            <p>
-              A free casino simulation for adults (18+), played with virtual chips only. Chips have no value: they cannot be bought, sold, exchanged
-              or turned into money or prizes. Nothing to pay, nothing to win: Royal Ace is not gambling. Not affiliated with any casino, game maker,
-              club, league or bookmaker. Sports data: football-data.org and API-Sports; odds are computed by Royal Ace.
-            </p>
           </section>
         </>
       }

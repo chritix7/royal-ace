@@ -1,14 +1,77 @@
 import type { Metadata } from "next";
 import { H, LegalDoc } from "../../components/LegalDoc";
 
-export const metadata: Metadata = { title: "Confidentialité · Royal Ace" };
+export const metadata: Metadata = { title: "Privacy policy" };
 
 export default function Page() {
   return (
     <LegalDoc
-      title="Politique de confidentialité"
-      updated="27 novembre 2026"
+      title="Privacy policy"
+      titleFr="Politique de confidentialité"
+      updated="27 November 2026"
+      en={
+        <>
+          <section>
+            <H>In short</H>
+            <p>
+              No mandatory account, no e-mail, no password, no ads, no trackers, no analytics. Your game stays on your device, unless you turn on
+              the cloud save yourself.
+            </p>
+          </section>
+          <section>
+            <H>Data controller</H>
+            <p>Christian Constantin, publisher of the site, reachable at <a href="mailto:christianxpro7@gmail.com" className="text-[#e5c779] underline">christianxpro7@gmail.com</a>.</p>
+          </section>
+          <section>
+            <H>The data we use</H>
+            <p>
+              <b className="text-white">On your device.</b> Your nickname, chips, progress and settings are kept in your browser&apos;s local
+              storage. They are not sent to us. You can erase everything in Settings, &quot;Reset account&quot;.
+            </p>
+            <p>
+              <b className="text-white">Cloud save (optional).</b> If you turn it on, we keep your nickname, your passkey&apos;s public key (Face
+              ID, Touch ID…: we never see your fingerprint or face) and your game data. A strictly necessary session cookie (&quot;ra_sess&quot;, 1
+              year) keeps you signed in. Legal basis: providing the service you ask for. Kept until you delete your save, which you can do at any
+              time from the game.
+            </p>
+            <p>
+              <b className="text-white">Technical logs.</b> Like any website, our host processes your IP address and technical connection data to
+              run and secure the service.
+            </p>
+            <p>
+              <b className="text-white">Matches.</b> Scores and fixtures are requested by our server from football-data.org and API-Sports: no data
+              about you is sent to them.
+            </p>
+          </section>
+          <section>
+            <H>Cookies</H>
+            <p>
+              Royal Ace only uses the cloud save&apos;s session cookie, which is strictly necessary for the service you ask for. It needs no
+              consent, so there is no cookie banner.
+            </p>
+          </section>
+          <section>
+            <H>Providers and transfers</H>
+            <p>
+              Hosting: Vercel Inc. Cloud save: Upstash, Inc. These providers may process data outside the European Union, in particular in the
+              United States, with the safeguards required by the GDPR (EU–US Data Privacy Framework or standard contractual clauses).
+            </p>
+          </section>
+          <section>
+            <H>Your rights</H>
+            <p>
+              You can access, correct and delete your data, restrict or object to its use, and get a copy of it. Write to <a href="mailto:christianxpro7@gmail.com" className="text-[#e5c779] underline">christianxpro7@gmail.com</a>. You can also
+              complain to your data protection authority (in France, the CNIL: cnil.fr).
+            </p>
+          </section>
+          <section>
+            <H>Minors</H>
+            <p>Royal Ace is for people aged 18 and over. We do not knowingly collect data about minors.</p>
+          </section>
+        </>
+      }
       fr={
+
         <>
           <section>
             <H>En bref</H>
@@ -69,18 +132,6 @@ export default function Page() {
             <H>Mineurs</H>
             <p>Royal Ace est réservé aux personnes de 18 ans et plus. Nous ne collectons pas sciemment de données concernant des mineurs.</p>
           </section>
-        </>
-      }
-      en={
-        <>
-          <p>
-            No mandatory account, no e-mail, no password, no ads, no trackers, no analytics. Your game stays in your browser&apos;s local storage.
-            If you turn on the optional cloud save, we keep your nickname, your passkey&apos;s public key and your game data, with one strictly
-            necessary session cookie (&quot;ra_sess&quot;, 1 year), until you delete the save from the game. Our host processes IP addresses and
-            technical logs to run the service. Providers: Vercel Inc. (hosting) and Upstash, Inc. (cloud save), possibly in the USA under GDPR
-            safeguards. To use your rights (access, correction, deletion, objection, portability), write to <a href="mailto:christianxpro7@gmail.com" className="text-[#e5c779] underline">christianxpro7@gmail.com</a>; you can also
-            complain to the CNIL. Royal Ace is for adults (18+).
-          </p>
         </>
       }
     />

@@ -1,14 +1,67 @@
 import type { Metadata } from "next";
 import { H, HELP_LINE, LegalDoc } from "../../components/LegalDoc";
 
-export const metadata: Metadata = { title: "Conditions d'utilisation · Royal Ace" };
+export const metadata: Metadata = { title: "Terms of use" };
 
 export default function Page() {
   return (
     <LegalDoc
-      title="Conditions d'utilisation"
-      updated="27 novembre 2026"
+      title="Terms of use"
+      titleFr="Conditions d'utilisation"
+      updated="27 November 2026"
+      en={
+        <>
+          <section>
+            <H>1. Access</H>
+            <p>Royal Ace is free and for people aged 18 and over only. By playing, you confirm you are 18 or older and accept these terms.</p>
+          </section>
+          <section>
+            <H>2. Virtual chips</H>
+            <p>
+              Chips, tickets, shop items and jackpots in Royal Ace are virtual. They have no monetary value, cannot be bought, sold or traded
+              between players, and can never be turned into money or prizes. They may be adjusted, reset or lost (for example if you clear your
+              browser data).
+            </p>
+          </section>
+          <section>
+            <H>3. This is not gambling</H>
+            <p>
+              Royal Ace is an entertainment simulation. Doing well in Royal Ace does not mean you would do well in a real casino or with a real
+              bookmaker. Sports bets are fictional: they are settled in virtual chips on real results, with odds computed by Royal Ace.
+            </p>
+          </section>
+          <section>
+            <H>4. Fair use</H>
+            <p>
+              You agree not to disrupt the service, not to try to get around its security and not to pick an offensive or misleading nickname. We
+              may delete a cloud save that breaks these rules.
+            </p>
+          </section>
+          <section>
+            <H>5. Availability and liability</H>
+            <p>
+              The service is provided as is, with no guarantee that it is always available. It may change, pause or stop. We are not liable for the
+              loss of virtual chips or progress, which have no value.
+            </p>
+          </section>
+          <section>
+            <H>6. Keep it fun</H>
+            <p>
+              Take breaks and set yourself time limits. If gaming becomes a problem, talk to someone you trust or a support service. In France,{" "}
+              {HELP_LINE.name} answers on {HELP_LINE.phone} (free of extra charge) and at {HELP_LINE.url.replace("https://", "")}.
+            </p>
+          </section>
+          <section>
+            <H>7. Changes and governing law</H>
+            <p>
+              These terms may be updated; the date at the top of the page applies. They are governed by French law. You can reach us at the
+              address given in the legal notice.
+            </p>
+          </section>
+        </>
+      }
       fr={
+
         <>
           <section>
             <H>1. Accès</H>
@@ -58,16 +111,6 @@ export default function Page() {
               écrire via l&apos;adresse indiquée dans les mentions légales.
             </p>
           </section>
-        </>
-      }
-      en={
-        <>
-          <p>
-            Royal Ace is free and for adults (18+) only. Chips, tickets, shop items and jackpots are virtual: no monetary value, not for sale, not
-            tradable, never convertible into money or prizes, and they can be adjusted, reset or lost. It is entertainment, not gambling; sports bets
-            are fictional and settled in virtual chips. Do not disrupt the service or misuse nicknames. The service is provided as is and can change
-            or stop. Take breaks; in France, {HELP_LINE.name} ({HELP_LINE.phone}) can help. French law applies.
-          </p>
         </>
       }
     />
