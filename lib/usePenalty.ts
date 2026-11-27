@@ -8,6 +8,7 @@ import { track } from "./events";
 import { sessionStore } from "./sessionStore";
 import { useBalance, wallet } from "./wallet";
 import { MAX_BET, MAX_SHOTS, MIN_BET, PENALTY_CHIPS, multiplierAt, payout, shoot, type Level, type Shooter, type Zone } from "./penalty";
+import { brag } from "./brag";
 
 /**
  * Penalty at the Royal Ace: the bet leaves the credit at kick-off, every
@@ -112,7 +113,10 @@ export function usePenalty(active: boolean, shotMs: number, slowMo = false) {
         track("penaltyRound");
         if (g > 0) track("penaltyGoal", g);
         if (cashed && won > r.bet) track("penaltyCashout");
-        if (cashed && g >= 4) track("penaltyBigWin");
+        if (cashed && g >= 4) {
+          track("penaltyBigWin");
+          brag({ game: "Penalty", amount: won, mult: won / r.bet });
+        }
         if (g >= MAX_SHOTS) track("penaltyPerfect");
       },
       quiet ? 0 : 600,

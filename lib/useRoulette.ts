@@ -19,6 +19,7 @@ import {
   type Bets,
   type LuckyNumber,
 } from "./roulette";
+import { brag } from "./brag";
 
 export type RoulettePhase = "betting" | "spinning" | "result";
 export type RouletteResult = {
@@ -186,7 +187,10 @@ export function useRoulette(active: boolean) {
         if (p.winners.some((k) => coverage(k).length === 1)) track("rouletteStraight");
         if (p.n === 0) track("rouletteZero");
         if (p.multiplied) track("rouletteLightning");
-        if (net >= p.staked * 10) track("rouletteBigWin");
+        if (net >= p.staked * 10) {
+          track("rouletteBigWin");
+          brag({ game: "Roulette", amount: net, mult: net / p.staked });
+        }
       }
       const nextHistory = [...s.history, p.n].slice(-HISTORY_MAX);
       const record: RoundRecord = { id: Date.now(), at: Date.now(), n: p.n, staked: p.staked, returned: p.returned, bets: p.bets, lucky: p.lucky ?? null };
@@ -477,7 +481,10 @@ export function useRoulette(active: boolean) {
         if (ann) unlock("announce");
         if (streak >= 3) unlock("streak3");
         if (res.returned >= res.staked * 100) unlock("x100");
-        if (net >= res.staked * 10) track("rouletteBigWin");
+        if (net >= res.staked * 10) {
+          track("rouletteBigWin");
+          brag({ game: "Roulette", amount: net, mult: net / res.staked });
+        }
       }
     }, 700);
     if (res.returned > 0) {

@@ -40,6 +40,8 @@ import {
 import { track } from "./events";
 import { BELLS_GAMBLE, GAMBLE_MAX_ROUNDS, canGamble, drawGambleCard, type CardColor } from "./gamble";
 import { HAPTIC, haptic } from "./haptics";
+import { brag } from "./brag";
+import { SKINS } from "./skins";
 import { JACKPOTS, foldLive, growPools, resetPool, sanitizePools, freshPools, type JackpotTier, type Pools } from "./jackpot";
 import { VAULT_PICKS, VAULT_TRIGGER, drawVault, settleVault, type VaultPrize } from "./vault";
 import { music } from "./music";
@@ -196,6 +198,8 @@ export function useSlots(
 ) {
   const machineRef = useRef(MACHINES[machineId]);
   machineRef.current = MACHINES[machineId];
+  const idRef = useRef(machineId);
+  idRef.current = machineId;
   const fsState = useRef<FsState | null>(null);
   const labelsRef = useRef(labels);
   labelsRef.current = labels;
@@ -730,6 +734,12 @@ if (collectionStore.isReady(b)) {
     track("jackpot", jackpots.length);
     for (const jackpot of jackpots) {
       winHistory.record({ game: "slots", kind: "jackpot", amount: jackpot.amount });
+    }
+    {
+      const game = SKINS[idRef.current]?.title ?? "Royal Ace slots";
+      const top = [...jackpots].sort((a, c) => c.amount - a.amount)[0];
+      if (top) brag({ game, amount: Math.max(total, top.amount), mult: ratio, jackpot: JACKPOTS[top.tier].label });
+      else if (ratio >= 20) brag({ game, amount: total, mult: ratio });
     }
 
     if (jackpots.length > 0) {

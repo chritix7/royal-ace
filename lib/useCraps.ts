@@ -7,6 +7,7 @@ import { track } from "./events";
 import { sessionStore } from "./sessionStore";
 import { useBalance, wallet } from "./wallet";
 import { canPlace, kindOf, TABLE_MAX, limitFor, maxOdds, MIN_BET, numOf, removable, resolve, rollDie, totalOf, type Bets, type BoxNum, type RollResult } from "./craps";
+import { brag } from "./brag";
 
 /**
  * Craps at the Royal Ace table. Chips leave the credit when they are
@@ -106,7 +107,11 @@ export function useCraps(active: boolean, rollMs: number) {
         if (res.won > res.lost) track("crapsWin");
         if (res.event === "pointMade" && p.bets.pass) track("crapsPoint");
         if (res.lines.some((l) => kindOf(l.key) === "hard" && l.result === "win")) track("crapsHard");
-        if (res.lines.some((l) => l.result === "win" && l.win >= l.stake * 10)) track("crapsBigWin");
+        if (res.lines.some((l) => l.result === "win" && l.win >= l.stake * 10)) {
+          track("crapsBigWin");
+          const best = Math.max(...res.lines.filter((l) => l.result === "win").map((l) => l.win / l.stake));
+          brag({ game: "Craps", amount: res.won, mult: best });
+        }
       },
       quiet ? 0 : 600,
     );

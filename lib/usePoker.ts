@@ -8,6 +8,7 @@ import { track } from "./events";
 import { sessionStore } from "./sessionStore";
 import { useBalance, wallet } from "./wallet";
 import { ANTE_MAX, ANTE_MIN, BONUS_MAX, bonusOf, evaluate, freshDeck, hint, settle, type Evaluated, type Settlement } from "./poker";
+import { brag } from "./brag";
 
 /**
  * Casino Hold'em at the Royal Ace table: bets, the deal, Call / Fold, the
@@ -151,7 +152,10 @@ export function usePoker(active: boolean) {
       if (s.outcome === "win" || s.outcome === "noQualify") track("pokerWin");
       if (s.bonusBack > 0) track("pokerBonus");
       if (wasCalled && s.player.cat >= 5) track("pokerFlush");
-      if (net >= p.bets.ante * 10) track("pokerBigWin");
+      if (net >= p.bets.ante * 10) {
+        track("pokerBigWin");
+        brag({ game: "Casino Hold'em", amount: net, mult: net / p.bets.ante });
+      }
     }, quiet ? 0 : 700);
     return s;
   }, []);

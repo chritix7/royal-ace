@@ -10,6 +10,7 @@ import { demoForms, demoMatches } from "./sports/demo";
 import { builderOk, encodeBuilder, isOpen, modelOf, parsePlayerMarket, playerProb, priceOf, probOf, settle, type PlayerLine } from "./sports/odds";
 import type { Feed, Match, Sport, Standings, StandingsFeed } from "./sports/types";
 import { BOOST_MAX_STAKE, dailyBoosts, flashBoost, isBoostMarket, type Boost } from "./sports/boosts";
+import { brag } from "./brag";
 
 /**
  * Sports betting with virtual chips on real matches.
@@ -589,7 +590,10 @@ export function useSportsbook(active: boolean) {
       if (tk.status === "won") {
         track("betWon");
         if (tk.legs.filter((l) => l.result === "won").length >= 3) track("betComboWon");
-        if (tk.payout >= tk.stake * 10) track("betBigWin");
+        if (tk.payout >= tk.stake * 10) {
+          track("betBigWin");
+          brag({ game: "Sports betting", amount: tk.payout, mult: tk.payout / tk.stake });
+        }
       }
     }
     for (const d of done)
