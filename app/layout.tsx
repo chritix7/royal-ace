@@ -68,8 +68,8 @@ export const metadata: Metadata = {
     images: ["/og-image.jpg"],
   },
   icons: {
-    icon: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    icon: [{ url: "/icon-192.png?v=2", sizes: "192x192", type: "image/png" }],
+    apple: [{ url: "/apple-touch-icon.png?v=2", sizes: "180x180", type: "image/png" }],
   },
   appleWebApp: {
     capable: true,
@@ -98,7 +98,7 @@ export default function RootLayout({
         {/* Splash when launched from the home screen: the crest on black,
             gone after a moment (CSS only, nothing to load). */}
         <div className="app-splash" aria-hidden="true">
-          <img src="/icon-192.png" alt="" width={96} height={96} loading="lazy" decoding="async" />
+          <img src="/icon-192.png?v=2" alt="" width={96} height={96} loading="lazy" decoding="async" />
           <span>CHRYSONYX</span>
         </div>
         {children}

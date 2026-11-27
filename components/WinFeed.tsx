@@ -16,7 +16,7 @@ const PLAYERS = [
   "WildTiger", "CrownJewel", "HighRoller88", "BlackjackPro", "LuckyClover",
 ];
 
-const GAMES = ["Royal Slots", "Blackjack", "Royal Slots", "Blackjack"];
+const GAMES = ["Royal Bells", "Blackjack", "Royal Bells", "Blackjack"];
 
 let nextId = 1;
 

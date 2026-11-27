@@ -1,4 +1,4 @@
-# Royal Ace
+# Chrysonyx
 
 Une salle de jeu virtuelle privée — PWA Next.js.
 
