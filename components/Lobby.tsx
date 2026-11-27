@@ -3,7 +3,8 @@ import { useLang } from "../lib/i18n";
 import { LegalFooter } from "./LegalDoc";
 
 import ProfileSheet from "./ProfileSheet";
-import { careerStore, useCareer, weeklyRanking } from "../lib/career";
+import { careerStore, useCareer } from "../lib/career";
+import { board, useBoard } from "../lib/leaderboard";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import GameArt, { type ArtId } from "./GameArt";
@@ -418,12 +419,12 @@ export default function Lobby({
   const [nameOpen, setNameOpen] = useState(false);
   const [profileTab, setProfileTab] = useState<null | "card" | "rank">(null);
   const career = useCareer();
-  const [nowMs, setNowMs] = useState(0);
+  const boardMe = useBoard().me;
   useEffect(() => {
     careerStore.hydrate();
-    setNowMs(Date.now());
+    void board.refresh(true);
   }, []);
-  const rank = nowMs ? weeklyRanking(career, profile.name, nowMs).rank : 0;
+  const rank = boardMe?.status === "ok" ? boardMe.rank : 0;
   const [bonus, setBonus] = useState<{ canClaim: boolean; reward: number } | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   // The time of day is read on the client (never during the prerender).
@@ -600,7 +601,7 @@ export default function Lobby({
           {desktop && <> · {career.weekNet >= 0 ? "+" : "−"}◈ {fmt(Math.abs(career.weekNet))}</>}
         </span>
         <span className="lb-bar">
-          <span style={{ width: `${rank ? Math.max(4, ((17 - rank) / 16) * 100) : 0}%` }} />
+          <span style={{ width: `${rank ? Math.max(4, ((21 - Math.min(rank, 20)) / 20) * 100) : 0}%` }} />
         </span>
       </button>
       {desktop && (

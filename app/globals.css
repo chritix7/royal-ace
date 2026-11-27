@@ -2740,6 +2740,18 @@ html.rl-wheel-solid body *:not(.rl-wheel-overlay, .rl-wheel-overlay *, .rl-over-
 .rk-row.is-top1 .rk-row__pos { color: #f5d778; } .rk-row.is-top2 .rk-row__pos { color: #d9d9e0; } .rk-row.is-top3 .rk-row__pos { color: #d39a62; }
 .rk-row.is-you { border-color: #f0d38b; background: linear-gradient(90deg, rgba(240, 211, 139, 0.18), rgba(240, 211, 139, 0.03)); }
 .rk-row.is-you .rk-row__net { color: #f5d778; }
+.rk-join { display: flex; width: 100%; flex-direction: column; gap: 2px; margin-bottom: 0.6rem; border-radius: 12px; border: 1px solid rgba(240, 211, 139, 0.45); background: linear-gradient(135deg, rgba(240, 211, 139, 0.16), rgba(240, 211, 139, 0.03)); padding: 0.65rem 0.8rem; text-align: left; }
+.rk-join__t { font-family: var(--font-display), Georgia, serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; color: #f5d778; }
+.rk-join__s { font-size: 11px; color: rgba(255, 255, 255, 0.6); }
+.rk-note { margin-bottom: 0.6rem; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.3); padding: 0.5rem 0.7rem; font-size: 11px; color: rgba(255, 255, 255, 0.65); }
+.rk-admin { margin-top: 0.9rem; border-radius: 12px; border: 1px dashed rgba(240, 211, 139, 0.35); padding: 0.65rem; }
+.rk-admin__h { margin-bottom: 0.4rem; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em; color: rgba(215, 180, 91, 0.85); }
+.rk-admin__in { min-width: 0; flex: 1; border-radius: 9px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(0, 0, 0, 0.45); padding: 0.45rem 0.6rem; font-size: 13px; color: #efe2bd; font-variant-numeric: tabular-nums; outline: none; }
+.rk-admin__in:focus { border-color: rgba(240, 211, 139, 0.6); }
+.rk-admin__btn { flex-shrink: 0; border-radius: 9px; background: linear-gradient(180deg, #f0d38b, #b8913d); padding: 0.45rem 0.85rem; font-size: 12px; font-weight: 800; color: #1a1406; }
+.rk-admin__btn:disabled { opacity: 0.5; }
+.rk-admin__mini { flex-shrink: 0; width: 1.7rem; height: 1.7rem; border-radius: 8px; border: 1px solid rgba(120, 220, 150, 0.4); color: #8be0a4; font-weight: 800; }
+.rk-admin__mini.is-no { border-color: rgba(240, 120, 120, 0.4); color: #f08a8a; }
 .sb-perks { display: flex; flex-wrap: wrap; gap: 0.3rem; }
 .sb-perk { border-radius: 9999px; border: 1px dashed rgba(255, 255, 255, 0.15); padding: 0.12rem 0.55rem; font-size: 9.5px; font-weight: 800; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.45); }
 .sb-perk.is-on { border-style: solid; border-color: rgba(240, 211, 139, 0.6); background: rgba(240, 211, 139, 0.1); color: #f5d778; }

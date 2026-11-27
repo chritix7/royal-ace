@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { careerStore, useCareer, weeklyRanking } from "../lib/career";
+import { careerStore, useCareer } from "../lib/career";
+import { useBoard } from "../lib/leaderboard";
 import { vipTierForLevel } from "../lib/daily";
 import { useProfile } from "../lib/profile";
 import { useProgression } from "../lib/progression";
 import { useStats } from "../lib/statsStore";
 import { useShop } from "../lib/shop";
 import { AvatarBadge, useTitle } from "./Avatar";
+import RankingPanel from "./RankingPanel";
 
 const fmt = (n: number) => Math.floor(n).toLocaleString("en-US");
 const signed = (n: number) => `${n >= 0 ? "+" : "−"}◈ ${fmt(Math.abs(n))}`;
@@ -21,10 +23,10 @@ export default function ProfileSheet({ tab: first, onClose }: { tab: "card" | "r
   const prog = useProgression();
   const career = useCareer();
   const stats = useStats() as unknown as Record<string, number>;
-  const [now, setNow] = useState(0);
+  const me = useBoard().me;
+  const myRank = me?.status === "ok" ? me.rank : 0;
   useEffect(() => {
     careerStore.hydrate();
-    setNow(Date.now());
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -45,10 +47,7 @@ export default function ProfileSheet({ tab: first, onClose }: { tab: "card" | "r
   ];
   const fav = [...rounds].sort((a, b) => b[1] - a[1])[0];
   const total = rounds.reduce((s, [, n]) => s + n, 0);
-  const ranking = useMemo(() => (now ? weeklyRanking(career, name, now) : { rows: [], rank: 0 }), [career, name, now]);
   if (typeof document === "undefined") return null;
-  const top = ranking.rows.slice(0, 10);
-  const meIn = top.some((r) => r.you);
   return createPortal(
     <div className="safe-y fixed inset-0 z-[150] flex items-end justify-center sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="Profile">
       <button type="button" aria-label="Close" onClick={onClose} className="backdrop-in absolute inset-0 cursor-default bg-black/70" />
@@ -84,7 +83,7 @@ export default function ProfileSheet({ tab: first, onClose }: { tab: "card" | "r
                 </div>
                 <div className="flex items-end justify-between">
                   <span className="vip-card__meta">Level {prog.level} · member since {career.since || "today"}</span>
-                  <span className="vip-card__rank">#{ranking.rank || "—"} this week</span>
+                  <span className="vip-card__rank">#{myRank || "—"} this week</span>
                 </div>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2">
@@ -97,7 +96,7 @@ export default function ProfileSheet({ tab: first, onClose }: { tab: "card" | "r
                     ["Favourite game", fav && fav[1] > 0 ? GAME_NAME[fav[0]] : "—"],
                     ["Rounds played", fmt(total)],
                     ["This week", signed(career.weekNet)],
-                    ["Weekly rank", ranking.rank ? `#${ranking.rank} of ${ranking.rows.length}` : "—"],
+                    ["Weekly rank", myRank ? `#${myRank}` : "—"],
                   ] as const
                 ).map(([k, v]) => (
                   <div key={k} className="lb-fact">
@@ -109,29 +108,7 @@ export default function ProfileSheet({ tab: first, onClose }: { tab: "card" | "r
               <p className="mt-3 text-center text-[10px] text-white/35">Money figures count from {career.since || "today"}. Virtual chips only.</p>
             </>
           ) : (
-            <>
-              <p className="mb-2 text-[11px] text-white/50">Net winnings this week, against the house regulars. Resets every Monday.</p>
-              <ol className="space-y-1">
-                {top.map((r, i) => (
-                  <li key={r.name + i} className={`rk-row ${r.you ? "is-you" : ""} ${i < 3 ? `is-top${i + 1}` : ""}`}>
-                    <span className="rk-row__pos">{i + 1}</span>
-                    <span className="flex min-w-0 flex-1 items-center gap-1.5 truncate">{r.you && <AvatarBadge size="sm" />}<span className="truncate">{r.you ? `${r.name} (you)` : r.name}</span></span>
-                    <span className="rk-row__net">{signed(r.net)}</span>
-                  </li>
-                ))}
-                {!meIn && ranking.rank > 0 && (
-                  <>
-                    <li className="py-0.5 text-center text-white/30">⋯</li>
-                    <li className="rk-row is-you">
-                      <span className="rk-row__pos">{ranking.rank}</span>
-                      <span className="flex min-w-0 flex-1 items-center gap-1.5 truncate"><AvatarBadge size="sm" /><span className="truncate">{name} (you)</span></span>
-                      <span className="rk-row__net">{signed(career.weekNet)}</span>
-                    </li>
-                  </>
-                )}
-              </ol>
-              <p className="mt-3 text-center text-[10px] text-white/35">House regulars are fictional players.</p>
-            </>
+            <RankingPanel onJoin={onClose} />
           )}
         </div>
       </div>

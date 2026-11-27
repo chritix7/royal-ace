@@ -38,6 +38,7 @@ import BragPrompt from "../components/BragPrompt";
 import { i18n } from "../lib/i18n";
 import { motion, startRest } from "../lib/motion";
 import { cloud } from "../lib/cloud";
+import { board } from "../lib/leaderboard";
 import HotkeysOverlay from "../components/HotkeysOverlay";
 import { useBalanceFlash } from "../hooks/useBalanceFlash";
 import { sessionStore } from "../lib/sessionStore";
@@ -242,6 +243,7 @@ export default function Home() {
     startRest(() => wallet.getLocked());
     i18n.boot();
     void cloud.boot();
+    board.start();
     // Play time: counted while the page is visible and used in the last 2 minutes.
     let lastInput = Date.now();
     const onInput = () => (lastInput = Date.now());

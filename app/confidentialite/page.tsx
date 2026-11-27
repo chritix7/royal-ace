@@ -8,7 +8,7 @@ export default function Page() {
     <LegalDoc
       title="Privacy policy"
       titleFr="Politique de confidentialité"
-      updated="27 November 2026"
+      updated="28 November 2026"
       en={
         <>
           <section>
@@ -69,6 +69,16 @@ export default function Page() {
             <p>
               Chrysonyx&apos;s use and transfer of information received from Google APIs adheres to the Google API Services User Data Policy,
               including the Limited Use requirements.
+            </p>
+          </section>
+          <section>
+            <H>Weekly ranking</H>
+            <p>
+              When you are signed in, the result of each round you play (game, stake, chips won or lost) is sent to our server to build the
+              weekly ranking. Only your nickname and your score for the week are shown to other players; your e-mail, Google name and
+              account are never shown. We also keep simple counters (rounds, total staked and won) to detect impossible results; a player
+              whose results look implausible may be held back from the ranking. These figures are deleted three weeks after the end of the
+              week. Legal basis: providing the ranking you join by signing in. To leave it, sign out or delete your account in Settings.
             </p>
           </section>
           <section>
@@ -183,6 +193,17 @@ export default function Page() {
             <p>
               L&apos;utilisation et le transfert par Chrysonyx des informations reçues des API Google respectent les Règles relatives aux données
               utilisateur des services d&apos;API Google (Google API Services User Data Policy), y compris les exigences d&apos;utilisation limitée.
+            </p>
+          </section>
+          <section>
+            <H>Classement hebdomadaire</H>
+            <p>
+              Quand tu es connecté, le résultat de chaque manche que tu joues (jeu, mise, jetons gagnés ou perdus) est envoyé à notre serveur
+              pour établir le classement de la semaine. Seuls ton pseudo et ton score de la semaine sont visibles des autres joueurs ; ton
+              e-mail, ton nom Google et ton compte ne sont jamais affichés. Nous gardons aussi de simples compteurs (manches, total misé et
+              gagné) pour repérer les résultats impossibles ; un joueur dont les résultats paraissent invraisemblables peut être retiré du
+              classement. Ces chiffres sont supprimés trois semaines après la fin de la semaine. Base légale : la fourniture du classement
+              que tu rejoins en te connectant. Pour en sortir, déconnecte-toi ou supprime ton compte dans les Réglages.
             </p>
           </section>
           <section>

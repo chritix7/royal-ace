@@ -7,6 +7,7 @@ import { cleanEmail, cleanName, getSave, getUser, json, newSession, readCookies,
 import { mailReady, sendLoginLink } from "../../../lib/server/mail";
 import { pipeline, redis, redisReady } from "../../../lib/server/redis";
 import { randomId, verifyAssertion, verifyRegistration } from "../../../lib/server/webauthn";
+import { weekKey } from "../../../lib/board";
 
 const MAX_SAVE = 900_000;
 const providers = () => ({ google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET), email: mailReady() });
@@ -146,6 +147,11 @@ export async function POST(req: Request) {
           ...(user?.keys ?? []).map((k) => ["DEL", `cred:${k.id}`]),
           ...(user?.google ? [["DEL", `idp:google:${user.google}`]] : []),
           ...(user?.email ? [["DEL", `idp:email:${user.email}`]] : []),
+          // The ranking: this week's line and counters, and the admin log.
+          ["ZREM", `lb:${weekKey()}`, uid],
+          ["HDEL", `lbn:${weekKey()}`, uid],
+          ["DEL", `lbs:${weekKey()}:${uid}`, `grants:${uid}`],
+          ["SREM", `lbrev:${weekKey()}`, uid],
         ]);
         return json({ ok: true }, 200, sessionCookies(null, secure));
       }

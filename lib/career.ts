@@ -1,6 +1,5 @@
 import { useSyncExternalStore } from "react";
 import { dayNumber, today } from "./clock";
-import { hashRand } from "./hashRand";
 
 /**
  * The player's career money figures, fed by every settled round (through
@@ -26,6 +25,14 @@ let state: Career = EMPTY;
 let hydrated = false;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
+/** Called with every settled round (the online ranking listens here). */
+const roundListeners = new Set<(game: string, wagered: number, net: number) => void>();
+export function onRound(l: (game: string, wagered: number, net: number) => void) {
+  roundListeners.add(l);
+  return () => {
+    roundListeners.delete(l);
+  };
+}
 
 function rollWeek() {
   const monday = mondayOf(dayNumber(today()));
@@ -60,6 +67,7 @@ export const careerStore = {
   /** One settled round: stake and net result (net < 0 when lost). */
   record(game: string, wagered: number, net: number) {
     careerStore.hydrate();
+    roundListeners.forEach((l) => l(game, wagered, net));
     rollWeek();
     const big = state.biggest;
     state = {
@@ -78,30 +86,3 @@ export const careerStore = {
 };
 
 export const useCareer = () => useSyncExternalStore(careerStore.subscribe, careerStore.get, () => EMPTY);
-
-/* ───────────── Weekly ranking ───────────── */
-
-const RIVALS = ["Valentina", "Kaiser_9", "LuckyLuc", "MonteCarlo", "Nadia.R", "BlackSwan", "Ozzy777", "Élodie", "TheBaron", "Mika_V", "Zoltan", "Royal_Q", "Sasha", "Diamond_Joe", "Ines.M", "Kenzo"];
-
-export type RankRow = { name: string; net: number; you?: boolean };
-
-/**
- * A ranking of the week's best winners: the player against a table of
- * house regulars (fictional players whose results build up over the week,
- * the same for everyone on the same day). Resets every Monday.
- */
-export function weeklyRanking(c: Career, you: string, now: number): { rows: RankRow[]; rank: number } {
-  const monday = c.weekStart || mondayOf(dayNumber(today()));
-  const start = Date.UTC(1970, 0, 1) + monday * 86400000;
-  const f = Math.max(0.02, Math.min(1, (now - start) / (7 * 86400000)));
-  const rows: RankRow[] = RIVALS.map((name, i) => {
-    const r = hashRand(monday * 97 + i * 13);
-    // Mostly modest weeks, a few big winners, a couple in the red.
-    const target = Math.round((2_000_000 * r ** 5 - 15000) / 100) * 100;
-    const wobble = 0.85 + hashRand(monday * 31 + i * 7 + Math.floor(f * 28)) * 0.3;
-    return { name, net: Math.round((target * f ** 0.85 * wobble) / 10) * 10 };
-  });
-  rows.push({ name: you || "You", net: c.weekNet, you: true });
-  rows.sort((a, b) => b.net - a.net);
-  return { rows, rank: rows.findIndex((r) => r.you) + 1 };
-}
