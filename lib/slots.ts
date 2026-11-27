@@ -150,7 +150,7 @@ export const noMults = (): number[][] => Array.from({ length: REELS }, () => Arr
  *   drawn at the start, which fills its reels and pays on every line.
  * `pay` and `fsPay` scale the line pays so every machine returns the same.
  */
-export type MachineId = "classic" | "miami" | "gold" | "pharaoh";
+export type MachineId = "classic" | "miami" | "gold" | "pharaoh" | "winter";
 export type Machine = {
   pay: number;
   fs: "sticky" | "expand";
@@ -196,6 +196,8 @@ export const MACHINES: Record<MachineId, Machine> = {
   // Gold: wilds on every reel (about one spin in 4), each with its multiplier; it stays in its cell.
   gold: { pay: 1.02, wilds: [1, 1, 1, 1, 1], fs: "sticky", fsPay: 0.55, fsWilds: [1, 2, 1, 2, 1], expand: false, mults: [{ v: 2, w: 60 }, { v: 3, w: 28 }, { v: 5, w: 12 }], cap: 50, fsMults: [{ v: 2, w: 1 }], fsCap: 2 },
   pharaoh: { pay: 1, fs: "expand", fsPay: 1, fsWilds: [0, 3, 3, 3, 0], bookPay: 0.03 },
+  // Winter Royale (limited): Miami's maths in winter dress.
+  winter: { pay: 1, fs: "sticky", fsPay: 1, fsWilds: FS_WILDS },
 };
 const STRIP_CACHE = new Map<string, Sym[][]>();
 function baseStrips(m: Machine): Sym[][] {

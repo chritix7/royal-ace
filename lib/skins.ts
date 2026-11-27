@@ -1,9 +1,21 @@
+import { useEffect, useState } from "react";
 import type { Sym } from "./slots";
 import { MIAMI_ART } from "./symbolArt";
 import { BELLS_ART, GOLD_ART, PHARAOH_ART } from "./symbolArt2";
+import { WINTER_ART } from "./symbolArt3";
+import { isWinter } from "./advent";
+import { today } from "./clock";
 
-export type SkinId = "classic" | "miami" | "gold" | "pharaoh";
-export const SKIN_IDS: SkinId[] = ["miami", "gold", "pharaoh", "classic"];
+export type SkinId = "classic" | "miami" | "gold" | "pharaoh" | "winter";
+export const SKIN_IDS: SkinId[] = ["miami", "gold", "pharaoh", "classic", "winter"];
+/** Machines open today: Winter Royale only from 1 December to 6 January. */
+export const openSkins = (key = today()): SkinId[] => SKIN_IDS.filter((id) => id !== "winter" || isWinter(key));
+/** openSkins() read after mount (the prerendered page never shows the seasonal machine). */
+export function useOpenSkins(): SkinId[] {
+  const [ids, setIds] = useState<SkinId[]>(() => SKIN_IDS.filter((id) => id !== "winter"));
+  useEffect(() => setIds(openSkins()), []);
+  return ids;
+}
 export type SlotLabels = { big: string; mega: string; epic: string; freeSpins: string };
 
 export type Skin = {
@@ -37,6 +49,35 @@ export type Skin = {
 };
 
 export const SKINS: Record<SkinId, Skin> = {
+  // Winter Royale: the limited winter machine (1 December – 6 January). Miami's maths.
+  winter: {
+    id: "winter",
+    title: "Winter Royale",
+    tagline: "Limited edition. Snowmen expand, wilds freeze.",
+    emoji: { cherry: "🍬", lemon: "🔵", grape: "🍪", bell: "🔔", gem: "🎁", seven: "❄️", wild: "⛄", scatter: "🔮" },
+    art: WINTER_ART,
+    names: { cherry: "Candy cane", lemon: "Bauble", grape: "Gingerbread", bell: "Sleigh bell", gem: "Gift", seven: "Ice crystal", wild: "Snowman", scatter: "Snow globe" },
+    labels: { big: "BIG WIN", mega: "BLIZZARD WIN", epic: "WINTER LEGEND", freeSpins: "FROZEN SPINS" },
+    confetti: ["#ffffff", "#cfe7ff", "#f3e2a6", "#7fb6e6", "#e23b4a", "#ffffff"],
+    stage: "bg-[radial-gradient(ellipse_at_50%_0%,#2b4f7a_0%,#122236_45%,#070b12_100%)]",
+    titleClass: "text-[#f3f8ff] [text-shadow:0_0_16px_#7fb6e6,0_0_36px_#7fb6e699]",
+    signBox: "border-[#cfe7ff]/70 bg-black/30 shadow-[0_0_28px_#7fb6e666,inset_0_0_18px_#7fb6e633]",
+    bezel: "bg-[linear-gradient(145deg,#fff4c2_0%,#a87a2c_30%,#e8f4ff_52%,#f3e2a6_70%,#6b4f1d_100%)] shadow-[0_0_40px_#7fb6e655]",
+    reel: "bg-[linear-gradient(180deg,#0c1626,#17263c_50%,#0c1626)]",
+    divider: "border-[#cfe7ff]/25",
+    win: "animate-pulse bg-[#cfe7ff]/25 ring-2 ring-inset ring-[#f3e2a6]",
+    wildBg: "bg-[radial-gradient(circle_at_50%_40%,#cfe7ff88_0%,#17263c_78%)]",
+    scatterBg: "bg-[radial-gradient(circle_at_50%_40%,#7fb6e688_0%,#0c1626_78%)]",
+    wildTag: "from-[#ffffff] to-[#9fc7ea] text-[#0b1220]",
+    scatterTag: "from-[#f3e2a6] to-[#c79b40] text-black",
+    led: "text-[#e8f4ff] [text-shadow:0_0_10px_#7fb6e6]",
+    ledBox: "bg-[#0a1320] border-[#cfe7ff]/35",
+    spinBtn: "bg-[radial-gradient(circle_at_35%_30%,#ffffff,#9fc7ea_45%,#2b4f7a)] text-[#0b1220] ring-4 ring-[#f3e2a6]/70 shadow-[0_0_30px_#7fb6e6aa]",
+    betOn: "border-[#f3e2a6] bg-[linear-gradient(180deg,#e8f4ff,#7fb6e6)] text-[#0b1220]",
+    accent: "text-[#cfe7ff]",
+    lineColor: "#f3e2a6",
+    bulb: "#e8f4ff",
+  },
   // Royal Bells (the old Classic): glossy fruits on dark velvet, the bell bonus.
   classic: {
     id: "classic",

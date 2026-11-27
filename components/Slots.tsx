@@ -15,7 +15,7 @@ import { Counter, machineSmall } from "./ui";
 import { money } from "../lib/game";
 import { wallet } from "../lib/wallet";
 import { exitFullscreenSettled, isNarrowScreen, requestFullscreenSettled, whenViewportStable } from "../lib/fullscreen";
-import { SKINS, SKIN_IDS, rankOf, type SkinId } from "../lib/skins";
+import { SKINS, openSkins, rankOf, useOpenSkins, type SkinId } from "../lib/skins";
 import { useSlots } from "../lib/useSlots";
 import {
   BET_LEVELS,
@@ -206,6 +206,7 @@ const MACHINE_LINE: Record<SkinId, string> = {
   gold: "Multiplier wilds ×2 ×3 ×5 · they multiply together",
   pharaoh: "One symbol expands on every free spin",
   classic: "Fruits & sevens · 5 bells start the bell bonus",
+  winter: "Limited edition · expanding snowmen · frozen sticky wilds",
 };
 
 export default function Slots({
@@ -218,6 +219,7 @@ export default function Slots({
   onFocusChange?: (v: boolean) => void;
 }) {
   const [skinId, setSkinId] = useState<SkinId>("miami");
+  const skinIds = useOpenSkins();
   const [picker, setPicker] = useState(false);
   const [gambleScreen, setGambleScreen] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
@@ -449,13 +451,13 @@ useEffect(() => {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("royalace:skin");
-      if (saved && (SKIN_IDS as string[]).includes(saved)) setSkinId(saved as SkinId);
+      if (saved && (openSkins() as string[]).includes(saved)) setSkinId(saved as SkinId);
     } catch {}
     skinLoaded.current = true;
     // The lobby can open a given machine.
     const pick = (e: Event) => {
       const id = (e as CustomEvent<string>).detail;
-      if ((SKIN_IDS as string[]).includes(id)) setSkinId(id as SkinId);
+      if ((openSkins() as string[]).includes(id)) setSkinId(id as SkinId);
     };
     window.addEventListener("royal-ace:slots-machine", pick);
     return () => window.removeEventListener("royal-ace:slots-machine", pick);
@@ -694,6 +696,7 @@ useEffect(() => {
           {!phoneScreen && skinId === "classic" && <div className="room-bells" aria-hidden="true" />}
           {!phoneScreen && skinId === "gold" && <div className="room-gold" aria-hidden="true" />}
           {!phoneScreen && skinId === "pharaoh" && <div className="room-pharaoh" aria-hidden="true" />}
+          {!phoneScreen && skinId === "winter" && <div className="room-winter" aria-hidden="true" />}
           {!phoneScreen && !eco && skinId === "miami" && <KingpinRoom party={s.fs !== null} />}
           {/* The room melts into the control deck instead of being cut */}
           <div
@@ -767,7 +770,7 @@ useEffect(() => {
           {picker && (
             <div className="machine-pick" role="menu" data-slots-popover="">
               <p className="machine-pick__title">Machines</p>
-              {SKIN_IDS.map((id) => {
+              {skinIds.map((id) => {
                 const k = SKINS[id];
                 return (
                   <button

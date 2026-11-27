@@ -8,7 +8,7 @@ import { COLLECTION_CHIP_MULT } from "../../lib/collection";
 import { money } from "../../lib/game";
 import { useSession } from "../../lib/sessionStore";
 import { useSlotBonuses } from "../../lib/slotBonuses";
-import { RANKS, SKIN_IDS, type SkinId, type Skin } from "../../lib/skins";
+import { RANKS, useOpenSkins, type SkinId, type Skin } from "../../lib/skins";
 import {
   BELL_BUY_MULT,
   BELL_X3_AT,
@@ -30,7 +30,7 @@ import {
 } from "../../lib/slots";
 import { VAULT_TRIGGER } from "../../lib/vault";
 
-const SHORT: Record<SkinId, string> = { miami: "Miami", gold: "Gold", pharaoh: "Pharaoh", classic: "Bells" };
+const SHORT: Record<SkinId, string> = { miami: "Miami", gold: "Gold", pharaoh: "Pharaoh", classic: "Bells", winter: "Winter" };
 
 const PAY_ROWS: Paying[] = ["seven", "wild", "gem", "bell", "grape", "lemon", "cherry"];
 
@@ -85,6 +85,7 @@ export default function SlotsSidePanel({
   net: number;
 }) {
   const session = useSession();
+  const skinIds = useOpenSkins();
   const ach = useAchievements();
   const [tab, setTab] = useState<Tab>(initialTab);
   // Long sentences with numbers inside: written in both languages here.
@@ -114,7 +115,7 @@ export default function SlotsSidePanel({
       <div className={`${card} flex items-center justify-between gap-3 lg:py-2`}>
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#d7b45b]/80">Machine</p>
         <div className="flex gap-1.5" role="group" aria-label="Machine theme">
-          {SKIN_IDS.map((id) => (
+          {skinIds.map((id) => (
             <button
               key={id}
               onClick={() => !busy && setSkinId(id)}

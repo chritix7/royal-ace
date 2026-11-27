@@ -26,6 +26,7 @@ import { AvatarBadge, useTitle } from "./Avatar";
 import { GrowingValue, SUIT, useLivePools } from "./JackpotBar";
 import { JACKPOTS, sanitizePools, type JackpotTier, type Pools } from "../lib/jackpot";
 import { BET_LEVELS } from "../lib/slots";
+import { useOpenSkins } from "../lib/skins";
 import { DAY_XP_MULT, gameOfDay } from "../lib/gameOfDay";
 
 export type LobbyGame = "blackjack" | "slots" | "roulette" | "poker" | "craps" | "penalty" | "sports";
@@ -323,8 +324,10 @@ const LOBBY_MACHINES: [string, string][] = [
   ["gold", "Gold"],
   ["pharaoh", "Pharaoh"],
   ["classic", "Bells"],
+  ["winter", "Winter"],
 ];
 function GameCard({ g, i, onOpen, onPlay, badge, compact, day, fav, onFav, onMachine }: { g: Info; i: number; onOpen: () => void; onPlay: () => void; badge: Badge; compact: boolean; day: boolean; fav: boolean; onFav: () => void; onMachine?: (id: string) => void }) {
+  const openIds = useOpenSkins();
   return (
     <article className={`lb-card ${g.soon ? "is-soon" : ""} ${g.id === "sports" ? "is-wide" : ""} ${day ? "is-day" : ""}`} style={{ "--i": i } as CSSProperties}>
       <button type="button" onClick={onOpen} className="lb-card__hit" aria-label={`${g.name} — details`} />
@@ -337,7 +340,7 @@ function GameCard({ g, i, onOpen, onPlay, badge, compact, day, fav, onFav, onMac
         {day && <span className="lb-day">{`★ Game of the day · XP ×${DAY_XP_MULT}`}</span>}
         {g.id === "slots" && onMachine && (
           <span className="lb-machines" role="group" aria-label="Machines">
-            {LOBBY_MACHINES.map(([id, label]) => (
+            {LOBBY_MACHINES.filter(([id]) => (openIds as string[]).includes(id)).map(([id, label]) => (
               <button key={id} type="button" onClick={() => onMachine(id)} className={`lb-machine is-${id}`} translate="no">
                 {label}
               </button>
