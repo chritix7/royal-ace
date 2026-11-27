@@ -18,6 +18,7 @@ import { useStats } from "../lib/statsStore";
  * gear (or from a locked theme in a game, straight on that item).
  */
 import { FEEDBACK_HREF, HELP_LINE, LEGAL_LINKS } from "./LegalDoc";
+import { NO_STATS_KEY } from "./SiteStats";
 export type SettingsTab = "settings" | "shop";
 
 function Row({ title, sub, children }: { title: string; sub?: string; children: ReactNode }) {
@@ -229,6 +230,20 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
   const [name, setName] = useState(profile.name);
   const [nameMsg, setNameMsg] = useState("");
   const [reset, setReset] = useState("");
+  const [stats, setStats] = useState(true);
+  useEffect(() => {
+    try {
+      setStats(localStorage.getItem(NO_STATS_KEY) !== "1");
+    } catch {}
+  }, []);
+  const toggleStats = () => {
+    const on = !stats;
+    setStats(on);
+    try {
+      if (on) localStorage.removeItem(NO_STATS_KEY);
+      else localStorage.setItem(NO_STATS_KEY, "1");
+    } catch {}
+  };
   useEffect(() => setName(profile.name), [profile.name]);
   const saveName = () => {
     const c = cleanName(name);
@@ -347,6 +362,14 @@ function SettingsPane({ onTour, onClose }: { onTour: () => void; onClose: () => 
               : `If gaming is a problem for you, ${HELP_LINE.name} can help: ${HELP_LINE.phone} (France).`}
           </li>
         </ul>
+        <div translate="no">
+          <Row
+            title={lang === "fr" ? "Statistiques de visite anonymes" : "Anonymous visit stats"}
+            sub={lang === "fr" ? "Sans cookie : nous aident à savoir combien de joueurs viennent" : "No cookies: they tell us how many players come by"}
+          >
+            <Switch on={stats} onClick={toggleStats} label={lang === "fr" ? "Statistiques de visite" : "Visit stats"} />
+          </Row>
+        </div>
         <a href={FEEDBACK_HREF} className="pr-btn is-sm mt-3 w-full" translate="no">
           {lang === "fr" ? "✉ Donner mon avis · signaler un bug" : "✉ Send feedback · report a bug"}
         </a>

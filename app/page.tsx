@@ -33,6 +33,7 @@ import { SettingsPage, ShopPage, type SettingsTab } from "../components/Settings
 import WelcomeTour, { WELCOME_KEY } from "../components/WelcomeTour";
 import AgeGate from "../components/AgeGate";
 import DomainMove from "../components/DomainMove";
+import SiteStats from "../components/SiteStats";
 import { i18n } from "../lib/i18n";
 import { motion, startRest } from "../lib/motion";
 import { cloud } from "../lib/cloud";
@@ -556,6 +557,7 @@ export default function Home() {
       {tourOpen && inLobby && <WelcomeTour onClose={() => setTourOpen(false)} />}
       <AgeGate />
       <DomainMove />
+      <SiteStats />
     </main>
   );
 }

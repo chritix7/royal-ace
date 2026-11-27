@@ -14,8 +14,8 @@ export default function Page() {
           <section>
             <H>In short</H>
             <p>
-              No mandatory account, no e-mail, no password, no ads, no trackers, no analytics. Your game stays on your device, unless you turn on
-              the cloud save yourself.
+              No mandatory account, no e-mail, no password, no ads, no trackers. Just anonymous visit counts, without cookies. Your game stays on
+              your device, unless you turn on the cloud save yourself.
             </p>
           </section>
           <section>
@@ -41,6 +41,14 @@ export default function Page() {
             <p>
               <b className="text-white">Matches.</b> Scores and fixtures are requested by our server from football-data.org and API-Sports: no data
               about you is sent to them.
+            </p>
+          </section>
+          <section>
+            <H>Visit statistics</H>
+            <p>
+              To know how many people visit and which pages they open, we use Vercel Web Analytics. It sets no cookie and stores nothing on your
+              device; it only gives us aggregate, anonymous figures (visits, pages, country, type of device) and is used for nothing else. Legal
+              basis: our legitimate interest in running the site. You can turn it off at any time in Settings, &quot;Anonymous visit stats&quot;.
             </p>
           </section>
           <section>
@@ -76,8 +84,8 @@ export default function Page() {
           <section>
             <H>En bref</H>
             <p>
-              Pas de compte obligatoire, pas d&apos;e-mail, pas de mot de passe, pas de publicité, pas de traceur, pas de mesure d&apos;audience. Ta
-              partie reste sur ton appareil, sauf si tu actives toi-même la sauvegarde en ligne.
+              Pas de compte obligatoire, pas d&apos;e-mail, pas de mot de passe, pas de publicité, pas de traceur. Seulement un comptage anonyme
+              des visites, sans cookie. Ta partie reste sur ton appareil, sauf si tu actives toi-même la sauvegarde en ligne.
             </p>
           </section>
           <section>
@@ -105,6 +113,15 @@ export default function Page() {
             <p>
               <b className="text-white">Matchs.</b> Les scores et calendriers sont demandés par notre serveur à football-data.org et API-Sports :
               aucune donnée te concernant ne leur est transmise.
+            </p>
+          </section>
+          <section>
+            <H>Statistiques de visite</H>
+            <p>
+              Pour savoir combien de personnes viennent et quelles pages elles ouvrent, nous utilisons Vercel Web Analytics. Cet outil ne dépose
+              aucun cookie et n&apos;enregistre rien sur ton appareil ; il nous donne seulement des chiffres globaux et anonymes (visites, pages,
+              pays, type d&apos;appareil) et ne sert à rien d&apos;autre. Base légale : notre intérêt légitime à faire fonctionner le site. Tu peux
+              le désactiver à tout moment dans Réglages, « Statistiques de visite anonymes ».
             </p>
           </section>
           <section>
