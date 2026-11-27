@@ -3,6 +3,8 @@ import { useLang } from "../lib/i18n";
 import { LegalFooter } from "./LegalDoc";
 
 import ProfileSheet from "./ProfileSheet";
+import AdventSheet from "./AdventSheet";
+import { adventStatus, isWinter, useAdvent } from "../lib/advent";
 import { careerStore, useCareer } from "../lib/career";
 import { board, useBoard } from "../lib/leaderboard";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
@@ -442,6 +444,12 @@ export default function Lobby({
   const [profileTab, setProfileTab] = useState<null | "card" | "rank">(null);
   const career = useCareer();
   const boardMe = useBoard().me;
+  useAdvent();
+  const [adventOpen, setAdventOpen] = useState(false);
+  const [dayKey, setDayKey] = useState("");
+  useEffect(() => setDayKey(today()), []);
+  const adv = dayKey ? adventStatus(dayKey) : null;
+  const winter = dayKey ? isWinter(dayKey) : false;
   useEffect(() => {
     careerStore.hydrate();
     void board.refresh(true);
@@ -595,6 +603,18 @@ export default function Lobby({
     </section>
   );
 
+  const adventTile = adv?.visible ? (
+    <button type="button" onClick={() => setAdventOpen(true)} className={`lb-tile is-advent ${adv.ready.length ? "is-ready" : ""}`}>
+      <span className="lb-tile__k">{desktop ? (fr ? "Calendrier de l'Avent" : "Advent calendar") : fr ? "Avent" : "Advent"}</span>
+      <span className="lb-tile__v" translate="no">
+        {adv.live ? (adv.ready.length ? <em>{fr ? `${adv.ready.length} à ouvrir` : `${adv.ready.length} to open`}</em> : `${adv.opened.length}/24`) : fr ? `J−${adv.opensIn}` : `in ${adv.opensIn}d`}
+      </span>
+      <span className="lb-bar">
+        <span style={{ width: `${(adv.opened.length / 24) * 100}%` }} />
+      </span>
+    </button>
+  ) : null;
+
   const summary = (
     <section className="lb-summary">
       <button type="button" onClick={onOpenChallenges} className="lb-tile">
@@ -607,6 +627,7 @@ export default function Lobby({
           <span style={{ width: `${views.length ? (done / views.length) * 100 : 0}%` }} />
         </span>
       </button>
+      {!desktop && adventTile ? adventTile : (
       <button type="button" onClick={onOpenRewards} className="lb-tile">
         <span className="lb-tile__k">Weekly chest</span>
         <span className="lb-tile__v">
@@ -616,6 +637,7 @@ export default function Lobby({
           <span style={{ width: `${Math.min(100, (weekly.points / nextChest.points) * 100)}%` }} />
         </span>
       </button>
+      )}
       <button type="button" onClick={() => setProfileTab("rank")} className="lb-tile">
         <span className="lb-tile__k">{desktop ? "Weekly ranking" : "Ranking"}</span>
         <span className="lb-tile__v">
@@ -626,7 +648,8 @@ export default function Lobby({
           <span style={{ width: `${rank ? Math.max(4, ((21 - Math.min(rank, 20)) / 20) * 100) : 0}%` }} />
         </span>
       </button>
-      {desktop && (
+      {desktop && adventTile}
+      {desktop && !adventTile && (
         <button type="button" onClick={() => setProfileTab("card")} className="lb-tile">
           <span className="lb-tile__k">VIP card</span>
           <span className="lb-tile__v">{vip.label} · Lv {progression.level}</span>
@@ -649,7 +672,7 @@ export default function Lobby({
   };
 
   return (
-    <div className={`lb-root ${desktop ? "is-pc" : "m-lite"}`}>
+    <div className={`lb-root ${desktop ? "is-pc" : "m-lite"} ${winter ? "is-winter" : ""}`}>
       {desktop ? (
         <div className="flex h-full min-h-0 flex-col gap-4">
           <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,24rem)] gap-4">
@@ -698,6 +721,7 @@ export default function Lobby({
           }}
         />
       )}
+      {adventOpen && <AdventSheet onClose={() => setAdventOpen(false)} />}
       {profileTab && <ProfileSheet tab={profileTab} onClose={() => setProfileTab(null)} />}
     </div>
   );

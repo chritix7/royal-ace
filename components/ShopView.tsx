@@ -452,7 +452,7 @@ export default function ShopView({ focus }: { focus?: string }) {
     return () => window.clearTimeout(t);
   }, [focus]);
   const say = (id: string, t: string) => setMsgs((m) => ({ ...m, [id]: t }));
-  const collectible = SHOP.length;
+  const collectible = SHOP.filter((i) => !i.exclusive || st.owned.includes(i.id)).length;
   const owned = st.owned.filter((id) => SHOP.some((i) => i.id === id)).length;
 
   return (
@@ -572,7 +572,7 @@ export default function ShopView({ focus }: { focus?: string }) {
             <p className="st-sub">{c.where}</p>
           </div>
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
-            {SHOP.filter((i) => i.cat === c.id).map((it) => (
+            {SHOP.filter((i) => i.cat === c.id && (!i.exclusive || st.owned.includes(i.id))).map((it) => (
               <ItemCard key={it.id} it={it} focus={focus === it.id} msg={msgs[it.id] ?? null} onMsg={say} onTry={() => setTrying(it)} />
             ))}
           </div>

@@ -24,7 +24,7 @@ const CHAMPAGNE = wrap(
   `<path d="M60 92 V44 Q60 34 66 28 V12 H78 V28 Q84 34 84 44 V92 Z" fill="url(#bot)" stroke="${K}" stroke-width="3" stroke-linejoin="round"/>
    <rect x="64" y="6" width="16" height="12" rx="3" fill="url(#g)" stroke="${K}" stroke-width="2.5"/>
    <rect x="62" y="54" width="20" height="22" rx="2" fill="url(#g)" stroke="${K}" stroke-width="2"/>
-   <text x="72" y="69" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="9" fill="${K}">RA</text>
+   <text x="72" y="69" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="9" fill="${K}">CX</text>
    <path d="M18 14 H50 L46 46 Q34 58 22 46 Z" fill="url(#wine)" stroke="${K}" stroke-width="3" stroke-linejoin="round"/>
    <path d="M20 22 H48" stroke="#fff" stroke-width="2" opacity=".7"/>
    <g fill="#fff" opacity=".85"><circle cx="30" cy="34" r="1.6"/><circle cx="38" cy="28" r="1.3"/><circle cx="34" cy="42" r="1.4"/></g>
@@ -87,7 +87,7 @@ const SEAL = wrap(
   `<g fill="url(#rim)" stroke="${K}" stroke-width="2.5">${Array.from({ length: 16 }, (_, i) => `<circle cx="${50 + 38 * Math.cos((i * Math.PI) / 8)}" cy="${50 + 38 * Math.sin((i * Math.PI) / 8)}" r="7"/>`).join("")}</g>
    <circle cx="50" cy="50" r="38" fill="url(#g)" stroke="${K}" stroke-width="3"/>
    <circle cx="50" cy="50" r="29" fill="#120d05" stroke="url(#rim)" stroke-width="2.5"/>
-   <text x="50" y="58" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="24" fill="#f3d98f">RA</text>
+   <text x="50" y="58" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="24" fill="#f3d98f">CX</text>
    <path d="M33 30 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6 -4 -4 -1.6 4 -1.6z" fill="#fff4c2"/>`,
 );
 export const GOLD_ART = art({ cherry: CHAMPAGNE, lemon: RING, grape: WATCH, bell: BARS, gem: DIAMOND, seven: CROWN, wild: ACE_WILD, scatter: SEAL });

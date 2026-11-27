@@ -20,6 +20,8 @@ export type ShopItem = {
   swatch: [string, string, string];
   /** avatar emblem, title text, effect particle… */
   glyph?: string;
+  /** Not for sale: won in an event (shown in the shop once owned). */
+  exclusive?: string;
 };
 
 export const SHOP: ShopItem[] = [
@@ -53,8 +55,10 @@ export const SHOP: ShopItem[] = [
   { id: "title:striker", cat: "title", name: "Penalty King", note: "Never misses a corner", price: 40000, swatch: ["#0b1a0e", "#2c6b35", "#f2f2f2"], glyph: "Penalty King" },
   { id: "title:roller", cat: "title", name: "High Roller", note: "Bets big, smiles bigger", price: 80000, swatch: ["#140c02", "#6b4a12", "#ffd76a"], glyph: "High Roller" },
   { id: "title:whale", cat: "title", name: "The Whale", note: "The casino knows your name", price: 250000, swatch: ["#020a14", "#0f3a6b", "#9be7ff"], glyph: "The Whale" },
+  { id: "title:winter", cat: "title", name: "Winter Star", note: "Advent calendar 2026 · day 12", price: 400000, swatch: ["#06101c", "#2b4f7a", "#e8f4ff"], glyph: "Winter Star", exclusive: "advent" },
   { id: "title:legend", cat: "title", name: "Chrysonyx Legend", note: "The ultimate flex", price: 1000000, swatch: ["#120d02", "#c99b42", "#fff3c4"], glyph: "Chrysonyx Legend" },
   // VIP card finishes.
+  { id: "card:frost", cat: "card", name: "Frost gold", note: "Advent calendar 2026 · day 24", price: 500000, swatch: ["#070b12", "#1b2a3d", "#f3e2a6"], exclusive: "advent" },
   { id: "card:gold", cat: "card", name: "Carbon gold", note: "The house finish", price: 0, swatch: ["#08080a", "#1d1d21", "#e5c779"] },
   { id: "card:platinum", cat: "card", name: "Platinum", note: "Brushed steel, silver", price: 100000, swatch: ["#0d0f12", "#2c3036", "#e6ebf2"] },
   { id: "card:rose", cat: "card", name: "Rose gold", note: "Warm copper sheen", price: 150000, swatch: ["#140b0a", "#3a2320", "#f2b8a2"] },
@@ -181,7 +185,7 @@ function hash(s: string) {
 }
 export const DEAL_OFF = 0.3;
 function pickDeal(owned: string[], day: string): ShopItem | null {
-  const pool = SHOP.filter((i) => i.price > 0 && !owned.includes(i.id));
+  const pool = SHOP.filter((i) => i.price > 0 && !i.exclusive && !owned.includes(i.id));
   if (!pool.length) return null;
   return pool[hash(`deal:${day}`) % pool.length];
 }
@@ -204,7 +208,7 @@ export function priceToday(it: ShopItem, day = today()) {
 // ── mystery chest: a random cosmetic you don't own, rarer = less likely ──
 const CHEST_WEIGHT: Record<Rarity, number> = { common: 50, rare: 32, epic: 14, legendary: 4 };
 function chestPick(owned: string[]): ShopItem | null {
-  const pool = SHOP.filter((i) => i.price > 0 && !owned.includes(i.id) && i.price <= 300000);
+  const pool = SHOP.filter((i) => i.price > 0 && !i.exclusive && !owned.includes(i.id) && i.price <= 300000);
   if (!pool.length) return null;
   const total = pool.reduce((t, i) => t + CHEST_WEIGHT[rarityOf(i.price)], 0);
   let r = Math.random() * total;
@@ -235,6 +239,7 @@ export const shop = {
     load();
     const it = SHOP.find((x) => x.id === id);
     if (!it || state.owned.includes(id)) return true;
+    if (it.exclusive) return false;
     const price = priceToday(it);
     if (wallet.getLocked() || wallet.getBalance() < price) return false;
     wallet.add(-price);
@@ -242,6 +247,15 @@ export const shop = {
     const slot = EQUIP_SLOT[it.cat];
     if (slot) set({ [slot]: id } as Partial<State>);
     return true;
+  },
+  /** An event reward: owned and worn at once. */
+  grant(id: string) {
+    load();
+    const it = SHOP.find((x) => x.id === id);
+    if (!it) return;
+    if (!state.owned.includes(id)) set({ owned: [...state.owned, id] });
+    const slot = EQUIP_SLOT[it.cat];
+    if (slot) set({ [slot]: id } as Partial<State>);
   },
   equip(id: string) {
     load();
