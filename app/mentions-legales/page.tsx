@@ -33,7 +33,7 @@ export default function Page() {
               not gambling (in France, article L. 320-1 of the Internal Security Code).
             </p>
             <p>
-              Keep it fun. If gaming, even free, becomes a problem for you, talk to someone you trust or a support service. In France, 
+              Keep it fun. If gaming, even free, becomes a problem for you, talk to someone you trust or a support service. In France,{" "}
               {HELP_LINE.name} answers on {HELP_LINE.phone} (free of extra charge) and at {HELP_LINE.url.replace("https://", "")}.
             </p>
           </section>
