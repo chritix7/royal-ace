@@ -26,7 +26,7 @@ type Toast = {
   /** Sports tab to open on tap. */
   game?: string;
   /** "challenges": opens the challenges panel on tap. */
-  action?: "challenges";
+  action?: "challenges" | "settings";
   ms?: number;
 };
 
@@ -104,6 +104,7 @@ export default function GameToasts() {
               onClick={() => {
                 dismiss(t.id);
                 if (t.action === "challenges") window.dispatchEvent(new CustomEvent("royal-ace:open-challenges"));
+                if (t.action === "settings") window.dispatchEvent(new CustomEvent("royal-ace:settings"));
                 else if (t.game && !wallet.getLocked()) window.dispatchEvent(new CustomEvent("royal-ace:goto-tab", { detail: t.game }));
               }}
             >

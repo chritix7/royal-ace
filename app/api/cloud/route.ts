@@ -1,54 +1,20 @@
 /**
- * Cloud save, Game Center style: an account is a passkey (Face ID / Touch
- * ID, synced by iCloud Keychain), the save is the player's royalace:* data.
- * No e-mail, no password; the server only keeps a public key, the nickname
- * and the game data. Everything goes through POST { op, ... }.
+ * Accounts and cloud save. A player signs in with a passkey (Face ID / Touch
+ * ID), Google or an e-mail link (see /api/auth); the save is the player's
+ * royalace:* data. No password. Everything here goes through POST { op, ... }.
  */
+import { cleanEmail, cleanName, getSave, getUser, json, newSession, readCookies, sessionCookies, sessionUser } from "../../../lib/server/account";
+import { mailReady, sendLoginLink } from "../../../lib/server/mail";
 import { pipeline, redis, redisReady } from "../../../lib/server/redis";
-import { randomId, verifyAssertion, verifyRegistration, type StoredKey } from "../../../lib/server/webauthn";
+import { randomId, verifyAssertion, verifyRegistration } from "../../../lib/server/webauthn";
 
-type User = { name: string; created: number; keys: StoredKey[] };
-const COOKIE = "ra_sess";
-const SESSION_TTL = 60 * 60 * 24 * 365;
 const MAX_SAVE = 900_000;
-
-const json = (body: unknown, status = 200, headers: Record<string, string> = {}) =>
-  new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...headers } });
-
-function sessionCookie(token: string | null, secure: boolean) {
-  const base = `${COOKIE}=${token ?? ""}; Path=/api/cloud; HttpOnly; SameSite=Strict${secure ? "; Secure" : ""}`;
-  return token ? `${base}; Max-Age=${SESSION_TTL}` : `${base}; Max-Age=0`;
-}
-function readCookie(req: Request) {
-  const m = (req.headers.get("cookie") ?? "").match(new RegExp(`(?:^|; )${COOKIE}=([A-Za-z0-9_-]{20,})`));
-  return m?.[1] ?? null;
-}
-async function sessionUser(req: Request): Promise<string | null> {
-  const t = readCookie(req);
-  if (!t) return null;
-  const uid = await redis<string | null>(["GET", `sess:${t}`]);
-  if (uid) await redis(["EXPIRE", `sess:${t}`, SESSION_TTL]);
-  return uid;
-}
-async function newSession(uid: string) {
-  const t = randomId(32);
-  await redis(["SET", `sess:${t}`, uid, "EX", SESSION_TTL]);
-  return t;
-}
-const getUser = async (uid: string) => {
-  const raw = await redis<string | null>(["GET", `user:${uid}`]);
-  return raw ? (JSON.parse(raw) as User) : null;
-};
-const getSave = async (uid: string) => {
-  const raw = await redis<string | null>(["GET", `save:${uid}`]);
-  return raw ? (JSON.parse(raw) as { at: number; data: Record<string, string> }) : null;
-};
-const cleanName = (s: unknown) => (typeof s === "string" ? s.replace(/[^\p{L}\p{N} _.-]/gu, "").trim().slice(0, 16) : "") || "Player";
+const providers = () => ({ google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET), email: mailReady() });
 const okData = (d: unknown): d is Record<string, string> =>
   !!d && typeof d === "object" && !Array.isArray(d) && Object.entries(d).every(([k, v]) => k.startsWith("royalace:") && typeof v === "string");
 
 export async function GET(req: Request) {
-  if (!redisReady()) return json({ configured: false, linked: false });
+  if (!redisReady()) return json({ configured: false, linked: false, providers: providers() });
   try {
     if (new URL(req.url).searchParams.has("health")) {
       const k = `health:${randomId(6)}`;
@@ -56,12 +22,12 @@ export async function GET(req: Request) {
       return json({ configured: true, storage: set === "OK" && get === "1" ? "ok" : "bad" });
     }
     const uid = await sessionUser(req);
-    if (!uid) return json({ configured: true, linked: false });
+    if (!uid) return json({ configured: true, linked: false, providers: providers() });
     const [user, save] = await Promise.all([getUser(uid), getSave(uid)]);
-    if (!user) return json({ configured: true, linked: false });
-    return json({ configured: true, linked: true, name: user.name, at: save?.at ?? 0 });
+    if (!user) return json({ configured: true, linked: false, providers: providers() });
+    return json({ configured: true, linked: true, name: user.name, email: user.email ?? "", google: !!user.google, passkey: user.keys.length > 0, at: save?.at ?? 0, providers: providers() });
   } catch {
-    return json({ configured: true, linked: false, error: "unavailable" }, 503);
+    return json({ configured: true, linked: false, providers: providers(), error: "unavailable" }, 503);
   }
 }
 
@@ -128,7 +94,7 @@ export async function POST(req: Request) {
         }
         await pipeline(cmds);
         const t = await newSession(uid);
-        return json({ ok: true, name: user.name, at }, 200, { "set-cookie": sessionCookie(t, secure) });
+        return json({ ok: true, name: user.name, at }, 200, sessionCookies(t, secure));
       }
       case "login-options": {
         const challenge = randomId(32);
@@ -150,7 +116,7 @@ export async function POST(req: Request) {
         key.counter = verifyAssertion(cred, key, challenge, origin, rpId);
         await redis(["SET", `user:${uid}`, JSON.stringify(user)]);
         const t = await newSession(uid);
-        return json({ ok: true, name: user.name, save: await getSave(uid) }, 200, { "set-cookie": sessionCookie(t, secure) });
+        return json({ ok: true, name: user.name, save: await getSave(uid) }, 200, sessionCookies(t, secure));
       }
       case "save": {
         const uid = await sessionUser(req);
@@ -166,17 +132,34 @@ export async function POST(req: Request) {
         return json({ save: await getSave(uid) });
       }
       case "logout": {
-        const t = readCookie(req);
-        if (t) await redis(["DEL", `sess:${t}`]);
-        return json({ ok: true }, 200, { "set-cookie": sessionCookie(null, secure) });
+        const ts = readCookies(req);
+        if (ts.length) await pipeline(ts.map((t) => ["DEL", `sess:${t}`]));
+        return json({ ok: true }, 200, sessionCookies(null, secure));
       }
       case "delete": {
         const uid = await sessionUser(req);
         if (!uid) return json({ error: "signed-out" }, 401);
         const user = await getUser(uid);
-        const t = readCookie(req);
-        await pipeline([["DEL", `user:${uid}`, `save:${uid}`, `sess:${t}`], ...(user?.keys ?? []).map((k) => ["DEL", `cred:${k.id}`])]);
-        return json({ ok: true }, 200, { "set-cookie": sessionCookie(null, secure) });
+        const ts = readCookies(req);
+        await pipeline([
+          ["DEL", `user:${uid}`, `save:${uid}`, ...ts.map((t) => `sess:${t}`)],
+          ...(user?.keys ?? []).map((k) => ["DEL", `cred:${k.id}`]),
+          ...(user?.google ? [["DEL", `idp:google:${user.google}`]] : []),
+          ...(user?.email ? [["DEL", `idp:email:${user.email}`]] : []),
+        ]);
+        return json({ ok: true }, 200, sessionCookies(null, secure));
+      }
+      case "email-start": {
+        if (!mailReady()) return json({ error: "not-available" }, 400);
+        const email = cleanEmail(body.email);
+        if (!email) return json({ error: "bad-email" }, 400);
+        // At most 5 links an hour per address.
+        const [n] = (await pipeline([["INCR", `mlrl:${email}`], ["EXPIRE", `mlrl:${email}`, 3600]])) as number[];
+        if (n > 5) return json({ error: "slow-down" }, 429);
+        const token = randomId(32);
+        await redis(["SET", `mlink:${token}`, JSON.stringify({ email }), "EX", 900]);
+        await sendLoginLink(email, `${origin}/api/auth/email?t=${token}`, body.lang === "fr");
+        return json({ ok: true });
       }
       default:
         return json({ error: "bad-op" }, 400);

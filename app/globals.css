@@ -3533,3 +3533,9 @@ textarea.st-input { border-radius: 12px; }
 @keyframes brag-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @media (max-width: 1023px) { .brag { left: 50%; right: auto; bottom: calc(env(safe-area-inset-bottom) + 6.5rem); translate: -50% 0; } }
 @media (prefers-reduced-motion: reduce) { .brag { animation: none; } }
+/* Settings: Google sign-in button (Google's own look: white, logo, dark text) */
+.st-google { display: inline-flex; height: 2.3rem; align-items: center; justify-content: center; gap: 0.6rem; border-radius: 9999px; background: #fff; padding: 0 1rem; font-size: 13px; font-weight: 600; color: #1f1f1f; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); transition: filter 0.15s; }
+.st-google:hover { filter: brightness(0.95); }
+.st-google:disabled { opacity: 0.6; }
+.st-link { color: #e5c779; text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
+.st-link:disabled { opacity: 0.5; }

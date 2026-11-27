@@ -14,8 +14,8 @@ export default function Page() {
           <section>
             <H>In short</H>
             <p>
-              No mandatory account, no e-mail, no password, no ads, no trackers. Just anonymous visit counts, without cookies. Your game stays on
-              your device, unless you turn on the cloud save yourself.
+              No mandatory account, no password, no ads, no trackers. Just anonymous visit counts, without cookies. Your game stays on
+              your device, unless you sign in yourself.
             </p>
           </section>
           <section>
@@ -29,10 +29,11 @@ export default function Page() {
               storage. They are not sent to us. You can erase everything in Settings, &quot;Reset account&quot;.
             </p>
             <p>
-              <b className="text-white">Cloud save (optional).</b> If you turn it on, we keep your nickname, your passkey&apos;s public key (Face
-              ID, Touch ID…: we never see your fingerprint or face) and your game data. A strictly necessary session cookie (&quot;ra_sess&quot;, 1
-              year) keeps you signed in. Legal basis: providing the service you ask for. Kept until you delete your save, which you can do at any
-              time from the game.
+              <b className="text-white">Account and cloud save (optional).</b> If you sign in, we keep your nickname, your game data and what
+              you signed in with: your e-mail address (Google or e-mail link), your Google account identifier (Google), or your passkey&apos;s
+              public key (Face ID, Touch ID…: we never see your fingerprint or face). Your e-mail is only used to sign you in: no newsletter,
+              no ads. A strictly necessary session cookie (&quot;ra_sess&quot;, 1 year) keeps you signed in. Legal basis: providing the service
+              you ask for. Kept until you delete your account, which you can do at any time in Settings.
             </p>
             <p>
               <b className="text-white">Technical logs.</b> Like any website, our host processes your IP address and technical connection data to
@@ -61,7 +62,8 @@ export default function Page() {
           <section>
             <H>Providers and transfers</H>
             <p>
-              Hosting: Vercel Inc. Cloud save: Upstash, Inc. These providers may process data outside the European Union, in particular in the
+              Hosting: Vercel Inc. Accounts and cloud save: Upstash, Inc. Sign-in e-mails: Resend, Inc. &quot;Continue with Google&quot;:
+              Google LLC, which tells us your name, e-mail and account identifier when you choose it. These providers may process data outside the European Union, in particular in the
               United States, with the safeguards required by the GDPR (EU–US Data Privacy Framework or standard contractual clauses).
             </p>
           </section>
@@ -84,8 +86,8 @@ export default function Page() {
           <section>
             <H>En bref</H>
             <p>
-              Pas de compte obligatoire, pas d&apos;e-mail, pas de mot de passe, pas de publicité, pas de traceur. Seulement un comptage anonyme
-              des visites, sans cookie. Ta partie reste sur ton appareil, sauf si tu actives toi-même la sauvegarde en ligne.
+              Pas de compte obligatoire, pas de mot de passe, pas de publicité, pas de traceur. Seulement un comptage anonyme
+              des visites, sans cookie. Ta partie reste sur ton appareil, sauf si tu te connectes toi-même.
             </p>
           </section>
           <section>
@@ -101,10 +103,12 @@ export default function Page() {
               stockage local de ton navigateur. Ils ne nous sont pas envoyés. Tu peux tout effacer dans Réglages, « Réinitialiser le compte ».
             </p>
             <p>
-              <b className="text-white">Sauvegarde en ligne (facultative).</b> Si tu l&apos;actives, nous conservons ton pseudo, la clé publique de
-              ta passkey (Face ID, Touch ID… : nous ne voyons jamais ton empreinte ni ton visage) et les données de ta partie. Un cookie de session
-              strictement nécessaire (« ra_sess », 1 an) te garde connecté. Base légale : l&apos;exécution du service que tu demandes. Conservation :
-              jusqu&apos;à ce que tu supprimes ta sauvegarde, ce que tu peux faire à tout moment depuis le jeu.
+              <b className="text-white">Compte et sauvegarde en ligne (facultatifs).</b> Si tu te connectes, nous conservons ton pseudo, ta
+              partie et ce qui te sert à te connecter : ton adresse e-mail (Google ou lien par e-mail), l&apos;identifiant de ton compte Google
+              (Google) ou la clé publique de ta passkey (Face ID, Touch ID… : nous ne voyons jamais ton empreinte ni ton visage). Ton e-mail sert
+              uniquement à te connecter : pas de newsletter, pas de publicité. Un cookie de session strictement nécessaire (« ra_sess », 1 an)
+              te garde connecté. Base légale : l&apos;exécution du service que tu demandes. Conservation : jusqu&apos;à ce que tu supprimes ton
+              compte, ce que tu peux faire à tout moment dans les Réglages.
             </p>
             <p>
               <b className="text-white">Journaux techniques.</b> Comme tout site, notre hébergeur traite l&apos;adresse IP et des informations
@@ -134,7 +138,8 @@ export default function Page() {
           <section>
             <H>Prestataires et transferts</H>
             <p>
-              Hébergement : Vercel Inc. Sauvegarde en ligne : Upstash, Inc. Ces prestataires peuvent traiter des données hors de l&apos;Union
+              Hébergement : Vercel Inc. Comptes et sauvegarde : Upstash, Inc. E-mails de connexion : Resend, Inc. « Continuer avec Google » :
+              Google LLC, qui nous transmet ton nom, ton e-mail et l&apos;identifiant de ton compte quand tu choisis cette option. Ces prestataires peuvent traiter des données hors de l&apos;Union
               européenne, notamment aux États-Unis, avec les garanties prévues par le RGPD (cadre de protection des données UE–États-Unis ou clauses
               contractuelles types).
             </p>

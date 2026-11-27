@@ -36,13 +36,14 @@ const Switch = ({ on, onClick, label }: { on: boolean; onClick: () => void; labe
   <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={onClick} className={`rl-switch ${on ? "is-on" : ""}`} />
 );
 
-function ago(at: number) {
-  if (!at) return "not yet";
+function ago(at: number, fr = false) {
+  if (!at) return fr ? "pas encore" : "not yet";
   const m = Math.round((Date.now() - at) / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m} min ago`;
+  if (m < 1) return fr ? "à l'instant" : "just now";
+  if (m < 60) return fr ? `il y a ${m} min` : `${m} min ago`;
   const h = Math.round(m / 60);
-  return h < 48 ? `${h} h ago` : `${Math.round(h / 24)} days ago`;
+  if (h < 48) return fr ? `il y a ${h} h` : `${h} h ago`;
+  return fr ? `il y a ${Math.round(h / 24)} jours` : `${Math.round(h / 24)} days ago`;
 }
 
 function CloudSection() {
@@ -71,40 +72,79 @@ function CloudSection() {
     const ok = await cloud.importCode(code);
     if (!ok) setCodeMsg("This code is not valid");
   };
+  const fr = useLang() === "fr";
+  const [email, setEmail] = useState("");
+  const [mailOpen, setMailOpen] = useState(false);
+  const ways = [c.google && "Google", c.email && c.email, c.passkey && "Face ID"].filter(Boolean).join(" · ");
   return (
-    <section className="st-card">
-      <p className="st-head">Cloud save · Face ID</p>
+    <section className="st-card" id="account">
+      <p className="st-head">{fr ? "Compte · sauvegarde" : "Account · cloud save"}</p>
       {!c.ready ? (
         <p className="st-sub">Checking…</p>
       ) : !c.configured ? (
         <p className="st-sub">Cloud save is being set up — come back in a moment. You can already use a backup code below.</p>
-      ) : !c.supported ? (
-        <p className="st-sub">This browser has no passkeys. Use a backup code below.</p>
       ) : c.linked ? (
-        <div className="st-cloud is-on">
+        <div className="st-cloud is-on" translate="no">
           <p className="st-row__title">
-            Saved to the cloud ✓ <span className="text-white/45">·</span> <span translate="no">{c.name}</span>
+            {fr ? "Connecté ✓" : "Signed in ✓"} <span className="text-white/45">·</span> {c.name}
           </p>
-          <p className="st-row__sub">{`Last save: ${ago(c.at)}. Saves itself while you play; on another device, open Settings and tap “I already have a save”.`}</p>
+          {ways && <p className="st-row__sub">{ways}</p>}
+          <p className="st-row__sub">{fr ? `Dernière sauvegarde : ${ago(c.at, true)}. Tout s'enregistre pendant que tu joues ; sur un autre appareil, connecte-toi de la même façon.` : `Last save: ${ago(c.at)}. Everything saves while you play; on another device, sign in the same way.`}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             <button type="button" className="pr-btn is-sm" disabled={c.busy} onClick={() => void cloud.syncNow()}>
-              Save now
+              {fr ? "Sauvegarder" : "Save now"}
             </button>
             <button type="button" className="pr-btn is-ghost is-sm" disabled={c.busy} onClick={() => void cloud.signOut()}>
-              Sign out
+              {fr ? "Se déconnecter" : "Sign out"}
             </button>
           </div>
         </div>
       ) : (
-        <div className="st-cloud">
-          <p className="st-row__sub">Protect your progress with a passkey: Face ID or Touch ID, kept in your iCloud Keychain. Get everything back on any device, even after deleting the app. No password, no e-mail.</p>
-          <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-            <button type="button" className="pr-btn is-sm" disabled={c.busy} onClick={() => cloud.create(profile.name || "Player")}>
-              Save my progress
-            </button>
-            <button type="button" className="pr-btn is-ghost is-sm" disabled={c.busy} onClick={() => cloud.restore()}>
-              I already have a save
-            </button>
+        <div className="st-cloud" translate="no">
+          <p className="st-row__sub">{fr ? "Connecte-toi pour garder tes jetons et ta progression sur tous tes appareils. Gratuit, sans mot de passe." : "Sign in to keep your chips and progress on all your devices. Free, no password."}</p>
+          <div className="mt-2 grid grid-cols-1 gap-1.5">
+            {c.providers.google && (
+              <button type="button" className="st-google" disabled={c.busy} onClick={() => cloud.google()}>
+                <svg viewBox="0 0 48 48" aria-hidden="true" className="h-4 w-4">
+                  <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />
+                  <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
+                  <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z" />
+                  <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
+                </svg>
+                {fr ? "Continuer avec Google" : "Continue with Google"}
+              </button>
+            )}
+            {c.providers.email &&
+              (mailOpen ? (
+                <form
+                  className="flex gap-1.5"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void cloud.emailLink(email, fr);
+                  }}
+                >
+                  <input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={fr ? "ton@email.com" : "you@email.com"} aria-label="E-mail" className="st-input min-w-0 flex-1" />
+                  <button type="submit" className="pr-btn is-sm" disabled={c.busy || !email}>
+                    {fr ? "Envoyer" : "Send"}
+                  </button>
+                </form>
+              ) : (
+                <button type="button" className="pr-btn is-ghost is-sm" onClick={() => setMailOpen(true)}>
+                  ✉ {fr ? "Recevoir un lien par e-mail" : "Get a sign-in link by e-mail"}
+                </button>
+              ))}
+            {c.supported && (
+              <p className="st-row__sub mt-1 text-center">
+                {fr ? "Ou avec Face ID / Touch ID : " : "Or with Face ID / Touch ID: "}
+                <button type="button" className="st-link" disabled={c.busy} onClick={() => cloud.create(profile.name || "Player")}>
+                  {fr ? "créer" : "create"}
+                </button>
+                {" · "}
+                <button type="button" className="st-link" disabled={c.busy} onClick={() => cloud.restore()}>
+                  {fr ? "me connecter" : "sign in"}
+                </button>
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -161,12 +201,12 @@ function CloudSection() {
             </div>
           ) : (
             <button type="button" onClick={() => setConfirmDel(true)} className="text-[10.5px] text-white/40 underline underline-offset-2 hover:text-white/70">
-              Delete my cloud account and data
+              {fr ? "Supprimer mon compte et mes données" : "Delete my account and data"}
             </button>
           )}
         </div>
       )}
-      <p className="st-sub mt-2">Privacy: the cloud keeps your nickname and your game data only. Face ID never leaves your device — the server stores a public key. Delete it all at any time.</p>
+      <p className="st-sub mt-2" translate="no">{fr ? "Confidentialité : le compte garde ton pseudo, ton e-mail (si tu l'utilises) et ta partie, rien d'autre. Pas de pub, pas de newsletter. Tu peux tout supprimer à tout moment." : "Privacy: the account keeps your nickname, your e-mail (if you use it) and your game, nothing else. No ads, no newsletter. Delete it all at any time."}</p>
     </section>
   );
 }

@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { onEvent } from "./events";
 
 /**
  * Cloud save, Game Center style. The account is a passkey (Face ID, synced
@@ -12,6 +13,12 @@ export type CloudState = {
   supported: boolean;
   linked: boolean;
   name: string;
+  /** Sign-ins on the account (when linked). */
+  email: string;
+  google: boolean;
+  passkey: boolean;
+  /** Sign-in methods the server offers. */
+  providers: { google: boolean; email: boolean };
   at: number;
   busy: boolean;
   msg: string;
@@ -20,7 +27,7 @@ const META = "royalace:cloud-meta";
 const EXCLUDE = new Set([META, "royalace:pwa-dismissed", "royalace:debug", "royalace:sports-results", "royalace:sports-forms"]);
 const API = "/api/cloud";
 
-let state: CloudState = { ready: false, configured: false, supported: false, linked: false, name: "", at: 0, busy: false, msg: "" };
+let state: CloudState = { ready: false, configured: false, supported: false, linked: false, name: "", email: "", google: false, passkey: false, providers: { google: false, email: false }, at: 0, busy: false, msg: "" };
 const listeners = new Set<() => void>();
 const set = (p: Partial<CloudState>) => {
   state = { ...state, ...p };
@@ -122,7 +129,67 @@ const errText = (e: unknown) => {
   return "Something went wrong, try again";
 };
 
+const SIGNED_IN_MSG: Record<string, string> = {
+  google: "Signed in with Google ✓",
+  email: "Signed in ✓",
+  expired: "This sign-in link has expired or was already used: ask for a new one",
+  cancelled: "Sign-in cancelled",
+  unavailable: "This sign-in is not available yet",
+  error: "Sign-in failed, try again",
+};
+
+// After a few rounds as a guest, one nudge to sign in (once per device).
+const NUDGE_KEY = "royalace:save-nudge";
+const ROUNDS = new Set(["spin", "bjHand", "rouletteSpin", "pokerHand", "crapsRoll", "penaltyRound", "betPlaced"]);
+let rounds = 0;
+function watchForNudge() {
+  try {
+    if (localStorage.getItem(NUDGE_KEY)) return;
+  } catch {
+    return;
+  }
+  const off = onEvent((e) => {
+    if (!ROUNDS.has(e) || ++rounds < 25) return;
+    off();
+    if (state.linked || !state.configured || !(state.providers.google || state.providers.email || state.supported)) return;
+    try {
+      localStorage.setItem(NUDGE_KEY, "1");
+    } catch {}
+    const fr = document.documentElement.lang === "fr" || localStorage.getItem("royalace:lang") === "fr";
+    window.dispatchEvent(
+      new CustomEvent("royal-ace:toast", {
+        detail: {
+          kind: "info",
+          eyebrow: fr ? "Ta progression" : "Your progress",
+          title: fr ? "Garde tes jetons sur tous tes appareils" : "Keep your chips on every device",
+          text: fr ? "Connecte-toi avec Google ou par e-mail : touche ici" : "Sign in with Google or e-mail: tap here",
+          action: "settings",
+          ms: 7000,
+        },
+      }),
+    );
+  });
+}
+
 export const cloud = {
+  /** "Continue with Google": leaves for Google, comes back signed in. */
+  google() {
+    void push(true);
+    location.href = "/api/auth/google";
+  },
+  /** Sends a one-time sign-in link to this address. */
+  async emailLink(email: string, fr: boolean) {
+    set({ busy: true, msg: "" });
+    try {
+      await call({ op: "email-start", email, lang: fr ? "fr" : "en" });
+      set({ busy: false, msg: fr ? `Lien envoyé à ${email} ✓ Ouvre-le sur cet appareil (regarde aussi les spams).` : `Link sent to ${email} ✓ Open it on this device (check your spam too).` });
+      return true;
+    } catch (e) {
+      const m = e instanceof Error ? e.message : "";
+      set({ busy: false, msg: m === "bad-email" ? (fr ? "Cette adresse e-mail n'est pas valide" : "This e-mail address is not valid") : errText(e) });
+      return false;
+    }
+  },
   get: () => state,
   subscribe(l: () => void) {
     listeners.add(l);
@@ -135,9 +202,28 @@ export const cloud = {
     const supported = typeof window.PublicKeyCredential !== "undefined" && !!navigator.credentials;
     set({ supported });
     try {
+      // Back from Google or an e-mail link: say how it went, and clean the address.
+      const url = new URL(location.href);
+      const outcome = url.searchParams.get("signed-in");
+      if (outcome) {
+        url.searchParams.delete("signed-in");
+        history.replaceState(history.state, "", url.pathname + url.search + url.hash);
+      }
       const r = await fetch(API, { credentials: "same-origin", cache: "no-store" }).then((x) => x.json());
-      set({ ready: true, configured: !!r.configured, linked: !!r.linked, name: r.name ?? "", at: r.at ?? 0 });
-      if (!r.linked) return;
+      set({
+        ready: true,
+        configured: !!r.configured,
+        linked: !!r.linked,
+        name: r.name ?? "",
+        email: r.email ?? "",
+        google: !!r.google,
+        passkey: !!r.passkey,
+        providers: { google: !!r.providers?.google, email: !!r.providers?.email },
+        at: r.at ?? 0,
+        msg: outcome ? SIGNED_IN_MSG[outcome] ?? "" : "",
+      });
+      if (outcome) window.dispatchEvent(new CustomEvent("royal-ace:signed-in", { detail: { outcome, linked: !!r.linked } }));
+      if (!r.linked) return watchForNudge();
       // Another device saved more recently: bring that save in.
       if ((r.at ?? 0) > meta().at + 1000) {
         const l = await call<{ save: { at: number; data: Record<string, string> } | null }>({ op: "load" });
