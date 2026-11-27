@@ -3,6 +3,7 @@ import { Cinzel, Geist, Geist_Mono, UnifrakturMaguntia, Share_Tech_Mono } from "
 import "./globals.css";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
+import { SITE } from "../lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,7 +40,6 @@ const shareTechMono = Share_Tech_Mono({
   subsets: ["latin"],
 });
 
-const SITE = process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000";
 const DESCRIPTION =
   "Royal Ace is a free online casino with virtual chips: slot machines, blackjack, roulette, Hold'em poker, craps, penalty shoot-out and sports betting on real matches. No sign-up, no real money. 18+.";
 
