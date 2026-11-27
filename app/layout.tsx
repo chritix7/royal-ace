@@ -48,6 +48,7 @@ export const metadata: Metadata = {
   title: { default: "Royal Ace · Free casino with virtual chips", template: "%s · Royal Ace" },
   description: DESCRIPTION,
   applicationName: "Royal Ace",
+  verification: { google: "2StTLGlxR5b6XE8JepRdQzfzF2YKVJvat8g8iZfVOo4" },
   keywords: ["free casino", "social casino", "free slots", "blackjack", "roulette", "poker", "virtual chips", "casino gratuit", "machine à sous gratuite"],
   alternates: { canonical: "/" },
   openGraph: {
