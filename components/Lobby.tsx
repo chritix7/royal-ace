@@ -87,7 +87,7 @@ export const LOBBY_GAMES: Info[] = [
     name: "Casino Hold'em",
     tag: "Texas Hold'em vs the dealer",
     facts: ["Royal flush pays 100:1", "AA Bonus up to 100:1", "Hint at the flop"],
-    limits: "Ante ◈ 10 – 500K",
+    limits: "◈ 10 – 500K",
     rtp: "97.8%",
     about: ["Two cards each, the flop — then call with twice your Ante, or fold.", "The dealer needs a pair of 4s to qualify.", "The AA Bonus pays on your cards and the flop, even if you fold."],
     challenge: "poker",

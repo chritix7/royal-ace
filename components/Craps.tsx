@@ -818,7 +818,7 @@ export default function Craps({ active, focus = false, onFocusChange }: { active
               <Die index={1} value={g.dice[1]} rollId={g.rollId} rolling={g.rolling} ms={850} size="2.15rem" travel={false} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className={`cr-call truncate !text-left !text-[14px] ${res && (res.event === "sevenOut" || res.event === "craps") ? "is-bad" : res && res.won > 0 ? "is-good" : ""}`}>{callText}</p>
+              <p className={`cr-call line-clamp-2 !text-left !text-[13px] !leading-tight !tracking-[0.08em] ${res && (res.event === "sevenOut" || res.event === "craps") ? "is-bad" : res && res.won > 0 ? "is-good" : ""}`}>{callText}</p>
               <div className="mt-0.5">{pointBadge}</div>
             </div>
             <button type="button" onClick={tour.start} className="rl-icon-key" aria-label="Guided first game">
