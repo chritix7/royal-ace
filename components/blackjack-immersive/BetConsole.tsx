@@ -115,12 +115,12 @@ export default function BetConsole({
 
   // Slim ghost key for the quick bets (Rebet / ×2 / Clear / Done).
   const quickBet =
-    "inline-flex h-7 w-full items-center justify-center rounded-full border border-white/10 bg-white/[0.03] px-2 text-[10px] font-black uppercase tracking-[0.18em] max-sm:h-full max-sm:min-h-7 max-sm:px-1 max-sm:tracking-[0.1em] text-white/70 outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-[color,border-color,background] focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:hover:border-[#d7b45b]/50 enabled:hover:bg-[#d7b45b]/[0.08] enabled:hover:text-[#f5d778] disabled:cursor-not-allowed disabled:opacity-35";
+    "font-display inline-flex h-7 w-full items-center justify-center rounded-full border border-[#d7b45b]/20 bg-white/[0.03] px-2 text-[10px] font-bold uppercase tracking-[0.16em] max-sm:h-full max-sm:min-h-7 max-sm:px-1 max-sm:tracking-[0.08em] text-[#efe2bd]/80 outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-[color,border-color,background] focus-visible:ring-2 focus-visible:ring-[#e5c779] enabled:hover:border-[#d7b45b]/50 enabled:hover:bg-[#d7b45b]/[0.08] enabled:hover:text-[#f5d778] disabled:cursor-not-allowed disabled:opacity-35";
 
   // Deal (or Refill when out of chips). `stacked` puts the amount on
   // its own line for the tall desktop key.
   const dealReady = s.bet >= MIN_BET && stake <= s.balance;
-  const primaryAction = (className: string, stacked = false) =>
+  const primaryAction = (className: string, stacked = false, short = false) =>
     outOfChips ? (
       <button
         type="button"
@@ -129,7 +129,7 @@ export default function BetConsole({
       >
         {stacked ? (
           <>
-            <span className="text-sm tracking-[0.14em]">Refill</span>
+            <span className="font-display text-[13px] font-bold tracking-[0.1em] lg:text-sm">Refill</span>
             <span className="text-[11px] font-black tabular-nums">
               ◈ {money(REFILL)}
             </span>
@@ -152,8 +152,8 @@ export default function BetConsole({
       >
         {stacked ? (
           <>
-            <span className="text-sm tracking-[0.14em]">
-              {s.phase === "settled" ? "Deal again" : "Deal"}
+            <span className="font-display text-[13px] font-bold tracking-[0.1em] lg:text-[13px] lg:tracking-[0.05em]">
+              {s.phase === "settled" && !short ? "Deal again" : "Deal"}
             </span>
             <span className="text-[11px] font-black tabular-nums">
               ◈ {money(stake)}
@@ -320,13 +320,13 @@ export default function BetConsole({
                   />
                 </div>
                 <div className="grid grid-cols-3 gap-1">
-                  <button type="button" onClick={() => setBetTo(s.lastBet)} className={`${quickBet} !h-6 !min-h-0 !px-1 !text-[9px] !tracking-[0.1em]`}>
+                  <button type="button" onClick={() => setBetTo(s.lastBet)} className={`${quickBet} !h-7 !min-h-0 !px-1 !text-[9.5px] !tracking-[0.08em]`}>
                     Rebet
                   </button>
-                  <button type="button" onClick={() => setBetTo(s.bet * 2)} disabled={s.bet === 0} className={`${quickBet} !h-6 !min-h-0 !px-1 !text-[9px] !tracking-[0.1em]`}>
+                  <button type="button" onClick={() => setBetTo(s.bet * 2)} disabled={s.bet === 0} className={`${quickBet} !h-7 !min-h-0 !px-1 !text-[9.5px] !tracking-[0.08em]`}>
                     ×2
                   </button>
-                  <button type="button" onClick={() => setBetTo(0)} disabled={s.bet === 0} className={`${quickBet} !h-6 !min-h-0 !px-1 !text-[9px] !tracking-[0.1em]`}>
+                  <button type="button" onClick={() => setBetTo(0)} disabled={s.bet === 0} className={`${quickBet} !h-7 !min-h-0 !px-1 !text-[9.5px] !tracking-[0.08em]`}>
                     Clear
                   </button>
                 </div>
@@ -334,9 +334,9 @@ export default function BetConsole({
 
               {/* Tall Deal key */}
               <div className="flex flex-col gap-1">
-                {primaryAction("!min-h-0 flex-1 flex-col gap-0 !rounded-2xl !px-1 !py-1 leading-tight", true)}
+                {primaryAction("!min-h-0 flex-1 flex-col gap-0 !rounded-2xl !px-1 !py-1 leading-tight", true, true)}
                 {s.phase === "settled" && (
-                  <button type="button" onClick={() => setEditBet(false)} className={`${quickBet} !h-5 !min-h-0 !text-[8px]`}>
+                  <button type="button" onClick={() => setEditBet(false)} className={`${quickBet} !h-7 !min-h-0 !shrink-0 !border-[#d7b45b]/45 !text-[10px] !tracking-[0.1em] !text-[#f5d778]`}>
                     Done
                   </button>
                 )}

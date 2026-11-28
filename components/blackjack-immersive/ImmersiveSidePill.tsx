@@ -28,16 +28,23 @@ export default function ImmersiveSidePill({
       aria-label={`${label} — stake ${amount}`}
       disabled={disabled}
       onClick={onOpen}
-      className={`group flex w-full min-w-0 items-center justify-between gap-1.5 rounded-full border px-2.5 py-1.5 outline-none max-sm:gap-1 max-sm:px-2 max-sm:py-0.5 transition-[background,border-color,transform] enabled:active:translate-y-px focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-40 ${
+      className={`group flex w-full min-w-0 items-center justify-between gap-1.5 rounded-full border px-2.5 py-1.5 outline-none max-sm:gap-1 max-sm:px-3 max-sm:py-2 transition-[background,border-color,transform] enabled:active:translate-y-px focus-visible:ring-2 focus-visible:ring-[#e5c779] disabled:cursor-not-allowed disabled:opacity-40 ${
         active
           ? "border-[#e5c779]/60 bg-[#e5c779]/12 shadow-[inset_0_1px_0_rgba(229,199,121,0.18),0_0_12px_rgba(229,199,121,0.18)]"
           : "border-white/15 bg-black/25 hover:border-[#d7b45b]/40"
       }`}
     >
-      <div className="min-w-0 text-left">
-        <div className="flex items-center gap-1">
-          <p className="text-[9px] font-black uppercase tracking-wide text-[#e5c779]">
-            {label}
+      <div className="min-w-0 text-left max-sm:flex max-sm:w-full max-sm:items-center max-sm:justify-between max-sm:gap-2">
+        <div className="flex min-w-0 items-center gap-1">
+          <p className="font-display truncate text-[10px] font-bold uppercase tracking-[0.1em] text-[#e5c779]">
+            {label === "PP" ? (
+              <>
+                <span className="sm:hidden">Perfect Pairs</span>
+                <span className="hidden sm:inline">PP</span>
+              </>
+            ) : (
+              label
+            )}
           </p>
           {heat && heat !== "neutral" && (
             <span
@@ -52,15 +59,15 @@ export default function ImmersiveSidePill({
           )}
         </div>
         <p
-          className={`text-[10px] font-bold tabular-nums ${
-            active ? "text-[#f5d778]" : "text-white/70"
+          className={`shrink-0 text-[10px] font-bold tabular-nums ${
+            active ? "text-[#f5d778]" : "text-white/70 max-sm:text-white/55"
           }`}
         >
           {amount > 0 ? (
             `◈ ${money(amount)}`
           ) : (
             <>
-              <span className="sm:hidden">Stake</span>
+              <span className="text-[13px] leading-none text-[#e5c779]/80 sm:hidden" aria-hidden="true">＋</span>
               <span className="hidden sm:inline">Tap to stake</span>
             </>
           )}

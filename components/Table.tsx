@@ -507,24 +507,7 @@ function getShoeStatus(g: Game): {
               INSIDE this slot, on top of the engraved arcs — no height
               is wasted below the table. */}
 <div className={`relative mt-3 lg:mt-0 lg:flex lg:min-h-[120px] lg:flex-col lg:items-center lg:justify-end lg:gap-2`}>
-  {/* Outer betting-area arc engraved in the felt */}
-  <div
-    aria-hidden="true"
-    className="pointer-events-none absolute -bottom-10 left-1/2 h-40 w-[min(94%,680px)] -translate-x-1/2 rounded-[50%]"
-    style={{
-      boxShadow:
-        "inset 0 0 0 1px rgba(229, 199, 121, 0.14), inset 0 1px 0 rgba(0, 0, 0, 0.5)",
-    }}
-  />
-  {/* Inner concentric arc */}
-  <div
-    aria-hidden="true"
-    className="pointer-events-none absolute -bottom-7 left-1/2 h-28 w-[min(78%,520px)] -translate-x-1/2 rounded-[50%]"
-    style={{
-      boxShadow:
-        "inset 0 0 0 1px rgba(229, 199, 121, 0.1), inset 0 1px 0 rgba(0, 0, 0, 0.4)",
-    }}
-  />
+  {/* No engraved arcs here: the player's cards sat on them on phones. */}
 {/* The official betting console, the same one as in Focus (all sizes) */}
 <BetConsole
   g={g}
