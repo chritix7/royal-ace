@@ -509,13 +509,12 @@ export default function BetConsole({
           </div>
           )
         ) : (
-          // Phones: Hit and Stand big on top, the three other calls below.
-          <div className="mx-auto grid max-w-4xl grid-cols-6 gap-1.5 sm:grid-cols-5 sm:gap-3">
+          <div className="bj-acts mx-auto grid max-w-4xl grid-cols-5 gap-1.5 sm:gap-3">
             <button
               type="button"
               onClick={hit}
               disabled={!playing}
-              className={`${control} ${gold} col-span-3 max-sm:!min-h-11 max-sm:!text-[14px] sm:col-span-1 sm:min-h-10`}
+              className={`${control} ${gold} sm:min-h-10`}
             >
               Hit
               <Kbd k="H" />
@@ -525,7 +524,7 @@ export default function BetConsole({
               type="button"
               onClick={stand}
               disabled={!playing}
-              className={`${control} ${neutral} col-span-3 max-sm:!min-h-11 max-sm:!text-[14px] sm:col-span-1 sm:min-h-10`}
+              className={`${control} ${neutral} sm:min-h-10`}
             >
               Stand
               <Kbd k="S" />
@@ -535,7 +534,7 @@ export default function BetConsole({
               type="button"
               onClick={double}
               disabled={!canDouble}
-              className={`${control} ${neutral} col-span-2 sm:col-span-1 sm:min-h-10`}
+              className={`${control} ${neutral} sm:min-h-10`}
             >
               Double
               <Kbd k="D" />
@@ -545,7 +544,7 @@ export default function BetConsole({
               type="button"
               onClick={split}
               disabled={!canSplit}
-              className={`${control} ${neutral} col-span-2 sm:col-span-1 sm:min-h-10`}
+              className={`${control} ${neutral} sm:min-h-10`}
             >
               Split
               <Kbd k="P" />
@@ -555,9 +554,10 @@ export default function BetConsole({
               type="button"
               onClick={surrender}
               disabled={!canSurrender}
-              className={`${control} ${neutral} col-span-2 sm:col-span-1 sm:min-h-10`}
+              className={`${control} ${neutral} sm:min-h-10`}
             >
-              Surrender
+              <span className="sm:hidden">Surr.</span>
+              <span className="hidden sm:inline">Surrender</span>
               <Kbd k="R" />
             </button>
           </div>

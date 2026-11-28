@@ -320,7 +320,7 @@ const playerCardStyle = (
 
       <main
         style={tableStyle}
-        className={`felt-texture relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${bettingOpen ? "pb-[180px] lg:pb-[158px]" : "pb-[80px] lg:pb-[138px]"} ${tableBg(s.settings)}`}
+        className={`felt-texture ${compact ? "" : "bj-focus-single"} relative isolate grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] overflow-hidden ${bettingOpen ? "pb-[180px] lg:pb-[158px]" : "pb-[80px] lg:pb-[138px]"} ${tableBg(s.settings)}`}
       >
         {s.settings.theme === "vegas" && <VegasFeltOverlay />}
         {s.celebrate > 0 && (

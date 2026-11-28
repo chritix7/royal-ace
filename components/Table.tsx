@@ -128,7 +128,7 @@ function getShoeStatus(g: Game): {
     <>
       {/* Phones / tablets: the table runs down to just above the home bar */}
       <section className="overflow-clip rounded-3xl border border-[#c8a65b]/20 bg-[#101713] shadow-2xl max-lg:flex max-lg:h-[calc(100dvh_-_10.15rem_-_env(safe-area-inset-top))] max-lg:min-h-[440px] max-lg:flex-col lg:flex lg:h-full lg:min-h-0 lg:flex-col">
-        <div className={`felt-texture bj-felt relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 max-lg:flex max-lg:min-h-0 max-lg:flex-1 max-lg:flex-col max-lg:pb-3 sm:px-9 sm:py-4 lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:justify-between lg:pb-7 lg:pt-14`}>
+        <div className={`felt-texture bj-felt relative overflow-hidden ${tableBg(s.settings)} px-2 py-3 max-lg:flex max-lg:min-h-0 max-lg:flex-1 max-lg:flex-col max-lg:pb-3 sm:px-9 sm:py-4 lg:flex lg:flex-1 lg:min-h-0 lg:flex-col lg:justify-between lg:pb-7 lg:pt-[4.25rem]`}>
           {/* ☰ Table menu (music, rules, explore…) — phones and tablets */}
           {onMenu && (
             <span className="absolute right-3 top-[86px] z-20 lg:hidden">

@@ -1353,4 +1353,6 @@ export const FR: Record<string, string> = {
 "1st 12": "1re 12",
 "2nd 12": "2e 12",
 "3rd 12": "3e 12",
+"Dealing…": "Distribution…",
+"Shuffling a new shoe…": "On mélange un nouveau sabot…",
 };
